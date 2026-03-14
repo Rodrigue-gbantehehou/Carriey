@@ -1,0 +1,89 @@
+{
+  "profile": {
+    "name": "Jean Dupont",
+    "title": "Développeur Full Stack",
+    "photo": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop",
+    "email": "jean.dupont@email.com",
+    "phone": "+33 6 12 34 56 78",
+    "location": "Paris, France",
+    "linkedin": "linkedin.com/in/jeandupont"
+  },
+  "summary": "Développeur Full Stack passionné avec 7 ans d'expérience dans la création d'applications web modernes et scalables. Expert en React, Node.js et Python avec une forte capacité à collaborer en équipe et à livrer des solutions innovantes.",
+  "social": [
+    {"name": "Facebook", "handle": "@jeandupont"},
+    {"name": "Twitter", "handle": "@jdupont"},
+    {"name": "Instagram", "handle": "@jean.dupont"}
+  ],
+  "languages": [
+    {"name": "Français", "level": "Langue maternelle"},
+    {"name": "Anglais", "level": "Courant (C1)"},
+    {"name": "Espagnol", "level": "Intermédiaire (B1)"}
+  ],
+  "skills": {
+    "groups": [
+      {
+        "label": "Frontend",
+        "items": ["React", "Next.js", "TypeScript", "Tailwind CSS", "Vue.js"]
+      },
+      {
+        "label": "Backend",
+        "items": ["Node.js", "Python", "FastAPI", "Express", "PostgreSQL"]
+      },
+      {
+        "label": "DevOps",
+        "items": ["Docker", "CI/CD", "AWS", "Git", "Linux"]
+      }
+    ]
+  },
+  "experience": [
+    {
+      "company": "Tech Innovations SA",
+      "position": "Lead Developer Full Stack",
+      "location": "Paris",
+      "dates": "2022 - Présent",
+      "tasks": [
+        "Direction technique d'une équipe de 5 développeurs",
+        "Architecture et développement d'applications web avec React et Node.js",
+        "Mise en place de pipelines CI/CD et amélioration des performances de 40%",
+        "Mentorat des développeurs juniors et revue de code"
+      ]
+    },
+    {
+      "company": "Digital Solutions",
+      "position": "Développeur Full Stack Senior",
+      "location": "Lyon",
+      "dates": "2019 - 2022",
+      "tasks": [
+        "Développement de plateformes e-commerce générant 2M€ de CA annuel",
+        "Optimisation SEO et performances web (score Lighthouse > 95)",
+        "Intégration de services tiers (Stripe, SendGrid, Analytics)",
+        "Participation active aux sprints Agile et cérémonies Scrum"
+      ]
+    },
+    {
+      "company": "WebStart",
+      "position": "Développeur Full Stack",
+      "location": "Marseille",
+      "dates": "2018 - 2019",
+      "tasks": [
+        "Création d'applications web responsives avec React et Express",
+        "Développement d'APIs RESTful et intégration de bases de données",
+        "Collaboration avec designers pour des interfaces utilisateur intuitives"
+      ]
+    }
+  ],
+  "education": [
+    {
+      "school": "École Supérieure d'Informatique",
+      "degree": "Master en Génie Logiciel",
+      "location": "Paris",
+      "year": "2018"
+    },
+    {
+      "school": "Université de Lyon",
+      "degree": "Licence en Informatique",
+      "location": "Lyon",
+      "year": "2016"
+    }
+  ]
+}

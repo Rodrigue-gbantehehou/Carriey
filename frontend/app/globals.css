@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #__next { height: 100%; }
+
+:root {
+  --bg: #0b1020;
+}
+
+body { background: #0a0f1f; color: #e5e7eb; }

@@ -1,0 +1,109 @@
+{
+  "templateName": "classique",
+  "displayName": "Classique",
+  "market": "global",
+  "layout": {
+    "type": "one-column",
+    "headerStyle": "inline-photo",
+    "photoRequired": false
+  },
+  "tokens": {
+    "colorPrimary": "#1a1a1a",
+    "colorSecondary": "#ffffff",
+    "colorAccent": "#d4af37",
+    "fontHeading": "Playfair Display",
+    "fontBody": "Crimson Text",
+    "borderRadius": "50%",
+    "spacing": "normal",
+    "fontSize": 14,
+    "photoShape": "circle"
+  },
+  "sections": [
+    {
+      "type": "photo",
+      "label": "Photo",
+      "column": "full",
+      "enabled": true,
+      "userCanDisable": true,
+      "userCanMove": false
+    },
+    {
+      "type": "contact",
+      "label": "Contact",
+      "column": "full",
+      "enabled": true,
+      "userCanDisable": false,
+      "userCanMove": false
+    },
+    {
+      "type": "identity",
+      "label": "Identité",
+      "column": "full",
+      "enabled": true,
+      "userCanDisable": true,
+      "userCanMove": true,
+      "fields": [
+        "age",
+        "nationality",
+        "marital_status"
+      ]
+    },
+    {
+      "type": "summary",
+      "label": "Profil",
+      "column": "full",
+      "enabled": true,
+      "userCanDisable": true,
+      "userCanMove": false
+    },
+    {
+      "type": "experience",
+      "label": "Expériences",
+      "column": "full",
+      "enabled": true,
+      "userCanDisable": false,
+      "userCanMove": true
+    },
+    {
+      "type": "education",
+      "label": "Formation",
+      "column": "full",
+      "enabled": true,
+      "userCanDisable": true,
+      "userCanMove": true
+    },
+    {
+      "type": "skills",
+      "label": "Compétences",
+      "column": "full",
+      "enabled": true,
+      "userCanDisable": true,
+      "userCanMove": true
+    },
+    {
+      "type": "languages",
+      "label": "Langues",
+      "column": "full",
+      "enabled": true,
+      "userCanDisable": true,
+      "userCanMove": true
+    }
+  ],
+  "userCustomizable": {
+    "colors": true,
+    "fonts": true,
+    "spacing": true,
+    "sidebarWidth": false,
+    "sectionOrder": true,
+    "layout": false
+  },
+  "colors": {
+    "primary": "#1a1a1a",
+    "secondary": "#ffffff",
+    "accent": "#d4af37"
+  },
+  "fonts": {
+    "heading": "Playfair Display",
+    "body": "Crimson Text"
+  }
+}

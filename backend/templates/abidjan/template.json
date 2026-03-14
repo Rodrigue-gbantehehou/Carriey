@@ -1,0 +1,125 @@
+{
+    "templateName": "abidjan",
+    "displayName": "Abidjan",
+    "market": "africa-west",
+    "layout": {
+        "type": "one-column",
+        "headerStyle": "centered-photo",
+        "photoRequired": true
+    },
+    "tokens": {
+        "colorPrimary": "#2C5F2E",
+        "colorSecondary": "#F4FAF4",
+        "colorAccent": "#97BC62",
+        "fontHeading": "Lato",
+        "fontBody": "Lato",
+        "borderRadius": "8px",
+        "spacing": "normal",
+        "fontSize": 13,
+        "photoShape": "circle"
+    },
+    "sections": [
+        {
+            "type": "photo",
+            "label": "Photo",
+            "column": "full",
+            "enabled": true,
+            "userCanDisable": false,
+            "userCanMove": false
+        },
+        {
+            "type": "contact",
+            "label": "Contact",
+            "column": "full",
+            "enabled": true,
+            "userCanDisable": false,
+            "userCanMove": false
+        },
+        {
+            "type": "identity",
+            "label": "Identité",
+            "column": "full",
+            "enabled": true,
+            "userCanDisable": true,
+            "userCanMove": true,
+            "fields": [
+                "age",
+                "nationality",
+                "marital_status"
+            ]
+        },
+        {
+            "type": "summary",
+            "label": "Profil",
+            "column": "full",
+            "enabled": true,
+            "userCanDisable": true,
+            "userCanMove": false
+        },
+        {
+            "type": "experience",
+            "label": "Expérience",
+            "column": "full",
+            "enabled": true,
+            "userCanDisable": false,
+            "userCanMove": true
+        },
+        {
+            "type": "education",
+            "label": "Formation",
+            "column": "full",
+            "enabled": true,
+            "userCanDisable": true,
+            "userCanMove": true
+        },
+        {
+            "type": "skills",
+            "label": "Compétences",
+            "column": "full",
+            "enabled": true,
+            "userCanDisable": true,
+            "userCanMove": true
+        },
+        {
+            "type": "languages",
+            "label": "Langues",
+            "column": "full",
+            "enabled": true,
+            "userCanDisable": true,
+            "userCanMove": true
+        },
+        {
+            "type": "references",
+            "label": "Références",
+            "column": "full",
+            "enabled": true,
+            "userCanDisable": true,
+            "userCanMove": true
+        },
+        {
+            "type": "projects",
+            "label": "Projets",
+            "column": "full",
+            "enabled": true,
+            "userCanDisable": true,
+            "userCanMove": true
+        }
+    ],
+    "userCustomizable": {
+        "colors": true,
+        "fonts": true,
+        "spacing": true,
+        "sidebarWidth": false,
+        "sectionOrder": true,
+        "layout": false
+    },
+    "colors": {
+        "primary": "#2C5F2E",
+        "secondary": "#F4FAF4",
+        "accent": "#97BC62"
+    },
+    "fonts": {
+        "heading": "Lato",
+        "body": "Lato"
+    }
+}

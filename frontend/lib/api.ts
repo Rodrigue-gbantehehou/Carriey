@@ -1,0 +1,248 @@
+import config from './config';
+
+// URL de base de l'API — utilisée dans tout le fichier
+const API_BASE = config.apiBaseUrl;
+export { API_BASE };
+
+// Stockage du token en mémoire
+let authToken: string | null = null;
+
+// Définir le token d'authentification
+export const setAuthToken = (token: string | null) => {
+  authToken = token;
+  if (token) {
+    localStorage.setItem(config.auth.tokenKey, token);
+  } else {
+    localStorage.removeItem(config.auth.tokenKey);
+  }
+};
+
+// Récupérer le token depuis le stockage local au chargement
+if (typeof window !== 'undefined') {
+  const token = localStorage.getItem(config.auth.tokenKey);
+  if (token) {
+    authToken = token;
+  }
+}
+
+// En-têtes par défaut pour les requêtes
+const getDefaultHeaders = (customHeaders: Record<string, string> = {}, accessToken?: string): HeadersInit => {
+  const token = accessToken || authToken || null
+  const authHeader = token ? { 'Authorization': `Bearer ${token}` } : {}
+  return {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    ...authHeader,
+    ...customHeaders,
+  } as Record<string, string>
+}
+
+
+// Types
+export type Template = {
+  templateName: string;
+  sections: any[];
+  fonts?: any;
+  colors?: any;
+  layout?: any;
+};
+
+export type ResumeData = any;
+
+interface PreviewResponse {
+  html: string;
+}
+
+interface ExportResponse {
+  file: string;
+  url?: string;
+}
+
+// Gestionnaire de réponses API
+async function handleResponse<T>(response: Response): Promise<T> {
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    console.error('Erreur API:', response.status, data);
+
+    // Gestion des erreurs d'authentification
+    if (response.status === 401) {
+      // Rediriger vers la page de connexion ou rafraîchir le token
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
+    }
+
+    throw new Error(data.message || `Erreur ${response.status}`);
+  }
+
+  return data as T;
+}
+
+// ===== AUTHENTIFICATION =====
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface User {
+  id: number;
+  email: string;
+  is_active: boolean;
+  is_superuser: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AuthResponse {
+  access_token: string;
+  token_type: string;
+  user: User;
+}
+
+// Connexion
+export async function login(credentials: LoginRequest): Promise<AuthResponse> {
+  const formData = new URLSearchParams();
+  formData.append('username', credentials.email);
+  formData.append('password', credentials.password);
+
+  const response = await fetch(`${API_BASE}/auth/login`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: formData,
+  });
+
+  const data = await handleResponse<AuthResponse>(response);
+  setAuthToken(data.access_token);
+  return data;
+}
+
+// Déconnexion
+export function logout(): void {
+  setAuthToken(null);
+  if (typeof window !== 'undefined') {
+    window.location.href = '/login';
+  }
+}
+
+// Récupérer l'utilisateur connecté
+export async function getCurrentUser(): Promise<User> {
+  const response = await fetch(`${API_BASE}/me`, {
+    headers: getDefaultHeaders(),
+  });
+  return handleResponse<User>(response);
+}
+
+// ===== TEMPLATES =====
+
+// Récupérer la liste des templates disponibles
+export async function getTemplates(): Promise<string[]> {
+  try {
+    const response = await fetch(`${API_BASE}/templates`, {
+      method: 'GET',
+      headers: getDefaultHeaders(),
+    });
+    const data = await handleResponse<{ templates: string[] }>(response);
+    return data.templates;
+  } catch (error) {
+    console.error('Erreur lors de la récupération des templates:', error);
+    throw error;
+  }
+}
+
+// === Prévisualisation HTML ===
+export async function previewHtml(template: Template, data: ResumeData, config?: any, accessToken?: string): Promise<PreviewResponse> {
+  const payload = {
+    template_name: template.templateName,
+    data,
+    config
+  };
+  console.log("SENDING PREVIEW PAYLOAD: ", payload);
+
+  const response = await fetch(`${API_BASE}/preview`, {
+    method: 'POST',
+    headers: getDefaultHeaders({}, accessToken),
+    body: JSON.stringify(payload),
+  });
+  return handleResponse<PreviewResponse>(response);
+}
+
+// === Export PDF ===
+export async function exportPdf(template: Template, data: ResumeData, out?: string, config?: any, accessToken?: string): Promise<ExportResponse> {
+  const response = await fetch(`${API_BASE}/export/pdf`, {
+    method: 'POST',
+    headers: getDefaultHeaders({}, accessToken),
+    body: JSON.stringify({
+      template_name: template.templateName,
+      data,
+      out,
+      config
+    }),
+  });
+  return handleResponse<ExportResponse>(response);
+}
+
+// === Export DOCX ===
+export async function exportDocx(template: Template, data: ResumeData, out?: string, config?: any, accessToken?: string): Promise<ExportResponse> {
+  const response = await fetch(`${API_BASE}/export/docx`, {
+    method: 'POST',
+    headers: getDefaultHeaders({}, accessToken),
+    body: JSON.stringify({
+      template_name: template.templateName,
+      data,
+      out,
+      config
+    }),
+  });
+  return handleResponse<ExportResponse>(response);
+}
+
+// === Génération de contenu IA ===
+interface GenerateRequest {
+  prompt?: string;
+  data?: ResumeData;
+  role?: string;
+}
+
+interface GenerateResponse {
+  data: ResumeData;
+  source: 'huggingface' | 'openai' | 'stub';
+  message?: string;
+  error?: string;
+}
+
+export async function generateContent(req: GenerateRequest, accessToken?: string): Promise<GenerateResponse> {
+  const response = await fetch(`${API_BASE}/generate`, {
+    method: 'POST',
+    headers: getDefaultHeaders({}, accessToken),
+    body: JSON.stringify(req),
+  });
+  return handleResponse<GenerateResponse>(response);
+}
+
+// Vérification de la connexion au serveur
+export async function checkServerStatus(): Promise<boolean> {
+  try {
+    const response = await fetch(API_BASE, {
+      method: 'GET',
+      headers: getDefaultHeaders(),
+    });
+    return response.ok;
+  } catch (error) {
+    console.error('Erreur de connexion au serveur:', error);
+    return false;
+  }
+}
+
+// Ré-exporter les fonctions d'authentification depuis la configuration
+export const { isAuthenticated } = config;
+
+// Rediriger vers la page de connexion si non authentifié
+export function requireAuth(): void {
+  if (typeof window !== 'undefined' && !isAuthenticated()) {
+    window.location.href = config.paths.login;
+  }
+}

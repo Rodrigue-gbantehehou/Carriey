@@ -1,0 +1,344 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --color-primary: #1B3C35;
+    /* Forest Green Deep */
+    --color-secondary: #F4FAF4;
+    /* Soft Sage Background */
+    --color-accent: #C5A059;
+    /* Sophisticated Gold */
+    --color-text: #2D3748;
+    --color-text-light: #718096;
+    --font-heading: 'Outfit', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --border-radius: 4px;
+    --spacing: 1;
+}
+
+body {
+    font-family: var(--font-body);
+    font-size: var(--font-size-base, 14px);
+    background: #F7FAFC;
+    color: var(--color-text);
+    line-height: var(--line-height, 1.5);
+}
+
+.cv-container {
+    width: 210mm;
+    min-height: auto;
+    background: white;
+    margin: 0 auto;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+/* ── En-tête Dynamique ── */
+.header {
+    background: var(--color-primary);
+    padding: calc(40px * var(--spacing)) calc(50px * var(--spacing));
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    position: relative;
+    overflow: hidden;
+}
+
+.header::after {
+    content: '';
+    position: absolute;
+    right: -50px;
+    top: -50px;
+    width: 200px;
+    height: 200px;
+    background: rgba(197, 160, 89, 0.1);
+    border-radius: 50%;
+}
+
+.profile-photo-wrap {
+    flex-shrink: 0;
+    position: relative;
+    z-index: 2;
+}
+
+.profile-photo,
+.photo-placeholder {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 3px solid var(--color-accent);
+    padding: 4px;
+    background: white;
+}
+
+.profile-photo img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.photo-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary);
+    font-size: 2.86em;
+}
+
+.header-info {
+    flex: 1;
+    color: white;
+    position: relative;
+    z-index: 2;
+}
+
+.header-name {
+    font-family: var(--font-heading);
+    font-size: 2.29em;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 4px;
+}
+
+.header-title {
+    font-size: 1.14em;
+    color: var(--color-accent);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+}
+
+.header-contact {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.79em;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.contact-item i {
+    color: var(--color-accent);
+}
+
+/* ── Corps du CV ── */
+.cv-body {
+    padding: calc(40px * var(--spacing)) calc(50px * var(--spacing));
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+.section-title {
+    font-family: var(--font-heading);
+    font-size: 1em;
+    font-weight: 700;
+    color: var(--color-primary);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #E2E8F0;
+}
+
+.section-title i {
+    color: var(--color-accent);
+    font-size: 0.86em;
+}
+
+/* ── Expériences — Timeline Épurée ── */
+.experience-item {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 30px;
+    margin-bottom: 18px;
+  break-inside: avoid;
+}
+
+.exp-left {
+    text-align: right;
+}
+
+.exp-dates {
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.exp-company {
+    font-size: 0.79em;
+    color: var(--color-accent);
+    font-weight: 500;
+    margin-top: 2px;
+}
+
+.exp-right {
+    position: relative;
+}
+
+.exp-title {
+    font-family: var(--font-heading);
+    font-size: 1.07em;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: 8px;
+}
+
+.exp-tasks {
+    list-style: none;
+}
+
+.exp-tasks li {
+    position: relative;
+    padding-left: 15px;
+    margin-bottom: 5px;
+    color: var(--color-text);
+    font-size: 0.86em;
+}
+
+.exp-tasks li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--color-accent);
+    font-weight: bold;
+}
+
+/* ── Compétences — Pills Minimalistes ── */
+.skills-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.skill-tag {
+    background: var(--color-secondary);
+    color: var(--color-primary);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.79em;
+    border: 1px solid rgba(27, 60, 53, 0.1);
+}
+
+/* ── Formation ── */
+.education-item {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 30px;
+    margin-bottom: 12px;
+  break-inside: avoid;
+}
+
+.edu-year {
+    font-weight: 700;
+    color: var(--color-primary);
+    text-align: right;
+}
+
+.edu-degree {
+    font-family: var(--font-heading);
+    font-size: 1em;
+    font-weight: 700;
+}
+
+.edu-school {
+    color: var(--color-accent);
+    font-weight: 500;
+    font-size: 0.79em;
+}
+
+/* ── Grille Langues & Identité ── */
+.skills-langs-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+}
+
+.language-item {
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #F1F5F9;
+    margin-bottom: 8px;
+  break-inside: avoid;
+}
+
+.lang-name {
+    font-weight: 600;
+}
+
+.lang-level {
+    color: var(--color-accent);
+    font-weight: 500;
+}
+
+.identity-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.identity-item {
+    display: flex;
+    flex-direction: column;
+  break-inside: avoid;
+}
+
+.identity-label {
+    font-size: 0.71em;
+    text-transform: uppercase;
+    color: var(--color-text-light);
+    letter-spacing: 0.5px;
+}
+
+.identity-value {
+    font-weight: 600;
+    font-size: 0.86em;
+}
+
+/* ── Footer ── */
+.cv-footer {
+    padding: 30px 50px;
+    border-top: 1px solid #E2E8F0;
+    font-size: 0.71em;
+    color: var(--color-text-light);
+    text-align: center;
+}
+
+@media print {
+    body {
+        background: white;
+    }
+
+    .cv-container {
+        box-shadow: none;
+        margin: 0;
+    }
+}
+
+@page {
+    size: A4;
+    margin: 0;
+}

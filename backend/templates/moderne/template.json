@@ -1,0 +1,119 @@
+{
+  "templateName": "moderne",
+  "displayName": "Moderne",
+  "market": "global",
+  "layout": {
+    "type": "two-column",
+    "sidebarPosition": "left",
+    "sidebarWidth": "38%",
+    "headerStyle": "sidebar-photo",
+    "photoRequired": false
+  },
+  "tokens": {
+    "colorPrimary": "#111827",
+    "colorSecondary": "#F3F4F6",
+    "colorAccent": "#2563EB",
+    "fontHeading": "Inter",
+    "fontBody": "Inter",
+    "borderRadius": "6px",
+    "spacing": "normal",
+    "fontSize": 13,
+    "photoShape": "circle"
+  },
+  "sections": [
+    {
+      "type": "photo",
+      "label": "Photo",
+      "column": "left",
+      "enabled": true,
+      "userCanDisable": true,
+      "userCanMove": false
+    },
+    {
+      "type": "contact",
+      "label": "Contact",
+      "column": "left",
+      "enabled": true,
+      "userCanDisable": false,
+      "userCanMove": false
+    },
+    {
+      "type": "skills",
+      "label": "Compétences",
+      "column": "left",
+      "enabled": true,
+      "userCanDisable": true,
+      "userCanMove": true
+    },
+    {
+      "type": "languages",
+      "label": "Langues",
+      "column": "left",
+      "enabled": true,
+      "userCanDisable": true,
+      "userCanMove": true
+    },
+    {
+      "type": "identity",
+      "label": "Identité",
+      "column": "left",
+      "enabled": true,
+      "userCanDisable": true,
+      "userCanMove": true,
+      "fields": [
+        "age",
+        "nationality",
+        "marital_status"
+      ]
+    },
+    {
+      "type": "summary",
+      "label": "À Propos",
+      "column": "right",
+      "enabled": true,
+      "userCanDisable": true,
+      "userCanMove": false
+    },
+    {
+      "type": "experience",
+      "label": "Expérience",
+      "column": "right",
+      "enabled": true,
+      "userCanDisable": false,
+      "userCanMove": true
+    },
+    {
+      "type": "education",
+      "label": "Formation",
+      "column": "right",
+      "enabled": true,
+      "userCanDisable": true,
+      "userCanMove": true
+    },
+    {
+      "type": "projects",
+      "label": "Projets",
+      "column": "right",
+      "enabled": true,
+      "userCanDisable": true,
+      "userCanMove": true
+    }
+  ],
+  "userCustomizable": {
+    "colors": true,
+    "fonts": true,
+    "spacing": true,
+    "sidebarWidth": false,
+    "sectionOrder": true,
+    "layout": false
+  },
+  "colors": {
+    "primary": "#111827",
+    "secondary": "#F3F4F6",
+    "accent": "#2563EB"
+  },
+  "fonts": {
+    "heading": "Inter",
+    "body": "Inter"
+  }
+}

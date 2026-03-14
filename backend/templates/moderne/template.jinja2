@@ -1,0 +1,160 @@
+<div class="cv-container">
+
+
+  <!-- Header Split -->
+  <header class="header">
+    <div class="header-left">
+      <h1 class="name">{{ data.profile.name | default('Nom Prénom') }}</h1>
+      {% if data.profile.position or data.profile.title %}
+      <p class="profession">{{ data.profile.position | default(data.profile.title) }}</p>
+      {% endif %}
+    </div>
+    {% set contact_section = template.sections | selectattr('type', 'equalto', 'contact') | list %}
+    {% set is_contact_enabled = contact_section[0].enabled if contact_section else true %}
+    {% if is_contact_enabled %}
+    <div class="header-right">
+      {% if data.profile.phone %}<div class="contact-item"><span>{{ data.profile.phone }}</span><i class="fas fa-phone"></i></div>{% endif %}
+      {% if data.profile.email %}<div class="contact-item"><span>{{ data.profile.email }}</span><i class="fas fa-envelope"></i></div>{% endif %}
+      {% if data.profile.location %}<div class="contact-item"><span>{{ data.profile.location }}</span><i class="fas fa-map-marker-alt"></i></div>{% endif %}
+    </div>
+    {% endif %}
+  </header>
+
+  <div class="main-content">
+    <!-- Sidebar Modular -->
+    <aside class="left-column">
+      {% set photo_section = template.sections | selectattr('type', 'equalto', 'photo') | list %}
+      {% set is_photo_enabled = photo_section[0].enabled if photo_section else true %}
+      {% if is_photo_enabled %}
+      <div class="profile-photo-wrap">
+        {% if data.profile.photo %}
+        <div class="profile-photo">
+          <img src="{{ data.profile.photo }}" alt="{{ data.profile.name | default('Photo') }}">
+        </div>
+        {% else %}
+        <div class="photo-placeholder"><i class="fas fa-user"></i></div>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      {% for section in template.sections if section.enabled and section.column == 'left' %}
+        {% if section.type == 'skills' and data.skills and data.skills.groups %}
+          <div class="sidebar-section">
+            <h3 class="sidebar-title">{{ section.label | default('Expertise') }}</h3>
+            {% for group in data.skills.groups %}
+              <div class="skill-category">
+                {% if group.label %}<h4>{{ group.label }}</h4>{% endif %}
+                {% for skill in group["items"] | default([]) %}
+                <div class="skill-item">{{ skill }}</div>
+                {% endfor %}
+              </div>
+            {% endfor %}
+          </div>
+        {% elif section.type == 'languages' and data.languages %}
+          <div class="sidebar-section">
+            <h3 class="sidebar-title">{{ section.label | default('Langues') }}</h3>
+            {% for lang in data.languages %}
+            <div class="lang-item">
+              <span class="lang-name">{{ lang.name }}</span>
+              <span class="lang-level">{{ lang.level }}</span>
+            </div>
+            {% endfor %}
+          </div>
+        {% elif section.type == 'identity' %}
+          {% if data.profile.age or data.profile.nationality %}
+          <div class="sidebar-section">
+            <h3 class="sidebar-title">{{ section.label | default('Identité') }}</h3>
+            {% if data.profile.age %}<div class="lang-item"><span class="lang-name">Âge</span><span class="lang-level">{{ data.profile.age }}</span></div>{% endif %}
+            {% if data.profile.nationality %}<div class="lang-item"><span class="lang-name">Nationalité</span><span class="lang-level">{{ data.profile.nationality }}</span></div>{% endif %}
+          </div>
+          {% endif %}
+        {% elif section.type.startswith('custom_') %}
+          {% set custom_id = section.type.replace('custom_', '') %}
+          {% for custom in data.custom_sections if custom.id == custom_id %}
+            <div class="sidebar-section">
+              <h3 class="sidebar-title">{{ custom.title }}</h3>
+              <div style="font-size: 0.9em; line-height: 1.4;">
+                {% if custom.type == 'list' %}
+                  <ul style="list-style: none; padding: 0;">{% for item in custom.content.split('\n') if item.strip() %}<li style="margin-bottom: 4px;">• {{ item }}</li>{% endfor %}</ul>
+                {% else %}
+                  {{ custom.content | replace('\n', '<br>') | safe }}
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endfor %}
+    </aside>
+
+    <!-- Main Content -->
+    <main class="right-column">
+      {% for section in template.sections if section.enabled and section.column == 'right' %}
+        {% if section.type == 'summary' and data.summary %}
+          <section class="section">
+            <h3 class="section-title">{{ section.label | default('Profil') }}</h3>
+            <p class="about-text">{{ data.summary }}</p>
+          </section>
+        {% elif section.type == 'experience' and data.experience %}
+          <section class="section">
+            <h3 class="section-title">{{ section.label | default('Expérience') }}</h3>
+            {% for exp in data.experience %}
+            <div class="experience-item">
+              <div class="exp-header">
+                <h4 class="exp-title">{{ exp.position | default(exp.role) }}</h4>
+                <span class="exp-date">{{ exp.dates | default((exp.start | default('')) ~ ' - ' ~ (exp.end | default('Présent'))) }}</span>
+              </div>
+              <div class="exp-company">{{ exp.company }}</div>
+              {% if exp.tasks or exp.bullets %}
+              <ul class="exp-tasks">{% for task in exp.tasks | default(exp.bullets) %}<li>{{ task }}</li>{% endfor %}</ul>
+              {% endif %}
+            </div>
+            {% endfor %}
+          </section>
+        {% elif section.type == 'education' and data.education %}
+          <section class="section">
+            <h3 class="section-title">{{ section.label | default('Formation') }}</h3>
+            {% for edu in data.education %}
+            <div class="edu-item">
+              <div class="edu-degree">{{ edu.degree }}</div>
+              <div class="edu-school">{{ edu.institution | default(edu.school) }}</div>
+              <span class="edu-year">
+                {% if edu.start or edu.end %}
+                  {{ edu.start | default('') }}{{ ' - ' if edu.start and edu.end }}{{ edu.end | default('') }}
+                {% else %}
+                  {{ edu.dates | default(edu.year) }}
+                {% endif %}
+              </span>
+            </div>
+            {% endfor %}
+          </section>
+        {% elif section.type == 'projects' and data.projects %}
+          <section class="section">
+            <h3 class="section-title">{{ section.label | default('Projets') }}</h3>
+            {% for project in data.projects %}
+            <div class="experience-item">
+              <div class="exp-header"><h4 class="exp-title">{{ project.name }}</h4></div>
+              {% if project.link %}<div class="exp-company">{{ project.link }}</div>{% endif %}
+              <div class="about-text" style="font-size: 0.95em; margin-top: 5px;">{{ project.description }}</div>
+            </div>
+            {% endfor %}
+          </section>
+        {% elif section.type.startswith('custom_') %}
+          {% set custom_id = section.type.replace('custom_', '') %}
+          {% for custom in data.custom_sections if custom.id == custom_id %}
+            <section class="section">
+              <h3 class="section-title">{{ custom.title }}</h3>
+              <div class="about-text">
+                {% if custom.type == 'list' %}
+                  <ul class="exp-tasks">{% for item in custom.content.split('\n') if item.strip() %}<li>{{ item }}</li>{% endfor %}</ul>
+                {% else %}
+                  {{ custom.content | replace('\n', '<br>') | safe }}
+                {% endif %}
+              </div>
+            </section>
+          {% endfor %}
+        {% endif %}
+      {% endfor %}
+    </main>
+  </div>
+</div>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">

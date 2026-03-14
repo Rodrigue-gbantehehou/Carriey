@@ -1,0 +1,65 @@
+# Dependencies
+**/node_modules/
+**/venv/
+**/.venv/
+**/env/
+**/.env/
+
+# Environment files
+.env
+.env.local
+**/.env
+**/.env.local
+**/.env.development.local
+**/.env.test.local
+**/.env.production.local
+
+# Build outputs & caches
+**/.next/
+**/tsconfig.tsbuildinfo
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+**/.pytest_cache/
+**/.cache/
+.DS_Store
+*.swp
+*.bak
+*.tmp
+
+# Application data
+**/cvtor.db
+**/*.pdf
+**/*.docx
+**/*.log
+
+# Project specific scripts
+**/fix_photo_shape*.py
+**/check_images.py
+**/clean_jinja.py
+**/fix_templates.py
+**/patch_templates.py
+**/check_data.py
+**/inspect_db.py
+**/seed_data.py
+**/create_tables.py
+**/test_flow.py
+**/verify_api.py
+**/test_api.py
+**/test_custom_section.py
+**/test_payload.py
+**/test_preview.html
+**/test_paper_look.html
+**/render_marlyse_pdf.bat
+**/render_nevil_pdf.bat
+**/run_api.bat
+**/add_creatif_template.py
+**/export_docx.py
+**/render_cv.py
+**/generate_pdf_from_html.py
+**/cv_secure.pdf
+**/test_weasy.pdf
+**/CV_*.pdf
+**/CV_*.docx
+**/CV_preview.pdf

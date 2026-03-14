@@ -1,0 +1,66 @@
+{
+  "templateName": "Rodrigue",
+  "fonts": {
+    "heading": "Montserrat",
+    "body": "Open Sans"
+  },
+  "colors": {
+    "primary": "#2D3748",
+    "secondary": "#F7FAFC",
+    "accent": "#805AD5"
+  },
+  "layout": {
+    "twoColumn": true,
+    "sidebarWidth": "35%"
+  },
+  "sections": [
+    {
+      "type": "contact",
+      "label": "Connexion",
+      "column": "left",
+      "enabled": true
+    },
+    {
+      "type": "summary",
+      "label": "En Bref",
+      "column": "right",
+      "enabled": true
+    },
+    {
+      "type": "experience",
+      "label": "Expériences",
+      "column": "right",
+      "enabled": true
+    },
+    {
+      "type": "education",
+      "label": "Études",
+      "column": "right",
+      "enabled": true
+    },
+    {
+      "type": "skills",
+      "label": "Vibes / Tech",
+      "column": "left",
+      "enabled": true
+    },
+    {
+      "type": "languages",
+      "label": "Langues",
+      "column": "left",
+      "enabled": true
+    },
+    {
+      "type": "identity",
+      "label": "Perso",
+      "column": "left",
+      "enabled": true
+    },
+    {
+      "type": "projects",
+      "label": "Projets",
+      "column": "right",
+      "enabled": true
+    }
+  ]
+}

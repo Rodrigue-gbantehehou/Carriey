@@ -1,0 +1,63 @@
+{
+  "templateName": "Creatif",
+  "fonts": {
+    "heading": "Montserrat",
+    "body": "Open Sans"
+  },
+  "colors": {
+    "primary": "#2D3748",
+    "secondary": "#F7FAFC",
+    "accent": "#805AD5",
+    "text": "#4A5568"
+  },
+  "layout": {
+    "twoColumn": true,
+    "sidebarWidth": "35%",
+    "margins": "20px",
+    "headerHeight": "120px"
+  },
+  "sections": [
+    {
+      "type": "contact",
+      "label": "Contact",
+      "column": "left",
+      "enabled": true
+    },
+    {
+      "type": "summary",
+      "label": "Profil",
+      "column": "right",
+      "enabled": true
+    },
+    {
+      "type": "experience",
+      "label": "Expérience",
+      "column": "right",
+      "enabled": true
+    },
+    {
+      "type": "education",
+      "label": "Formation",
+      "column": "right",
+      "enabled": true
+    },
+    {
+      "type": "skills",
+      "label": "Compétences",
+      "column": "left",
+      "enabled": true
+    },
+    {
+      "type": "languages",
+      "label": "Langues",
+      "column": "left",
+      "enabled": true
+    }
+  ],
+  "features": {
+    "photoSupport": true,
+    "customColors": true,
+    "modernLayout": true,
+    "iconSupport": true
+  }
+}

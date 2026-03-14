@@ -1,0 +1,68 @@
+{
+  "profile": {
+    "name": "Marlyse Dubois",
+    "title": "Développeuse Full Stack",
+    "photo": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop",
+    "email": "marlyse.dubois@email.com",
+    "phone": "+33 6 12 34 56 78",
+    "location": "Paris, France",
+    "linkedin": "linkedin.com/in/marlyse-dubois"
+  },
+  "summary": "Développeuse Full Stack passionnée avec 5 ans d'expérience dans la création d'applications web modernes. Expertise en React, Node.js et Python. Capacité démontrée à livrer des solutions techniques innovantes et à collaborer efficacement en équipe.",
+  "experience": [
+    {
+      "company": "Tech Innovators",
+      "position": "Développeuse Senior Full Stack",
+      "location": "Paris",
+      "dates": "2021 - Présent",
+      "tasks": [
+        "Développement d'applications web avec React et Next.js",
+        "Conception et implémentation d'APIs RESTful avec Node.js et Python",
+        "Collaboration avec l'équipe design pour créer des interfaces utilisateur intuitives",
+        "Mentorat de développeurs juniors et révision de code"
+      ]
+    },
+    {
+      "company": "Digital Solutions",
+      "position": "Développeuse Full Stack",
+      "location": "Lyon",
+      "dates": "2019 - 2021",
+      "tasks": [
+        "Construction de plateformes e-commerce avec React et Express",
+        "Optimisation des performances et du SEO",
+        "Intégration de services tiers (Stripe, SendGrid)",
+        "Participation aux sprints Agile et aux réunions de planification"
+      ]
+    }
+  ],
+  "education": [
+    {
+      "institution": "École Supérieure d'Informatique",
+      "degree": "Master en Informatique",
+      "location": "Paris",
+      "dates": "2017 - 2019"
+    },
+    {
+      "institution": "Université de Lyon",
+      "degree": "Licence en Informatique",
+      "location": "Lyon",
+      "dates": "2014 - 2017"
+    }
+  ],
+  "skills": {
+    "groups": [
+      {
+        "label": "Frontend",
+        "items": ["React", "Next.js", "TypeScript", "Tailwind CSS", "HTML/CSS"]
+      },
+      {
+        "label": "Backend",
+        "items": ["Node.js", "Python", "FastAPI", "Express", "PostgreSQL"]
+      },
+      {
+        "label": "Outils",
+        "items": ["Git", "Docker", "CI/CD", "AWS", "Vercel"]
+      }
+    ]
+  }
+}

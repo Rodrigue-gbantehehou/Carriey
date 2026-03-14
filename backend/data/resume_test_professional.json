@@ -1,0 +1,83 @@
+{
+  "profile": {
+    "name": "Travis Anderson",
+    "title": "Développeur Full Stack",
+    "photo": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop",
+    "email": "travis.anderson@email.com",
+    "phone": "+33 6 12 34 56 78",
+    "location": "Paris, France",
+    "linkedin": "linkedin.com/in/travisanderson"
+  },
+  "summary": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed diam voluptua. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate.",
+  "social": [
+    {"name": "Facebook", "handle": "@yourfacebook"},
+    {"name": "Twitter", "handle": "@yourtwitter"},
+    {"name": "Instagram", "handle": "@yourinstagram"}
+  ],
+  "languages": [
+    {"name": "English", "level": "Native"},
+    {"name": "Spanish", "level": "Native"},
+    {"name": "Italian", "level": "Native"},
+    {"name": "Mandarin", "level": "Native"}
+  ],
+  "skills": {
+    "groups": [
+      {
+        "label": "Frontend",
+        "items": ["Drawing", "Photo", "Copywrite", "Computerize", "Design"]
+      }
+    ]
+  },
+  "experience": [
+    {
+      "position": "Job Position",
+      "company": "Company Name 2020 | 2021",
+      "dates": "2020 - 2021",
+      "tasks": [
+        "Porttitor amet massa Donec apeorttitor dolor et nisl molestie turn tellison lore ipsum dolor tincidilla, lorem ipsum. Qleidundk est deler time. Dona apeorttitor dolor lorem"
+      ]
+    },
+    {
+      "position": "Job Position",
+      "company": "Company Name 2020 | 2021",
+      "dates": "2020 - 2021",
+      "tasks": [
+        "Porttitor amet massa Donec apeorttitor dolor et nisl molestie turn tellison lore ipsum dolor tincidilla, lorem ipsum. Qleidundk est deler time. Dona apeorttitor dolor lorem"
+      ]
+    },
+    {
+      "position": "Job Position",
+      "company": "Company Name 2020 | 2021",
+      "dates": "2020 - 2021",
+      "tasks": [
+        "Porttitor amet massa Donec apeorttitor dolor et nisl molestie turn tellison lore ipsum dolor tincidilla, lorem ipsum. Qleidundk est deler time. Dona apeorttitor dolor lorem"
+      ]
+    }
+  ],
+  "education": [
+    {
+      "degree": "Master Degree",
+      "school": "University Name 2020 | 2021",
+      "dates": "2020 - 2021",
+      "tasks": [
+        "Porttitor amet massa Donec apeorttitor dolor et nisl molestie turn tellison lore ipsum dolor tincidilla, lorem ipsum. Qleidundk est deler time. Dona apeorttitor dolor lorem"
+      ]
+    },
+    {
+      "degree": "Master Degree",
+      "school": "University Name 2020 | 2021",
+      "dates": "2020 - 2021",
+      "tasks": [
+        "Porttitor amet massa Donec apeorttitor dolor et nisl molestie turn tellison lore ipsum dolor tincidilla, lorem ipsum. Qleidundk est deler time. Dona apeorttitor dolor lorem"
+      ]
+    },
+    {
+      "degree": "Master Degree",
+      "school": "University Name 2020 | 2021",
+      "dates": "2020 - 2021",
+      "tasks": [
+        "Porttitor amet massa Donec apeorttitor dolor et nisl molestie turn tellison lore ipsum dolor tincidilla, lorem ipsum. Qleidundk est deler time. Dona apeorttitor dolor lorem"
+      ]
+    }
+  ]
+}

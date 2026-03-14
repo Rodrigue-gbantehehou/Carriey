@@ -1,0 +1,67 @@
+{
+  "profile": {
+    "name": "Nevil Martin",
+    "title": "Chef de Projet Digital",
+    "email": "nevil.martin@email.com",
+    "phone": "+33 6 98 76 54 32",
+    "location": "Marseille, France",
+    "linkedin": "linkedin.com/in/nevil-martin"
+  },
+  "summary": "Chef de projet digital expérimenté avec 7 ans d'expérience dans la gestion de projets web et mobile. Expertise en méthodologies Agile et Scrum. Capacité prouvée à diriger des équipes multidisciplinaires et à livrer des projets dans les délais et le budget.",
+  "experience": [
+    {
+      "company": "Agence Digitale 360",
+      "position": "Chef de Projet Senior",
+      "location": "Marseille",
+      "dates": "2020 - Présent",
+      "tasks": [
+        "Gestion de projets web et mobile de A à Z",
+        "Coordination d'équipes de 8 à 12 personnes (développeurs, designers, QA)",
+        "Planification et suivi budgétaire des projets",
+        "Communication avec les clients et parties prenantes"
+      ]
+    },
+    {
+      "company": "Web Factory",
+      "position": "Chef de Projet Digital",
+      "location": "Nice",
+      "dates": "2017 - 2020",
+      "tasks": [
+        "Management de projets e-commerce et sites vitrine",
+        "Rédaction de cahiers des charges fonctionnels",
+        "Animation de réunions clients et reporting d'avancement",
+        "Coordination avec les équipes techniques et créatives"
+      ]
+    }
+  ],
+  "education": [
+    {
+      "institution": "IAE Aix-Marseille",
+      "degree": "Master Management de Projets Digitaux",
+      "location": "Marseille",
+      "dates": "2015 - 2017"
+    },
+    {
+      "institution": "Université de Nice",
+      "degree": "Licence en Communication",
+      "location": "Nice",
+      "dates": "2012 - 2015"
+    }
+  ],
+  "skills": {
+    "groups": [
+      {
+        "label": "Gestion de projet",
+        "items": ["Agile/Scrum", "Jira", "Trello", "MS Project", "Gantt"]
+      },
+      {
+        "label": "Digital",
+        "items": ["UX/UI", "SEO", "Analytics", "A/B Testing", "CMS (WordPress, Drupal)"]
+      },
+      {
+        "label": "Soft skills",
+        "items": ["Leadership", "Communication", "Négociation", "Résolution de problèmes"]
+      }
+    ]
+  }
+}

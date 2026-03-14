@@ -1,0 +1,15 @@
+# 🧩 Ignorer les dépendances Node.js
+/frontend/node_modules/
+
+# 🔒 Ignorer les fichiers d'environnement (variables secrètes)
+.env
+.env.local
+/frontend/.env
+/frontend/.env.local
+
+# 🐍 Ignorer l'environnement virtuel Python
+/backend/.venv/
+
+# 🗂️ Autres dossiers de cache (optionnel mais recommandé)
+__pycache__/
+*.pyc
