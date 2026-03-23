@@ -39,6 +39,8 @@ class TemplateListOut(BaseModel):
     id: str
     slug: str
     name: str
+    description: Optional[str] = None
+    preview_image: Optional[str] = None
     price: Decimal
     currency: str
     is_active: bool

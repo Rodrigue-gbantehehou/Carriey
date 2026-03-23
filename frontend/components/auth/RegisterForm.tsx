@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import config from '@/lib/config';
 
 export default function RegisterForm() {
@@ -12,6 +13,8 @@ export default function RegisterForm() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,9 +54,9 @@ export default function RegisterForm() {
 
       if (result?.error) {
         // Should not happen immediately after success register but handle it
-        router.push('/login');
+        router.push(`/login?callbackUrl=${callbackUrl}`);
       } else {
-        router.push('/admin'); // Redirect to dashboard
+        router.push(callbackUrl); // Redirect to dashboard or original target
       }
     } catch (err: any) {
       setError(err.message || 'Une erreur est survenue lors de l\'inscription.');
@@ -72,7 +75,7 @@ export default function RegisterForm() {
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             Ou{' '}
-            <Link href="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
+            <Link href="/login" className="font-medium text-blue-600 hover:text-blue-500">
               connectez-vous à votre compte existant
             </Link>
           </p>
@@ -105,7 +108,7 @@ export default function RegisterForm() {
                 type="email"
                 autoComplete="email"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                className="appearance-none rounded-none relative block w-full px-3 py-2.5 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-xl focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder="Adresse email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -121,7 +124,7 @@ export default function RegisterForm() {
                 type="password"
                 autoComplete="new-password"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                className="appearance-none rounded-none relative block w-full px-3 py-2.5 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder="Mot de passe"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -137,7 +140,7 @@ export default function RegisterForm() {
                 type="password"
                 autoComplete="new-password"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                className="appearance-none rounded-none relative block w-full px-3 py-2.5 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-xl focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder="Confirmer le mot de passe"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
@@ -147,7 +150,7 @@ export default function RegisterForm() {
 
           <div className="flex items-center justify-between">
             <div className="text-sm">
-              <Link href="/forgot-password" className="font-medium text-indigo-600 hover:text-indigo-500">
+              <Link href="/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">
                 Mot de passe oublié ?
               </Link>
             </div>
@@ -157,7 +160,7 @@ export default function RegisterForm() {
             <button
               type="submit"
               disabled={isLoading}
-              className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+              className={`group relative w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${isLoading ? 'opacity-70 cursor-not-allowed' : ''} transition-all shadow-lg shadow-blue-500/20`}
             >
               {isLoading ? 'Inscription en cours...' : 'S\'inscrire'}
             </button>
@@ -176,11 +179,11 @@ export default function RegisterForm() {
             </div>
           </div>
           <div className="mt-2 text-center text-sm text-gray-600">
-            <Link href="/terms" className="font-medium text-indigo-600 hover:text-indigo-500">
+            <Link href="/terms" className="font-medium text-blue-600 hover:text-blue-500">
               Conditions d'utilisation
             </Link>
             {' '}et{' '}
-            <Link href="/privacy" className="font-medium text-indigo-600 hover:text-indigo-500">
+            <Link href="/privacy" className="font-medium text-blue-600 hover:text-blue-500">
               Politique de confidentialité
             </Link>
           </div>

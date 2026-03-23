@@ -1,18 +1,16 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { logout } from '../../lib/api';
+import { signOut } from 'next-auth/react';
+import { toast } from 'react-hot-toast';
 
 export default function LogoutButton() {
-  const router = useRouter();
-
   const handleLogout = async () => {
     try {
-      await logout();
-      router.push('/login');
-      router.refresh(); // Forcer le rafraîchissement de la page
+      await signOut({ callbackUrl: '/login' });
+      toast.success('Déconnexion réussie');
     } catch (error) {
       console.error('Erreur lors de la déconnexion:', error);
+      toast.error('Erreur lors de la déconnexion');
     }
   };
 

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 // Chemins protégés qui nécessitent une authentification
-const protectedPaths = ['/editor', '/profile', '/templates', '/dashboard'];
+const protectedPaths = ['/profile', '/templates', '/dashboard'];
 // Chemins accessibles uniquement aux utilisateurs non connectés
 const guestPaths = ['/login', '/register'];
 

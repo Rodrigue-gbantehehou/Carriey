@@ -20,6 +20,7 @@ export type CustomSection = {
 }
 
 export type Template = {
+  id?: string
   templateName: string
   displayName?: string
   market?: string
@@ -68,6 +69,7 @@ export type ResumeData = any & {
 type State = {
   template: Template | null
   templateName: string | null
+  templateId: string | null
   data: ResumeData | null
   editMode: 'wizard' | 'expert'
   currentStep: number
@@ -93,6 +95,7 @@ type State = {
 export const useEditorStore = create<State>((set, get) => ({
   template: null,
   templateName: null,
+  templateId: null,
   data: null,
   editMode: 'wizard',
   currentStep: 0,
@@ -102,7 +105,7 @@ export const useEditorStore = create<State>((set, get) => ({
     namePreview: '',
   },
 
-  setTemplate: (t) => set({ template: t, templateName: t.templateName }),
+  setTemplate: (t) => set({ template: t, templateName: t.templateName, templateId: t.id || null }),
   setTemplateName: (name) => set({ templateName: name }),
   setData: (d) => set({ data: d }),
   setEditMode: (mode) => set({ editMode: mode }),

@@ -1,0 +1,19 @@
+Bonjour {{ full_name }},
+
+Félicitations ! Votre paiement a été validé et votre CV premium a été généré avec succès.
+
+Un compte a été créé pour vous afin que vous puissiez modifier votre CV à tout moment :
+- Email : {{ recipient_email }}
+{% if setup_link %}
+Cliquez sur le lien suivant pour définir votre mot de passe et finaliser votre compte : {{ setup_link }}
+{% endif %}
+
+Vous pouvez vous connecter ici : {{ login_url }}
+
+{% if has_pdf %}
+Vous trouverez votre CV en pièce jointe.
+{% else %}
+Votre CV est disponible en téléchargement dans votre espace personnel.
+{% endif %}
+
+L'équipe CVTor.

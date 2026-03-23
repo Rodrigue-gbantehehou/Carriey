@@ -67,7 +67,7 @@ export const authOptions: NextAuthOptions = {
             id: userData.id,
             email: userData.email,
             name: userData.full_name,
-            role: userData.role, // 'SUPER_ADMIN', 'ADMIN', 'USER'
+            role: userData.role?.toUpperCase(), // Normalize to 'ADMIN', 'SUPER_ADMIN', 'USER'
             accessToken: token,
           };
 

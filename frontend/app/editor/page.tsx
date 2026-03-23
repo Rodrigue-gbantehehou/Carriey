@@ -2,11 +2,12 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
+import { useSession, signOut } from 'next-auth/react'
 import { useEditorStore } from '../../store/editor'
 import DndList from '../../components/editor/DndList'
 import ContentEditor from '../../components/editor/ContentEditor'
-import { exportPdf, exportDocx, generateContent, previewHtml } from '../../lib/api'
+import { exportPdf, exportDocx, generateContent, previewHtml, triggerDownload } from '../../lib/api'
+import DownloadFlowModal from '../../components/editor/DownloadFlowModal'
 import config from '@/lib/config'
 import { toast } from 'react-hot-toast'
 
@@ -66,7 +67,7 @@ export default function EditorPage() {
   const {
     template, setTemplate, setData, moveSection,
     selected, setSelected, updateSectionStyle, updateColors, data,
-    editMode, setEditMode, currentStep, setStep, onboardingData
+    editMode, setEditMode, currentStep, setStep, onboardingData, templateId
   } = useEditorStore()
 
   const searchParams = useSearchParams()
@@ -98,6 +99,18 @@ export default function EditorPage() {
   const [isOptimizing, setIsOptimizing] = useState(false)
   const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit')
   const [previewError, setPreviewError] = useState<string | null>(null)
+  const [showDownloadModal, setShowDownloadModal] = useState(false)
+  const [pendingExport, setPendingExport] = useState<'pdf' | 'docx' | null>(null)
+  const [hasTemplateAccess, setHasTemplateAccess] = useState(true)
+
+  useEffect(() => {
+    console.log("STATE CHANGE: showDownloadModal =", showDownloadModal)
+  }, [showDownloadModal])
+  
+  useEffect(() => {
+    console.log("EDITOR PAGE MOUNTED")
+    return () => console.log("EDITOR PAGE UNMOUNTED")
+  }, [])
   const previewContainerRef = useRef<HTMLDivElement>(null)
 
   // ── Auto-scale sur mobile ──────────────────────────────────────────────────
@@ -186,6 +199,7 @@ export default function EditorPage() {
               const savedSections = content._sections || tplInfo.definition.sections
               setTemplate({ 
                 ...tplInfo.definition, 
+                id: tplInfo.id,
                 templateName: tplInfo.slug, 
                 sections: savedSections,
                 colors: { ...tplInfo.definition.colors, ...(_customColors || {}) }, 
@@ -202,7 +216,7 @@ export default function EditorPage() {
             const pal = COLOR_PALETTES.find(p => p.id === palId) || COLOR_PALETTES[0]
             const initialColors = { primary: searchParams.get('primary') || pal.primary, secondary: pal.secondary, accent: searchParams.get('accent') || pal.accent }
             setCustomColors(initialColors)
-            setTemplate({ ...tplInfo.definition, templateName: tplInfo.slug, colors: { ...tplInfo.definition.colors, ...initialColors }, fonts: { heading: headingFont, body: bodyFont } })
+            setTemplate({ ...tplInfo.definition, id: tplInfo.id, templateName: tplInfo.slug, colors: { ...tplInfo.definition.colors, ...initialColors }, fonts: { heading: headingFont, body: bodyFont } })
 
             // Mix de DATA SAMPLE avec Onboarding (nom)
             setData({
@@ -213,6 +227,28 @@ export default function EditorPage() {
               }
             })
             setIsSaved(false)
+
+            // ── Access Control: check if logged-in user has access to paid templates ──
+            if (session?.user?.accessToken && tplInfo.price > 0) {
+              try {
+                const accessRes = await fetch(`${config.apiBaseUrl}/templates/${templateSlug}/check-access`, {
+                  headers: { Authorization: `Bearer ${session.user.accessToken}` }
+                })
+                if (accessRes.ok) {
+                  const accessData = await accessRes.json()
+                  if (!accessData.has_access) {
+                    // User doesn't have access → block exports and open payment modal
+                    setHasTemplateAccess(false)
+                    setPendingExport('pdf')
+                    setShowDownloadModal(true)
+                  } else {
+                    setHasTemplateAccess(true)
+                  }
+                }
+              } catch (e) {
+                console.error('Access check error:', e)
+              }
+            }
           }
         } else {
           router.push('/modeles')
@@ -228,7 +264,14 @@ export default function EditorPage() {
 
   // ── Save ───────────────────────────────────────────────────────────────────
   const saveResume = useCallback(async (showToast = true) => {
-    if (!template || !data || !session?.user?.accessToken) return
+    if (!session?.user?.accessToken) {
+      if (showToast) {
+        toast.error("Veuillez vous connecter pour enregistrer votre CV");
+        router.push(`/login?callbackUrl=/editor${resumeId ? `?resume=${resumeId}` : ''}`);
+      }
+      return
+    }
+    if (!template || !data) return
     setIsSaving(true)
     const contentToSave = {
       ...data,
@@ -307,7 +350,7 @@ export default function EditorPage() {
       } catch (e: any) {
         setPreviewError(e?.message || 'Erreur de rendu')
       }
-    }, 500)
+    }, 800)
     return () => clearTimeout(timer)
   }, [template, data, customColors, headingFont, bodyFont, spacing, fontSize, lineHeight, photoShape, borderRadius])
 
@@ -363,7 +406,18 @@ export default function EditorPage() {
     setTemplate({ ...template, fonts: { heading: type === 'heading' ? font : headingFont, body: type === 'body' ? font : bodyFont } })
   }, [template, headingFont, bodyFont, setTemplate])
 
-  const handleExportPdf = async () => {
+  const handleExportPdf = async (ignoreAuth = false, guestData?: { email: string; name: string }, plan?: string) => {
+    if (!session?.user?.accessToken && !ignoreAuth) {
+      setPendingExport('pdf')
+      setShowDownloadModal(true)
+      return
+    }
+    // Block export if user is logged in but hasn't paid for this template
+    if (session?.user?.accessToken && !hasTemplateAccess && !ignoreAuth) {
+      setPendingExport('pdf')
+      setShowDownloadModal(true)
+      return
+    }
     if (!template || !data) return
     try {
       setExporting('pdf')
@@ -381,12 +435,28 @@ export default function EditorPage() {
         borderRadius,
         sections: template.sections
       }
-      const res = await exportPdf(template, data, 'CV.pdf', configOverride, token)
-      if (res.url) window.open(res.url, '_blank')
+      console.log(`Starting ${ignoreAuth ? 'Direct ' : ''}PDF Export...`)
+      const res = await exportPdf(template, data, 'CV.pdf', configOverride, token, guestData, plan, templateId)
+      console.log('PDF Export response:', res)
+      if (res.url) {
+        console.log('Triggering download for:', res.url)
+        await triggerDownload(res.url, 'CV.pdf')
+      }
     } finally { setExporting(null) }
   }
 
-  const handleExportDocx = async () => {
+  const handleExportDocx = async (ignoreAuth = false, guestData?: { email: string; name: string }, plan?: string) => {
+    if (!session?.user?.accessToken && !ignoreAuth) {
+      setPendingExport('docx')
+      setShowDownloadModal(true)
+      return
+    }
+    // Block export if user is logged in but hasn't paid for this template
+    if (session?.user?.accessToken && !hasTemplateAccess && !ignoreAuth) {
+      setPendingExport('docx')
+      setShowDownloadModal(true)
+      return
+    }
     if (!template || !data) return
     try {
       setExporting('docx')
@@ -404,12 +474,22 @@ export default function EditorPage() {
         borderRadius,
         sections: template.sections
       }
-      const res = await exportDocx(template, data, 'CV.docx', configOverride, token)
-      if (res.url) window.open(res.url, '_blank')
+      console.log(`Starting ${ignoreAuth ? 'Direct ' : ''}DOCX Export...`)
+      const res = await exportDocx(template, data, 'CV.docx', configOverride, token, guestData, plan, templateId)
+      console.log('DOCX Export response:', res)
+      if (res.url) {
+        console.log('Triggering download for:', res.url)
+        await triggerDownload(res.url, 'CV.docx')
+      }
     } finally { setExporting(null) }
   }
 
   const handleGenerateAI = async () => {
+    if (!session?.user?.accessToken) {
+      toast.error("Veuillez vous connecter pour utiliser l'Assistant IA");
+      router.push(`/login?callbackUrl=/editor${resumeId ? `?resume=${resumeId}` : ''}`);
+      return
+    }
     if (!template) return
     try {
       setGenLoading(true)
@@ -421,7 +501,12 @@ export default function EditorPage() {
     } finally { setGenLoading(false) }
   }
 
-  // ── Loading / Error ────────────────────────────────────────────────────────
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: '/login' })
+    toast.success('Déconnexion réussie')
+  }
+
+  // ── Loading / Error ─────────────────────────────────────────────
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-[#F5F5F5]">
       <div className="text-center">
@@ -507,7 +592,7 @@ export default function EditorPage() {
               Mes CVs
             </Link>
           )}
-          <button onClick={handleExportDocx} disabled={!template || !data || !!exporting}
+          <button onClick={() => handleExportDocx()} disabled={!template || !data || !!exporting}
             className="hidden sm:flex items-center gap-2 h-8 px-3 rounded-lg text-xs font-medium text-[#1c1c1c] bg-white hover:bg-gray-50 border border-gray-200 transition-all disabled:opacity-40">
             {exporting === 'docx'
               ? <div className="w-3 h-3 border border-gray-400 border-t-transparent rounded-full animate-spin" />
@@ -515,7 +600,7 @@ export default function EditorPage() {
             }
             DOCX
           </button>
-          <button onClick={handleExportPdf} disabled={!template || !data || !!exporting}
+          <button onClick={() => handleExportPdf()} disabled={!template || !data || !!exporting}
             className="flex items-center gap-2 h-8 px-3 sm:px-4 rounded-lg text-xs font-semibold text-white bg-[#00C896] hover:bg-[#66E1B5] transition-all disabled:opacity-40 shadow-lg shadow-[#00C896]/25">
             {exporting === 'pdf'
               ? <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -523,6 +608,42 @@ export default function EditorPage() {
             }
             <span className="hidden sm:inline">Exporter </span>PDF
           </button>
+          
+          {session?.user?.role && ['ADMIN', 'SUPER_ADMIN', 'admin', 'super_admin'].includes(session.user.role) && (
+            <Link 
+              href="/admin"
+              className="flex items-center gap-2 h-8 px-3 rounded-lg text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 transition-all border border-blue-200"
+            >
+              Admin
+            </Link>
+          )}
+
+          {session ? (
+            <div className="flex items-center gap-2 ml-1.5 pl-1.5 border-l border-gray-200">
+              <div className="hidden lg:flex flex-col items-end mr-1">
+                <span className="text-[10px] font-bold text-[#1c1c1c] leading-tight truncate max-w-[120px]">
+                  {session.user?.email?.split('@')[0]}
+                </span>
+                <span className="text-[9px] text-[#777777] leading-tight lowercase">Utilisateur</span>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="flex items-center justify-center w-8 h-8 rounded-lg text-[#777777] hover:text-red-500 hover:bg-red-50 transition-all"
+                title="Déconnexion"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+              </button>
+            </div>
+          ) : (
+            <Link 
+              href="/login?callbackUrl=/editor"
+              className="flex items-center gap-2 h-8 px-3 rounded-lg text-xs font-semibold text-[#1c1c1c] bg-gray-100 hover:bg-gray-200 transition-all"
+            >
+              Connexion
+            </Link>
+          )}
         </div>
       </header>
 
@@ -1030,7 +1151,7 @@ export default function EditorPage() {
               }
             </button>
           )}
-          <button onClick={handleExportPdf} disabled={!template || !data || !!exporting}
+          <button onClick={() => handleExportPdf()} disabled={!template || !data || !!exporting}
             className="flex items-center gap-2 h-9 px-4 rounded-xl text-xs font-bold text-white bg-[#00C896] hover:bg-[#66E1B5] transition-all disabled:opacity-40 shadow-lg shadow-[#00C896]/25">
             {exporting === 'pdf'
               ? <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -1040,6 +1161,29 @@ export default function EditorPage() {
           </button>
         </div>
       </div>
+
+      <DownloadFlowModal
+        isOpen={showDownloadModal}
+        onClose={() => setShowDownloadModal(false)}
+        onSuccess={async (guestData) => {
+          console.log("onSuccess callback triggered in EditorPage", guestData)
+          setShowDownloadModal(false)
+          setHasTemplateAccess(true)  // Grant access after payment
+          toast.success("Paiement confirmé ! Préparation de votre téléchargement...")
+          
+          if (pendingExport === 'pdf') {
+             console.log("Triggering pending PDF export")
+             await handleExportPdf(true, { email: guestData.email, name: guestData.name }, guestData.plan)
+          } else if (pendingExport === 'docx') {
+             console.log("Triggering pending DOCX export")
+             await handleExportDocx(true, { email: guestData.email, name: guestData.name }, guestData.plan)
+          }
+          console.log("onSuccess flow completed")
+          setPendingExport(null)
+        }}
+        templatePrice={template?.price || "2000"}
+        templateName={template?.name || "Modèle Premium"}
+      />
     </div>
   )
 }

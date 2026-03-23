@@ -67,10 +67,8 @@ async function handleResponse<T>(response: Response): Promise<T> {
 
     // Gestion des erreurs d'authentification
     if (response.status === 401) {
-      // Rediriger vers la page de connexion ou rafraîchir le token
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login';
-      }
+      // On log l'erreur mais on ne redirige pas sauvagement pour laisser les flux d'invités fonctionner
+      console.warn('Non autorisé (401)');
     }
 
     throw new Error(data.message || `Erreur ${response.status}`);
@@ -139,17 +137,16 @@ export async function getCurrentUser(): Promise<User> {
 // ===== TEMPLATES =====
 
 // Récupérer la liste des templates disponibles
-export async function getTemplates(): Promise<string[]> {
+export async function getTemplates(): Promise<any[]> {
   try {
     const response = await fetch(`${API_BASE}/templates`, {
       method: 'GET',
       headers: getDefaultHeaders(),
     });
-    const data = await handleResponse<{ templates: string[] }>(response);
-    return data.templates;
+    return handleResponse<any[]>(response);
   } catch (error) {
     console.error('Erreur lors de la récupération des templates:', error);
-    throw error;
+    return []; // Return empty array on failure to avoid crashing
   }
 }
 
@@ -171,7 +168,16 @@ export async function previewHtml(template: Template, data: ResumeData, config?:
 }
 
 // === Export PDF ===
-export async function exportPdf(template: Template, data: ResumeData, out?: string, config?: any, accessToken?: string): Promise<ExportResponse> {
+export async function exportPdf(
+  template: Template, 
+  data: ResumeData, 
+  out?: string, 
+  config?: any, 
+  accessToken?: string,
+  guestData?: { email: string; name: string },
+  plan: string = 'trial',
+  templateId?: string | null
+): Promise<ExportResponse> {
   const response = await fetch(`${API_BASE}/export/pdf`, {
     method: 'POST',
     headers: getDefaultHeaders({}, accessToken),
@@ -179,14 +185,35 @@ export async function exportPdf(template: Template, data: ResumeData, out?: stri
       template_name: template.templateName,
       data,
       out,
-      config
+      config,
+      guest_email: guestData?.email,
+      guest_name: guestData?.name,
+      plan,
+      template_id: templateId
     }),
   });
-  return handleResponse<ExportResponse>(response);
+  const res = await handleResponse<ExportResponse>(response);
+  
+  // Ensure the URL is absolute if it's a relative path from the backend
+  if (res.url && res.url.startsWith('/')) {
+    const backendBase = API_BASE.replace(/\/api$/, '');
+    res.url = `${backendBase}${res.url}`;
+  }
+  
+  return res;
 }
 
 // === Export DOCX ===
-export async function exportDocx(template: Template, data: ResumeData, out?: string, config?: any, accessToken?: string): Promise<ExportResponse> {
+export async function exportDocx(
+  template: Template, 
+  data: ResumeData, 
+  out?: string, 
+  config?: any, 
+  accessToken?: string,
+  guestData?: { email: string; name: string },
+  plan: string = 'trial',
+  templateId?: string | null
+): Promise<ExportResponse> {
   const response = await fetch(`${API_BASE}/export/docx`, {
     method: 'POST',
     headers: getDefaultHeaders({}, accessToken),
@@ -194,10 +221,22 @@ export async function exportDocx(template: Template, data: ResumeData, out?: str
       template_name: template.templateName,
       data,
       out,
-      config
+      config,
+      guest_email: guestData?.email,
+      guest_name: guestData?.name,
+      plan,
+      template_id: templateId
     }),
   });
-  return handleResponse<ExportResponse>(response);
+  const res = await handleResponse<ExportResponse>(response);
+  
+  // Ensure the URL is absolute if it's a relative path from the backend
+  if (res.url && res.url.startsWith('/')) {
+    const backendBase = API_BASE.replace(/\/api$/, '');
+    res.url = `${backendBase}${res.url}`;
+  }
+  
+  return res;
 }
 
 // === Génération de contenu IA ===
@@ -244,5 +283,31 @@ export const { isAuthenticated } = config;
 export function requireAuth(): void {
   if (typeof window !== 'undefined' && !isAuthenticated()) {
     window.location.href = config.paths.login;
+  }
+}
+
+/**
+ * Force le téléchargement d'un fichier à partir d'une URL
+ * Utile pour éviter que le navigateur n'ouvre le PDF dans un nouvel onglet
+ */
+export async function triggerDownload(url: string, filename: string): Promise<void> {
+  try {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    const blobUrl = window.URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = blobUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    
+    // Nettoyage
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(blobUrl);
+  } catch (error) {
+    console.error('Erreur lors du téléchargement forcé:', error);
+    // Repli sur l'ouverture classique si le fetch échoue (ex: CORS ou réseau)
+    window.open(url, '_blank');
   }
 }

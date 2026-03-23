@@ -25,7 +25,8 @@
     </div>
 
     <!-- Dynamic Sidebar Sections -->
-    {% for section in template.sections if section.enabled and section.column == 'left' %}
+    {% for section in template.sections %}
+    {% if section.enabled and section.column == 'left' %}
       {% if section.type == 'contact' %}
         <div class="sidebar-info">
           <h3 class="sidebar-title">{{ section.label | default('Contact') }}</h3>
@@ -77,12 +78,14 @@
           </div>
         {% endfor %}
       {% endif %}
+    {% endif %}
     {% endfor %}
   </aside>
   
   <!-- Main Content -->
   <main class="main-content">
-    {% for section in template.sections if section.enabled and (section.column != 'left') %}
+    {% for section in template.sections %}
+    {% if section.enabled and (section.column != 'left') %}
       {% if section.type == 'summary' and data.summary %}
         <section class="section">
           <h2 class="section-title">{{ section.label | default('Profil') }}</h2>
@@ -164,6 +167,7 @@
             </div>
           </section>
         {% endfor %}
+      {% endif %}
       {% endif %}
     {% endfor %}
   </main>

@@ -1,8 +1,15 @@
-#!/usr/bin/env python3
 import os
 import json
+import sys
+import asyncio
 from pathlib import Path
 from typing import Optional, Dict, Any, List
+from sqlalchemy.orm import Session
+
+# --- WINDOWS ASYNCIO FIX ---
+# Playwright needs subprocess support, which requires ProactorEventLoop on Windows.
+if sys.platform == 'win32':
+    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
 
 from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -11,7 +18,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-from services.rendering_service import render_html_by_name as _render_html_service
+from services.rendering_service import render_html_by_name
 
 from export_docx import export_docx
 from generate_pdf_from_html import html_to_pdf
@@ -19,7 +26,7 @@ from generate_pdf_from_html import html_to_pdf
 # Imports d'authentification
 from auth.router import router as auth_router
 from auth.schemas import Token, UserOut
-from auth.deps import get_current_user, get_current_active_user, get_current_active_superuser
+from auth.deps import get_current_user, get_current_active_user, get_current_active_superuser, get_optional_user
 
 # Imports routers
 from routers.admin_templates import router as admin_templates_router
@@ -32,7 +39,7 @@ from routers.resumes import router as resumes_router
 from routers.admin_users import router as admin_users_router
 from routers.exports import router as exports_router
 from routers.personas import router as personas_router
-from database import engine, Base
+from database import engine, Base, get_db
 import models.persona # Ensure model is registered for create_all
 
 # Création des tables (simple auto-migration au démarrage)
@@ -41,6 +48,10 @@ Base.metadata.create_all(bind=engine)
 BASE_DIR = Path(__file__).parent.resolve()
 TEMPLATES_DIR = BASE_DIR / "templates"
 DATA_DIR = BASE_DIR / "data"
+STATIC_DIR = BASE_DIR / "static"
+
+# S'assurer que le dossier static existe
+STATIC_DIR.mkdir(exist_ok=True)
 
 app = FastAPI(
     title="CV Generator API",
@@ -79,7 +90,8 @@ app.include_router(personas_router, prefix="/api", tags=["personas"])
 
 
 # === Static ===
-app.mount("/static", StaticFiles(directory=str(BASE_DIR)), name="static")
+app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+app.mount("/api/templates", StaticFiles(directory=str(TEMPLATES_DIR)), name="templates_files")
 
 # --- MODELS ---
 class PreviewRequest(BaseModel):
@@ -92,6 +104,12 @@ class ExportRequest(BaseModel):
     data: Dict[str, Any]
     config: Optional[Dict[str, Any]] = None
     out: Optional[str] = None
+    # Infos Guest & Paiement
+    guest_email: Optional[str] = None
+    guest_name: Optional[str] = None
+    plan: Optional[str] = "trial"  # "trial" ou "single"
+    payment_id: Optional[str] = None
+    template_id: Optional[str] = None
 
 class GenerateRequest(BaseModel):
     prompt: Optional[str] = None
@@ -129,17 +147,64 @@ async def preview_html(req: PreviewRequest):
         print(f"Preview error: {traceback.format_exc()}")
         raise HTTPException(status_code=400, detail=str(e))
 
+# --- HELPERS POUR L'EXPORT ---
+async def _get_or_create_export_user(req: ExportRequest, current_user: Optional[UserOut], db: Session):
+    """Gère la logique de création/récupération d'utilisateur pour l'export"""
+    from datetime import datetime, timedelta
+    from models.user import User, UserRole
+    from services.template_access_service import TemplateAccessService
+    from auth.utils import create_access_token, get_password_hash
+    import secrets
+
+    target_user_id = None
+    is_new_user = False
+    setup_token = None
+
+    if current_user:
+        target_user_id = current_user.id
+    elif req.guest_email:
+        user = db.query(User).filter(User.email == req.guest_email).first()
+        if not user:
+            random_pass = secrets.token_urlsafe(16)
+            user = User(
+                email=req.guest_email,
+                full_name=req.guest_name or "Client CVTor",
+                hashed_password=get_password_hash(random_pass),
+                role=UserRole.USER,
+                is_active=True
+            )
+            db.add(user)
+            db.commit()
+            db.refresh(user)
+            is_new_user = True
+            setup_token = create_access_token(
+                data={"sub": user.email, "purpose": "setup_password"},
+                expires_delta=timedelta(days=7)
+            )
+        target_user_id = user.id
+    
+    if target_user_id and req.template_id:
+        expires_at = datetime.now() + timedelta(days=14) if req.plan == "trial" else None
+        TemplateAccessService.grant_access(db=db, user_id=target_user_id, template_id=req.template_id, expires_at=expires_at)
+        
+    return target_user_id, is_new_user, setup_token
+
+
 # Export PDF
 @app.post("/api/export/pdf")
 async def export_pdf(
     req: ExportRequest,
-    current_user: UserOut = Depends(get_current_active_user)
+    current_user: Optional[UserOut] = Depends(get_optional_user),
+    db: Session = Depends(get_db)
 ):
-    """Exporte le CV en PDF (accès authentifié requis)"""
+    """Exporte le CV en PDF et gère l'accès/inscription si nécessaire"""
     import uuid
     import re
+    from services.mailer_service import mailer_service
     
     try:
+        # 1. Gérer l'utilisateur
+        target_user_id, is_new_user, setup_token = await _get_or_create_export_user(req, current_user, db)
         # Générer un ID unique pour cette requête
         request_id = str(uuid.uuid4())
         
@@ -154,16 +219,41 @@ async def export_pdf(
         # Cela empêche les collisions et les fuites de données entre utilisateurs
         safe_filename = f"CV_{request_id}.pdf"
         
-        # Construire le chemin de sortie sécurisé (toujours dans BASE_DIR)
-        out_pdf = BASE_DIR / safe_filename
+        # Construire le chemin de sortie sécurisé (dans STATIC_DIR)
+        out_pdf = STATIC_DIR / safe_filename
         
-        # Générer le PDF
-        html_to_pdf(tmp_html, out_pdf)
+        # Générer le PDF via un sous-processus pour éviter les conflits d'Event Loop sur Windows
+        import subprocess
+        
+        def run_pdf_cmd():
+            cmd = [sys.executable, str(BASE_DIR / "generate_pdf_from_html.py"), "--html", str(tmp_html), "--out", str(out_pdf)]
+            return subprocess.run(cmd, capture_output=True, text=True)
+            
+        result = await asyncio.to_thread(run_pdf_cmd)
+        
+        if result.returncode != 0:
+            print(f"PDF Generator Error: {result.stderr}")
+            raise RuntimeError(f"Erreur lors de la génération du PDF: {result.stderr}")
         
         # Nettoyer le fichier temp
         tmp_html.unlink(missing_ok=True)
 
         url = f"/static/{out_pdf.name}" if out_pdf.exists() else None
+
+        # 3. Envoyer l'email si c'est un nouvel utilisateur ou si demandé
+        if url and (is_new_user or req.guest_email):
+            email = req.guest_email or (current_user.email if current_user else None)
+            name = req.guest_name or (current_user.full_name if current_user else "Client")
+            
+            if email:
+                setup_link = f"{os.getenv('FRONTEND_URL', 'http://localhost:5000')}/set-password?token={setup_token}" if setup_token else None
+                mailer_service.send_welcome_and_cv(
+                    recipient_email=email,
+                    full_name=name,
+                    pdf_path=str(out_pdf) if out_pdf.exists() else None,
+                    setup_link=setup_link
+                )
+        
         return {"file": str(out_pdf), "url": url}
     except Exception as e:
         import traceback
@@ -178,25 +268,73 @@ async def export_pdf(
 @app.post("/api/export/docx")
 async def export_docx_endpoint(
     req: ExportRequest,
-    current_user: UserOut = Depends(get_current_active_user)
+    current_user: Optional[UserOut] = Depends(get_optional_user),
+    db: Session = Depends(get_db)
 ):
-    """Exporte le CV en DOCX (accès authentifié requis)"""
+    """Exporte le CV en DOCX et gère l'accès si nécessaire"""
+    from services.mailer_service import mailer_service
     try:
+        # 1. Gérer l'utilisateur
+        target_user_id, is_new_user, setup_token = await _get_or_create_export_user(req, current_user, db)
+        
         import uuid
         request_id = str(uuid.uuid4())
         safe_filename = f"CV_{request_id}.docx"
-        out_docx = BASE_DIR / safe_filename
+        out_docx = STATIC_DIR / safe_filename
         
         # Passer les données directement (export_docx le supporte maintenant)
-        # Note: DOCX ignore actuellement le config_override car il est basé sur du texte pur
         result_path = export_docx(req.data, out_docx)
         
         url = f"/static/{out_docx.name}" if out_docx.exists() else None
+        
+        # 2. Envoyer l'email
+        if url and (is_new_user or req.guest_email):
+            email = req.guest_email or (current_user.email if current_user else None)
+            name = req.guest_name or (current_user.full_name if current_user else "Client")
+            
+            if email:
+                setup_link = f"{os.getenv('FRONTEND_URL', 'http://localhost:5000')}/set-password?token={setup_token}" if setup_token else None
+                mailer_service.send_welcome_and_cv(
+                    recipient_email=email, 
+                    full_name=name, 
+                    setup_link=setup_link
+                )
+
         return {"file": str(out_docx), "url": url}
     except Exception as e:
         import traceback
         print(f"DOCX export error: {traceback.format_exc()}")
         raise HTTPException(status_code=400, detail=str(e))
+
+# Setup Password
+class SetPasswordRequest(BaseModel):
+    token: str
+    password: str
+
+@app.post("/api/auth/set-password")
+async def set_password(req: SetPasswordRequest, db: Session = Depends(get_db)):
+    from jose import jwt
+    from auth.utils import SECRET_KEY, ALGORITHM, get_password_hash
+    from models.user import User
+    
+    try:
+        payload = jwt.decode(req.token, SECRET_KEY, algorithms=[ALGORITHM])
+        email = payload.get("sub")
+        purpose = payload.get("purpose")
+        
+        if not email or purpose != "setup_password":
+            raise HTTPException(status_code=400, detail="Token invalide ou expiré")
+            
+        user = db.query(User).filter(User.email == email).first()
+        if not user:
+            raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+            
+        user.hashed_password = get_password_hash(req.password)
+        db.commit()
+        
+        return {"message": "Mot de passe défini avec succès"}
+    except Exception:
+        raise HTTPException(status_code=400, detail="Lien invalide ou expiré")
 
 # Génération de contenu
 @app.post("/api/generate")

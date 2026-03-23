@@ -26,7 +26,8 @@
       </div>
       {% endif %}
 
-      {% for section in template.sections if section.enabled and section.column == 'left' %}
+      {% for section in template.sections %}
+      {% if section.enabled and section.column == 'left' %}
         {% if section.type == 'contact' %}
           <div class="sidebar-section">
             <h3 class="sidebar-title">{{ section.label | default('Coordonnées') }}</h3>
@@ -85,12 +86,14 @@
             </div>
           {% endfor %}
         {% endif %}
+      {% endif %}
       {% endfor %}
     </aside>
 
     <!-- Main Content -->
     <main class="right-column">
-      {% for section in template.sections if section.enabled and section.column != 'left' %}
+      {% for section in template.sections %}
+      {% if section.enabled and section.column != 'left' %}
         {% if section.type == 'summary' and data.summary %}
           <section class="content-section">
             <h3 class="section-title">{{ section.label | default('Parcours Professionnel') }}</h3>
@@ -155,6 +158,7 @@
             </section>
           {% endfor %}
         {% endif %}
+      {% endif %}
       {% endfor %}
     </main>
   </div>

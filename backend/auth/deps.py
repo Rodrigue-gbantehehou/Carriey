@@ -38,6 +38,28 @@ async def get_current_user(
         
     return user
 
+from fastapi import Depends, HTTPException, status, Request
+from .utils import oauth2_scheme, SECRET_KEY, ALGORITHM
+
+async def get_optional_user(
+    request: Request,
+    db = Depends(get_db)
+) -> Optional[User]:
+    """Récupère l'utilisateur actuel s'il existe, sinon retourne None (sans lever d'erreur)"""
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return None
+    
+    token = auth_header.replace("Bearer ", "")
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            return None
+        return db.query(User).filter(User.email == email).first()
+    except Exception:
+        return None
+
 
 
 async def get_current_active_user(

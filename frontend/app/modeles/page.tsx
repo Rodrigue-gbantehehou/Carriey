@@ -6,6 +6,8 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import config from '@/lib/config'
 import { useEditorStore } from '@/store/editor'
+import Navbar from '@/components/layout/Navbar'
+import TemplatePreview from '@/components/layout/TemplatePreview'
 
 // Palette par défaut pour l'aperçu
 const DEFAULT_PALETTE = { primary: '#2563eb', secondary: '#1e40af', accent: '#f59e0b' }
@@ -80,110 +82,29 @@ const PREVIEW_DATA = {
   languages: [{ name: 'Français', level: 'Natif' }, { name: 'Anglais', level: 'Avancé' }],
 }
 
-function TemplateCard({ template, onSelect, namePreview, personaData, selectedSector }: { template: any; onSelect: (t: any) => void; namePreview?: string; personaData?: any; selectedSector?: string }) {
+function TemplateCard({ template, onSelect, selectedSector, previewData }: { template: any; onSelect: (t: any) => void; selectedSector?: string; previewData?: any }) {
   const meta = TEMPLATE_META[template.slug] || DEFAULT_META
-  const [previewHtml, setPreviewHtml] = useState<string>('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [scale, setScale] = useState(0.38)
-  const isFree = parseFloat(template.price) === 0
-  
-  // Ref pour calculer l'échelle dynamique
-  const containerRef = (node: HTMLDivElement | null) => {
-    if (node) {
-      const updateScale = () => {
-        const width = node.offsetWidth
-        // 210mm est environ 794px à 96dpi
-        const newScale = width / 793.7
-        setScale(newScale)
-      }
-      updateScale()
-      const ro = new ResizeObserver(updateScale)
-      ro.observe(node)
-    }
-  }
-
-  useEffect(() => {
-    const fetchPreview = async () => {
-      setIsLoading(true)
-      try {
-        const res = await fetch(`${config.apiBaseUrl}/preview`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            template_name: template.slug,
-            data: {
-              ...(personaData || PREVIEW_DATA),
-              profile: {
-                ...(personaData?.profile || PREVIEW_DATA.profile),
-                name: namePreview || personaData?.profile?.name || PREVIEW_DATA.profile.name
-              },
-            },
-            config: { colors: DEFAULT_PALETTE, is_thumbnail: true }
-          })
-        })
-        if (res.ok) {
-          const result = await res.json()
-          setPreviewHtml(result.html || '')
-        }
-      } catch (e) {
-        console.error(e)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-    const timer = setTimeout(fetchPreview, 100)
-    return () => clearTimeout(timer)
-  }, [template.slug, namePreview, personaData])
-
   const isRecommended = selectedSector && meta.tags?.includes(selectedSector)
 
   return (
     <div 
-      className={`group bg-white border ${isRecommended ? 'border-amber-200 ring-2 ring-amber-100 shadow-md' : 'border-gray-200 hover:border-indigo-300'} rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col h-full relative cursor-pointer`}
+      className={`group bg-white border ${isRecommended ? 'border-brand-cta ring-4 ring-brand-cta/5' : 'border-gray-100 hover:border-brand-cta/30'} rounded-2xl overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 flex flex-col h-full relative cursor-pointer`}
       onClick={() => onSelect(template)}
     >
-      {isRecommended && (
-        <div className="absolute top-0 right-0 z-20">
-          <div className="bg-amber-500 text-white text-[9px] font-bold px-3 py-1.5 rounded-bl-xl shadow-sm uppercase tracking-wider flex items-center gap-1 transition-opacity duration-300 group-hover:opacity-0">
-            <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-            Recommandé
-          </div>
-        </div>
-      )}
-      <div className="relative aspect-[3/4.2] flex items-center justify-center overflow-hidden bg-white">
-        {previewHtml ? (
-          <div ref={containerRef} className="w-full h-full relative overflow-hidden bg-white">
-            <iframe
-              srcDoc={previewHtml}
-              className="absolute top-0 left-0 border-0 pointer-events-none origin-top-left transition-transform duration-700 ease-out group-hover:scale-[1.02]"
-              style={{
-                transform: `scale(${scale})`,
-                width: `${100 / scale}%`,
-                height: `${100 / scale}%`,
-                opacity: isLoading ? 0.5 : 1,
-                overflow: 'hidden'
-              }}
-              scrolling="no"
-              title={`Aperçu ${template.name}`}
-            />
-          </div>
-        ) : (
-          <div className="text-gray-300 italic text-xs px-4 text-center">
-            {isLoading ? 'Chargement...' : 'Aperçu non disponible'}
-          </div>
-        )}
+      <div className="relative aspect-[1/1.414] overflow-hidden bg-gray-50/50">
+        <TemplatePreview 
+          template={template} 
+          data={previewData}
+        />
 
         {/* Overlay Hover */}
-        <div className="absolute inset-0 bg-orange-900/20 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center z-10">
-            <button
-                onClick={(e) => { e.stopPropagation(); onSelect(template); }}
-                className="px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white text-sm font-bold rounded-full shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-all duration-300"
-            >
-                Choisir ce modèle
-            </button>
+        <div className="absolute inset-0 bg-brand-text/60 backdrop-blur-[3px] opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col items-center justify-center z-10">
+          <div
+            className="px-8 py-3.5 bg-brand-cta text-white text-sm font-black rounded-full shadow-2xl transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 hover:scale-105 active:scale-95"
+          >
+            Utiliser ce modèle
+          </div>
         </div>
-
-
       </div>
     </div>
   )
@@ -232,11 +153,6 @@ export default function ModelesPage() {
   }, [namePreview])
 
   const handleSelect = async (template: any) => {
-    const isFree = parseFloat(template.price) === 0
-    if (!isFree && !session) {
-      router.push(`/login?callbackUrl=/modeles`)
-      return
-    }
     const params = new URLSearchParams({
       step: 'method',
       template: template.slug,
@@ -254,34 +170,21 @@ export default function ModelesPage() {
   })
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* ── Navigation Responsive ── */}
-      <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="text-xl font-bold text-orange-600 tracking-tight">
-            CVtor
-          </Link>
-          <div className="flex items-center gap-4 sm:gap-6">
-            <Link href="/modeles" className="text-xs sm:text-sm font-medium text-orange-600">Modèles</Link>
-            <Link href="/tarifs" className="hidden xs:block text-xs sm:text-sm font-medium text-gray-500 hover:text-gray-900">Tarifs</Link>
-            {session ? (
-              <Link href="/editor" className="text-xs sm:text-sm font-medium text-gray-900 border-l border-gray-200 pl-4 sm:pl-6">Espace</Link>
-            ) : (
-              <Link href="/login" className="text-xs sm:text-sm font-bold text-orange-600">Connexion</Link>
-            )}
-          </div>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-brand-bg flex flex-col">
+      <Navbar />
 
       {/* ── Entête Responsive ── */}
-      <header className="bg-white border-b border-gray-200 py-8 sm:py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+      <header className="bg-white border-b border-gray-100 py-12 sm:py-20 relative overflow-hidden">
+        {/* Background Decorative patterns */}
+        <div className="absolute top-0 right-0 w-1/3 h-full bg-brand-cta/5 skew-x-12 translate-x-1/2 pointer-events-none" />
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
           <div className="max-w-3xl">
-            <h1 className="text-2xl sm:text-4xl font-extrabold text-gray-900 tracking-tight leading-tight">
-              Choisissez votre modèle
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-brand-text tracking-tight leading-[1.1]">
+              Choisissez votre <span className="text-brand-cta">modèle</span> idéal
             </h1>
-            <p className="mt-2 sm:mt-4 text-sm sm:text-lg text-gray-500">
-              Des designs professionnels personnalisables en quelques secondes.
+            <p className="mt-6 text-lg sm:text-xl text-brand-muted font-medium max-w-2xl">
+              Des CV conçus par des experts en recrutement avec des designs haute performance pour propulser votre carrière.
             </p>
           </div>
 
@@ -323,10 +226,10 @@ export default function ModelesPage() {
             <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide no-scrollbar">
               {[
                 { id: 'all', label: 'Tous' },
-                { id: 'corporate', label: '🏢 Corporate' },
-                { id: 'tech', label: '🚀 Tech' },
-                { id: 'creative', label: '✨ Créatif' },
-                { id: 'minimalist', label: '🌿 Minimaliste' }
+                { id: 'corporate', label: 'Corporate' },
+                { id: 'tech', label: 'Tech' },
+                { id: 'creative', label: 'Créatif' },
+                { id: 'minimalist', label: 'Minimaliste' }
               ].map(f => (
                 <button
                   key={f.id}
@@ -339,18 +242,9 @@ export default function ModelesPage() {
             </div>
           </div>
           
-          <div className="flex items-center gap-6 w-full lg:w-auto justify-between lg:justify-end">
-            <label className="flex items-center gap-3 cursor-pointer group">
-              <span className="text-xs font-bold text-gray-500 group-hover:text-orange-600 transition-colors">Gratuits uniquement</span>
-              <div 
-                onClick={() => setShowFreeOnly(!showFreeOnly)}
-                className={`relative w-10 h-5 rounded-full transition-colors ${showFreeOnly ? 'bg-emerald-500' : 'bg-gray-200'}`}
-              >
-                <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${showFreeOnly ? 'translate-x-5' : ''}`} />
-              </div>
-            </label>
-            <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
-              {filtered.length} MODÈLES
+          <div className="flex items-center justify-end w-full lg:w-auto">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-white px-4 py-2 rounded-lg border border-gray-100 shadow-sm">
+              {filtered.length} Modèles disponibles
             </p>
           </div>
         </div>
@@ -368,9 +262,14 @@ export default function ModelesPage() {
                 key={t.id}
                 template={t}
                 onSelect={handleSelect}
-                namePreview={namePreview}
-                personaData={personaContent}
                 selectedSector={selectedSector}
+                previewData={{
+                  ...(personaContent || PREVIEW_DATA),
+                  profile: {
+                    ...(personaContent?.profile || PREVIEW_DATA.profile),
+                    name: namePreview || personaContent?.profile?.name || PREVIEW_DATA.profile.name
+                  }
+                }}
               />
             ))}
           </div>

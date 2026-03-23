@@ -1,3 +1,18 @@
 {
-    "git.ignoreLimitWarning": true
+    "files.exclude": {
+        "**/vendor": true,
+        "**/var": true,
+        "**/.git": true
+    },
+    "search.exclude": {
+        "**/vendor": true,
+        "**/var": true,
+        "**/node_modules": true
+    },
+    "php.suggest.basic": false,
+    "intelephense.files.exclude": [
+        "**/vendor/**",
+        "**/var/**",
+        "**/.git/**"
+    ]
 }

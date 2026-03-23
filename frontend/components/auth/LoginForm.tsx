@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function LoginForm() {
@@ -11,6 +11,8 @@ export default function LoginForm() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,7 +35,7 @@ export default function LoginForm() {
       if (result?.error) {
         setError('Identifiants invalides. Veuillez réessayer.');
       } else {
-        router.push('/admin'); // Default redirect to admin or dashboard
+        router.push(callbackUrl);
       }
     } catch (err) {
       setError('Une erreur est survenue');
@@ -52,7 +54,7 @@ export default function LoginForm() {
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             Ou{' '}
-            <Link href="/register" className="font-medium text-indigo-600 hover:text-indigo-500">
+            <Link href="/register" className="font-medium text-blue-600 hover:text-blue-500">
               créez un nouveau compte
             </Link>
           </p>
@@ -111,7 +113,7 @@ export default function LoginForm() {
 
           <div className="flex items-center justify-between">
             <div className="text-sm">
-              <Link href="/forgot-password" className="font-medium text-indigo-600 hover:text-indigo-500">
+              <Link href="/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">
                 Mot de passe oublié ?
               </Link>
             </div>
@@ -121,7 +123,7 @@ export default function LoginForm() {
             <button
               type="submit"
               disabled={isLoading}
-              className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+              className={`group relative w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${isLoading ? 'opacity-70 cursor-not-allowed' : ''} transition-all shadow-lg shadow-blue-500/20`}
             >
               {isLoading ? 'Connexion en cours...' : 'Se connecter'}
             </button>
