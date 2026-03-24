@@ -1,9 +1,9 @@
 
 import React from 'react';
 import { TemplateProps } from '@/types/cv';
-import { TemplateStyles } from '../BaseComponents';
+import { TemplateStyles, RemoteStyles } from '../BaseComponents';
 
-const ModerneTemplate: React.FC<TemplateProps> = ({ data, config }) => {
+const ModerneTemplate: React.FC<TemplateProps> = ({ data, config, apiBaseUrl }) => {
   const { profile, summary, experience, education, skills, languages, projects, custom_sections } = data;
   
   const isSectionEnabled = (type: string) => {
@@ -20,6 +20,7 @@ const ModerneTemplate: React.FC<TemplateProps> = ({ data, config }) => {
 
   return (
     <div className="cv-rendering-root cv-container moderne-template">
+      <RemoteStyles templateName={config.templateName} apiBaseUrl={apiBaseUrl} />
       <TemplateStyles config={config} />
       
       {/* Header Split */}
@@ -55,9 +56,9 @@ const ModerneTemplate: React.FC<TemplateProps> = ({ data, config }) => {
         )}
       </header>
 
-      <div className="main-content">
+      <div className="main-content" style={{ display: 'flex', flex: 1 }}>
         {/* Sidebar */}
-        <aside className="left-column">
+        <aside className="left-column" style={{ width: '35%', flexShrink: 0 }}>
           {isSectionEnabled('photo') && (
             <div className="profile-photo-wrap">
               {profile.photo ? (

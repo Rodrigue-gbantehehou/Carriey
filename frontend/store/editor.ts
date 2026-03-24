@@ -58,6 +58,7 @@ export type Template = {
 
 export type OnboardingData = {
   experience: string | null;
+  sector: string | null;
   method: 'new' | 'import' | null;
   namePreview: string;
 }
@@ -101,6 +102,7 @@ export const useEditorStore = create<State>((set, get) => ({
   currentStep: 0,
   onboardingData: {
     experience: null,
+    sector: null,
     method: null,
     namePreview: '',
   },

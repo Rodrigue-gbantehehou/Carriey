@@ -45,6 +45,7 @@ class TemplateListOut(BaseModel):
     currency: str
     is_active: bool
     is_system: bool
+    definition: Dict[str, Any]
     created_at: datetime
 
     class Config:

@@ -6,7 +6,7 @@
   box-sizing: border-box;
 }
 
-:root {
+.cv-rendering-root {
   --color-primary: #334155;
   /* Slate Blue Executive */
   --color-secondary: #F8FAFC;
@@ -40,7 +40,7 @@ body {
 
 /* ── Executive Header ── */
 .header {
-  padding: 55px 70px;
+  padding: 35px 50px;
   text-align: center;
   border-bottom: 2px solid #F1F5F9;
   background: white;
@@ -73,11 +73,11 @@ body {
 .left-column {
   width: var(--sidebar-width);
   background: var(--color-secondary);
-  padding: 45px 35px;
+  padding: 30px 28px;
   border-right: 1px solid #E2E8F0;
   display: flex;
   flex-direction: column;
-  gap: 40px;
+  gap: 22px;
 }
 
 .profile-photo-wrap {
@@ -115,15 +115,15 @@ body {
   color: var(--color-primary);
   text-transform: uppercase;
   letter-spacing: 2px;
-  margin-bottom: 25px;
-  padding-bottom: 10px;
+  margin-bottom: 15px;
+  padding-bottom: 6px;
   border-bottom: 2px solid var(--color-accent);
 }
 
 .contact-list {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 10px;
 }
 
 .contact-item {
@@ -170,7 +170,7 @@ body {
 /* ── Content ── */
 .right-column {
   flex: 1;
-  padding: 55px 55px;
+  padding: 35px 40px;
 }
 
 .section-title {
@@ -194,13 +194,13 @@ body {
 .about-text {
   font-size: 1.07em;
   color: #475569;
-  line-height: 1.8;
+  line-height: 1.5;
   text-align: justify;
-  margin-bottom: 15px;
+  margin-bottom: 8px;
 }
 
 .experience-item {
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   break-inside: avoid;
 }
 
@@ -230,7 +230,7 @@ body {
   font-size: 1.07em;
   font-weight: 600;
   color: #64748B;
-  margin-bottom: 15px;
+  margin-bottom: 8px;
 }
 
 .exp-tasks {

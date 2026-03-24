@@ -1,14 +1,14 @@
 {
   "templateName": "Creatif",
   "fonts": {
-    "heading": "Montserrat",
-    "body": "Open Sans"
+    "heading": "Playfair Display",
+    "body": "Outfit"
   },
   "colors": {
-    "primary": "#2D3748",
+    "primary": "#FF6B6B",
     "secondary": "#F7FAFC",
-    "accent": "#805AD5",
-    "text": "#4A5568"
+    "accent": "#4ECDC4",
+    "text": "#334155"
   },
   "layout": {
     "twoColumn": true,

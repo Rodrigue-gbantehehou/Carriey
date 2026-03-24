@@ -14,9 +14,11 @@ from schemas.template import TemplateCreate, TemplateUpdate, TemplateOut, Templa
 from auth.deps import get_current_admin, get_current_super_admin
 from services.rendering_service import render_html_from_strings, PLACEHOLDER_PHOTO_B64
 
-# Get the base templates directory
-BASE_DIR = Path(__file__).parent.parent.resolve()
-TEMPLATES_DIR = BASE_DIR / "templates"
+from config import settings
+
+# Get the base templates directory from settings
+TEMPLATES_DIR = Path(settings.TEMPLATES_DIR)
+BASE_DIR = Path(settings.BASE_DIR)
 
 # Dummy data for live preview
 PREVIEW_DUMMY_DATA = {
@@ -154,7 +156,36 @@ async def create_template(
             ]
         },
         "style.css": "/* Style pour " + template_in.name + " */\n\nbody {\n  font-family: 'Open Sans', sans-serif;\n  color: #2D3748;\n  line-height: 1.5;\n}\n\nh1, h2, h3 {\n  font-family: 'Montserrat', sans-serif;\n  color: #1A202C;\n}\n",
-        "template.jinja2": "<div class=\"cv-container\">\n  <header>\n    <h1>{{ data.profile.name }}</h1>\n    <p>{{ data.profile.title }}</p>\n  </header>\n  \n  <div class=\"main-content\">\n    <section class=\"summary\">\n      <h2>Résumé</h2>\n      <p>{{ data.summary }}</p>\n    </section>\n    \n    <section class=\"experience\">\n      <h2>Expériences</h2>\n      {% for exp in data.experience %}\n        <div class=\"exp-item\">\n          <h3>{{ exp.title }} @ {{ exp.company }}</h3>\n          <p>{{ exp.period }}</p>\n          <p>{{ exp.description }}</p>\n        </div>\n      {% endfor %}\n    </section>\n  </div>\n</div>\n"
+        "template.jinja2": "<div class=\"cv-container\">\n  <header>\n    <h1>{{ data.profile.name }}</h1>\n    <p>{{ data.profile.title }}</p>\n  </header>\n  \n  <div class=\"main-content\">\n    <section class=\"summary\">\n      <h2>Résumé</h2>\n      <p>{{ data.summary }}</p>\n    </section>\n    \n    <section class=\"experience\">\n      <h2>Expériences</h2>\n      {% for exp in data.experience %}\n        <div class=\"exp-item\">\n          <h3>{{ exp.title }} @ {{ exp.company }}</h3>\n          <p>{{ exp.period }}</p>\n          <p>{{ exp.description }}</p>\n        </div>\n      {% endfor %}\n    </section>\n  </div>\n</div>\n",
+        "Template.tsx": """import React from 'react';
+import { TemplateProps } from '@/types/cv';
+import { TemplateStyles, RemoteStyles } from '../BaseComponents';
+
+const Template: React.FC<TemplateProps> = ({ data, config, apiBaseUrl }) => {
+  const { profile, summary, experience, education, skills, languages, projects, custom_sections } = data;
+  
+  return (
+    <div className="cv-rendering-root cv-container">
+      <RemoteStyles templateName={config.templateName} apiBaseUrl={apiBaseUrl} />
+      <TemplateStyles config={config} />
+      
+      <header className="header" style={{ padding: '40px', textAlign: 'center' }}>
+        <h1 className="name" style={{ fontSize: '2.5em', margin: 0 }}>{profile.name || 'Nom Prénom'}</h1>
+        <p className="profession" style={{ fontSize: '1.2em', color: 'var(--color-accent)' }}>{profile.position || profile.title}</p>
+      </header>
+      
+      <div className="main-content" style={{ padding: '0 40px' }}>
+        <section className="section">
+          <h2 className="section-title">Résumé</h2>
+          <p className="about-text">{summary}</p>
+        </section>
+      </div>
+    </div>
+  );
+};
+
+export default React.memo(Template);
+"""
     }
     
     # Écrire les fichiers boilerplate sur le disque
@@ -162,9 +193,11 @@ async def create_template(
     for filename, content in boilerplate.items():
         file_path = template_folder / filename
         if filename.endswith(".json"):
+            # Use json.dumps to ensure we write a string
             file_path.write_text(json.dumps(content, indent=2, ensure_ascii=False), encoding="utf-8")
         else:
-            file_path.write_text(content, encoding="utf-8")
+            # content is already a string for .css, .jinja2 and .tsx
+            file_path.write_text(str(content), encoding="utf-8")
         file_paths[filename] = str(file_path.relative_to(BASE_DIR))
 
     # Créer le template en base
@@ -188,6 +221,7 @@ async def create_template(
         if filename == "template.jinja2": asset_type = "jinja"
         elif filename == "style.css": asset_type = "css"
         elif filename == "template.json": asset_type = "json"
+        elif filename == "Template.tsx": asset_type = "react"
             
         asset = TemplateAsset(
             template_id=new_template.id,

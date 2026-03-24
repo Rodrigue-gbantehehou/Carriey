@@ -6,6 +6,19 @@ import Link from 'next/link'
 import { useEditorStore } from '@/store/editor'
 import Navbar from '@/components/layout/Navbar'
 
+const SECTORS = [
+    { id: 'tech', label: '💻 Tech & Informatique', icon: '💻' },
+    { id: 'finance', label: '📊 Finance & Comptabilité', icon: '📊' },
+    { id: 'sante', label: '🏥 Santé & Médical', icon: '🏥' },
+    { id: 'marketing', label: '📣 Marketing & Communication', icon: '📣' },
+    { id: 'education', label: '🎓 Éducation & Formation', icon: '🎓' },
+    { id: 'commerce', label: '🛒 Commerce & Vente', icon: '🛒' },
+    { id: 'juridique', label: '⚖️ Juridique & Droit', icon: '⚖️' },
+    { id: 'design', label: '🎨 Design & Créatif', icon: '🎨' },
+    { id: 'industrie', label: '🏭 Industrie & Ingénierie', icon: '🏭' },
+    { id: 'autre', label: '📋 Autre secteur', icon: '📋' },
+]
+
 const QUALIFICATIONS = [
     { id: 'none', label: 'Sans expérience' },
     { id: 'junior', label: 'Moins de 3 ans' },
@@ -19,18 +32,27 @@ export default function OnboardingPage() {
     const searchParams = useSearchParams()
     const { setOnboardingData } = useEditorStore()
 
-    const step = searchParams.get('step') || 'experience'
+    const step = searchParams.get('step') || 'sector'
     const template = searchParams.get('template')
+
+    const handleSelectSector = (id: string) => {
+        setOnboardingData({ sector: id })
+        const params = new URLSearchParams(searchParams.toString())
+        params.set('step', 'experience')
+        params.set('sector', id)
+        router.push(`/onboarding?${params.toString()}`)
+    }
 
     const handleSelectExperience = (id: string) => {
         setOnboardingData({ experience: id })
-        router.push('/modeles')
+        const params = new URLSearchParams(searchParams.toString())
+        router.push(`/modeles?${params.toString()}`)
     }
 
     const handleSelectMethod = (method: 'new' | 'import') => {
         setOnboardingData({ method })
-        const templateParam = template ? `?template=${template}` : ''
-        router.push(`/editor${templateParam}`)
+        const params = new URLSearchParams(searchParams.toString())
+        router.push(`/editor?${params.toString()}`)
     }
 
     return (
@@ -49,15 +71,48 @@ export default function OnboardingPage() {
                 <div className="absolute top-0 left-0 w-full h-1.5 bg-gray-50 rounded-t-[40px] overflow-hidden">
                     <div 
                         className="h-full bg-brand-cta transition-all duration-700 ease-out" 
-                        style={{ width: step === 'experience' ? '25%' : '75%' }}
+                        style={{ width: step === 'sector' ? '15%' : step === 'experience' ? '40%' : '75%' }}
                     />
                 </div>
+
+                {step === 'sector' && (
+                    <div className="text-center space-y-12 animate-slide-up">
+                        <div className="space-y-4">
+                            <div className="inline-block px-4 py-1.5 bg-brand-cta/10 text-brand-cta text-[10px] font-black uppercase tracking-widest rounded-full">
+                                Étape 01
+                            </div>
+                            <h1 className="text-3xl sm:text-4xl font-black text-brand-text tracking-tight leading-tight">
+                                Quel est votre <br />
+                                <span className="text-brand-cta">secteur d'activité ?</span>
+                            </h1>
+                            <p className="text-brand-muted font-medium max-w-sm mx-auto">
+                                Nous pré-remplirons votre CV avec des exemples adaptés à votre domaine.
+                            </p>
+                        </div>
+
+                        <div className="grid sm:grid-cols-2 gap-3">
+                            {SECTORS.map((s, idx) => (
+                                <button
+                                    key={s.id}
+                                    onClick={() => handleSelectSector(s.id)}
+                                    className="w-full py-4 px-6 rounded-2xl border border-gray-100 bg-brand-bg hover:border-brand-cta/50 hover:bg-white hover:shadow-xl hover:shadow-brand-cta/5 text-left font-bold text-brand-text transition-all active:scale-[0.98] group flex items-center justify-between"
+                                    style={{ animationDelay: `${idx * 30}ms` }}
+                                >
+                                    <span>{s.label}</span>
+                                    <svg className="w-5 h-5 text-gray-300 group-hover:text-brand-cta group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                    </svg>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 {step === 'experience' && (
                     <div className="text-center space-y-12 animate-slide-up">
                         <div className="space-y-4">
                             <div className="inline-block px-4 py-1.5 bg-brand-cta/10 text-brand-cta text-[10px] font-black uppercase tracking-widest rounded-full">
-                                Étape 01
+                                Étape 02
                             </div>
                             <h1 className="text-3xl sm:text-4xl font-black text-brand-text tracking-tight leading-tight">
                                 Quel est votre <br />

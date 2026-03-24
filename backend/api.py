@@ -1,4 +1,5 @@
 import os
+from config import settings
 import json
 import sys
 import asyncio
@@ -46,7 +47,7 @@ import models.persona # Ensure model is registered for create_all
 Base.metadata.create_all(bind=engine)
 
 BASE_DIR = Path(__file__).parent.resolve()
-TEMPLATES_DIR = BASE_DIR / "templates"
+TEMPLATES_DIR = Path(settings.TEMPLATES_DIR)
 DATA_DIR = BASE_DIR / "data"
 STATIC_DIR = BASE_DIR / "static"
 
@@ -62,7 +63,6 @@ app = FastAPI(
 )
 
 # === CORS ===
-from config import settings
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.BACKEND_CORS_ORIGINS,

@@ -73,6 +73,7 @@ export interface CVData {
   skills?: CVSkills;
   languages?: CVLanguage[];
   projects?: CVProject[];
+  interests?: string[];
   custom_sections?: CVCustomSection[];
 }
 
@@ -88,16 +89,21 @@ export interface TemplateSection {
 export interface TemplateConfig {
   templateName: string;
   displayName: string;
+  sector?: string; // e.g. "Santé", "Tech"
   tokens: {
     colorPrimary: string;
     colorSecondary: string;
     colorAccent: string;
+    colorTextMain?: string;
+    colorTextMuted?: string;
     fontHeading: string;
     fontBody: string;
     borderRadius?: string;
     spacing?: string;
     fontSize?: number;
     photoShape?: 'circle' | 'square' | 'rounded';
+    sidebarWidth?: string;
+    lineHeight?: number;
   };
   sections: TemplateSection[];
 }
@@ -105,4 +111,5 @@ export interface TemplateConfig {
 export interface TemplateProps {
   data: CVData;
   config: TemplateConfig;
+  apiBaseUrl: string;
 }

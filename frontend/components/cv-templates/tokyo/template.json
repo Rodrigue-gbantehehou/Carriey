@@ -89,6 +89,14 @@
       "enabled": true,
       "userCanDisable": true,
       "userCanMove": true
+    },
+    {
+      "type": "interests",
+      "label": "Loisirs",
+      "column": "left",
+      "enabled": true,
+      "userCanDisable": true,
+      "userCanMove": true
     }
   ],
   "userCustomizable": {

@@ -1,13 +1,13 @@
 {
   "templateName": "Rodrigue",
   "fonts": {
-    "heading": "Montserrat",
-    "body": "Open Sans"
+    "heading": "Marcellus",
+    "body": "Outfit"
   },
   "colors": {
-    "primary": "#2D3748",
-    "secondary": "#F7FAFC",
-    "accent": "#805AD5"
+    "primary": "#0F172A",
+    "secondary": "#F8FAFC",
+    "accent": "#C5A059"
   },
   "layout": {
     "twoColumn": true,
@@ -61,6 +61,14 @@
       "label": "Projets",
       "column": "right",
       "enabled": true
+    },
+    {
+      "type": "interests",
+      "label": "Passions",
+      "column": "left",
+      "enabled": true,
+      "userCanDisable": true,
+      "userCanMove": true
     }
   ]
 }

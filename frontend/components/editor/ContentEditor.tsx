@@ -13,7 +13,7 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
     4: 'languages'
   }
 
-  const [activeTab, setActiveTab] = useState<'profile' | 'summary' | 'experience' | 'education' | 'skills' | 'languages' | 'projects' | 'sections'>(
+  const [activeTab, setActiveTab] = useState<'profile' | 'summary' | 'experience' | 'education' | 'skills' | 'languages' | 'projects' | 'interests' | 'sections'>(
     wizardStep !== undefined ? stepToTab[wizardStep] : 'profile'
   )
 
@@ -187,11 +187,30 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
     setData({ ...data, languages })
   }
 
+  const addInterest = () => {
+    setData({
+      ...data,
+      interests: [...(data.interests || []), 'Nouveau loisir']
+    })
+  }
+
+  const updateInterest = (index: number, value: string) => {
+    const interests = [...(data.interests || [])]
+    interests[index] = value
+    setData({ ...data, interests })
+  }
+
+  const deleteInterest = (index: number) => {
+    const interests = [...(data.interests || [])]
+    interests.splice(index, 1)
+    setData({ ...data, interests })
+  }
+
   return (
     <div className="space-y-4">
       {wizardStep === undefined && (
         <div className="flex gap-2 border-b-0 pb-2 overflow-x-auto no-scrollbar scroll-smooth">
-          {(['profile', 'summary', 'experience', 'education', 'skills', 'languages', 'projects', 'sections'] as const).map((tab) => {
+          {(['profile', 'summary', 'experience', 'education', 'skills', 'languages', 'projects', 'interests', 'sections'] as const).map((tab) => {
             const getTabIcon = (t: string) => {
               switch (t) {
                 case 'profile': return <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>;
@@ -201,6 +220,7 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
                 case 'skills': return <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>;
                 case 'languages': return <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg>;
                 case 'projects': return <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>;
+                case 'interests': return <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>;
                 case 'sections': return <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>;
                 default: return null;
               }
@@ -215,6 +235,7 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
                 case 'skills': return 'Compétences';
                 case 'languages': return 'Langues';
                 case 'projects': return 'Projets';
+                case 'interests': return 'Loisirs';
                 case 'sections': return 'Sections';
                 default: return '';
               }
@@ -661,6 +682,38 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {activeTab === 'interests' && (
+          <div className="space-y-4">
+            <button
+              onClick={addInterest}
+              className="w-full px-3 py-2 rounded-lg bg-[#00C896] hover:bg-[#66E1B5] text-white text-xs font-bold transition-colors"
+            >
+              + AJOUTER UN CENTRE D'INTÉRÊT
+            </button>
+            <div className="grid grid-cols-1 gap-2">
+              {(data.interests || []).map((interest: string, idx: number) => (
+                <div key={idx} className="bg-white rounded-xl p-3 flex gap-3 border border-gray-200 shadow-sm items-center">
+                  <input
+                    type="text"
+                    value={interest || ''}
+                    onChange={(e) => updateInterest(idx, e.target.value)}
+                    placeholder="ex: Photographie"
+                    className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-[#1c1c1c] text-sm focus:ring-1 focus:ring-[#00C896] outline-none"
+                  />
+                  <button
+                    onClick={() => deleteInterest(idx)}
+                    className="text-red-400 hover:text-red-500 transition-colors p-1"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 

@@ -175,8 +175,7 @@ def assemble_html(jinja_template, css_content: str, template_metadata: Dict[str,
     css_vars_lines.append(f"  --font-size-base: {font_size}px;")
     css_vars_lines.append(f"  --line-height: {line_height};")
     css_vars_lines.append(f"  --photo-shape: {photo_shape_css};")
-    css_vars_lines.append(f"  --spacing: {spacing_val};")
-    css_vars_lines.append(f"  --spacing-base: {spacing_val};") # Compatibilité Classique
+    css_vars_lines.append(f"  --spacing-multiplier: {spacing_val};") # Aligné sur frontend
 
     # Liens Google Fonts dynamiques (Utiliser les polices résolues !)
     google_font_links = []

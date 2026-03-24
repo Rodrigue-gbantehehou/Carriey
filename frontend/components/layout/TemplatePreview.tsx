@@ -1,12 +1,16 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
-import { previewHtml } from '@/lib/api';
+import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { CVTemplateRenderer } from '../cv-templates';
+import { API_BASE } from '@/lib/api';
+import { CVData, TemplateConfig } from '@/types/cv';
 
 interface TemplatePreviewProps {
   template: any;
   scale?: number;
   data?: any;
+  sector?: string;
 }
 
 const DIVERSE_PHOTOS = [
@@ -87,8 +91,53 @@ const GhostCVSkeleton = () => (
   </div>
 );
 
-export default function TemplatePreview({ template, data = DEFAULT_MOCK_DATA }: TemplatePreviewProps) {
-  const [html, setHtml] = useState<string>('');
+const ShadowRoot: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const shadowHostRef = useRef<HTMLDivElement>(null);
+  const [shadowRoot, setShadowRoot] = useState<ShadowRoot | null>(null);
+
+  useLayoutEffect(() => {
+    if (shadowHostRef.current) {
+      if (!shadowHostRef.current.shadowRoot) {
+        const root = shadowHostRef.current.attachShadow({ mode: 'open' });
+        setShadowRoot(root);
+      } else {
+        setShadowRoot(shadowHostRef.current.shadowRoot);
+      }
+    }
+  }, []);
+
+  return (
+    <div ref={shadowHostRef} className="w-full h-full">
+      {shadowRoot && createPortal(
+        <>
+          <style>{`
+            * { box-sizing: border-box; }
+            html, body { margin: 0; padding: 0; height: 100%; }
+            .cv-rendering-root {
+              width: 100%;
+              min-height: 100%;
+              background: white;
+              position: relative;
+            }
+            ul, ol { padding-left: 20px; }
+            img { max-width: 100%; height: auto; display: block; }
+            /* Force A4 proportions if the template doesn't specify */
+            .cv-container {
+              width: 210mm !important;
+              min-height: 297mm !important;
+              margin: 0 !important;
+              box-shadow: none !important;
+            }
+          `}</style>
+          {children}
+        </>,
+        shadowRoot
+      )}
+    </div>
+  );
+};
+
+export default function TemplatePreview({ template, data = DEFAULT_MOCK_DATA, sector }: TemplatePreviewProps) {
   const [loading, setLoading] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
   const [dynamicScale, setDynamicScale] = useState(0.25);
@@ -141,47 +190,45 @@ export default function TemplatePreview({ template, data = DEFAULT_MOCK_DATA }: 
 
   useEffect(() => {
     if (!isVisible || !template) return;
+    setLoading(false);
+  }, [isVisible, template]);
 
-    const fetchPreview = async () => {
-      try {
-        setLoading(true);
-        const res = await previewHtml(
-          { ...template, templateName: template.slug },
-          {
-            ...data,
-            profile: {
-              ...data.profile,
-              photo: data.profile?.photo || stablePhoto
-            }
-          }
-        );
-        
-        const crispStyles = `
-          <style>
-            html { 
-              -webkit-font-smoothing: antialiased; 
-              -moz-osx-font-smoothing: grayscale; 
-              text-rendering: optimizeLegibility;
-              image-rendering: -webkit-optimize-contrast;
-            }
-            body { 
-              overflow: hidden !important; 
-              width: 210mm !important;
-              margin: 0 !important;
-            }
-            * { transition: none !important; }
-          </style>
-        `;
-        setHtml(res.html.replace('</head>', `${crispStyles}</head>`));
-      } catch (error) {
-        console.error('Failed to fetch template preview:', error);
-      } finally {
-        setLoading(false);
-      }
+  // Map backend definition to TemplateConfig tokens
+  const getTemplateConfig = (tpl: any): TemplateConfig => {
+    const def = tpl.definition || {};
+    return {
+      templateName: tpl.slug,
+      displayName: tpl.name,
+      sector: sector, // Pass sector info for dynamic watermarks etc.
+      tokens: {
+        colorPrimary: def.tokens?.colorPrimary || def.colors?.primary || '#0f172a',
+        colorSecondary: def.tokens?.colorSecondary || def.colors?.secondary || '#ffffff',
+        colorAccent: def.tokens?.colorAccent || def.colors?.accent || '#c5a059',
+        colorTextMain: def.tokens?.colorTextMain || def.colors?.textMain || '#1e293b',
+        colorTextMuted: def.tokens?.colorTextMuted || def.colors?.textMuted || '#64748b',
+        fontHeading: def.tokens?.fontHeading || def.fonts?.heading || 'Marcellus',
+        fontBody: def.tokens?.fontBody || def.fonts?.body || 'Outfit',
+        photoShape: def.tokens?.photoShape || 'circle',
+        spacing: def.tokens?.spacing || 'normal',
+        fontSize: def.tokens?.fontSize || 14,
+        borderRadius: def.tokens?.borderRadius || '4px',
+        sidebarWidth: def.tokens?.sidebarWidth || def.layout?.sidebarWidth || '35%',
+        lineHeight: def.tokens?.lineHeight || 1.5
+      },
+      sections: def.sections || [
+        { type: 'photo', enabled: true, column: 'left' },
+        { type: 'contact', enabled: true, column: 'left', label: 'Contact' },
+        { type: 'identity', enabled: true, column: 'left', label: 'Identité' },
+        { type: 'skills', enabled: true, column: 'left', label: 'Compétences' },
+        { type: 'languages', enabled: true, column: 'left', label: 'Langues' },
+        { type: 'interests', enabled: true, column: 'left', label: 'Loisirs' },
+        { type: 'summary', enabled: true, column: 'main', label: 'Profil' },
+        { type: 'experience', enabled: true, column: 'main', label: 'Expérience' },
+        { type: 'education', enabled: true, column: 'main', label: 'Formation' },
+        { type: 'projects', enabled: true, column: 'main', label: 'Projets' }
+      ]
     };
-
-    fetchPreview();
-  }, [isVisible, template, data]);
+  };
 
   if (!isVisible) return <div ref={containerRef} className="w-full h-full bg-gray-50/50" />;
 
@@ -191,22 +238,31 @@ export default function TemplatePreview({ template, data = DEFAULT_MOCK_DATA }: 
       className="w-full h-full relative overflow-hidden bg-[#FBFBFB] flex items-center justify-center group/preview"
     >
       <div 
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 origin-center transition-all duration-700 ease-out"
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 origin-center transition-all duration-700 ease-out bg-white overflow-hidden shadow-cv"
         style={{ 
           width: '210mm', 
           height: '297mm',
           transform: `translate(-50%, -50%) scale(${dynamicScale})`,
-          opacity: html && !loading ? 1 : 0,
-          boxShadow: '0 20px 50px -12px rgba(0, 0, 0, 0.15), 0 10px 20px -10px rgba(0, 0, 0, 0.1), 0 0 1px 0 rgba(0, 0, 0, 0.05)'
+          opacity: !loading ? 1 : 0,
         }}
       >
-        {html && (
-          <iframe
-            srcDoc={html}
-            className="w-full h-full border-0 pointer-events-none select-none"
-            title={`Preview ${template.name}`}
-            scrolling="no"
-          />
+        {!loading && (
+          <ShadowRoot>
+            <div className="w-full h-full pointer-events-none select-none overflow-hidden">
+              <CVTemplateRenderer 
+                templateName={template.slug} 
+                data={{
+                  ...data,
+                  profile: {
+                    ...data.profile,
+                    photo: data.profile?.photo || stablePhoto
+                  }
+                } as CVData}
+                config={getTemplateConfig(template)}
+                apiBaseUrl={API_BASE}
+              />
+            </div>
+          </ShadowRoot>
         )}
       </div>
 

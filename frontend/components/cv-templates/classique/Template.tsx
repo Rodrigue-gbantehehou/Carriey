@@ -1,9 +1,9 @@
 
 import React from 'react';
 import { TemplateProps } from '@/types/cv';
-import { TemplateStyles, CVSection, ItemGroup, SkillTag } from '../BaseComponents';
+import { TemplateStyles, CVSection, ItemGroup, SkillTag, RemoteStyles } from '../BaseComponents';
 
-const ClassiqueTemplate: React.FC<TemplateProps> = ({ data, config }) => {
+const ClassiqueTemplate: React.FC<TemplateProps> = ({ data, config, apiBaseUrl }) => {
   const { profile, summary, experience, education, skills, languages, projects, custom_sections } = data;
   
   // Find section config to check if enabled
@@ -17,6 +17,7 @@ const ClassiqueTemplate: React.FC<TemplateProps> = ({ data, config }) => {
 
   return (
     <div className="cv-rendering-root cv-container classique-template">
+      <RemoteStyles templateName={config.templateName} apiBaseUrl={apiBaseUrl} />
       <TemplateStyles config={config} />
       
       {/* Header */}

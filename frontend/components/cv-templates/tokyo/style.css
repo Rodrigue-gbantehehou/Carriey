@@ -6,7 +6,7 @@
   box-sizing: border-box;
 }
 
-:root {
+.cv-rendering-root {
   --color-primary: #1E293B;
   /* Deep Slate Navy */
   --color-sidebar: #F8FAFC;
@@ -18,12 +18,12 @@
   --font-body: 'Open Sans', sans-serif;
   --sidebar-width: 32%;
   --border-radius: 2px;
-  --spacing: 1;
+  --spacing-multiplier: 1;
 }
 
 body {
   font-family: var(--font-body);
-  font-size: var(--font-size-base, 14px);
+  font-size: calc(var(--font-size-base, 14px) * min(var(--spacing-multiplier, 1), 1.1));
   background: #F1F5F9;
   color: var(--color-text);
   line-height: var(--line-height, 1.5);
@@ -42,16 +42,16 @@ body {
 .left-column {
   width: var(--sidebar-width);
   background: var(--color-sidebar);
-  padding: 50px 30px;
+  padding: calc(30px * var(--spacing-multiplier, 1)) calc(25px * var(--spacing-multiplier, 1));
   display: flex;
   flex-direction: column;
-  gap: 40px;
+  gap: calc(22px * var(--spacing-multiplier, 1));
   flex-shrink: 0;
 }
 
 .profile-photo-wrap {
   text-align: center;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
 }
 
 .profile-photo,
@@ -87,7 +87,7 @@ body {
   color: var(--color-primary);
   text-transform: uppercase;
   letter-spacing: 2px;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
   border-bottom: 2px solid var(--color-primary);
   display: inline-block;
   padding-bottom: 4px;
@@ -96,7 +96,7 @@ body {
 .contact-list {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 10px;
 }
 
 .contact-item {
@@ -148,11 +148,11 @@ body {
 /* ── Main Content ── */
 .right-column {
   flex: 1;
-  padding: 50px 50px;
+  padding: calc(30px * var(--spacing-multiplier, 1)) calc(40px * var(--spacing-multiplier, 1));
 }
 
 .header {
-  margin-bottom: 50px;
+  margin-bottom: 25px;
 }
 
 .name {
@@ -161,7 +161,7 @@ body {
   font-weight: 700;
   color: var(--color-primary);
   line-height: 1.1;
-  margin-bottom: 12px;
+  margin-bottom: 6px;
   text-transform: uppercase;
   letter-spacing: -1.5px;
 }
@@ -175,7 +175,7 @@ body {
 }
 
 .summary-section {
-  margin-bottom: 28px;
+  margin-bottom: 16px;
 }
 
 .section-title {
@@ -185,10 +185,10 @@ body {
   color: var(--color-primary);
   text-transform: uppercase;
   letter-spacing: 2px;
-  margin-bottom: 14px;
+  margin-bottom: calc(14px * var(--spacing-multiplier, 1));
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: calc(15px * var(--spacing-multiplier, 1));
 }
 
 .section-title::after {
@@ -199,7 +199,7 @@ body {
 }
 
 .experience-item {
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   break-inside: avoid;
 }
 
@@ -227,7 +227,7 @@ body {
   color: var(--color-accent);
   font-weight: 600;
   font-size: 0.93em;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .exp-tasks {

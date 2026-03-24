@@ -139,6 +139,15 @@
         {% endfor %}
       </section>
 
+    {% elif section.type == 'interests' and data.interests %}
+      <section class="section">
+        <h2 class="section-title">{{ section.label | default('Centres d\'Intérêt') }}</h2>
+        <div class="skill-list">
+          {% for interest in data.interests %}
+          <span class="skill-tag">{{ interest }}</span>
+          {% endfor %}
+        </div>
+      </section>
     {% elif section.type.startswith('custom_') %}
       {% set custom_id = section.type.replace('custom_', '') %}
       {% for custom in data.custom_sections if custom.id == custom_id %}

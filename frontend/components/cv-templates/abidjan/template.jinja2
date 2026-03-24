@@ -1,5 +1,10 @@
 {% set profile = data.profile | default({}) %}
 <div class="cv-container">
+  {# Filigrane de secteur (Dynamique) #}
+  {% set sector = template.tokens.sector | default('sante') %}
+  <div class="cv-watermark">
+    {% if sector == 'sante' %}+{% elif sector == 'tech' %}&lt;/&gt;{% endif %}
+  </div>
 
 
   {# ── En-tête centré avec photo ── #}
@@ -147,6 +152,15 @@
               </div>
               {% endif %}
             </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% elif section.type == 'interests' and data.interests %}
+        <div class="cv-section">
+          <h3 class="section-title"><i class="fas fa-heart"></i> {{ section.label | default('Centres d\'Intérêt') }}</h3>
+          <div class="skills-list">
+            {% for interest in data.interests %}
+              <div class="skill-tag">{{ interest }}</div>
             {% endfor %}
           </div>
         </div>

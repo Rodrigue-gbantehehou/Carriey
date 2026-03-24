@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import config from '@/lib/config'
 import { useEditorStore } from '@/store/editor'
 import Navbar from '@/components/layout/Navbar'
@@ -12,12 +12,21 @@ import TemplatePreview from '@/components/layout/TemplatePreview'
 // Palette par défaut pour l'aperçu
 const DEFAULT_PALETTE = { primary: '#2563eb', secondary: '#1e40af', accent: '#f59e0b' }
 
-// Métadonnées simplifiées pour une meilleure lisibilité
+const SECTOR_ID_MAP: Record<string, string> = {
+  'Informatique & Tech': 'tech',
+  'Finance & Gestion': 'finance',
+  'Santé': 'sante',
+  'Marketing & Com': 'marketing',
+  'Commerce & Vente': 'commerce',
+  'BTP & Ingénierie': 'industrie',
+  'Administration': 'autre',
+}
+
 const TEMPLATE_META: Record<string, { category: 'corporate' | 'tech' | 'creative' | 'minimalist'; description: string; tags: string[]; isAtsFriendly?: boolean }> = {
   classique: { 
     category: 'corporate', 
     description: 'Structure traditionnelle et sobre, parfaitement adaptée aux milieux formels.',
-    tags: ['Santé', 'Commerce & Vente', 'Administration', 'Finance', 'Droit'],
+    tags: ['Santé', 'Commerce & Vente', 'Administration', 'Finance & Gestion', 'Juridique & Droit'],
     isAtsFriendly: true 
   },
   moderne: { 
@@ -35,19 +44,19 @@ const TEMPLATE_META: Record<string, { category: 'corporate' | 'tech' | 'creative
   tokyo: { 
     category: 'minimalist', 
     description: 'Minimalisme radical pour une lisibilité maximale et un impact direct.',
-    tags: ['Informatique & Tech', 'Marketing & Com', 'Freelance', 'Design'],
+    tags: ['Informatique & Tech', 'Marketing & Com', 'Freelance', 'Design & Créatif'],
     isAtsFriendly: true
   },
   creatif: { 
     category: 'creative', 
     description: 'Mise en page audacieuse pour valoriser l\'originalité et le portfolio.',
-    tags: ['Marketing & Com', 'Design', 'Arts', 'Mode'],
+    tags: ['Marketing & Com', 'Design & Créatif', 'Arts', 'Mode'],
     isAtsFriendly: false
   },
   rodrigue: { 
     category: 'corporate', 
     description: 'Élégance premium avec une touche de luxe pour les hautes fonctions.',
-    tags: ['Management', 'Luxe', 'Direction', 'Finance'],
+    tags: ['Management', 'Luxe', 'Direction', 'Finance & Gestion'],
     isAtsFriendly: false
   },
   abidjan: {
@@ -76,8 +85,8 @@ const DEFAULT_META = { category: 'Standard', description: 'Modèle de CV polyval
 const PREVIEW_DATA = {
   profile: { name: 'Jean Dupont', title: 'Responsable Commercial', email: 'jean.dupont@email.com', phone: '+225 07 00 00 00', location: 'Abidjan, Côte d\'Ivoire', photo: '' },
   summary: 'Professionnel dynamique avec plus de 8 ans d\'expérience dans le développement commercial et la gestion d\'équipes.',
-  experience: [{ position: 'Directeur Commercial', company: 'Global Trade', period: '2019 - Présent', tasks: ['Augmentation du CA de 40% en 2 ans.', 'Gestion d\'une équipe de 10 personnes.'] }],
-  education: [{ degree: 'Master en Gestion', school: 'INP-HB', period: '2012 - 2014', description: 'Major de promotion.' }],
+  experience: [{ role: 'Directeur Commercial', company: 'Global Trade', period: '2019 - Présent', bullets: ['Augmentation du CA de 40% en 2 ans.', 'Gestion d\'une équipe de 10 personnes.'] }],
+  education: [{ degree: 'Master en Gestion', institution: 'INP-HB', period: '2012 - 2014', description: 'Major de promotion.' }],
   skills: { groups: [{ label: 'Expertise', items: ['Négociation', 'Stratégie', 'Vente'] }] },
   languages: [{ name: 'Français', level: 'Natif' }, { name: 'Anglais', level: 'Avancé' }],
 }
@@ -91,10 +100,16 @@ function TemplateCard({ template, onSelect, selectedSector, previewData }: { tem
       className={`group bg-white border ${isRecommended ? 'border-brand-cta ring-4 ring-brand-cta/5' : 'border-gray-100 hover:border-brand-cta/30'} rounded-2xl overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 flex flex-col h-full relative cursor-pointer`}
       onClick={() => onSelect(template)}
     >
+      {isRecommended && (
+        <div className="absolute top-4 right-4 z-20 bg-brand-cta text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg animate-bounce">
+          RECOMMANDÉ
+        </div>
+      )}
       <div className="relative aspect-[1/1.414] overflow-hidden bg-gray-50/50">
         <TemplatePreview 
           template={template} 
           data={previewData}
+          sector={selectedSector}
         />
 
         {/* Overlay Hover */}
@@ -113,6 +128,7 @@ function TemplateCard({ template, onSelect, selectedSector, previewData }: { tem
 export default function ModelesPage() {
   const { data: session } = useSession()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { setOnboardingData, onboardingData } = useEditorStore()
 
   const [templates, setTemplates] = useState<any[]>([])
@@ -124,12 +140,33 @@ export default function ModelesPage() {
   const [selectedSector, setSelectedSector] = useState<string>('')
   const [personaContent, setPersonaContent] = useState<any>(null)
 
+  // ── Sync Sector from URL ──
+  useEffect(() => {
+    const urlSectorId = searchParams.get('sector')
+    if (urlSectorId && sectors.length > 0) {
+      const matched = sectors.find(s => SECTOR_ID_MAP[s] === urlSectorId)
+      if (matched) setSelectedSector(matched)
+    }
+  }, [sectors, searchParams])
+
+  // ── Sync Editor Store when sector changes ──
+  useEffect(() => {
+    if (selectedSector) {
+      const sectorId = SECTOR_ID_MAP[selectedSector] || 'tech'
+      setOnboardingData({ sector: sectorId })
+    }
+  }, [selectedSector])
+
   useEffect(() => {
     fetch(`${config.apiBaseUrl}/personas/sectors`)
       .then(r => r.ok ? r.json() : [])
       .then(data => {
         setSectors(data)
-        if (data.length > 0) setSelectedSector(data[0])
+        if (data.length > 0 && !selectedSector) {
+           const urlSectorId = searchParams.get('sector')
+           const matched = data.find((s: string) => SECTOR_ID_MAP[s] === urlSectorId)
+           setSelectedSector(matched || data[0])
+        }
       })
   }, [])
 
@@ -153,11 +190,17 @@ export default function ModelesPage() {
   }, [namePreview])
 
   const handleSelect = async (template: any) => {
+    const def = template.definition || {}
+    const sectorId = SECTOR_ID_MAP[selectedSector] || 'tech'
+    
     const params = new URLSearchParams({
       step: 'method',
       template: template.slug,
-      primary: DEFAULT_PALETTE.primary,
-      accent: DEFAULT_PALETTE.accent,
+      sector: sectorId,
+      primary: def.tokens?.colorPrimary || def.colors?.primary || DEFAULT_PALETTE.primary,
+      accent: def.tokens?.colorAccent || def.colors?.accent || DEFAULT_PALETTE.accent,
+      fontHeading: def.tokens?.fontHeading || def.fonts?.heading || 'Marcellus',
+      fontBody: def.tokens?.fontBody || def.fonts?.body || 'Outfit',
     })
     router.push(`/onboarding?${params.toString()}`)
   }
@@ -168,6 +211,16 @@ export default function ModelesPage() {
     if (showFreeOnly && parseFloat(t.price) !== 0) return false
     return true
   })
+
+  const normalizeData = (d: any) => {
+    if (!d) return d
+    return {
+      ...d,
+      experience: d.experience?.map((e: any) => ({ ...e, dates: e.period || e.dates, role: e.role || e.position })),
+      education: d.education?.map((e: any) => ({ ...e, dates: e.period || e.dates, year: e.period || e.year, school: e.institution || e.school })),
+      interests: d.interests || d.loisirs || []
+    }
+  }
 
   return (
     <div className="min-h-screen bg-brand-bg flex flex-col">
@@ -263,13 +316,13 @@ export default function ModelesPage() {
                 template={t}
                 onSelect={handleSelect}
                 selectedSector={selectedSector}
-                previewData={{
+                previewData={normalizeData({
                   ...(personaContent || PREVIEW_DATA),
                   profile: {
                     ...(personaContent?.profile || PREVIEW_DATA.profile),
                     name: namePreview || personaContent?.profile?.name || PREVIEW_DATA.profile.name
                   }
-                }}
+                })}
               />
             ))}
           </div>

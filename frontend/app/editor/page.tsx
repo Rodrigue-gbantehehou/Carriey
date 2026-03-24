@@ -38,29 +38,92 @@ const GOOGLE_FONTS = [
   'Nunito', 'Ubuntu', 'PT Sans', 'Oswald', 'Noto Sans',
 ]
 
-const SAMPLE_DATA = {
-  profile: {
-    name: 'Jean Dupont',
-    title: 'Développeur Fullstack Senior',
-    email: 'jean.dupont@email.com',
-    phone: '+33 6 12 34 56 78',
-    location: 'Paris, France',
-    linkedin: 'linkedin.com/in/jeandupont',
-    photo: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop'
+const SECTOR_SAMPLE_DATA: Record<string, any> = {
+  tech: {
+    profile: { name: 'Jean Dupont', title: 'Développeur Fullstack Senior', email: 'jean.dupont@email.com', phone: '+229 97 12 34 56', location: 'Cotonou, Bénin', photo: '' },
+    summary: "Expert en architecture logicielle avec 8 ans d'expérience. Spécialisé en React, Node.js et infrastructures Cloud AWS.",
+    experience: [{ company: 'Tech Solutions SAS', role: 'Lead Developer', start: '2021', end: 'Présent', bullets: ['Conception d\'une architecture SaaS supportant 100k+ users.', 'Réduction du temps de chargement de 60%.', 'Mentorat technique de l\'équipe frontend.'] }],
+    education: [{ degree: 'Master Informatique', institution: 'Université d\'Abomey-Calavi', year: '2018' }],
+    skills: { groups: [{ label: 'Frontend', items: ['React', 'Next.js', 'TypeScript', 'Tailwind'] }, { label: 'Backend', items: ['Node.js', 'FastAPI', 'PostgreSQL', 'Redis'] }] },
+    languages: [{ name: 'Français', level: 'Maternel' }, { name: 'Anglais', level: 'B2 (Technique)' }],
+    interests: ['Open Source', 'Randonnée', 'Echecs']
   },
-  summary: "Passionné par le développement web depuis plus de 8 ans, j'accompagne les entreprises dans la création d'applications robustes et scalables.",
-  experience: [
-    {
-      company: 'Tech Solutions SAS',
-      role: 'Lead Developer',
-      start: '2021',
-      end: 'Présent',
-      bullets: ['Architecture SaaS 10k+ utilisateurs.', 'Mentorat de 5 développeurs.', 'Optimisation performances -40%.']
-    },
-  ],
-  education: [{ degree: 'Master Informatique', institution: 'Sorbonne Université', year: '2018' }],
-  skills: { groups: [{ label: 'Frontend', items: ['React', 'Next.js', 'TypeScript'] }, { label: 'Backend', items: ['Node.js', 'FastAPI', 'PostgreSQL'] }] },
-  languages: [{ name: 'Français', level: 'Maternel' }, { name: 'Anglais', level: 'C1' }]
+  finance: {
+    profile: { name: 'Marie Ahouansou', title: 'Analyste Financier Senior', email: 'marie.ahouansou@email.com', phone: '+229 96 78 90 12', location: 'Cotonou, Bénin', photo: '' },
+    summary: "Analyste financière avec 6 ans d'expérience en gestion de portefeuille, analyse de risques et reporting financier dans le secteur bancaire.",
+    experience: [{ company: 'Banque Atlantique', role: 'Analyste Financier Senior', start: '2020', end: 'Présent', bullets: ['Gestion de portefeuille de 2M€.', 'Analyse de risques et conformité réglementaire.', 'Reporting mensuel pour la direction.'] }],
+    education: [{ degree: 'Master Finance & Comptabilité', institution: 'ENEAM', year: '2019' }],
+    skills: { groups: [{ label: 'Finance', items: ['Analyse financière', 'Comptabilité', 'Excel avancé'] }, { label: 'Outils', items: ['SAP', 'Bloomberg', 'Power BI'] }] },
+    languages: [{ name: 'Français', level: 'Maternel' }, { name: 'Anglais', level: 'B2' }]
+  },
+  sante: {
+    profile: { name: 'Pr. Yao Akoto', title: 'Chirurgien Chef de Clinique & Professeur Agrégé', email: 'pr.akoto@health.tg', phone: '+228 91 11 22 33', location: 'Lomé, Togo', photo: '' },
+    summary: "Plus de 20 ans de contribution à la chirurgie cardiaque et à l'enseignement médical en Afrique de l'Ouest. Pionnier des interventions à cœur ouvert.",
+    experience: [
+      { company: 'CHU Sylvanus Olympio', role: 'Chef de Clinique - Chirurgie Cardiaque', start: '2012', end: 'Présent', bullets: ['Pionnier des interventions cardiaques à cœur ouvert au Togo.', 'Recherche clinique sur les cardiopathies congénitales.', 'Direction des staffs médicaux et formation continue.'] },
+      { company: 'Université de Lomé', role: 'Doyen de la Faculté des Sciences de la Santé', start: '2018', end: '2023', bullets: ['Direction de la stratégie académique et hospitalière.', 'Réforme complète du curriculum des études médicales.'] }
+    ],
+    education: [
+      { degree: 'Agrégation de Médecine (Chirurgie Thoracique et Cardiaque)', institution: 'CAMES', year: '2011' },
+      { degree: 'Doctorat en Médecine', institution: 'Université de Lomé', year: '2010' }
+    ],
+    skills: { groups: [{ label: 'Spécialités', items: ['Chirurgie obstétricale', 'Échographie morphologique', 'Planification familiale'] }] },
+    languages: [{ name: 'Français', level: 'Maternel' }, { name: 'Anglais', level: 'Médical' }],
+    interests: ['Opéra', 'Piano', 'Jardinage']
+  },
+  marketing: {
+    profile: { name: 'Amina Bello', title: 'Responsable Marketing Digital', email: 'amina.bello@email.com', phone: '+229 67 89 01 23', location: 'Cotonou, Bénin', photo: '' },
+    summary: "Spécialiste en marketing digital avec 5 ans d'expérience en stratégie de contenu, SEO et gestion de campagnes publicitaires.",
+    experience: [{ company: 'DigiCom Agency', role: 'Responsable Marketing Digital', start: '2021', end: 'Présent', bullets: ['Stratégie social media +150% engagement.', 'Campagnes Google Ads ROI x3.', 'Management équipe de 4 personnes.'] }],
+    education: [{ degree: 'Master Marketing & Communication', institution: 'ISM Cotonou', year: '2020' }],
+    skills: { groups: [{ label: 'Marketing', items: ['SEO/SEM', 'Content Marketing', 'Social Media'] }, { label: 'Outils', items: ['Google Analytics', 'Meta Ads', 'Canva'] }] },
+    languages: [{ name: 'Français', level: 'Maternel' }, { name: 'Anglais', level: 'B2' }]
+  },
+  education: {
+    profile: { name: 'Paul Adjovi', title: 'Enseignant de Mathématiques', email: 'paul.adjovi@email.com', phone: '+229 94 56 78 90', location: 'Abomey-Calavi, Bénin', photo: '' },
+    summary: "Enseignant passionné avec 7 ans d'expérience dans l'éducation secondaire et la formation des jeunes talents.",
+    experience: [{ company: 'Lycée Béhanzin', role: 'Professeur de Mathématiques', start: '2019', end: 'Présent', bullets: ['Enseignement classes de Terminale.', 'Taux de réussite BAC : 92%.', 'Création de supports pédagogiques innovants.'] }],
+    education: [{ degree: 'CAPES Mathématiques', institution: 'ENS Porto-Novo', year: '2018' }],
+    skills: { groups: [{ label: 'Pédagogie', items: ['Didactique', 'Évaluation', 'Tutorat'] }, { label: 'Outils', items: ['GeoGebra', 'Google Classroom', 'LaTeX'] }] },
+    languages: [{ name: 'Français', level: 'Maternel' }, { name: 'Anglais', level: 'B1' }]
+  },
+  commerce: {
+    profile: { name: 'Rachid Souleymane', title: 'Responsable Commercial', email: 'rachid.souleymane@email.com', phone: '+229 66 12 34 56', location: 'Cotonou, Bénin', photo: '' },
+    summary: "Commercial performant avec 6 ans d'expérience en développement de clientèle B2B et gestion de grands comptes.",
+    experience: [{ company: 'SOBEBRA', role: 'Responsable Commercial Zone Sud', start: '2020', end: 'Présent', bullets: ['Développement portefeuille +40 clients.', 'CA annuel de 500M FCFA.', 'Négociation contrats grands comptes.'] }],
+    education: [{ degree: 'Licence Commerce International', institution: 'ESGIS Cotonou', year: '2019' }],
+    skills: { groups: [{ label: 'Vente', items: ['Prospection B2B', 'Négociation', 'CRM'] }, { label: 'Outils', items: ['Salesforce', 'Excel', 'PowerPoint'] }] },
+    languages: [{ name: 'Français', level: 'Maternel' }, { name: 'Anglais', level: 'B1' }]
+  },
+  juridique: {
+    profile: { name: 'Clarisse Dossou', title: 'Juriste d\'Entreprise', email: 'clarisse.dossou@email.com', phone: '+229 97 34 56 78', location: 'Cotonou, Bénin', photo: '' },
+    summary: "Juriste spécialisée en droit des affaires OHADA avec 5 ans d'expérience en conseil juridique et contentieux.",
+    experience: [{ company: 'Cabinet Me Ajavon & Associés', role: 'Juriste Senior', start: '2021', end: 'Présent', bullets: ['Rédaction de contrats commerciaux.', 'Conseil en conformité OHADA.', 'Gestion de contentieux civils et commerciaux.'] }],
+    education: [{ degree: 'Master Droit des Affaires', institution: 'FADESP - UAC', year: '2020' }],
+    skills: { groups: [{ label: 'Droit', items: ['Droit OHADA', 'Droit des contrats', 'Contentieux'] }, { label: 'Outils', items: ['LegalTech', 'Recherche juridique', 'Rédaction'] }] },
+    languages: [{ name: 'Français', level: 'Maternel' }, { name: 'Anglais', level: 'B2' }]
+  },
+  design: {
+    profile: { name: 'Fatou Diallo', title: 'Directrice Artistique', email: 'fatou.diallo@email.com', phone: '+229 96 45 67 89', location: 'Cotonou, Bénin', photo: '' },
+    summary: "Créative passionnée avec 6 ans d'expérience en design graphique, branding et direction artistique.",
+    experience: [{ company: 'Studio Créatif Bénin', role: 'Directrice Artistique', start: '2020', end: 'Présent', bullets: ['Direction de la charte graphique de 15+ marques.', 'Création d\'identités visuelles complètes.', 'Management d\'une équipe de 3 designers.'] }],
+    education: [{ degree: 'Master Design Graphique', institution: 'ISBA Cotonou', year: '2019' }],
+    skills: { groups: [{ label: 'Design', items: ['Branding', 'UI/UX', 'Illustration'] }, { label: 'Outils', items: ['Figma', 'Adobe Creative Suite', 'After Effects'] }] },
+    languages: [{ name: 'Français', level: 'Maternel' }, { name: 'Anglais', level: 'B2' }]
+  },
+  industrie: {
+    profile: { name: 'Kofi Agbossou', title: 'Ingénieur de Production', email: 'kofi.agbossou@email.com', phone: '+229 95 67 89 01', location: 'Cotonou, Bénin', photo: '' },
+    summary: "Ingénieur industriel avec 8 ans d'expérience en gestion de production, maintenance et optimisation des processus.",
+    experience: [{ company: 'SCB-Lafarge', role: 'Ingénieur de Production', start: '2019', end: 'Présent', bullets: ['Supervision ligne de production 24/7.', 'Réduction des temps d\'arrêt de 30%.', 'Mise en place de la maintenance préventive.'] }],
+    education: [{ degree: 'Diplôme d\'Ingénieur Génie Mécanique', institution: 'EPAC - UAC', year: '2017' }],
+    skills: { groups: [{ label: 'Ingénierie', items: ['Lean Manufacturing', 'Maintenance', 'Qualité'] }, { label: 'Outils', items: ['AutoCAD', 'SolidWorks', 'SAP'] }] },
+    languages: [{ name: 'Français', level: 'Maternel' }, { name: 'Anglais', level: 'B1' }]
+  },
+}
+
+// Fallback = tech
+const getSampleData = (sector: string | null) => {
+  return SECTOR_SAMPLE_DATA[sector || 'tech'] || SECTOR_SAMPLE_DATA.tech
 }
 
 type SidebarTab = 'content' | 'design' | 'sections' | 'ai'
@@ -216,16 +279,35 @@ export default function EditorPage() {
             const palId = searchParams.get('palette') || 'ocean'
             setSelectedPaletteId(palId)
             const pal = COLOR_PALETTES.find(p => p.id === palId) || COLOR_PALETTES[0]
-            const initialColors = { primary: searchParams.get('primary') || pal.primary, secondary: pal.secondary, accent: searchParams.get('accent') || pal.accent }
+            const initialColors = { 
+              primary: searchParams.get('primary') || pal.primary, 
+              secondary: pal.secondary, 
+              accent: searchParams.get('accent') || pal.accent 
+            }
             setCustomColors(initialColors)
-            setTemplate({ ...tplInfo.definition, id: tplInfo.id, templateName: tplInfo.slug, colors: { ...tplInfo.definition.colors, ...initialColors }, fonts: { heading: headingFont, body: bodyFont } })
+            
+            const hFont = searchParams.get('fontHeading') || tplInfo.definition.fonts?.heading || headingFont
+            const bFont = searchParams.get('fontBody') || tplInfo.definition.fonts?.body || bodyFont
+            setHeadingFont(hFont)
+            setBodyFont(bFont)
+            
+            setTemplate({ 
+              ...tplInfo.definition, 
+              id: tplInfo.id, 
+              templateName: tplInfo.slug, 
+              colors: { ...tplInfo.definition.colors, ...initialColors }, 
+              fonts: { heading: hFont, body: bFont } 
+            })
 
-            // Mix de DATA SAMPLE avec Onboarding (nom)
+            // Mix de DATA SAMPLE avec Onboarding (nom + secteur)
+            const sector = searchParams.get('sector') || onboardingData.sector
+            const sampleData = getSampleData(sector)
+
             setData({
-              ...SAMPLE_DATA,
+              ...sampleData,
               profile: {
-                ...SAMPLE_DATA.profile,
-                name: onboardingData.namePreview || SAMPLE_DATA.profile.name
+                ...sampleData.profile,
+                name: onboardingData.namePreview || sampleData.profile.name
               }
             })
             setIsSaved(false)
@@ -1088,7 +1170,8 @@ export default function EditorPage() {
                   <CVTemplateRenderer
                     templateName={template.templateName}
                     data={data}
-                    config={reactTemplateConfig}
+                    config={reactTemplateConfig as any}
+                    apiBaseUrl={config.apiBaseUrl}
                   />
                 </div>
               </div>
