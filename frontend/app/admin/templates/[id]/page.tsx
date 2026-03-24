@@ -170,7 +170,7 @@ export default async function AdminTemplateDetailPage({ params }: { params: { id
                                                         ></div>
                                                         <span className="text-xs text-gray-600 capitalize">{key}</span>
                                                     </div>
-                                                    <div className="font-mono text-xs text-gray-700">{color}</div>
+                                                    <div className="font-mono text-xs text-gray-700">{String(color)}</div>
                                                 </div>
                                             ))}
                                         </div>

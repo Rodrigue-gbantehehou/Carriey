@@ -118,6 +118,21 @@ export async function login(credentials: LoginRequest): Promise<AuthResponse> {
   return data;
 }
 
+// Inscription
+export async function register(credentials: LoginRequest): Promise<AuthResponse> {
+  const response = await fetch(`${API_BASE}/auth/register`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(credentials),
+  });
+
+  const data = await handleResponse<AuthResponse>(response);
+  setAuthToken(data.access_token);
+  return data;
+}
+
 // Déconnexion
 export function logout(): void {
   setAuthToken(null);

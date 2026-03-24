@@ -1,13 +1,15 @@
 "use client"
-import React, { useEffect, useState, useCallback, useRef } from 'react'
+import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
 import { useEditorStore } from '../../store/editor'
 import DndList from '../../components/editor/DndList'
 import ContentEditor from '../../components/editor/ContentEditor'
-import { exportPdf, exportDocx, generateContent, previewHtml, triggerDownload } from '../../lib/api'
+import { exportPdf, exportDocx, generateContent, triggerDownload } from '../../lib/api'
 import DownloadFlowModal from '../../components/editor/DownloadFlowModal'
+import { CVTemplateRenderer } from '../../components/cv-templates'
+import type { TemplateConfig } from '@/types/cv'
 import config from '@/lib/config'
 import { toast } from 'react-hot-toast'
 
@@ -78,7 +80,7 @@ export default function EditorPage() {
   const [error, setError] = useState<string | null>(null)
   const [exporting, setExporting] = useState<'pdf' | 'docx' | null>(null)
   const [genLoading, setGenLoading] = useState(false)
-  const [previewHtmlContent, setPreviewHtmlContent] = useState<string>('')
+  // previewHtmlContent removed — rendering is now done via React components
   const [aiPrompt, setAiPrompt] = useState('')
   const [activeTab, setActiveTab] = useState<SidebarTab>('content')
   const [selectedPaletteId, setSelectedPaletteId] = useState('ocean')
@@ -326,33 +328,26 @@ export default function EditorPage() {
 
   useEffect(() => { setIsSaved(false) }, [data])
 
-  // ── Live preview ───────────────────────────────────────────────────────────
-  useEffect(() => {
-    if (!template || !data) return
-    const timer = setTimeout(async () => {
-      try {
-        setPreviewError(null)
-        const configOverride = {
-          colorPrimary: customColors.primary,
-          colorSecondary: customColors.secondary,
-          colorAccent: customColors.accent,
-          fontHeading: headingFont,
-          fontBody: bodyFont,
-          spacing,
-          fontSize,
-          lineHeight,
-          photoShape,
-          borderRadius,
-          sections: template.sections
-        }
-        const res = await previewHtml(template, data, configOverride)
-        setPreviewHtmlContent(res.html)
-      } catch (e: any) {
-        setPreviewError(e?.message || 'Erreur de rendu')
-      }
-    }, 800)
-    return () => clearTimeout(timer)
-  }, [template, data, customColors, headingFont, bodyFont, spacing, fontSize, lineHeight, photoShape, borderRadius])
+  // ── Live preview (React-based, no API call) ────────────────────────────────
+  const reactTemplateConfig: TemplateConfig | null = useMemo(() => {
+    if (!template) return null
+    return {
+      templateName: template.templateName,
+      displayName: template.displayName || template.templateName,
+      tokens: {
+        colorPrimary: customColors.primary,
+        colorSecondary: customColors.secondary,
+        colorAccent: customColors.accent,
+        fontHeading: headingFont,
+        fontBody: bodyFont,
+        spacing: spacing as any,
+        fontSize,
+        photoShape,
+        borderRadius,
+      },
+      sections: (template.sections as any) || [],
+    }
+  }, [template, customColors, headingFont, bodyFont, spacing, fontSize, photoShape, borderRadius])
 
   // ── Actions ────────────────────────────────────────────────────────────────
   // ── Magic Optimization ───────────────────────────────────────────────────
@@ -1069,37 +1064,31 @@ export default function EditorPage() {
             </div>
           </div>
 
-          {/* Canvas */}
+          {/* Canvas — React-based live rendering */}
           <div ref={previewContainerRef} className="flex-1 overflow-auto flex justify-center items-start px-4 sm:px-8 pb-4 sm:pb-8 pt-2"
             style={{ backgroundImage: 'radial-gradient(circle, rgba(0,0,0,0.05) 1px, transparent 1px)', backgroundSize: '24px 24px' }}>
-            {previewHtmlContent ? (
+            {template && data && reactTemplateConfig ? (
               <div
                 className="transition-all duration-300 ease-in-out"
                 style={{
                   width: `${210 * previewScale}mm`,
-                  /* Scale the real content height instead of fixing at 1 A4 page */
-                  height: previewHeight === 'auto'
-                    ? `${297 * previewScale}mm`
-                    : `${parseInt(previewHeight) * previewScale}px`,
+                  minHeight: `${297 * previewScale}mm`,
                   position: 'relative'
                 }}
               >
                 <div
-                  className="shadow-2xl shadow-black/80 origin-top-left bg-white leading-[0]"
+                  className="shadow-2xl shadow-black/80 origin-top-left bg-white"
                   style={{
                     width: '210mm',
-                    height: previewHeight,
+                    minHeight: '297mm',
                     transform: `scale(${previewScale})`,
                     transformOrigin: 'top left',
                   }}
                 >
-                  <iframe
-                    srcDoc={previewHtmlContent}
-                    className="border-0 block"
-                    style={{ width: '210mm', height: previewHeight }}
-                    title="CV Preview"
-                    sandbox="allow-same-origin allow-scripts"
-                    scrolling="no"
+                  <CVTemplateRenderer
+                    templateName={template.templateName}
+                    data={data}
+                    config={reactTemplateConfig}
                   />
                 </div>
               </div>
@@ -1181,8 +1170,8 @@ export default function EditorPage() {
           console.log("onSuccess flow completed")
           setPendingExport(null)
         }}
-        templatePrice={template?.price || "2000"}
-        templateName={template?.name || "Modèle Premium"}
+        templatePrice={(template as any)?.price || "2000"}
+        templateName={(template as any)?.name || "Modèle Premium"}
       />
     </div>
   )

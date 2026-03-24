@@ -40,7 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string) => {
     try {
       setLoading(true);
-      const { user: userData } = await apiLogin(email, password);
+      const { user: userData } = await apiLogin({ email, password });
       setUser(userData);
       router.push('/');
     } finally {
@@ -52,7 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const register = async (email: string, password: string) => {
     try {
       setLoading(true);
-      await apiRegister(email, password);
+      await apiRegister({ email, password });
       // Après l'inscription, connecte automatiquement l'utilisateur
       await login(email, password);
     } finally {
