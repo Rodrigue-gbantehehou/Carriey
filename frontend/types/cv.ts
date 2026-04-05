@@ -74,6 +74,7 @@ export interface CVData {
   languages?: CVLanguage[];
   projects?: CVProject[];
   interests?: string[];
+  references?: { name: string; title?: string; company?: string; phone?: string; email?: string }[];
   custom_sections?: CVCustomSection[];
 }
 

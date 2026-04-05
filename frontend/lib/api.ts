@@ -65,13 +65,18 @@ async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     console.error('Erreur API:', response.status, data);
 
+    // Extraction du message d'erreur (FastAPI utilise souvent .detail pour les erreurs 422)
+    let errorMessage = data.message;
+    if (!errorMessage && data.detail) {
+      errorMessage = typeof data.detail === 'string' ? data.detail : JSON.stringify(data.detail);
+    }
+    
     // Gestion des erreurs d'authentification
     if (response.status === 401) {
-      // On log l'erreur mais on ne redirige pas sauvagement pour laisser les flux d'invités fonctionner
       console.warn('Non autorisé (401)');
     }
 
-    throw new Error(data.message || `Erreur ${response.status}`);
+    throw new Error(errorMessage || `Erreur ${response.status}`);
   }
 
   return data as T;
@@ -191,7 +196,8 @@ export async function exportPdf(
   accessToken?: string,
   guestData?: { email: string; name: string },
   plan: string = 'trial',
-  templateId?: string | null
+  templateId?: string | null,
+  paymentId?: string
 ): Promise<ExportResponse> {
   const response = await fetch(`${API_BASE}/export/pdf`, {
     method: 'POST',
@@ -204,7 +210,8 @@ export async function exportPdf(
       guest_email: guestData?.email,
       guest_name: guestData?.name,
       plan,
-      template_id: templateId
+      template_id: templateId,
+      payment_id: paymentId ? String(paymentId) : undefined
     }),
   });
   const res = await handleResponse<ExportResponse>(response);
@@ -227,7 +234,8 @@ export async function exportDocx(
   accessToken?: string,
   guestData?: { email: string; name: string },
   plan: string = 'trial',
-  templateId?: string | null
+  templateId?: string | null,
+  paymentId?: string
 ): Promise<ExportResponse> {
   const response = await fetch(`${API_BASE}/export/docx`, {
     method: 'POST',
@@ -240,7 +248,8 @@ export async function exportDocx(
       guest_email: guestData?.email,
       guest_name: guestData?.name,
       plan,
-      template_id: templateId
+      template_id: templateId,
+      payment_id: paymentId ? String(paymentId) : undefined
     }),
   });
   const res = await handleResponse<ExportResponse>(response);

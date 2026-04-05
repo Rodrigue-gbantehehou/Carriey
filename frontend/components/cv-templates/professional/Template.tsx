@@ -1,15 +1,13 @@
 
 import React from 'react';
 import { TemplateProps } from '@/types/cv';
-import { TemplateStyles, RemoteStyles } from '../BaseComponents';
+import { TemplateStyles, RemoteStyles, CVSection, ItemGroup, SkillBar } from '../BaseComponents';
+import { getSafeData, isSectionEnabled, getSectionLabel } from '../utils';
 
-const ProfessionalTemplate: React.FC<TemplateProps> = ({ data, config, apiBaseUrl }) => {
+const ProfessionalTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBaseUrl }) => {
+  const data = getSafeData(rawData);
   const { profile, summary, experience, education, skills, languages, projects, custom_sections } = data;
   
-  const isSectionEnabled = (type: string) => {
-    return config.sections.find(s => s.type === type)?.enabled !== false;
-  };
-
   return (
     <div className="cv-rendering-root cv-container professional-template">
       <RemoteStyles templateName={config.templateName} apiBaseUrl={apiBaseUrl} />
@@ -17,20 +15,20 @@ const ProfessionalTemplate: React.FC<TemplateProps> = ({ data, config, apiBaseUr
       
       {/* Executive Header */}
       <header className="header">
-        <h1 className="name">{profile.name || 'Nom Prénom'}</h1>
-        {(profile.position || profile.title) && (
-          <p className="profession">{profile.position || profile.title}</p>
+        <h1 className="name">{profile.name}</h1>
+        {profile.title && (
+          <p className="profession">{profile.title}</p>
         )}
       </header>
 
       <div className="main-layout" style={{ display: 'flex', flex: 1, width: '100%' }}>
         {/* Sidebar */}
         <aside className="left-column" style={{ width: '32%', flexShrink: 0 }}>
-          {isSectionEnabled('photo') && (
+          {isSectionEnabled(config, 'photo') && (
             <div className="profile-photo-wrap">
               {profile.photo ? (
                 <div className="profile-photo">
-                  <img src={profile.photo} alt={profile.name || 'Photo'} />
+                  <img src={profile.photo} alt={profile.name} />
                 </div>
               ) : (
                 <div className="photo-placeholder"><i className="fas fa-user"></i></div>
@@ -42,66 +40,61 @@ const ProfessionalTemplate: React.FC<TemplateProps> = ({ data, config, apiBaseUr
             switch (section.type) {
               case 'contact':
                 return (
-                  <div key="contact" className="sidebar-section">
-                    <h3 className="sidebar-title">{section.label || 'Coordonnées'}</h3>
+                  <CVSection key="contact" title={getSectionLabel(config, 'contact', 'Coordonnées')} className="sidebar-section">
                     <div className="contact-list">
                       {profile.phone && <div className="contact-item"><i className="fas fa-phone"></i><span>{profile.phone}</span></div>}
                       {profile.email && <div className="contact-item"><i className="fas fa-envelope"></i><span>{profile.email}</span></div>}
                       {profile.location && <div className="contact-item"><i className="fas fa-map-marker-alt"></i><span>{profile.location}</span></div>}
                     </div>
-                  </div>
+                  </CVSection>
                 );
               case 'identity':
                 return (profile.age || profile.nationality || (profile as any).marital_status) && (
-                  <div key="identity" className="sidebar-section">
-                    <h3 className="sidebar-title">{section.label || 'État Civil'}</h3>
+                  <CVSection key="identity" title={getSectionLabel(config, 'identity', 'État Civil')} className="sidebar-section">
                     <div className="contact-list">
                       {profile.age && <div className="contact-item"><i className="fas fa-calendar-check"></i><span>{profile.age}</span></div>}
                       {profile.nationality && <div className="contact-item"><i className="fas fa-flag"></i><span>{profile.nationality}</span></div>}
                       {(profile as any).marital_status && <div className="contact-item"><i className="fas fa-users"></i><span>{(profile as any).marital_status}</span></div>}
                     </div>
-                  </div>
+                  </CVSection>
                 );
               case 'skills':
                 return skills?.groups && (
-                  <div key="skills" className="sidebar-section">
-                    <h3 className="sidebar-title">{section.label || 'Expertise'}</h3>
+                  <CVSection key="skills" title={getSectionLabel(config, 'skills', 'Expertise')} className="sidebar-section">
                     <div className="skills-list">
-                      {skills.groups.flatMap(g => g.items || []).map((skill, sIdx) => (
+                      {skills.groups.flatMap((g: any) => g.items || []).map((skill: string, sIdx: number) => (
                         <div key={sIdx} className="skill-group">
                           <div className="skill-item">{skill}</div>
-                          <div className="skill-bar-bg"><div className="skill-bar-fill" style={{ width: '85%' }}></div></div>
+                          <SkillBar level={85} />
                         </div>
                       ))}
                     </div>
-                  </div>
+                  </CVSection>
                 );
               case 'languages':
                 return languages && languages.length > 0 && (
-                  <div key="languages" className="sidebar-section">
-                    <h3 className="sidebar-title">{section.label || 'Langues'}</h3>
+                  <CVSection key="languages" title={getSectionLabel(config, 'languages', 'Langues')} className="sidebar-section">
                     <div className="contact-list">
-                      {languages.map((lang, lIdx) => (
+                      {languages.map((lang: any, lIdx: number) => (
                         <div key={lIdx} className="contact-item">
                           <i className="fas fa-globe"></i>
                           <span><strong>{lang.name}</strong> – {lang.level}</span>
                         </div>
                       ))}
                     </div>
-                  </div>
+                  </CVSection>
                 );
               default:
                 if (section.type.startsWith('custom_')) {
                   const customId = section.type.replace('custom_', '');
-                  const custom = custom_sections?.find(c => c.id === customId);
+                  const custom = custom_sections?.find((c: any) => c.id === customId);
                   if (custom) {
                     return (
-                      <div key={section.type} className="sidebar-section">
-                        <h3 className="sidebar-title">{custom.title}</h3>
+                      <CVSection key={section.type} title={custom.title} className="sidebar-section">
                         <div style={{ fontSize: '0.9em', lineHeight: 1.4, opacity: 0.9 }}>
                           {custom.type === 'list' ? (
                             <ul style={{ listStyle: 'none', padding: 0 }}>
-                              {custom.content.split('\n').filter(line => line.trim()).map((item, iIdx) => (
+                              {custom.content.split('\n').filter((line: string) => line.trim()).map((item: string, iIdx: number) => (
                                 <li key={iIdx} style={{ marginBottom: '4px' }}>• {item}</li>
                               ))}
                             </ul>
@@ -109,7 +102,7 @@ const ProfessionalTemplate: React.FC<TemplateProps> = ({ data, config, apiBaseUr
                             <div dangerouslySetInnerHTML={{ __html: custom.content.replace(/\n/g, '<br>') }} />
                           )}
                         </div>
-                      </div>
+                      </CVSection>
                     );
                   }
                 }
@@ -124,77 +117,76 @@ const ProfessionalTemplate: React.FC<TemplateProps> = ({ data, config, apiBaseUr
             switch (section.type) {
               case 'summary':
                 return summary && (
-                  <section key="summary" className="content-section">
-                    <h3 className="section-title">{section.label || 'Parcours Professionnel'}</h3>
+                  <CVSection key="summary" title={getSectionLabel(config, 'summary', 'Parcours Professionnel')} className="content-section">
                     <p className="about-text">{summary}</p>
-                  </section>
+                  </CVSection>
                 );
               case 'experience':
                 return experience && experience.length > 0 && (
-                  <section key="experience" className="content-section">
-                    <h3 className="section-title">{section.label || 'Expérience'}</h3>
-                    {experience.map((exp, idx) => (
-                      <div key={idx} className="experience-item">
-                        <div className="exp-header">
-                          <h4 className="exp-title">{exp.position || (exp as any).role}</h4>
-                          <span className="exp-dates">{exp.dates || `${exp.start || ''} - ${exp.end || ''}`}</span>
-                        </div>
-                        <div className="exp-company">{exp.company}</div>
-                        {(exp.tasks || exp.bullets) && (
+                  <CVSection key="experience" title={getSectionLabel(config, 'experience', 'Expérience')} className="content-section">
+                    {experience.map((exp: any, idx: number) => (
+                      <ItemGroup 
+                        key={idx} 
+                        title={exp.title} 
+                        subtitle={exp.company} 
+                        date={exp.dates}
+                        className="experience-item"
+                      >
+                        {exp.tasks && exp.tasks.length > 0 && (
                           <ul className="exp-tasks">
-                            {(exp.tasks || exp.bullets || []).map((task, tIdx) => <li key={tIdx}>{task}</li>)}
+                            {exp.tasks.map((task: string, tIdx: number) => <li key={tIdx}>{task}</li>)}
                           </ul>
                         )}
-                      </div>
+                      </ItemGroup>
                     ))}
-                  </section>
+                  </CVSection>
                 );
               case 'education':
                 return education && education.length > 0 && (
-                  <section key="education" className="content-section">
-                    <h3 className="section-title">{section.label || 'Formation'}</h3>
-                    {education.map((edu, idx) => (
-                      <div key={idx} className="education-item">
-                        <div className="edu-degree">{edu.degree}</div>
-                        <div className="edu-school">{edu.institution || edu.school}</div>
-                        <span className="edu-dates">
-                          {edu.start || edu.end ? `${edu.start || ''} - ${edu.end || ''}` : (edu.dates || edu.year)}
-                        </span>
-                      </div>
+                  <CVSection key="education" title={getSectionLabel(config, 'education', 'Formation')} className="content-section">
+                    {education.map((edu: any, idx: number) => (
+                      <ItemGroup 
+                        key={idx} 
+                        title={edu.degree} 
+                        subtitle={edu.institution} 
+                        date={edu.dates}
+                        className="education-item"
+                      />
                     ))}
-                  </section>
+                  </CVSection>
                 );
               case 'projects':
                 return projects && projects.length > 0 && (
-                  <section key="projects" className="content-section">
-                    <h3 className="section-title">{section.label || 'Projets'}</h3>
-                    {projects.map((project, idx) => (
-                      <div key={idx} className="experience-item">
-                        <div className="exp-header"><h4 className="exp-title">{project.name}</h4></div>
-                        {project.link && <div className="exp-company">{project.link}</div>}
+                  <CVSection key="projects" title={getSectionLabel(config, 'projects', 'Projets')} className="content-section">
+                    {projects.map((project: any, idx: number) => (
+                      <ItemGroup 
+                        key={idx} 
+                        title={project.name} 
+                        subtitle={project.link} 
+                        className="experience-item"
+                      >
                         <p className="about-text" style={{ fontSize: '0.95em', marginTop: '5px' }}>{project.description}</p>
-                      </div>
+                      </ItemGroup>
                     ))}
-                  </section>
+                  </CVSection>
                 );
               default:
                 if (section.type.startsWith('custom_')) {
                   const customId = section.type.replace('custom_', '');
-                  const custom = custom_sections?.find(c => c.id === customId);
+                  const custom = custom_sections?.find((c: any) => c.id === customId);
                   if (custom) {
                     return (
-                      <section key={section.type} className="content-section">
-                        <h3 className="section-title">{custom.title}</h3>
+                      <CVSection key={section.type} title={custom.title} className="content-section">
                         <div className="about-text">
                           {custom.type === 'list' ? (
                             <ul className="exp-tasks">
-                              {custom.content.split('\n').filter(line => line.trim()).map((item, iIdx) => <li key={iIdx}>{item}</li>)}
+                              {custom.content.split('\n').filter((line: string) => line.trim()).map((item: string, iIdx: number) => <li key={iIdx}>{item}</li>)}
                             </ul>
                           ) : (
                             <div dangerouslySetInnerHTML={{ __html: custom.content.replace(/\n/g, '<br>') }} />
                           )}
                         </div>
-                      </section>
+                      </CVSection>
                     );
                   }
                 }
@@ -203,7 +195,6 @@ const ProfessionalTemplate: React.FC<TemplateProps> = ({ data, config, apiBaseUr
           })}
         </main>
       </div>
-      <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
     </div>
   );
 };

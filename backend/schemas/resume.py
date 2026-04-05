@@ -30,6 +30,7 @@ class ResumeListOut(BaseModel):
     title: str
     template_id: str
     status: str
+    content: Optional[Dict[str, Any]] = None
     created_at: datetime
 
     class Config:

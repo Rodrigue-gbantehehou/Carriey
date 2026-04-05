@@ -99,6 +99,8 @@ class PreviewRequest(BaseModel):
     data: Dict[str, Any]
     config: Optional[Dict[str, Any]] = None
 
+from typing import Optional, Dict, Any, List, Union
+
 class ExportRequest(BaseModel):
     template_name: str
     data: Dict[str, Any]
@@ -108,7 +110,7 @@ class ExportRequest(BaseModel):
     guest_email: Optional[str] = None
     guest_name: Optional[str] = None
     plan: Optional[str] = "trial"  # "trial" ou "single"
-    payment_id: Optional[str] = None
+    payment_id: Optional[Union[str, int]] = None
     template_id: Optional[str] = None
 
 class GenerateRequest(BaseModel):
@@ -149,13 +151,23 @@ async def preview_html(req: PreviewRequest):
 
 # --- HELPERS POUR L'EXPORT ---
 async def _get_or_create_export_user(req: ExportRequest, current_user: Optional[UserOut], db: Session):
-    """Gère la logique de création/récupération d'utilisateur pour l'export"""
+    """Gère la logique de création/récupération d'utilisateur pour l'export avec vérification stricte du paiement"""
     from datetime import datetime, timedelta
     from models.user import User, UserRole
+    from models.template import Template
+    from models.payment import Payment, PaymentStatus
     from services.template_access_service import TemplateAccessService
     from auth.utils import create_access_token, get_password_hash
     import secrets
 
+    # 1. Vérifier si le template est gratuit
+    template = db.query(Template).filter(Template.slug == req.template_name).first()
+    if not template and req.template_id:
+        template = db.query(Template).filter(Template.id == req.template_id).first()
+    
+    is_free = template and template.price == 0
+    
+    # 2. Identifier l'utilisateur cible
     target_user_id = None
     is_new_user = False
     setup_token = None
@@ -182,11 +194,54 @@ async def _get_or_create_export_user(req: ExportRequest, current_user: Optional[
                 expires_delta=timedelta(days=7)
             )
         target_user_id = user.id
+
+    # 3. Vérification de l'accès / Paiement (Sauf pour les ADMINS)
+    is_admin = current_user and current_user.role in ["ADMIN", "SUPER_ADMIN"]
     
-    if target_user_id and req.template_id:
-        expires_at = datetime.now() + timedelta(days=14) if req.plan == "trial" else None
-        TemplateAccessService.grant_access(db=db, user_id=target_user_id, template_id=req.template_id, expires_at=expires_at)
+    if not is_free and not is_admin:
+        # Si c'est payant, on vérifie si l'utilisateur a déjà accès
+        has_access = target_user_id and TemplateAccessService.check_user_access(db, target_user_id, template.id)
         
+        if not has_access:
+            # Si pas d'accès, on vérifie si un payment_id valide est fourni
+            if req.payment_id:
+                # On accepte soit l'ID interne, soit l'ID du provider (KkiaPay/FedaPay)
+                payment = db.query(Payment).filter(
+                    (Payment.id == req.payment_id) | (Payment.provider_payment_id == req.payment_id)
+                ).first()
+                
+                # En mode Sandbox local, on est plus souple car les webhooks ne reviennent pas vers localhost
+                is_sandbox = os.getenv("KKIAPAY_SANDBOX") == "true" or os.getenv("PAYMENT_SANDBOX") == "true"
+                
+                if (payment and payment.status == PaymentStatus.SUCCESS) or is_sandbox:
+                    # En sandbox, si le paiement n'existe pas encore en DB (ex: guest local), on le crée
+                    if not payment and is_sandbox:
+                        from models.payment import PaymentProvider
+                        payment = Payment(
+                            id=str(req.payment_id) if "-" in str(req.payment_id) else None,
+                            provider_payment_id=str(req.payment_id),
+                            user_id=target_user_id,
+                            template_id=template.id,
+                            amount=600 if req.plan == "trial" else template.price,
+                            currency="XOF",
+                            status=PaymentStatus.SUCCESS,
+                            provider=PaymentProvider.KKIAPAY # Par défaut
+                        )
+                        db.add(payment)
+                        db.commit()
+                        db.refresh(payment)
+
+                    # On accorde l'accès
+                    expires_at = datetime.now() + timedelta(days=14) if req.plan == "trial" else None
+                    TemplateAccessService.grant_access(db=db, user_id=target_user_id, template_id=template.id, expires_at=expires_at, payment_id=payment.id)
+                else:
+                    raise HTTPException(status_code=402, detail="Paiement requis ou non validé")
+            else:
+                raise HTTPException(status_code=402, detail="Paiement requis pour ce modèle")
+    elif is_free and target_user_id and template:
+        # Accès gratuit auto-accordé pour suivi
+        TemplateAccessService.grant_access(db=db, user_id=target_user_id, template_id=template.id)
+
     return target_user_id, is_new_user, setup_token
 
 

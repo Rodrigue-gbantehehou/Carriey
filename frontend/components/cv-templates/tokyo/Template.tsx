@@ -1,26 +1,23 @@
-
 import React from 'react';
 import { TemplateProps } from '@/types/cv';
-import { TemplateStyles, RemoteStyles } from '../BaseComponents';
+import { TemplateStyles, RemoteStyles, CVSection, ItemGroup, SkillBar, DateRange, SkillTag } from '../BaseComponents';
+import { getSafeData, isSectionEnabled, getSectionLabel } from '../utils';
 
-const TokyoTemplate: React.FC<TemplateProps> = ({ data, config, apiBaseUrl }) => {
+const TokyoTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBaseUrl }) => {
+  const data = getSafeData(rawData);
   const { profile, summary, experience, education, skills, languages, projects, custom_sections } = data;
   
-  const isSectionEnabled = (type: string) => {
-    return config.sections.find(s => s.type === type)?.enabled !== false;
-  };
-
   return (
     <div className="cv-rendering-root cv-container tokyo-template">
       <RemoteStyles templateName={config.templateName} apiBaseUrl={apiBaseUrl} />
       <TemplateStyles config={config} />
       
-      <div className="left-column" style={{ width: '32%', flexShrink: 0 }}>
-        {isSectionEnabled('photo') && (
+      <div className="left-column">
+        {isSectionEnabled(config, 'photo') && (
           <div className="profile-photo-wrap">
             {profile.photo ? (
               <div className="profile-photo">
-                <img src={profile.photo} alt={profile.name || 'Photo'} />
+                <img src={profile.photo} alt={profile.name} />
               </div>
             ) : (
               <div className="photo-placeholder"><i className="fas fa-user"></i></div>
@@ -33,78 +30,69 @@ const TokyoTemplate: React.FC<TemplateProps> = ({ data, config, apiBaseUrl }) =>
           switch (section.type) {
             case 'contact':
               return (
-                <section key="contact" className="sidebar-section">
-                  <h3 className="sidebar-title">{section.label || 'Contact'}</h3>
+                <CVSection key="contact" title={getSectionLabel(config, 'contact', 'Contact')} className="sidebar-section">
                   <div className="contact-list">
                     {profile.location && <div className="contact-item"><i className="fas fa-map-marker-alt"></i><span>{profile.location}</span></div>}
                     {profile.phone && <div className="contact-item"><i className="fas fa-phone"></i><span>{profile.phone}</span></div>}
                     {profile.email && <div className="contact-item"><i className="fas fa-envelope"></i><span>{profile.email}</span></div>}
                   </div>
-                </section>
+                </CVSection>
               );
             case 'skills':
               return skills?.groups && (
-                <section key="skills" className="sidebar-section">
-                  <h3 className="sidebar-title">{section.label || 'Compétences'}</h3>
+                <CVSection key="skills" title={getSectionLabel(config, 'skills', 'Compétences')} className="sidebar-section">
                   <div className="skills-list">
-                    {skills.groups.flatMap(g => g.items || []).map((skill, sIdx) => (
-                      <div key={sIdx} className="skill-item">
-                        <span className="skill-name">{skill}</span>
-                        <div className="skill-bar-bg"><div className="skill-bar-fill" style={{ width: '85%' }}></div></div>
-                      </div>
+                    {skills.groups.flatMap((g: any) => g.items || []).map((skill: string, sIdx: number) => (
+                      <SkillBar key={sIdx} name={skill} />
                     ))}
                   </div>
-                </section>
+                </CVSection>
               );
             case 'languages':
               return languages && languages.length > 0 && (
-                <section key="languages" className="sidebar-section">
-                  <h3 className="sidebar-title">{section.label || 'Langues'}</h3>
+                <CVSection key="languages" title={getSectionLabel(config, 'languages', 'Langues')} className="sidebar-section">
                   <div className="languages-list">
-                    {languages.map((lang, lIdx) => (
+                    {languages.map((lang: any, lIdx: number) => (
                       <div key={lIdx} className="language-item">
                         <span className="lang-name">{lang.name}</span>
                         <span className="lang-level">{lang.level}</span>
                       </div>
                     ))}
                   </div>
-                </section>
+                </CVSection>
               );
             case 'identity':
               return (profile.age || profile.nationality) && (
-                <section key="identity" className="sidebar-section">
-                  <h3 className="sidebar-title">{section.label || 'Identité'}</h3>
+                <CVSection key="identity" title={getSectionLabel(config, 'identity', 'Identité')} className="sidebar-section">
                   <div className="languages-list">
                     {profile.age && <div className="language-item"><span className="lang-name">Âge</span><span className="lang-level">{profile.age}</span></div>}
                     {profile.nationality && <div className="language-item"><span className="lang-name">Nationalité</span><span className="lang-level">{profile.nationality}</span></div>}
                   </div>
-                </section>
+                </CVSection>
               );
             case 'interests':
               return data.interests && data.interests.length > 0 && (
-                <section key="interests" className="sidebar-section">
-                  <h3 className="sidebar-title">{section.label || 'Loisirs'}</h3>
+                <CVSection key="interests" title={getSectionLabel(config, 'interests', 'Loisirs')} className="sidebar-section">
                   <div className="skills-list" style={{ gap: '8px' }}>
-                    {data.interests.map((interest, iIdx) => (
-                      <div key={iIdx} className="skill-name" style={{ fontSize: '0.86em', borderBottom: '1px solid #E2E8F0', paddingBottom: '4px' }}>
+                    {data.interests.map((interest: string, iIdx: number) => (
+                      <div key={iIdx} className="skill-name" style={{ fontSize: '0.86em', borderBottom: '1px solid var(--color-background-soft)', paddingBottom: '4px' }}>
                         {interest}
                       </div>
                     ))}
                   </div>
-                </section>
+                </CVSection>
               );
             default:
               if (section.type.startsWith('custom_')) {
                 const customId = section.type.replace('custom_', '');
-                const custom = custom_sections?.find(c => c.id === customId);
+                const custom = custom_sections?.find((c: any) => c.id === customId);
                 if (custom) {
                   return (
-                    <section key={section.type} className="sidebar-section">
-                      <h3 className="sidebar-title">{custom.title}</h3>
+                    <CVSection key={section.type} title={custom.title} className="sidebar-section">
                       <div style={{ fontSize: '0.9em', lineHeight: 1.4, opacity: 0.9 }}>
                         {custom.type === 'list' ? (
                           <ul style={{ listStyle: 'none', padding: 0 }}>
-                            {custom.content.split('\n').filter(line => line.trim()).map((item, iIdx) => (
+                            {custom.content.split('\n').filter((line: string) => line.trim()).map((item: string, iIdx: number) => (
                               <li key={iIdx} style={{ marginBottom: '4px' }}>• {item}</li>
                             ))}
                           </ul>
@@ -112,7 +100,7 @@ const TokyoTemplate: React.FC<TemplateProps> = ({ data, config, apiBaseUrl }) =>
                           <div dangerouslySetInnerHTML={{ __html: custom.content.replace(/\n/g, '<br>') }} />
                         )}
                       </div>
-                    </section>
+                    </CVSection>
                   );
                 }
               }
@@ -121,11 +109,11 @@ const TokyoTemplate: React.FC<TemplateProps> = ({ data, config, apiBaseUrl }) =>
         })}
       </div>
 
-      <div className="right-column" style={{ flex: 1 }}>
+      <div className="right-column">
         <header className="header">
-          <h1 className="name">{profile.name || 'Prénom Nom'}</h1>
-          {(profile.position || profile.title) && (
-            <p className="profession">{profile.position || profile.title}</p>
+          <h1 className="name">{profile.name}</h1>
+          {profile.title && (
+            <p className="profession">{profile.title}</p>
           )}
         </header>
 
@@ -133,79 +121,76 @@ const TokyoTemplate: React.FC<TemplateProps> = ({ data, config, apiBaseUrl }) =>
           switch (section.type) {
             case 'summary':
               return summary && (
-                <section key="summary" className="summary-section">
-                  <h3 className="section-title">{section.label || 'Profil'}</h3>
+                <CVSection key="summary" title={getSectionLabel(config, 'summary', 'Profil')} className="summary-section">
                   <p className="profile-text">{summary}</p>
-                </section>
+                </CVSection>
               );
             case 'experience':
               return experience && experience.length > 0 && (
-                <section key="experience" className="content-section">
-                  <h3 className="section-title">{section.label || 'Expériences'}</h3>
-                  {experience.map((exp, idx) => (
-                    <div key={idx} className="experience-item">
-                      <div className="exp-header">
-                        <h4 className="exp-title">{exp.position || (exp as any).role}</h4>
-                        <span className="exp-dates">{exp.dates || `${exp.start || ''} - ${exp.end || ''}`}</span>
-                      </div>
-                      <div className="exp-company">{exp.company}</div>
-                      {(exp.tasks || exp.bullets) && (
+                <CVSection key="experience" title={getSectionLabel(config, 'experience', 'Expériences professionnel')} className="content-section">
+                  {experience.map((exp: any, idx: number) => (
+                    <ItemGroup 
+                      key={idx} 
+                      title={exp.title} 
+                      subtitle={exp.company} 
+                      date={exp.dates}
+                      className="experience-item"
+                    >
+                      {exp.tasks && exp.tasks.length > 0 && (
                         <ul className="exp-tasks">
-                          {(exp.tasks || exp.bullets || []).map((task, tIdx) => <li key={tIdx}>{task}</li>)}
+                          {exp.tasks.map((task: string, tIdx: number) => <li key={tIdx}>{task}</li>)}
                         </ul>
                       )}
-                    </div>
+                    </ItemGroup>
                   ))}
-                </section>
+                </CVSection>
               );
             case 'education':
               return education && education.length > 0 && (
-                <section key="education" className="content-section">
-                  <h3 className="section-title">{section.label || 'Formation'}</h3>
-                  {education.map((edu, idx) => (
-                    <div key={idx} className="education-item">
-                      <h4 className="edu-degree">{edu.degree}</h4>
-                      <div className="edu-meta">
-                        <span className="edu-school">{edu.institution || edu.school}</span>
-                        <span className="edu-dates">
-                          {edu.start || edu.end ? `${edu.start || ''} - ${edu.end || ''}` : (edu.dates || edu.year)}
-                        </span>
-                      </div>
-                    </div>
+                <CVSection key="education" title={getSectionLabel(config, 'education', 'Formation')} className="content-section">
+                  {education.map((edu: any, idx: number) => (
+                    <ItemGroup 
+                      key={idx} 
+                      title={edu.degree} 
+                      subtitle={edu.institution} 
+                      date={edu.dates}
+                      className="education-item"
+                    />
                   ))}
-                </section>
+                </CVSection>
               );
             case 'projects':
               return projects && projects.length > 0 && (
-                <section key="projects" className="content-section">
-                  <h3 className="section-title">{section.label || 'Projets'}</h3>
-                  {projects.map((project, idx) => (
-                    <div key={idx} className="experience-item">
-                      <div className="exp-header"><h4 className="exp-title">{project.name}</h4></div>
-                      {project.link && <div className="exp-company">{project.link}</div>}
+                <CVSection key="projects" title={getSectionLabel(config, 'projects', 'Projets')} className="content-section">
+                  {projects.map((project: any, idx: number) => (
+                    <ItemGroup 
+                      key={idx} 
+                      title={project.name} 
+                      subtitle={project.link} 
+                      className="experience-item"
+                    >
                       <p className="profile-text" style={{ marginTop: '5px' }}>{project.description}</p>
-                    </div>
+                    </ItemGroup>
                   ))}
-                </section>
+                </CVSection>
               );
             default:
               if (section.type.startsWith('custom_')) {
                 const customId = section.type.replace('custom_', '');
-                const custom = custom_sections?.find(c => c.id === customId);
+                const custom = custom_sections?.find((c: any) => c.id === customId);
                 if (custom) {
                   return (
-                    <section key={section.type} className="content-section">
-                      <h3 className="section-title">{custom.title}</h3>
+                    <CVSection key={section.type} title={custom.title} className="content-section">
                       <div className="profile-text">
                         {custom.type === 'list' ? (
                           <ul className="exp-tasks">
-                            {custom.content.split('\n').filter(line => line.trim()).map((item, iIdx) => <li key={iIdx}>{item}</li>)}
+                            {custom.content.split('\n').filter((line: string) => line.trim()).map((item: string, iIdx: number) => <li key={iIdx}>{item}</li>)}
                           </ul>
                         ) : (
                           <div dangerouslySetInnerHTML={{ __html: custom.content.replace(/\n/g, '<br>') }} />
                         )}
                       </div>
-                    </section>
+                    </CVSection>
                   );
                 }
               }

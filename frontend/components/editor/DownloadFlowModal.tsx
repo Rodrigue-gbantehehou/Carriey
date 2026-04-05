@@ -8,7 +8,7 @@ import config from '@/lib/config'
 interface DownloadFlowModalProps {
   isOpen: boolean
   onClose: () => void
-  onSuccess: (guestData: { email: string, name: string, plan: string }) => void
+  onSuccess: (guestData: { email: string, name: string, plan: string, paymentId?: string }) => void
   templatePrice: string
   templateName: string
 }
@@ -81,7 +81,7 @@ export default function DownloadFlowModal({ isOpen, onClose, onSuccess, template
       if (response.success) {
         console.log("Payment success in modal, calling onSuccess")
         toast.success("Paiement validé avec succès !")
-        onSuccess({ email, name, plan: selectedPlan })
+        onSuccess({ email, name, plan: selectedPlan, paymentId: response.transactionId })
       } else {
         console.warn("Payment failed in modal:", response.error)
         toast.error(response.error || "Le paiement a échoué")
@@ -349,22 +349,6 @@ export default function DownloadFlowModal({ isOpen, onClose, onSuccess, template
                         `Payer ${selectedPlan === 'trial' ? '600 F' : `${templatePrice} F`} & Télécharger`
                       )}
                     </button>
-
-                    {isProcessing && (
-                      <div className="mt-4 p-4 bg-orange-50 rounded-2xl border border-orange-100 text-center">
-                        <p className="text-[9px] text-orange-600 font-medium mb-1">Si la fenêtre de paiement ne s'affiche pas :</p>
-                        <button 
-                          type="button"
-                          onClick={() => {
-                            console.log("EMERGENCY BYPASS TRIGGERED")
-                            onSuccess({ email: email || 'sandbox@test.com', name: name || 'Sandbox User', plan: selectedPlan })
-                          }}
-                          className="text-[10px] font-bold text-orange-700 underline uppercase"
-                        >
-                          Cliquez ici pour forcer le téléchargement
-                        </button>
-                      </div>
-                    )}
                  </div>
               </div>
 

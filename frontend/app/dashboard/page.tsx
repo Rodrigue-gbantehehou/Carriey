@@ -334,8 +334,12 @@ export default function DashboardPage() {
                                         return (
                                             <div key={resume.id} className="group bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-lg transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                                 <div className="flex items-center gap-5 flex-1 min-w-0">
-                                                    <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center text-gray-400 group-hover:bg-brand-bg transition-colors">
-                                                        {Icons.file}
+                                                    <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center text-gray-400 group-hover:bg-brand-bg transition-colors overflow-hidden border border-gray-100 shadow-inner">
+                                                        {resume.content?.profile?.photo ? (
+                                                            <img src={resume.content.profile.photo} alt={resume.title} className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            Icons.file
+                                                        )}
                                                     </div>
                                                     <div className="flex-1 min-w-0">
                                                         <div className="flex items-center gap-3 mb-1">

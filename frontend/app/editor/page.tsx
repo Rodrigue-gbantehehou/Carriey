@@ -376,7 +376,10 @@ export default function EditorPage() {
         const res = await fetch(`${config.apiBaseUrl}/resumes/${resumeId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.user.accessToken}` },
-          body: JSON.stringify({ content: contentToSave }),
+          body: JSON.stringify({ 
+            title: data.profile?.name ? `CV - ${data.profile.name}` : 'Mon CV',
+            content: contentToSave 
+          }),
         })
         if (!res.ok) throw new Error('Erreur de sauvegarde')
       } else {
@@ -483,7 +486,7 @@ export default function EditorPage() {
     setTemplate({ ...template, fonts: { heading: type === 'heading' ? font : headingFont, body: type === 'body' ? font : bodyFont } })
   }, [template, headingFont, bodyFont, setTemplate])
 
-  const handleExportPdf = async (ignoreAuth = false, guestData?: { email: string; name: string }, plan?: string) => {
+  const handleExportPdf = async (ignoreAuth = false, guestData?: { email: string; name: string }, plan?: string, paymentId?: string) => {
     if (!session?.user?.accessToken && !ignoreAuth) {
       setPendingExport('pdf')
       setShowDownloadModal(true)
@@ -513,7 +516,7 @@ export default function EditorPage() {
         sections: template.sections
       }
       console.log(`Starting ${ignoreAuth ? 'Direct ' : ''}PDF Export...`)
-      const res = await exportPdf(template, data, 'CV.pdf', configOverride, token, guestData, plan, templateId)
+      const res = await exportPdf(template, data, 'CV.pdf', configOverride, token, guestData, plan, templateId, paymentId)
       console.log('PDF Export response:', res)
       if (res.url) {
         console.log('Triggering download for:', res.url)
@@ -522,7 +525,7 @@ export default function EditorPage() {
     } finally { setExporting(null) }
   }
 
-  const handleExportDocx = async (ignoreAuth = false, guestData?: { email: string; name: string }, plan?: string) => {
+  const handleExportDocx = async (ignoreAuth = false, guestData?: { email: string; name: string }, plan?: string, paymentId?: string) => {
     if (!session?.user?.accessToken && !ignoreAuth) {
       setPendingExport('docx')
       setShowDownloadModal(true)
@@ -552,7 +555,7 @@ export default function EditorPage() {
         sections: template.sections
       }
       console.log(`Starting ${ignoreAuth ? 'Direct ' : ''}DOCX Export...`)
-      const res = await exportDocx(template, data, 'CV.docx', configOverride, token, guestData, plan, templateId)
+      const res = await exportDocx(template, data, 'CV.docx', configOverride, token, guestData, plan, templateId, paymentId)
       console.log('DOCX Export response:', res)
       if (res.url) {
         console.log('Triggering download for:', res.url)
@@ -1245,10 +1248,10 @@ export default function EditorPage() {
           
           if (pendingExport === 'pdf') {
              console.log("Triggering pending PDF export")
-             await handleExportPdf(true, { email: guestData.email, name: guestData.name }, guestData.plan)
+             await handleExportPdf(true, { email: guestData.email, name: guestData.name }, guestData.plan, guestData.paymentId)
           } else if (pendingExport === 'docx') {
              console.log("Triggering pending DOCX export")
-             await handleExportDocx(true, { email: guestData.email, name: guestData.name }, guestData.plan)
+             await handleExportDocx(true, { email: guestData.email, name: guestData.name }, guestData.plan, guestData.paymentId)
           }
           console.log("onSuccess flow completed")
           setPendingExport(null)

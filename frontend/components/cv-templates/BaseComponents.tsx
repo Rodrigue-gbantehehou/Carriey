@@ -10,15 +10,15 @@ export const TemplateStyles = ({ config }: { config: any }) => {
   const photoShapeMap: any = { circle: "50%", square: "4px", rounded: "12px" };
   const photoShapeCss = photoShapeMap[tokens.photoShape || "circle"] || "50%";
 
-  const spacingMap: any = { compact: "0.75", normal: "1", airy: "1.4" };
+  const spacingMap: any = { compact: "0.7", normal: "1", airy: "1.3" };
   const spacingVal = spacingMap[tokens.spacing || "normal"] || "1";
 
-  // We use a style tag to inject CSS variables at the root of the CV container
   const cssVars = `
     .cv-rendering-root {
       --color-primary: ${tokens.colorPrimary || '#0f172a'};
       --color-secondary: ${tokens.colorSecondary || '#ffffff'};
       --color-accent: ${tokens.colorAccent || '#c5a059'};
+      --color-background-soft: rgba(0, 0, 0, 0.03);
       --color-text-main: ${tokens.colorTextMain || '#1e293b'};
       --color-text-muted: ${tokens.colorTextMuted || '#64748b'};
       --font-heading: '${tokens.fontHeading || 'Marcellus'}', serif;
@@ -30,30 +30,51 @@ export const TemplateStyles = ({ config }: { config: any }) => {
       --spacing: ${spacingVal};
       --spacing-multiplier: ${spacingVal};
       --line-height: ${tokens.lineHeight || 1.4};
+      --section-gap: calc(24px * var(--spacing-multiplier));
+      --item-gap: calc(16px * var(--spacing-multiplier));
     }
   `;
 
   return <style dangerouslySetInnerHTML={{ __html: cssVars }} />;
 };
 
-export const CVSection = ({ title, children, className = "" }: { title?: string; children: React.ReactNode; className?: string }) => (
+export const SkillBar = ({ name, level = 85 }: { name: string; level?: number }) => (
+  <div className="skill-item">
+    <span className="skill-name">{name}</span>
+    <div className="skill-bar-bg">
+      <div className="skill-bar-fill" style={{ width: `${level}%` }}></div>
+    </div>
+  </div>
+);
+
+export const DateRange = ({ start, end, dates }: { start?: string; end?: string; dates?: string }) => {
+  const displayDates = dates || (start && end ? `${start} - ${end}` : start || end || "");
+  if (!displayDates) return null;
+  return <span className="item-date">{displayDates}</span>;
+};
+
+export const CVSection = ({ title, icon, children, className = "" }: { title?: string; icon?: string; children: React.ReactNode; className?: string }) => (
   <section className={`section ${className}`}>
-    {title && <h2 className="section-title">{title}</h2>}
-    {children}
+    {title && (
+      <h2 className="section-title">
+        {icon && <i className={`${icon} section-icon`}></i>}
+        {title}
+      </h2>
+    )}
+    <div className="section-content">{children}</div>
   </section>
 );
 
-export const ItemGroup = ({ title, subtitle, date, children }: { title: string; subtitle?: string; date?: string; children?: React.ReactNode }) => (
-  <div className="item-group">
+export const ItemGroup = ({ title, subtitle, date, children, className = "" }: { title: string; subtitle?: string; date?: string; children?: React.ReactNode; className?: string }) => (
+  <div className={`item-group ${className}`}>
     <div className="item-header">
       <h4 className="item-title">{title}</h4>
       {date && <span className="item-date">{date}</span>}
     </div>
     {subtitle && <div className="item-subtitle">{subtitle}</div>}
-    {children}
+    {children && <div className="item-body">{children}</div>}
   </div>
 );
-
 
 export const SkillTag = ({ children }: { children: React.ReactNode }) => (
   <span className="skill-tag">{children}</span>
@@ -69,7 +90,6 @@ export const RemoteStyles = ({ templateName, apiBaseUrl }: { templateName: strin
   React.useEffect(() => {
     const fetchCss = async () => {
       try {
-        // Add a cache-busting timestamp to ensure we get the latest styles from disk
         const cacheBuster = new Date().getTime();
         const response = await fetch(`${apiBaseUrl}/templates/${slug}/style.css?v=${cacheBuster}`);
         if (response.ok) {
