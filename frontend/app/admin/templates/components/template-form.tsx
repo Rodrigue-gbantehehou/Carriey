@@ -12,10 +12,10 @@ const templateSchema = z.object({
   slug: z.string()
     .min(3, 'Le slug doit contenir au moins 3 caractères')
     .regex(/^[a-z0-9-]+$/, 'Le slug ne peut contenir que des lettres minuscules, des chiffres et des tirets'),
-  price: z.coerce.number().min(0, 'Le prix doit être positif'),
+  price: z.number({ message: 'Le prix doit être un nombre' }).min(0, 'Le prix doit être positif'),
   folder_name: z.string().min(1, 'Le nom du dossier technique est requis'),
   description: z.string().optional().or(z.literal('')),
-  is_active: z.boolean().default(true),
+  is_active: z.boolean(),
 })
 
 type TemplateFormData = z.infer<typeof templateSchema>
@@ -127,7 +127,7 @@ export function TemplateForm({
                   type="number"
                   step="0.01"
                   id="price"
-                  {...register('price')}
+                  {...register('price', { valueAsNumber: true })}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 />
                 {errors.price && (

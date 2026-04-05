@@ -31,9 +31,9 @@
         <div class="sidebar-info">
           <h3 class="sidebar-title">{{ section.label | default('Contact') }}</h3>
           <div class="contact-list">
-            {% if data.profile.phone %}<div class="contact-item"><i class="fas fa-phone"></i><span>{{ data.profile.phone }}</span></div>{% endif %}
-            {% if data.profile.email %}<div class="contact-item"><i class="fas fa-envelope"></i><span>{{ data.profile.email }}</span></div>{% endif %}
-            {% if data.profile.location %}<div class="contact-item"><i class="fas fa-map-marker-alt"></i><span>{{ data.profile.location }}</span></div>{% endif %}
+            {% if data.profile.phone %}<div class="contact-item"><i class="fa fa-phone"></i><span>{{ data.profile.phone }}</span></div>{% endif %}
+            {% if data.profile.email %}<div class="contact-item"><i class="fa fa-envelope"></i><span>{{ data.profile.email }}</span></div>{% endif %}
+            {% if data.profile.location %}<div class="contact-item"><i class="fa fa-map-marker-alt"></i><span>{{ data.profile.location }}</span></div>{% endif %}
           </div>
         </div>
       {% elif section.type == 'skills' and data.skills and data.skills.groups %}

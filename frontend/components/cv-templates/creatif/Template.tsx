@@ -39,9 +39,9 @@ const CreatifTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBa
                 <div key="contact" className="sidebar-info">
                   <h3 className="sidebar-title">{getSectionLabel(config, 'contact', 'Contact')}</h3>
                   <div className="contact-list">
-                    {profile.phone && <div className="contact-item"><i className="fas fa-phone"></i><span>{profile.phone}</span></div>}
-                    {profile.email && <div className="contact-item"><i className="fas fa-envelope"></i><span>{profile.email}</span></div>}
-                    {profile.location && <div className="contact-item"><i className="fas fa-map-marker-alt"></i><span>{profile.location}</span></div>}
+                    {profile.phone && <div className="contact-item"><i className="fa fa-phone"></i><span>{profile.phone}</span></div>}
+                    {profile.email && <div className="contact-item"><i className="fa fa-envelope"></i><span>{profile.email}</span></div>}
+                    {profile.location && <div className="contact-item"><i className="fa fa-map-marker-alt"></i><span>{profile.location}</span></div>}
                   </div>
                 </div>
               );
