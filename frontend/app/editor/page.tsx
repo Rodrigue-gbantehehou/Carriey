@@ -248,7 +248,7 @@ export default function EditorPage() {
             const resumeData = await res.json()
             const content = resumeData.content || {}
             const { _paletteId, _customColors, _headingFont, _bodyFont, _spacing, _fontSize, _photoShape, _borderRadius, ...cleanData } = content
-            setData(cleanData.profile ? cleanData : SAMPLE_DATA)
+            setData(cleanData.profile ? cleanData : getSampleData(null))
             if (_paletteId) setSelectedPaletteId(_paletteId)
             if (_customColors) setCustomColors(_customColors)
             if (_headingFont) setHeadingFont(_headingFont)
