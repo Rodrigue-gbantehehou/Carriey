@@ -17,7 +17,7 @@ export default function Footer() {
               <span className="text-2xl font-black text-white tracking-tight">CVTor</span>
             </Link>
             <p className="text-gray-400 mb-8 max-w-sm text-sm font-medium leading-relaxed">
-              La solution n°1 en Afrique pour créer des CV professionnels qui attirent l'attention des recruteurs. Propulsé par l'IA et adapté aux réalités locales.
+              La solution n°1 en Afrique pour créer des CV professionnels qui attirent l&apos;attention des recruteurs. Propulsé par l&apos;IA et adapté aux réalités locales.
             </p>
             <div className="flex gap-4">
               {/* Social Placeholders */}
@@ -48,7 +48,7 @@ export default function Footer() {
             <ul className="space-y-4 text-gray-400 text-sm font-medium">
               <li><Link href="/contact" className="hover:text-brand-cta transition-colors">Nous contacter</Link></li>
               <li><Link href="/faq" className="hover:text-brand-cta transition-colors">Aide en ligne</Link></li>
-              <li><span className="block text-white/40">Abidjan, Côte d'Ivoire</span></li>
+              <li><span className="block text-white/40">Abidjan, Côte d&apos;Ivoire</span></li>
               <li><span className="block text-white/40">contact@cvtor.pro</span></li>
             </ul>
           </div>

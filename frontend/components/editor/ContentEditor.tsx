@@ -54,7 +54,7 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
   if (!data) {
     return (
       <div className="text-sm text-[#777777] p-4">
-        Chargez des données pour commencer l'édition
+        Chargez des données pour commencer l&apos;édition
       </div>
     )
   }
@@ -691,7 +691,7 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
               onClick={addInterest}
               className="w-full px-3 py-2 rounded-lg bg-[#00C896] hover:bg-[#66E1B5] text-white text-xs font-bold transition-colors"
             >
-              + AJOUTER UN CENTRE D'INTÉRÊT
+              + AJOUTER UN CENTRE D&apos;INTÉRÊT
             </button>
             <div className="grid grid-cols-1 gap-2">
               {(data.interests || []).map((interest: string, idx: number) => (
