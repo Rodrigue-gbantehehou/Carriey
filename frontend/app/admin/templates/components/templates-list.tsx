@@ -2,7 +2,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { PencilIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline'
+import { Pencil, Trash2, Plus } from 'lucide-react'
 import Link from 'next/link'
 import { Template } from '@/types/template'
 
@@ -71,7 +71,7 @@ export function AdminTemplatesList() {
             href="/admin/templates/new"
             className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto"
           >
-            <PlusIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
+            <Plus className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
             Nouveau template
           </Link>
         </div>
@@ -128,14 +128,14 @@ export function AdminTemplatesList() {
                             href={`/admin/templates/${template.id}/edit`}
                             className="text-indigo-600 hover:text-indigo-900"
                           >
-                            <PencilIcon className="h-5 w-5" aria-hidden="true" />
+                            <Pencil className="h-5 w-5" aria-hidden="true" />
                             <span className="sr-only">Modifier</span>
                           </Link>
                           <button
                             onClick={() => handleDelete(template.id)}
                             className="text-red-600 hover:text-red-900"
                           >
-                            <TrashIcon className="h-5 w-5" aria-hidden="true" />
+                            <Trash2 className="h-5 w-5" aria-hidden="true" />
                             <span className="sr-only">Supprimer</span>
                           </button>
                         </div>
