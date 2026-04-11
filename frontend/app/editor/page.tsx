@@ -344,7 +344,7 @@ export default function EditorPage() {
       }
     }
     initEditor()
-  }, [searchParams, session, router, onboardingData])
+  }, [searchParams, session, router, onboardingData, bodyFont, headingFont, setData, setTemplate])
 
   // ── Save ───────────────────────────────────────────────────────────────────
   const saveResume = useCallback(async (showToast = true) => {
@@ -402,7 +402,7 @@ export default function EditorPage() {
     } finally {
       setIsSaving(false)
     }
-  }, [template, data, session, resumeId, customColors, headingFont, bodyFont, selectedPaletteId, spacing, fontSize, lineHeight, photoShape, borderRadius])
+  }, [template, data, session, resumeId, customColors, headingFont, bodyFont, selectedPaletteId, spacing, fontSize, lineHeight, photoShape, borderRadius, router])
 
   // Auto-save
   useEffect(() => {
@@ -591,7 +591,7 @@ export default function EditorPage() {
     <div className="min-h-screen flex items-center justify-center bg-[#F5F5F5]">
       <div className="text-center">
         <div className="w-10 h-10 border-2 border-[#00C896] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-        <p className="text-[#777777] text-sm">Chargement de l'éditeur...</p>
+        <p className="text-[#777777] text-sm">Chargement de l&apos;éditeur...</p>
       </div>
     </div>
   )
@@ -763,9 +763,9 @@ export default function EditorPage() {
                     ✨
                   </div>
                   <div className="space-y-1">
-                    <p className="text-xs font-bold text-[#00C896] uppercase tracking-widest mt-0.5">Note de l'Assistant</p>
+1 space:                     <p className="text-xs font-bold text-[#00C896] uppercase tracking-widest mt-0.5">Note de l&apos;Assistant</p>
                     <p className="text-sm text-[#1c1c1c] leading-relaxed italic">
-                      "{STEP_MESSAGES[currentStep]}"
+                      &quot;{STEP_MESSAGES[currentStep]}&quot;
                     </p>
                   </div>
                 </div>
@@ -868,7 +868,7 @@ export default function EditorPage() {
                         </button>
 
                         <p className="text-[10px] text-[#777777] text-center leading-relaxed">
-                          Ajuste automatiquement la taille et l'interligne pour remplir parfaitement votre page.
+                          Ajuste automatiquement la taille et l&apos;interligne pour remplir parfaitement votre page.
                         </p>
                       </div>
                     </div>
@@ -1094,7 +1094,7 @@ export default function EditorPage() {
                             <span className="text-lg">✨</span>
                             <h3 className="text-sm font-bold text-[#00C896]">Génération IA</h3>
                           </div>
-                          <p className="text-xs text-[#1c1c1c] leading-relaxed mb-4">Décrivez votre profil, l'IA rédige votre CV.</p>
+                          <p className="text-xs text-[#1c1c1c] leading-relaxed mb-4">Décrivez votre profil, l&apos;IA rédige votre CV.</p>
                           <textarea
                             className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2.5 text-[#1c1c1c] text-xs focus:outline-none focus:border-[#00C896] transition-colors resize-none placeholder-[#777777] mb-3"
                             rows={4}

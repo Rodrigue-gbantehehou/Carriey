@@ -1,17 +1,18 @@
 "use client"
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
+import Image from 'next/image'
 import { useEditorStore } from '../../store/editor'
 
 export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
   const { template, data, setData } = useEditorStore()
 
-  const stepToTab: Record<number, any> = {
+  const stepToTab: Record<number, any> = useMemo(() => ({
     0: 'profile',
     1: 'experience',
     2: 'education',
     3: 'skills',
     4: 'languages'
-  }
+  }), [])
 
   const [activeTab, setActiveTab] = useState<'profile' | 'summary' | 'experience' | 'education' | 'skills' | 'languages' | 'projects' | 'interests' | 'sections'>(
     wizardStep !== undefined ? stepToTab[wizardStep] : 'profile'
@@ -22,7 +23,7 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
     if (wizardStep !== undefined) {
       setActiveTab(stepToTab[wizardStep])
     }
-  }, [wizardStep])
+  }, [wizardStep, stepToTab])
 
   // Auto-migrate legacy dates from DB to start/end fields
   React.useEffect(() => {
@@ -49,7 +50,7 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
     if (changed) {
       setData(newData)
     }
-  }, [data?.experience, data?.education]) // Only run when these arrays change
+  }, [data, setData]) // Only run when these arrays change
 
   if (!data) {
     return (
@@ -265,7 +266,12 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
               <div className="relative group">
                 <div className="w-20 h-20 rounded-2xl bg-gray-50 border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden transition-all group-hover:border-[#00C896]">
                   {data.profile?.photo ? (
-                    <img src={data.profile.photo} alt="Profile" className="w-full h-full object-cover" />
+                    <Image 
+                      src={data.profile.photo} 
+                      alt="Profile" 
+                      fill 
+                      className="object-cover" 
+                    />
                   ) : (
                     <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />

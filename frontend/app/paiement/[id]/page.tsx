@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import config from '@/lib/config'
@@ -11,15 +11,7 @@ export default function PaymentPage({ params }: { params: { id: string } }) {
     const [template, setTemplate] = useState<any>(null)
     const [isLoading, setIsLoading] = useState(false)
 
-    useEffect(() => {
-        if (!session) {
-            router.push('/login')
-            return
-        }
-        fetchTemplate()
-    }, [session])
-
-    const fetchTemplate = async () => {
+    const fetchTemplate = useCallback(async () => {
         try {
             const res = await fetch(`${config.apiBaseUrl}/templates`)
             if (res.ok) {
@@ -30,7 +22,15 @@ export default function PaymentPage({ params }: { params: { id: string } }) {
         } catch (e) {
             console.error(e)
         }
-    }
+    }, [params.id])
+
+    useEffect(() => {
+        if (!session) {
+            router.push('/login')
+            return
+        }
+        fetchTemplate()
+    }, [session, router, fetchTemplate])
 
     const handlePayment = async () => {
         setIsLoading(true)

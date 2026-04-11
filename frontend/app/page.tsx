@@ -283,7 +283,7 @@ export default function Home() {
       <section className="bg-brand-text py-16 sm:py-24">
         <div className="container mx-auto px-4 sm:px-6 text-center">
           <h2 className="text-5xl font-black text-white mb-10 tracking-tight">
-            Démarrez votre <span className="text-brand-cta">succès</span> dès aujourd'hui.
+            Démarrez votre <span className="text-brand-cta">succès</span> dès aujourd&apos;hui.
           </h2>
           <div className="flex flex-col sm:flex-row gap-5 justify-center">
             <Link

@@ -155,7 +155,7 @@ export default function ModelesPage() {
       const sectorId = SECTOR_ID_MAP[selectedSector] || 'tech'
       setOnboardingData({ sector: sectorId })
     }
-  }, [selectedSector])
+  }, [selectedSector, setOnboardingData])
 
   useEffect(() => {
     fetch(`${config.apiBaseUrl}/personas/sectors`)
@@ -168,7 +168,7 @@ export default function ModelesPage() {
            setSelectedSector(matched || data[0])
         }
       })
-  }, [searchParams])
+  }, [searchParams, selectedSector])
 
   useEffect(() => {
     if (!selectedSector) return
@@ -187,7 +187,7 @@ export default function ModelesPage() {
 
   useEffect(() => {
     setOnboardingData({ namePreview })
-  }, [namePreview])
+  }, [namePreview, setOnboardingData])
 
   const handleSelect = async (template: any) => {
     const def = template.definition || {}
