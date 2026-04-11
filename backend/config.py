@@ -13,8 +13,8 @@ class Settings(BaseSettings):
     
     # Paths
     BASE_DIR: str = os.path.dirname(os.path.abspath(__file__))
-    TEMPLATES_DIR: str = os.path.join(os.path.dirname(BASE_DIR), "frontend", "components", "cv-templates")
-    DATA_DIR: str = os.path.join(BASE_DIR, "data")
+    TEMPLATES_DIR: str = os.getenv("TEMPLATES_DIR", os.path.join(os.path.dirname(BASE_DIR), "frontend", "components", "cv-templates"))
+    DATA_DIR: str = os.getenv("DATA_DIR", os.path.join(BASE_DIR, "data"))
     
     # Database
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./cvtor.db")
@@ -34,6 +34,12 @@ class Settings(BaseSettings):
         "http://localhost:3000",
         "http://127.0.0.1:3000",
     ]
+
+    def _get_cors_origins(self) -> List[str]:
+        env_origins = os.getenv("BACKEND_CORS_ORIGINS")
+        if env_origins:
+            return [o.strip() for o in env_origins.split(",") if o.strip()]
+        return self.BACKEND_CORS_ORIGINS
 
     model_config = SettingsConfigDict(
         env_file=".env",

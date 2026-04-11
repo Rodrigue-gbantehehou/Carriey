@@ -12,6 +12,11 @@ const nextConfig = {
     return config;
   },
   async rewrites() {
+    // En production sur Vercel, on préfère appeler l'API directement via NEXT_PUBLIC_API_URL
+    // Mais on garde la réecriture pour le développement local
+    if (process.env.NODE_ENV === 'production') {
+      return [];
+    }
     return [
       {
         source: '/backend/:path*',

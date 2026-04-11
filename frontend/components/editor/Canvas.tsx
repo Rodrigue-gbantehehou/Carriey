@@ -5,7 +5,7 @@ import { API_BASE } from '../../lib/api'
 
 // Utility: rewrite asset href/src from relative to backend static
 function rewriteAssets(html: string, backendBase = `${API_BASE}/static/`) {
-  // replace href="styles.css" -> href="http://localhost:8000/static/styles.css"
+  // replace href="styles.css" -> href="[BACKEND_URL]/static/styles.css"
   return html
     .replace(/href=\"(styles[^\"]*)\"/g, `href="${backendBase}$1"`)
     .replace(/href=\"(styles_[^\"]*)\"/g, `href="${backendBase}$1"`)

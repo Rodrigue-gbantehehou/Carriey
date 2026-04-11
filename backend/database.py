@@ -15,9 +15,23 @@ if DATABASE_URL.startswith("sqlite"):
     engine = create_engine(
         DATABASE_URL, connect_args={"check_same_thread": False}
     )
-# Pour MySQL et autres
+# Pour MySQL, TiDB et autres
 else:
-    engine = create_engine(DATABASE_URL, pool_pre_ping=True)
+    # ssl_args pour TiDB Cloud et autres services sécurisés
+    connect_args = {}
+    if "mysql" in DATABASE_URL:
+        # TiDB Cloud nécessite SSL. Sur Render et la plupart des plateformes Linux, 
+        # le certificat CA système est suffisant pour vérifier l'identité du serveur.
+        connect_args["ssl"] = {"reject_unauthorized": True}
+        
+    # pool_pre_ping=True est important pour les bases cloud qui coupent les connexions inactives
+    engine = create_engine(
+        DATABASE_URL, 
+        connect_args=connect_args,
+        pool_pre_ping=True,
+        pool_size=5,
+        max_overflow=10
+    )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: cvtor-backend
+    env: docker
+    plan: free
+    region: frankfurt  # Ou une autre région supportant le free tier
+    dockerContext: .
+    dockerfilePath: Dockerfile
+    healthCheckPath: /healthz
+    numInstances: 1
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        sync: false  # À remplir dans l'interface Render
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: BACKEND_CORS_ORIGINS
+        sync: false  # À remplir avec l'URL Vercel (ex: https://cvtor.vercel.app)
+      - key: FRONTEND_URL
+        sync: false  # À remplir avec l'URL Vercel
+      - key: HF_TOKEN
+        sync: false  # Optionnel pour l'IA
