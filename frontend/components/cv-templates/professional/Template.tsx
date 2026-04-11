@@ -63,10 +63,7 @@ const ProfessionalTemplate: React.FC<TemplateProps> = ({ data: rawData, config, 
                   <CVSection key="skills" title={getSectionLabel(config, 'skills', 'Expertise')} className="sidebar-section">
                     <div className="skills-list">
                       {skills.groups.flatMap((g: any) => g.items || []).map((skill: string, sIdx: number) => (
-                        <div key={sIdx} className="skill-group">
-                          <div className="skill-item">{skill}</div>
-                          <SkillBar level={85} />
-                        </div>
+                        <SkillBar key={sIdx} name={skill} level={85} />
                       ))}
                     </div>
                   </CVSection>
