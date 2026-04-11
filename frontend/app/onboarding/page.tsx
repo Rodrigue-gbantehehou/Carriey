@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import Image from 'next/image'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
@@ -28,7 +28,7 @@ const QUALIFICATIONS = [
     { id: 'expert', label: 'Plus de 10 ans' },
 ]
 
-export default function OnboardingPage() {
+function OnboardingPageContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const { setOnboardingData } = useEditorStore()
@@ -219,4 +219,11 @@ export default function OnboardingPage() {
             </div>
         </div>
     )
+}
+export default function OnboardingPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gray-50"><div className="animate-pulse text-gray-400">Chargement...</div></div>}>
+      <OnboardingPageContent />
+    </Suspense>
+  )
 }

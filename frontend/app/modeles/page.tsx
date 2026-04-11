@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSession } from 'next-auth/react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import config from '@/lib/config'
@@ -125,7 +125,7 @@ function TemplateCard({ template, onSelect, selectedSector, previewData }: { tem
   )
 }
 
-export default function ModelesPage() {
+function ModelesPageContent() {
   const { data: session } = useSession()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -335,5 +335,13 @@ export default function ModelesPage() {
         </div>
       </footer>
     </div>
+  )
+}
+
+export default function ModelesPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gray-50"><div className="animate-pulse text-gray-400">Chargement des modèles...</div></div>}>
+      <ModelesPageContent />
+    </Suspense>
   )
 }

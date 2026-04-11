@@ -1,5 +1,5 @@
 "use client"
-import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react'
+import React, { useEffect, useState, useCallback, useRef, useMemo, Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
@@ -128,7 +128,7 @@ const getSampleData = (sector: string | null) => {
 
 type SidebarTab = 'content' | 'design' | 'sections' | 'ai'
 
-export default function EditorPage() {
+function EditorPageContent() {
   const {
     template, setTemplate, setData, moveSection,
     selected, setSelected, updateSectionStyle, updateColors, data,
@@ -1260,5 +1260,19 @@ export default function EditorPage() {
         templateName={(template as any)?.name || "Modèle Premium"}
       />
     </div>
+  )
+}
+export default function EditorPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-[#F5F5F5]">
+        <div className="text-center">
+          <div className="w-10 h-10 border-2 border-[#00C896] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-[#777777] text-sm">Chargement de l&apos;éditeur...</p>
+        </div>
+      </div>
+    }>
+      <EditorPageContent />
+    </Suspense>
   )
 }

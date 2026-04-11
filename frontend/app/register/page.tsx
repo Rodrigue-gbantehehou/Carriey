@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import RegisterForm from '@/components/auth/RegisterForm';
 
 export const metadata = {
@@ -6,5 +7,9 @@ export const metadata = {
 };
 
 export default function RegisterPage() {
-  return <RegisterForm />;
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gray-50"><div className="animate-pulse text-gray-400">Chargement...</div></div>}>
+      <RegisterForm />
+    </Suspense>
+  );
 }
