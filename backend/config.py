@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     HF_TOKEN: Optional[str] = None
     
     # Security
-    BACKEND_CORS_ORIGINS: List[str] = [
+    BACKEND_CORS_ORIGINS: Union[List[str], str] = [
         "http://localhost:5000",
         "http://127.0.0.1:5000",
         "http://localhost:3000",
