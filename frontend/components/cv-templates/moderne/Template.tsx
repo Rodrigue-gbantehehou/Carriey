@@ -1,5 +1,6 @@
 import React from 'react';
 import { TemplateProps } from '@/types/cv';
+import Image from 'next/image';
 import { TemplateStyles, RemoteStyles, CVSection, ItemGroup } from '../BaseComponents';
 import { getSafeData, isSectionEnabled, getSectionLabel } from '../utils';
 
@@ -55,8 +56,13 @@ const ModerneTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBa
           {isSectionEnabled(config, 'photo') && (
             <div className="profile-photo-wrap">
               {profile.photo ? (
-                <div className="profile-photo">
-                  <img src={profile.photo} alt={profile.name} />
+                <div className="profile-photo relative overflow-hidden h-full w-full">
+                  <Image 
+                    src={profile.photo} 
+                    alt={profile.name} 
+                    fill 
+                    className="object-cover"
+                  />
                 </div>
               ) : (
                 <div className="photo-placeholder">

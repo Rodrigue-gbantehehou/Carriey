@@ -1,5 +1,6 @@
 import React from 'react';
 import { TemplateProps } from '@/types/cv';
+import Image from 'next/image';
 import { TemplateStyles, RemoteStyles, CVSection, ItemGroup, SkillTag } from '../BaseComponents';
 import { getSafeData, isSectionEnabled, getSectionLabel } from '../utils';
 
@@ -24,8 +25,13 @@ const AbidjanTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBa
         {isSectionEnabled(config, 'photo') && (
           <div className="profile-photo-wrap" style={{ transform: config.tokens.spacing === 'compact' ? 'scale(0.85)' : 'none' }}>
             {profile.photo ? (
-              <div className="profile-photo">
-                <img src={profile.photo} alt={profile.name} />
+              <div className="profile-photo relative overflow-hidden h-full w-full">
+                <Image 
+                  src={profile.photo} 
+                  alt={profile.name} 
+                  fill 
+                  className="object-cover"
+                />
               </div>
             ) : (
               <div className="photo-placeholder"><i className="fas fa-user"></i></div>
@@ -148,7 +154,7 @@ const AbidjanTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBa
               );
             case 'interests':
               return data.interests && data.interests.length > 0 && (
-                <CVSection key="interests" title={getSectionLabel(config, 'interests', 'Centres d\'Intérêt')} icon="fas fa-heart">
+                <CVSection key="interests" title={getSectionLabel(config, 'interests', 'Centres d&apos;Intérêt')} icon="fas fa-heart">
                   <div className="interests-list">
                     {data.interests.map((interest: string, iIdx: number) => (
                       <span key={iIdx} className="interest-tag">{interest}</span>

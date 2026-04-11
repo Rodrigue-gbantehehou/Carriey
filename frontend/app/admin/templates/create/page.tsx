@@ -339,7 +339,7 @@ export default function CreateTemplatePage() {
                   </h3>
                 </div>
                 <p className={`text-sm ${creationMode === 'config' ? 'text-blue-700' : 'text-gray-600'}`}>
-                  Créez un template avec l'assistant de configuration. Idéal pour débuter.
+                  Créez un template avec l&apos;assistant de configuration. Idéal pour débuter.
                 </p>
               </button>
 

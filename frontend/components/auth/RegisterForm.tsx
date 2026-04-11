@@ -162,7 +162,7 @@ export default function RegisterForm() {
               disabled={isLoading}
               className={`group relative w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${isLoading ? 'opacity-70 cursor-not-allowed' : ''} transition-all shadow-lg shadow-blue-500/20`}
             >
-              {isLoading ? 'Inscription en cours...' : 'S\'inscrire'}
+              {isLoading ? 'Inscription en cours...' : 'S&apos;inscrire'}
             </button>
           </div>
         </form>
@@ -180,7 +180,7 @@ export default function RegisterForm() {
           </div>
           <div className="mt-2 text-center text-sm text-gray-600">
             <Link href="/terms" className="font-medium text-blue-600 hover:text-blue-500">
-              Conditions d'utilisation
+              Conditions d&apos;utilisation
             </Link>
             {' '}et{' '}
             <Link href="/privacy" className="font-medium text-blue-600 hover:text-blue-500">

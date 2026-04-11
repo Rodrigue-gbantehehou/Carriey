@@ -60,9 +60,9 @@ export default function FAQPage() {
 
         <div className="mt-20 bg-brand-text rounded-3xl p-8 sm:p-12 text-center text-white relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-brand-cta opacity-10 blur-3xl rounded-full -mr-20 -mt-20"></div>
-          <h2 className="text-3xl font-bold mb-4 relative z-10">Vous avez d'autres questions ?</h2>
+          <h2 className="text-3xl font-bold mb-4 relative z-10">Vous avez d&apos;autres questions ?</h2>
           <p className="text-white/70 mb-8 relative z-10 max-w-lg mx-auto">
-            Notre équipe est là pour vous accompagner dans votre recherche d'emploi.
+            Notre équipe est là pour vous accompagner dans votre recherche d&apos;emploi.
           </p>
           <Link 
             href="/contact"

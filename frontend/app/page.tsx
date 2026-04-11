@@ -61,7 +61,7 @@ export default function Home() {
               href="/onboarding?step=experience"
               className="px-8 py-5 bg-brand-text text-white font-black rounded-full hover:bg-black shadow-2xl shadow-black/10 hover:scale-105 transition-all text-lg group text-center"
             >
-              Créer mon CV – <span className="text-brand-cta font-black">C'est Gratuit</span>
+              Créer mon CV – <span className="text-brand-cta font-black">C&apos;est Gratuit</span>
             </Link>
               <Link
                 href="#modeles"
@@ -191,7 +191,7 @@ export default function Home() {
               </div>
               <h2 className="text-4xl sm:text-6xl font-black text-brand-text tracking-tighter leading-[0.9] mb-16">
                 Votre carrière mérite <br />
-                <span className="text-brand-cta">l'excellence.</span>
+                <span className="text-brand-cta">l&apos;excellence.</span>
               </h2>
               
               <div className="relative space-y-16">
@@ -246,9 +246,9 @@ export default function Home() {
               { icon: '📊', title: 'Analyse ATS', desc: 'Compatibilité garantie avec les systèmes de tri des recruteurs' },
               { icon: '🎯', title: 'Guidage expert', desc: 'Recommandations basées sur les standards du recrutement' },
               { icon: '⚡', title: 'Rédaction IA', desc: 'Formulations optimisées pour maximiser votre impact' },
-              { icon: '📝', title: 'Export professionnel', desc: 'PDF haute résolution et formats standards de l\'industrie' },
+              { icon: '📝', title: 'Export professionnel', desc: 'PDF haute résolution et formats standards de l&apos;industrie' },
               { icon: '🔧', title: 'Personnalisation avancée', desc: 'Adaptez chaque détail tout en conservant le professionnalisme' },
-              { icon: '📱', title: 'Multi-formats', desc: 'Optimisé pour l\'impression, le web et les applications mobiles' }
+              { icon: '📱', title: 'Multi-formats', desc: 'Optimisé pour l&apos;impression, le web et les applications mobiles' }
             ].map((feature, index) => (
               <div key={index} className="p-8 rounded-2xl bg-brand-bg hover:shadow-xl transition-all duration-300 group border border-gray-100 hover:border-brand-cta/30">
               

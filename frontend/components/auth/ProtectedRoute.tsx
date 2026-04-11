@@ -51,7 +51,7 @@ export default function ProtectedRoute({
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-red-500 mb-4">Accès refusé</h1>
-          <p>Vous n'avez pas les droits nécessaires pour accéder à cette page.</p>
+          <p>Vous n&apos;avez pas les droits nécessaires pour accéder à cette page.</p>
         </div>
       </div>
     );

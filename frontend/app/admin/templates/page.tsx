@@ -26,54 +26,55 @@ export default function TemplatesPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    const fetchTemplates = async () => {
+      console.log('🔍 fetchTemplates called')
+      console.log('🔍 Session:', session)
+      console.log('🔍 Status:', status)
+      console.log('🔍 Token exists:', !!session?.user?.accessToken)
+
+      if (!session?.user?.accessToken) {
+        console.error('❌ Token d\'authentification non trouvé')
+        toast.error('Token d\'authentification non trouvé')
+        return
+      }
+
+      console.log('🔍 API URL:', `${config.apiBaseUrl}/admin/templates/`)
+
+      try {
+        const response = await fetch(`${config.apiBaseUrl}/admin/templates/`, {
+          headers: {
+            'Authorization': `Bearer ${session.user.accessToken}`,
+            'Content-Type': 'application/json'
+          }
+        })
+
+        console.log('🔍 Response status:', response.status)
+        console.log('🔍 Response ok:', response.ok)
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}))
+          console.error('❌ Error data:', errorData)
+          throw new Error(errorData.detail || 'Impossible de charger les templates')
+        }
+
+        const data = await response.json()
+        console.log('✅ Templates loaded:', data)
+        setTemplates(data)
+      } catch (error) {
+        console.error('❌ Fetch error:', error)
+        toast.error('Erreur lors du chargement des templates')
+      } finally {
+        setLoading(false)
+      }
+    }
+
     if (status === 'authenticated') {
       fetchTemplates()
     } else if (status === 'unauthenticated') {
       toast.error('Veuillez vous connecter pour accéder à cette page')
-    }
-  }, [status])
-
-  const fetchTemplates = async () => {
-    console.log('🔍 fetchTemplates called')
-    console.log('🔍 Session:', session)
-    console.log('🔍 Status:', status)
-    console.log('🔍 Token exists:', !!session?.user?.accessToken)
-
-    if (!session?.user?.accessToken) {
-      console.error('❌ Token d\'authentification non trouvé')
-      toast.error('Token d\'authentification non trouvé')
-      return
-    }
-
-    console.log('🔍 API URL:', `${config.apiBaseUrl}/admin/templates/`)
-
-    try {
-      const response = await fetch(`${config.apiBaseUrl}/admin/templates/`, {
-        headers: {
-          'Authorization': `Bearer ${session.user.accessToken}`,
-          'Content-Type': 'application/json'
-        }
-      })
-
-      console.log('🔍 Response status:', response.status)
-      console.log('🔍 Response ok:', response.ok)
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        console.error('❌ Error data:', errorData)
-        throw new Error(errorData.detail || 'Impossible de charger les templates')
-      }
-
-      const data = await response.json()
-      console.log('✅ Templates loaded:', data)
-      setTemplates(data)
-    } catch (error) {
-      console.error('❌ Fetch error:', error)
-      toast.error('Erreur lors du chargement des templates')
-    } finally {
       setLoading(false)
     }
-  }
+  }, [status, session])
 
   const toggleTemplate = async (templateId: string, currentStatus: boolean) => {
     if (!session?.user?.accessToken) {

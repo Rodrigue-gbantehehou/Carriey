@@ -62,7 +62,7 @@ export default function DebugTemplatesPage() {
       <h1 className="text-2xl font-bold mb-4">Debug Templates API</h1>
       
       <div className="bg-gray-100 p-4 rounded mb-4">
-        <h2 className="font-bold mb-2">État de l'authentification:</h2>
+        <h2 className="font-bold mb-2">État de l&apos;authentification:</h2>
         <pre className="text-sm">
           {JSON.stringify({
             status: status,
@@ -86,7 +86,7 @@ export default function DebugTemplatesPage() {
       </div>
 
       <div className="bg-gray-100 p-4 rounded mb-4">
-        <h2 className="font-bold mb-2">Résultat de l'API:</h2>
+        <h2 className="font-bold mb-2">Résultat de l&apos;API:</h2>
         <pre className="text-sm">
           {JSON.stringify(debugInfo, null, 2)}
         </pre>

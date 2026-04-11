@@ -53,7 +53,7 @@ function SetPasswordContent() {
         <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center">
           <h1 className="text-2xl font-bold text-red-600 mb-4">Lien Invalide</h1>
           <p className="text-gray-600 mb-6">Ce lien de configuration du mot de passe est manquant ou invalide.</p>
-          <button onClick={() => router.push('/')} className="bg-brand-cta text-white px-6 py-2 rounded-xl font-bold">Retour à l'accueil</button>
+          <button onClick={() => router.push('/')} className="bg-brand-cta text-white px-6 py-2 rounded-xl font-bold">Retour à l&apos;accueil</button>
         </div>
       </div>
     )

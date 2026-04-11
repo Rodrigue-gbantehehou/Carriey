@@ -24,27 +24,29 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await fetch(`${config.apiBaseUrl}/admin/stats/overview`, {
+          headers: {
+            'Authorization': `Bearer ${session?.user?.accessToken}`
+          }
+        })
+        if (!res.ok) throw new Error('Erreur lors du chargement des statistiques')
+        const data = await res.json()
+        setStats(data)
+      } catch (err: any) {
+        toast.error(err.message)
+      } finally {
+        setLoading(false)
+      }
+    }
+
     if (session?.user?.accessToken) {
       fetchStats()
-    }
-  }, [session])
-
-  const fetchStats = async () => {
-    try {
-      const res = await fetch(`${config.apiBaseUrl}/admin/stats/overview`, {
-        headers: {
-          'Authorization': `Bearer ${session?.user?.accessToken}`
-        }
-      })
-      if (!res.ok) throw new Error('Erreur lors du chargement des statistiques')
-      const data = await res.json()
-      setStats(data)
-    } catch (err: any) {
-      toast.error(err.message)
-    } finally {
+    } else if (!session) {
       setLoading(false)
     }
-  }
+  }, [session])
 
   const StatCard = ({ title, value, icon, color, subValue }: { title: string, value: string | number, icon: any, color: string, subValue?: string }) => (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
@@ -140,7 +142,7 @@ export default function AdminDashboard() {
               </div>
               <div>
                 <p className="font-semibold text-gray-900">Nouveau Template</p>
-                <p className="text-xs text-gray-500">Ajouter via l'assistant</p>
+                <p className="text-xs text-gray-500">Ajouter via l&apos;assistant</p>
               </div>
             </Link>
             <Link
@@ -175,7 +177,7 @@ export default function AdminDashboard() {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
               </div>
               <div>
-                <p className="font-semibold text-gray-900">Journaux d'Audit</p>
+                 <p className="font-semibold text-gray-900">Journaux d&apos;Audit</p>
                 <p className="text-xs text-gray-500">Sécurité et traçabilité</p>
               </div>
             </Link>
@@ -186,7 +188,7 @@ export default function AdminDashboard() {
           <h3 className="font-bold text-gray-900 mb-4">Support & Aide</h3>
           <div className="space-y-4">
             <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
-              <p className="text-sm text-blue-800 font-medium mb-1">Besoin d'aide ?</p>
+              <p className="text-sm text-blue-800 font-medium mb-1">Besoin d&apos;aide ?</p>
               <p className="text-xs text-blue-600">Consultez la documentation pour apprendre à créer des templates complexes.</p>
               <button className="mt-3 text-sm font-semibold text-blue-700 hover:text-blue-900">Lire la doc →</button>
             </div>

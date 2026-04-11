@@ -214,8 +214,8 @@ export default function EditorPage() {
     "Parlez-nous de vos expériences professionnelles les plus récentes. Concentrez-vous sur vos réalisations.",
     "Quelles sont vos formations ? Indiquez même les certifications courtes.",
     "Quelles sont vos compétences clés pour ce poste ? Soyez précis sur vos outils techniques.",
-    "Quelles langues maîtrisez-vous ? N'oubliez pas d'indiquer votre niveau réel.",
-    "Super ! Enfin, personnalisons le design de votre CV pour qu'il vous ressemble parfaitement."
+    "Quelles langues maîtrisez-vous ? N&apos;oubliez pas d&apos;indiquer votre niveau réel.",
+    "Super ! Enfin, personnalisons le design de votre CV pour qu&apos;il vous ressemble parfaitement."
   ]
 
   const STEP_TITLES = ['Profil', 'Expérience', 'Formation', 'Compétences', 'Langues', 'Design']
@@ -344,7 +344,7 @@ export default function EditorPage() {
       }
     }
     initEditor()
-  }, [searchParams, session, router])
+  }, [searchParams, session, router, onboardingData])
 
   // ── Save ───────────────────────────────────────────────────────────────────
   const saveResume = useCallback(async (showToast = true) => {
@@ -1189,7 +1189,7 @@ export default function EditorPage() {
             ) : (
               <div className="flex flex-col items-center justify-center gap-4 mt-24">
                 <div className="w-10 h-10 border-2 border-[#00C896] border-t-transparent rounded-full animate-spin" />
-                <p className="text-sm text-[#777777]">Chargement de l'aperçu...</p>
+                <p className="text-sm text-[#777777]">Chargement de l&apos;aperçu...</p>
               </div>
             )}
           </div>

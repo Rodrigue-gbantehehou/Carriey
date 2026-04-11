@@ -20,9 +20,9 @@ export default async function AdminLayout({
             <div className="min-h-screen flex items-center justify-center bg-gray-100">
                 <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full">
                     <h1 className="text-2xl font-bold text-red-600 mb-4">Accès Refusé</h1>
-                    <p className="mb-6">Vous n'avez pas les droits nécessaires pour accéder à cette section.</p>
+                    <p className="mb-6">Vous n&apos;avez pas les droits nécessaires pour accéder à cette section.</p>
                     <Link href="/" className="text-blue-600 hover:underline">
-                        Retour à l'accueil
+                        Retour à l&apos;accueil
                     </Link>
                 </div>
             </div>

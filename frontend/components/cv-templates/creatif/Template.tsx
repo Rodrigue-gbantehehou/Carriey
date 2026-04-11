@@ -1,5 +1,6 @@
 import React from 'react';
 import { TemplateProps } from '@/types/cv';
+import Image from 'next/image';
 import { TemplateStyles, RemoteStyles, CVSection, ItemGroup, SkillTag } from '../BaseComponents';
 import { getSafeData, isSectionEnabled, getSectionLabel } from '../utils';
 
@@ -17,8 +18,13 @@ const CreatifTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBa
         <div className="profile-section">
           {isSectionEnabled(config, 'photo') && (
             profile.photo ? (
-              <div className="profile-image">
-                <img src={profile.photo} alt={profile.name} />
+              <div className="profile-image relative overflow-hidden h-full w-full">
+                <Image 
+                  src={profile.photo} 
+                  alt={profile.name} 
+                  fill 
+                  className="object-cover"
+                />
               </div>
             ) : (
               <div className="photo-placeholder">

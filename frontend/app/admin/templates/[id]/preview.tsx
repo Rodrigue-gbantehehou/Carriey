@@ -111,7 +111,7 @@ export default function TemplatePreview({ template }: TemplatePreviewProps) {
         <div className="space-y-4">
             <div className="flex items-center justify-between">
                 <p className="text-sm text-gray-600">
-                    Cliquez sur le bouton pour générer une prévisualisation du template avec des données d'exemple.
+                    Cliquez sur le bouton pour générer une prévisualisation du template avec des données d&apos;exemple.
                 </p>
                 <button
                     onClick={generatePreview}
@@ -228,7 +228,7 @@ export default function TemplatePreview({ template }: TemplatePreviewProps) {
                     </svg>
                     <h3 className="mt-2 text-sm font-medium text-gray-900">Aucune prévisualisation</h3>
                     <p className="mt-1 text-sm text-gray-500">
-                        Cliquez sur "Générer la prévisualisation" pour voir le template avec des données d'exemple.
+                        Cliquez sur &quot;Générer la prévisualisation&quot; pour voir le template avec des données d&apos;exemple.
                     </p>
                 </div>
             )}

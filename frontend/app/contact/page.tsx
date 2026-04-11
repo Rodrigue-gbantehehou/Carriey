@@ -33,7 +33,7 @@ export default function ContactPage() {
             <div className="relative z-10">
               <h1 className="text-4xl font-black mb-6">Parlons de votre <span className="text-brand-cta">futur</span>.</h1>
               <p className="text-gray-400 font-medium leading-relaxed mb-12">
-                Vous avez une question, une suggestion ou besoin d'aide ? Notre équipe ivoirienne est à votre écoute.
+                Vous avez une question, une suggestion ou besoin d&apos;aide ? Notre équipe ivoirienne est à votre écoute.
               </p>
 
               <div className="space-y-8">
@@ -58,7 +58,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Siège social</p>
-                    <p className="font-bold">Abidjan, Côte d'Ivoire</p>
+                    <p className="font-bold">Abidjan, Côte d&apos;Ivoire</p>
                   </div>
                 </div>
               </div>

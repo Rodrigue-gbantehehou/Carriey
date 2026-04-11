@@ -168,7 +168,7 @@ export default function ModelesPage() {
            setSelectedSector(matched || data[0])
         }
       })
-  }, [])
+  }, [searchParams])
 
   useEffect(() => {
     if (!selectedSector) return
@@ -253,7 +253,7 @@ export default function ModelesPage() {
               />
             </div>
             <div className="flex-1">
-              <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Secteur d'activité</label>
+              <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Secteur d&apos;activité</label>
               <div className="relative">
                 <select
                   value={selectedSector}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { TemplateProps } from '@/types/cv';
+import Image from 'next/image';
 import { TemplateStyles, RemoteStyles, CVSection, ItemGroup, SkillBar, DateRange, SkillTag } from '../BaseComponents';
 import { getSafeData, isSectionEnabled, getSectionLabel } from '../utils';
 
@@ -16,8 +17,13 @@ const TokyoTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBase
         {isSectionEnabled(config, 'photo') && (
           <div className="profile-photo-wrap">
             {profile.photo ? (
-              <div className="profile-photo">
-                <img src={profile.photo} alt={profile.name} />
+              <div className="profile-photo relative overflow-hidden h-full w-full">
+                <Image 
+                  src={profile.photo} 
+                  alt={profile.name} 
+                  fill 
+                  className="object-cover"
+                />
               </div>
             ) : (
               <div className="photo-placeholder"><i className="fas fa-user"></i></div>
@@ -127,7 +133,7 @@ const TokyoTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBase
               );
             case 'experience':
               return experience && experience.length > 0 && (
-                <CVSection key="experience" title={getSectionLabel(config, 'experience', 'Expériences professionnel')} className="content-section">
+                <CVSection key="experience" title={getSectionLabel(config, 'experience', 'Expériences professionnelles')} className="content-section">
                   {experience.map((exp: any, idx: number) => (
                     <ItemGroup 
                       key={idx} 

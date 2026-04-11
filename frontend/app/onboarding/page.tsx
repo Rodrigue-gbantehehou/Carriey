@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import Image from 'next/image'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useEditorStore } from '@/store/editor'
@@ -83,7 +84,7 @@ export default function OnboardingPage() {
                             </div>
                             <h1 className="text-3xl sm:text-4xl font-black text-brand-text tracking-tight leading-tight">
                                 Quel est votre <br />
-                                <span className="text-brand-cta">secteur d'activité ?</span>
+                                <span className="text-brand-cta">secteur d&apos;activité ?</span>
                             </h1>
                             <p className="text-brand-muted font-medium max-w-sm mx-auto">
                                 Nous pré-remplirons votre CV avec des exemples adaptés à votre domaine.
@@ -116,10 +117,10 @@ export default function OnboardingPage() {
                             </div>
                             <h1 className="text-3xl sm:text-4xl font-black text-brand-text tracking-tight leading-tight">
                                 Quel est votre <br />
-                                <span className="text-brand-cta">niveau d'expérience ?</span>
+                                <span className="text-brand-cta">niveau d&apos;expérience ?</span>
                             </h1>
-                            <p className="text-brand-muted font-medium max-w-sm mx-auto">
-                                Nous personnaliserons les modèles pour qu'ils correspondent parfaitement à votre parcours.
+                             <p className="text-brand-muted font-medium max-w-sm mx-auto">
+                                Nous personnaliserons les modèles pour qu&apos;ils correspondent parfaitement à votre parcours.
                             </p>
                         </div>
 
@@ -201,8 +202,13 @@ export default function OnboardingPage() {
             <div className="mt-12 flex items-center gap-6">
                 <div className="flex -space-x-3">
                     {[1, 2, 3, 4].map((i) => (
-                        <div key={i} className="w-10 h-10 rounded-full border-2 border-white bg-gray-200 overflow-hidden shadow-sm">
-                            <img src={`https://i.pravatar.cc/100?img=${i + 20}`} alt="user" className="w-full h-full object-cover grayscale opacity-80" />
+                        <div key={i} className="w-10 h-10 rounded-full border-2 border-white bg-gray-200 overflow-hidden shadow-sm relative">
+                            <Image 
+                                src={`https://i.pravatar.cc/100?img=${i + 20}`} 
+                                alt="user" 
+                                fill
+                                className="object-cover grayscale opacity-80" 
+                            />
                         </div>
                     ))}
                 </div>
