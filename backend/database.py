@@ -3,6 +3,11 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
 from dotenv import load_dotenv
+import pymysql
+
+# Rediriger toutes les tentatives d'import de MySQLdb vers pymysql
+# C'est nécessaire pour SQLAlchemy sur Render quand mysqlclient n'est pas installé
+pymysql.install_as_MySQLdb()
 
 load_dotenv()
 
