@@ -9,6 +9,10 @@ load_dotenv()
 # Récupérer l'URL de la base de données depuis les variables d'environnement
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./cvtor.db")
 
+# Si on utilise MySQL, on force l'utilisation de pymysql (plus simple sur Render)
+if DATABASE_URL.startswith("mysql://"):
+    DATABASE_URL = DATABASE_URL.replace("mysql://", "mysql+pymysql://", 1)
+
 # Pour SQLite, on a besoin de cette option pour gérer les requêtes multithread
 # Pour SQLite, on a besoin de cette option pour gérer les requêtes multithread
 if DATABASE_URL.startswith("sqlite"):
