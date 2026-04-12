@@ -51,8 +51,8 @@ backend/static/*
 **/patch_templates.py
 **/check_data.py
 **/inspect_db.py
-**/seed_data.py
-**/create_tables.py
+# **/seed_data.py
+# **/create_tables.py
 **/test_flow.py
 **/verify_api.py
 **/test_api.py
@@ -64,9 +64,9 @@ backend/static/*
 **/render_nevil_pdf.bat
 **/run_api.bat
 **/add_creatif_template.py
-**/export_docx.py
-**/render_cv.py
-**/generate_pdf_from_html.py
+# **/export_docx.py
+# **/render_cv.py
+# **/generate_pdf_from_html.py
 **/cv_secure.pdf
 **/test_weasy.pdf
 **/CV_*.pdf
