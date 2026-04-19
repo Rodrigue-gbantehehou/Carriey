@@ -3,17 +3,14 @@ const path = require('path');
 
 const nextConfig = {
   reactStrictMode: true,
-  sassOptions: {
-    includePaths: [path.join(__dirname, 'styles')],
-  },
   webpack: (config) => {
     // Configuration des alias
     config.resolve.alias['@'] = path.resolve(__dirname);
     return config;
   },
   async rewrites() {
-    // En production sur Vercel, on préfère appeler l'API directement via NEXT_PUBLIC_API_URL
-    // Mais on garde la réecriture pour le développement local
+    // En production sur Vercel, l'API est appelée directement via NEXT_PUBLIC_API_URL
+    // Le proxy local n'est utilisé qu'en développement
     if (process.env.NODE_ENV === 'production') {
       return [];
     }
@@ -22,7 +19,7 @@ const nextConfig = {
         source: '/backend/:path*',
         destination: 'http://localhost:8000/:path*',
       },
-    ]
+    ];
   },
 };
 
