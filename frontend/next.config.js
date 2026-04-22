@@ -2,11 +2,22 @@
 const nextConfig = {
   reactStrictMode: true,
 
-  // Empêche Next.js de bundler nunjucks côté serveur.
-  // nunjucks est un package CommonJS qui utilise __dirname en interne,
-  // ce qui provoque un ReferenceError sur Vercel (ESM runtime).
-  // Il est utilisé uniquement côté client via nunjucks/browser/nunjucks.js.
-  serverExternalPackages: ['nunjucks'],
+  // Fix "ReferenceError: __dirname is not defined" sur Vercel.
+  // Certains packages CJS (ex: @prisma/client, nunjucks) utilisent __dirname
+  // en interne. Quand Next.js les bundle en ESM côté serveur, __dirname
+  // n'existe pas. Ce fix webpack l'injecte explicitement dans le bundle serveur.
+  serverExternalPackages: ['nunjucks', '@prisma/client', '@auth/prisma-adapter'],
+
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.node = {
+        ...config.node,
+        __dirname: true,
+        __filename: true,
+      };
+    }
+    return config;
+  },
 
   async rewrites() {
     if (process.env.NODE_ENV === 'production') {
