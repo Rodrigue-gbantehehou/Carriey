@@ -3,11 +3,13 @@ const nextConfig = {
   reactStrictMode: true,
 
   // Fix "ReferenceError: __dirname is not defined" sur Vercel.
-  // Certains packages CJS (ex: @prisma/client, nunjucks) utilisent __dirname
-  // en interne. Quand Next.js les bundle en ESM côté serveur, __dirname
-  // n'existe pas. Ce fix webpack l'injecte explicitement dans le bundle serveur.
-  serverExternalPackages: ['nunjucks', '@prisma/client', '@auth/prisma-adapter'],
+  // serverComponentsExternalPackages empêche Next.js de bundler ces packages
+  // en ESM (où __dirname n'existe pas). Ils sont chargés via require() natif.
+  experimental: {
+    serverComponentsExternalPackages: ['nunjucks', '@prisma/client', '@auth/prisma-adapter', 'bcryptjs'],
+  },
 
+  // Fallback: injecte __dirname dans tous les bundles webpack serveur.
   webpack: (config, { isServer }) => {
     if (isServer) {
       config.node = {
