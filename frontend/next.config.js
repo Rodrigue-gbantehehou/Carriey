@@ -6,7 +6,7 @@ const nextConfig = {
   // serverComponentsExternalPackages empêche Next.js de bundler ces packages
   // en ESM (où __dirname n'existe pas). Ils sont chargés via require() natif.
   experimental: {
-    serverComponentsExternalPackages: ['nunjucks', '@prisma/client', '@auth/prisma-adapter', 'bcryptjs'],
+    serverComponentsExternalPackages: [],
   },
 
   // Fallback: injecte __dirname dans tous les bundles webpack serveur.
