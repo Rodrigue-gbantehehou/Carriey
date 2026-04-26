@@ -18,12 +18,12 @@ const RodrigueTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiB
         {isSectionEnabled(config, 'photo') && (
           <div className="profile-photo-wrap">
             {profile.photo ? (
-              <div className="profile-photo relative overflow-hidden h-full w-full">
+              <div className="profile-photo" style={{ position: 'relative', overflow: 'hidden', borderRadius: 'var(--photo-shape, 50%)' }}>
                 <Image 
                   src={profile.photo} 
                   alt={profile.name || 'Photo'} 
                   fill 
-                  className="object-cover"
+                  style={{ objectFit: 'cover' }}
                 />
               </div>
             ) : (

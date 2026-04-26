@@ -18,12 +18,12 @@ const CreatifTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBa
         <div className="profile-section">
           {isSectionEnabled(config, 'photo') && (
             profile.photo ? (
-              <div className="profile-image relative overflow-hidden h-full w-full">
+              <div className="profile-image" style={{ position: 'relative', overflow: 'hidden', borderRadius: 'var(--photo-shape, 50%)' }}>
                 <Image 
                   src={profile.photo} 
                   alt={profile.name} 
                   fill 
-                  className="object-cover"
+                  style={{ objectFit: 'cover' }}
                 />
               </div>
             ) : (
