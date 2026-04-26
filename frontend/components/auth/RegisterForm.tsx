@@ -33,18 +33,30 @@ export default function RegisterForm() {
     try {
       setIsLoading(true);
       setError('');
+      console.log("[Register] Starting registration for:", email);
+      console.log("[Register] API URL:", config.apiBaseUrl);
 
       // 1. Register via API
-      const res = await fetch(`${config.apiBaseUrl}/auth/register`, {
+      const registerUrl = `${config.apiBaseUrl}/auth/register`;
+      const res = await fetch(registerUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password, full_name: 'Utilisateur' }) 
       });
 
+      console.log("[Register] Response status:", res.status);
+
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.detail || 'Erreur inscription');
+        let errorData;
+        try {
+          errorData = await res.json();
+        } catch (e) {
+          errorData = { detail: "Erreur serveur inconnue" };
+        }
+        throw new Error(errorData.detail || 'Erreur lors de l\'inscription');
       }
+
+      console.log("[Register] Success! Attempting auto-login...");
 
       // 2. Auto login
       const result = await signIn('credentials', {
@@ -54,13 +66,15 @@ export default function RegisterForm() {
       });
 
       if (result?.error) {
+        console.error("[Register] Auto-login error:", result.error);
         router.push(`/login?callbackUrl=${callbackUrl}`);
       } else {
+        console.log("[Register] Auto-login success! Redirecting...");
         router.push(callbackUrl);
       }
     } catch (err: any) {
-      setError(err.message || 'Une erreur est survenue lors de l\'inscription.');
-      console.error('Registration error:', err);
+      console.error("[Register] Exception:", err);
+      setError(err.message || 'Impossible de contacter le serveur. Vérifiez votre connexion.');
     } finally {
       setIsLoading(false);
     }
@@ -74,15 +88,15 @@ export default function RegisterForm() {
       <div className="absolute -bottom-8 left-20 w-72 h-72 bg-[#00C896] rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-4000"></div>
 
       <div className="max-w-md w-full relative">
-        <div className="glass-emerald rounded-[2rem] shadow-2xl p-8 sm:p-10">
-          <div className="text-center mb-10">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-[#00C896] rounded-2xl mb-6 shadow-lg shadow-[#00C896]/20">
-              <User className="text-white w-8 h-8" />
+        <div className="glass-emerald rounded-3xl sm:rounded-[2rem] shadow-2xl p-6 sm:p-10">
+          <div className="text-center mb-8 sm:mb-10">
+            <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 bg-[#00C896] rounded-2xl mb-4 sm:mb-6 shadow-lg shadow-[#00C896]/20">
+              <User className="text-white w-7 h-7 sm:w-8 sm:h-8" />
             </div>
-            <h2 className="text-3xl font-black text-[#1C1C1C] tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-black text-[#1C1C1C] tracking-tight">
               Créer un compte
             </h2>
-            <p className="mt-3 text-[#777777] font-medium">
+            <p className="mt-2 sm:mt-3 text-[#777777] font-medium text-sm sm:text-base">
               Rejoignez-nous pour créer votre CV
             </p>
           </div>

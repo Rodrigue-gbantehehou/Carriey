@@ -5,6 +5,7 @@ import { signIn } from 'next-auth/react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Mail, Lock, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
+import config from '@/lib/config';
 
 export default function LoginForm() {
   const [email, setEmail] = useState('');
@@ -26,6 +27,8 @@ export default function LoginForm() {
     try {
       setIsLoading(true);
       setError('');
+      console.log("[Login] Starting login for:", email);
+      console.log("[Login] API URL:", config.apiBaseUrl);
 
       const result = await signIn('credentials', {
         redirect: false,
@@ -33,14 +36,18 @@ export default function LoginForm() {
         password,
       });
 
+      console.log("[Login] Result:", result);
+
       if (result?.error) {
-        setError('Identifiants invalides. Veuillez réessayer.');
+        console.error("[Login] Auth error:", result.error);
+        setError('Identifiants invalides ou erreur de connexion.');
       } else {
+        console.log("[Login] Success! Redirecting...");
         router.push(callbackUrl);
       }
-    } catch (err) {
-      setError('Une erreur est survenue');
-      console.error('Login error:', err);
+    } catch (err: any) {
+      console.error("[Login] Exception:", err);
+      setError('Impossible de contacter le serveur. Vérifiez votre connexion.');
     } finally {
       setIsLoading(false);
     }
@@ -54,15 +61,15 @@ export default function LoginForm() {
       <div className="absolute -bottom-8 left-20 w-72 h-72 bg-[#00C896] rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-4000"></div>
 
       <div className="max-w-md w-full relative">
-        <div className="glass-emerald rounded-[2rem] shadow-2xl p-8 sm:p-10">
-          <div className="text-center mb-10">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-[#00C896] rounded-2xl mb-6 shadow-lg shadow-[#00C896]/20">
-              <Lock className="text-white w-8 h-8" />
+        <div className="glass-emerald rounded-3xl sm:rounded-[2rem] shadow-2xl p-6 sm:p-10">
+          <div className="text-center mb-8 sm:mb-10">
+            <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 bg-[#00C896] rounded-2xl mb-4 sm:mb-6 shadow-lg shadow-[#00C896]/20">
+              <Lock className="text-white w-7 h-7 sm:w-8 sm:h-8" />
             </div>
-            <h2 className="text-3xl font-black text-[#1C1C1C] tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-black text-[#1C1C1C] tracking-tight">
               Bon retour parmi nous
             </h2>
-            <p className="mt-3 text-[#777777] font-medium">
+            <p className="mt-2 sm:mt-3 text-[#777777] font-medium text-sm sm:text-base">
               Connectez-vous pour continuer à créer
             </p>
           </div>

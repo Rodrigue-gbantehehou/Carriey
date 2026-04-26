@@ -41,10 +41,10 @@ export default function ForgotPasswordForm() {
       <div className="absolute -bottom-8 left-20 w-72 h-72 bg-[#00C896] rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-4000"></div>
 
       <div className="max-w-md w-full relative">
-        <div className="glass-emerald rounded-[2rem] shadow-2xl p-8 sm:p-10">
+        <div className="glass-emerald rounded-3xl sm:rounded-[2rem] shadow-2xl p-6 sm:p-10">
           <Link 
             href="/login" 
-            className="inline-flex items-center gap-2 text-sm font-bold text-[#777777] hover:text-[#00C896] transition-colors mb-8 group"
+            className="inline-flex items-center gap-2 text-sm font-bold text-[#777777] hover:text-[#00C896] transition-colors mb-6 sm:mb-8 group"
           >
             <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
             Retour à la connexion
@@ -52,14 +52,14 @@ export default function ForgotPasswordForm() {
 
           {!isSuccess ? (
             <>
-              <div className="text-center mb-10">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-[#00C896] rounded-2xl mb-6 shadow-lg shadow-[#00C896]/20">
-                  <Mail className="text-white w-8 h-8" />
+              <div className="text-center mb-8 sm:mb-10">
+                <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 bg-[#00C896] rounded-2xl mb-4 sm:mb-6 shadow-lg shadow-[#00C896]/20">
+                  <Mail className="text-white w-7 h-7 sm:w-8 sm:h-8" />
                 </div>
-                <h2 className="text-3xl font-black text-[#1C1C1C] tracking-tight">
+                <h2 className="text-2xl sm:text-3xl font-black text-[#1C1C1C] tracking-tight">
                   Mot de passe oublié ?
                 </h2>
-                <p className="mt-3 text-[#777777] font-medium leading-relaxed">
+                <p className="mt-2 sm:mt-3 text-[#777777] font-medium leading-relaxed text-sm sm:text-base">
                   Pas de panique ! Entrez votre email et nous vous enverrons un lien pour réinitialiser votre mot de passe.
                 </p>
               </div>
