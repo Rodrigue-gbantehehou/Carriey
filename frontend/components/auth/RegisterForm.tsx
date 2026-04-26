@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Mail, Lock, User, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
 import config from '@/lib/config';
 
 export default function RegisterForm() {
@@ -37,7 +38,7 @@ export default function RegisterForm() {
       const res = await fetch(`${config.apiBaseUrl}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, full_name: 'New User' }) // Default name
+        body: JSON.stringify({ email, password, full_name: 'Utilisateur' }) 
       });
 
       if (!res.ok) {
@@ -53,10 +54,9 @@ export default function RegisterForm() {
       });
 
       if (result?.error) {
-        // Should not happen immediately after success register but handle it
         router.push(`/login?callbackUrl=${callbackUrl}`);
       } else {
-        router.push(callbackUrl); // Redirect to dashboard or original target
+        router.push(callbackUrl);
       }
     } catch (err: any) {
       setError(err.message || 'Une erreur est survenue lors de l\'inscription.');
@@ -67,125 +67,120 @@ export default function RegisterForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Créer un compte
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Ou{' '}
-            <Link href="/login" className="font-medium text-blue-600 hover:text-blue-500">
-              connectez-vous à votre compte existant
-            </Link>
-          </p>
-        </div>
+    <div className="min-h-screen flex items-center justify-center bg-[#F5F5F5] relative overflow-hidden px-4 py-12">
+      {/* Background Blobs */}
+      <div className="absolute top-0 -left-4 w-72 h-72 bg-[#00C896] rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob"></div>
+      <div className="absolute top-0 -right-4 w-72 h-72 bg-[#00C896] rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-2000"></div>
+      <div className="absolute -bottom-8 left-20 w-72 h-72 bg-[#00C896] rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-4000"></div>
 
-        {error && (
-          <div className="bg-red-50 border-l-4 border-red-500 p-4">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm text-red-700">{error}</p>
-              </div>
+      <div className="max-w-md w-full relative">
+        <div className="glass-emerald rounded-[2rem] shadow-2xl p-8 sm:p-10">
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-[#00C896] rounded-2xl mb-6 shadow-lg shadow-[#00C896]/20">
+              <User className="text-white w-8 h-8" />
             </div>
+            <h2 className="text-3xl font-black text-[#1C1C1C] tracking-tight">
+              Créer un compte
+            </h2>
+            <p className="mt-3 text-[#777777] font-medium">
+              Rejoignez-nous pour créer votre CV
+            </p>
           </div>
-        )}
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="email-address" className="sr-only">
-                Adresse email
-              </label>
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+              <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+              <p className="text-sm text-red-600 font-medium">{error}</p>
+            </div>
+          )}
+
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            <div className="relative group">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#777777] group-focus-within:text-[#00C896] transition-colors">
+                <Mail className="w-5 h-5" />
+              </div>
               <input
                 id="email-address"
                 name="email"
                 type="email"
                 autoComplete="email"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2.5 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-xl focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                className="block w-full pl-11 pr-4 py-3.5 bg-white/50 border border-gray-200 rounded-2xl text-[#1C1C1C] placeholder:text-[#777777] focus:ring-2 focus:ring-[#00C896]/20 focus:border-[#00C896] focus:bg-white outline-none transition-all"
                 placeholder="Adresse email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Mot de passe
-              </label>
+
+            <div className="relative group">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#777777] group-focus-within:text-[#00C896] transition-colors">
+                <Lock className="w-5 h-5" />
+              </div>
               <input
                 id="password"
                 name="password"
                 type="password"
                 autoComplete="new-password"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2.5 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                className="block w-full pl-11 pr-4 py-3.5 bg-white/50 border border-gray-200 rounded-2xl text-[#1C1C1C] placeholder:text-[#777777] focus:ring-2 focus:ring-[#00C896]/20 focus:border-[#00C896] focus:bg-white outline-none transition-all"
                 placeholder="Mot de passe"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
-            <div>
-              <label htmlFor="confirm-password" className="sr-only">
-                Confirmer le mot de passe
-              </label>
+
+            <div className="relative group">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#777777] group-focus-within:text-[#00C896] transition-colors">
+                <Lock className="w-5 h-5" />
+              </div>
               <input
                 id="confirm-password"
                 name="confirm-password"
                 type="password"
                 autoComplete="new-password"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2.5 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-xl focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                className="block w-full pl-11 pr-4 py-3.5 bg-white/50 border border-gray-200 rounded-2xl text-[#1C1C1C] placeholder:text-[#777777] focus:ring-2 focus:ring-[#00C896]/20 focus:border-[#00C896] focus:bg-white outline-none transition-all"
                 placeholder="Confirmer le mot de passe"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
             </div>
-          </div>
 
-          <div className="flex items-center justify-between">
-            <div className="text-sm">
-              <Link href="/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">
-                Mot de passe oublié ?
+            <div className="pt-2">
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="group relative w-full flex justify-center items-center gap-2 py-4 px-6 bg-[#00C896] hover:bg-[#00B285] text-white text-base font-bold rounded-2xl shadow-xl shadow-[#00C896]/20 transition-all active:scale-[0.98] disabled:opacity-70 disabled:active:scale-100"
+              >
+                {isLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <>
+                    S&apos;inscrire
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+
+          <div className="mt-10 text-center">
+            <p className="text-[#777777] font-medium">
+              Déjà un compte ?{' '}
+              <Link 
+                href="/login" 
+                className="text-[#00C896] font-bold hover:underline decoration-2 underline-offset-4 transition-all"
+              >
+                Se connecter
               </Link>
-            </div>
+            </p>
           </div>
 
-          <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className={`group relative w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${isLoading ? 'opacity-70 cursor-not-allowed' : ''} transition-all shadow-lg shadow-blue-500/20`}
-            >
-              {isLoading ? 'Inscription en cours...' : 'S&apos;inscrire'}
-            </button>
-          </div>
-        </form>
-
-        <div className="mt-6">
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">
-                En vous inscrivant, vous acceptez nos
-              </span>
-            </div>
-          </div>
-          <div className="mt-2 text-center text-sm text-gray-600">
-            <Link href="/terms" className="font-medium text-blue-600 hover:text-blue-500">
-              Conditions d&apos;utilisation
-            </Link>
-            {' '}et{' '}
-            <Link href="/privacy" className="font-medium text-blue-600 hover:text-blue-500">
-              Politique de confidentialité
-            </Link>
+          <div className="mt-8 pt-8 border-t border-gray-100 text-center text-xs text-[#777777] leading-relaxed">
+            En vous inscrivant, vous acceptez nos{' '}
+            <Link href="/terms" className="text-[#00C896] hover:underline font-bold">Conditions</Link>
+            {' '}et notre{' '}
+            <Link href="/privacy" className="text-[#00C896] hover:underline font-bold">Confidentialité</Link>.
           </div>
         </div>
       </div>
