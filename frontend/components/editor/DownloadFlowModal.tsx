@@ -71,7 +71,7 @@ export default function DownloadFlowModal({ isOpen, onClose, onSuccess, template
     setIsProcessing(true)
     try {
       const provider = PaymentFactory.getProvider(selectedMethod)
-      const amount = selectedPlan === 'trial' ? 600 : parseInt(templatePrice.replace(/\s/g, ''))
+      const amount = selectedPlan === 'trial' ? 300 : parseInt(templatePrice.replace(/\s/g, ''))
       
       const response = await provider.initiate(
         { value: amount, currency: 'XOF' },
@@ -229,7 +229,7 @@ export default function DownloadFlowModal({ isOpen, onClose, onSuccess, template
                       <h3 className="font-black text-brand-text text-lg italic">Pass Elite 14 Jours</h3>
                       <p className="text-brand-muted text-xs font-medium">Testez ce modèle pendant 14 jours. Téléchargements illimités pendant la période.</p>
                       <div className="flex items-baseline gap-1 mt-2">
-                        <span className="text-2xl font-black text-brand-text">600 F</span>
+                        <span className="text-2xl font-black text-brand-text">300 F</span>
                         <span className="text-brand-muted text-xs font-bold uppercase">CFA</span>
                       </div>
                     </div>
@@ -310,20 +310,17 @@ export default function DownloadFlowModal({ isOpen, onClose, onSuccess, template
                     </button>
                     <button 
                       type="button"
-                      onClick={() => setSelectedMethod('card')}
-                      className={`flex flex-col items-center gap-3 p-6 rounded-3xl border-2 transition-all group ${
-                        selectedMethod === 'card' ? 'border-brand-cta bg-brand-cta/5' : 'border-gray-100 bg-white'
-                      }`}
+                      disabled={true}
+                      className="flex flex-col items-center gap-3 p-6 rounded-3xl border-2 border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed relative"
                     >
-                       <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110 ${
-                         selectedMethod === 'card' ? 'bg-white shadow-sm text-brand-cta' : 'bg-gray-50 text-brand-text'
-                       }`}>
+                       <div className="absolute top-2 right-2">
+                          <span className="bg-orange-500 text-white text-[8px] font-black px-2 py-0.5 rounded-full uppercase">Maintenance</span>
+                       </div>
+                       <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-gray-100 text-gray-400">
                           <Icons.CreditCard />
                        </div>
-                       <span className="text-[10px] font-bold uppercase tracking-wider">Carte Visa</span>
-                       <span className={`text-[8px] font-black px-2 py-0.5 rounded-full uppercase ${
-                         selectedMethod === 'card' ? 'text-brand-cta bg-brand-cta/10' : 'text-gray-400 bg-gray-100'
-                       }`}>via KkiaPay</span>
+                       <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Carte Visa</span>
+                       <span className="text-[8px] font-black px-2 py-0.5 rounded-full uppercase text-gray-400 bg-gray-200">Bientôt disponible</span>
                     </button>
                  </div>
 
@@ -346,7 +343,7 @@ export default function DownloadFlowModal({ isOpen, onClose, onSuccess, template
                           Traitement...
                         </>
                       ) : (
-                        `Payer ${selectedPlan === 'trial' ? '600 F' : `${templatePrice} F`} & Télécharger`
+                        `Payer ${selectedPlan === 'trial' ? '300 F' : `${templatePrice} F`} & Télécharger`
                       )}
                     </button>
                  </div>

@@ -47,13 +47,20 @@ export class FedaPayProvider implements PaymentProvider {
           
           console.log('Extraited Data:', { status, transactionId })
 
-          if (status === 'approved' || status === 'success' || status === 'captured' || status === 'paid' || (this.isSandbox && transactionId)) {
+          const isSuccessStatus = ['approved', 'success', 'captured', 'paid'].includes(status)
+          
+          if (isSuccessStatus) {
             console.log('FedaPay Success confirmed')
             // Nettoyage des globaux pour éviter les doubles déclenchements
             delete (window as any).onFedaPayComplete
             resolve({ success: true, transactionId: transactionId })
           } else if (status === 'canceled' || status === 'cancelled') {
+            console.log('FedaPay Payment Canceled')
             resolve({ success: false, error: 'Paiement annulé' })
+          } else {
+            console.log('FedaPay other status:', status)
+            // Ne pas résoudre immédiatement si c'est un autre statut (ex: pending)
+            // sauf si la fenêtre est fermée
           }
         }
 

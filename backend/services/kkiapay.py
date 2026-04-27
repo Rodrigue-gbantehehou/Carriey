@@ -1,19 +1,19 @@
-import os
 import hmac
 import hashlib
 import httpx
 from typing import Dict, Any, Optional
 from decimal import Decimal
+from config import settings
 
 class KkiaPayService:
     """Service pour intégrer KkiaPay"""
     
     def __init__(self):
-        self.public_key = os.getenv("KKIAPAY_PUBLIC_KEY")
-        self.private_key = os.getenv("KKIAPAY_PRIVATE_KEY")
-        self.secret = os.getenv("KKIAPAY_SECRET")
-        self.api_url = os.getenv("KKIAPAY_API_URL", "https://api.kkiapay.me/api/v1")
-        self.sandbox = os.getenv("KKIAPAY_SANDBOX", "true").lower() == "true"
+        self.public_key = settings.KKIAPAY_PUBLIC_KEY
+        self.private_key = settings.KKIAPAY_PRIVATE_KEY
+        self.secret = settings.KKIAPAY_SECRET
+        self.api_url = settings.KKIAPAY_API_URL
+        self.sandbox = settings.KKIAPAY_SANDBOX
         
         # KkiaPay utilise généralement la même URL, la distinction se fait via les clés (pk_live vs pk_test)
         # Mais si une URL sandbox spécifique existe, elle peut être surchargée via env
@@ -79,7 +79,7 @@ class KkiaPayService:
         """
         async with httpx.AsyncClient() as client:
             headers = {
-                "x-api-key": self.private_key,
+                "x-private-key": self.private_key,
                 "Content-Type": "application/json"
             }
             
@@ -110,7 +110,7 @@ class KkiaPayService:
         if not self.secret:
             return False
         
-        expected_signature = hmac.new(
+        expected_signature = hmac.HMAC(
             self.secret.encode('utf-8'),
             payload.encode('utf-8'),
             hashlib.sha256

@@ -88,7 +88,7 @@ class KkiapayService:
         import json
         
         payload_string = json.dumps(payload, separators=(',', ':'))
-        expected_signature = hmac.new(
+        expected_signature = hmac.HMAC(
             self.config.SECRET.encode(),
             payload_string.encode(),
             hashlib.sha256

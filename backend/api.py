@@ -1,4 +1,10 @@
 import os
+from dotenv import load_dotenv
+
+# Charger le .env EN PREMIER, avant tout autre import qui lit des variables d'env
+env_path = os.path.join(os.path.dirname(__file__), ".env")
+load_dotenv(env_path)
+
 from config import settings
 import json
 import sys
@@ -222,7 +228,7 @@ async def _get_or_create_export_user(req: ExportRequest, current_user: Optional[
                             provider_payment_id=str(req.payment_id),
                             user_id=target_user_id,
                             template_id=template.id,
-                            amount=600 if req.plan == "trial" else template.price,
+                            amount=300 if req.plan == "trial" else template.price,
                             currency="XOF",
                             status=PaymentStatus.SUCCESS,
                             provider=PaymentProvider.KKIAPAY # Par défaut

@@ -1,3 +1,4 @@
+import os
 from typing import Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Header
 from sqlalchemy.orm import Session
@@ -11,6 +12,7 @@ from models.template import Template
 from schemas.payment import PaymentCreate, PaymentOut, PaymentWebhook, PaymentVerification
 from auth.deps import get_current_active_user
 from services.kkiapay import kkiapay_service
+from services.fedapay import fedapay_service
 
 router = APIRouter(prefix="/payments", tags=["payments"])
 
@@ -53,7 +55,7 @@ async def create_payment(
     new_payment = Payment(
         user_id=current_user.id,
         template_id=payment_in.template_id,
-        provider=PaymentProvider.KKIAPAY,
+        provider=payment_in.provider,
         amount=payment_in.amount,
         currency=payment_in.currency,
         status=PaymentStatus.PENDING
@@ -64,26 +66,45 @@ async def create_payment(
     db.refresh(new_payment)
     
     try:
-        # Créer la transaction KkiaPay
-        callback_url = f"{os.getenv('BACKEND_URL', 'http://localhost:8000')}/api/payments/kkiapay/callback"
-        
-        kkiapay_response = await kkiapay_service.create_payment(
-            amount=payment_in.amount,
-            reason=f"Achat template {template.name}",
-            callback_url=callback_url
-        )
-        
-        # Mettre à jour le payment avec l'ID KkiaPay
-        new_payment.provider_payment_id = kkiapay_response["transaction_id"]
-        new_payment.meta_data = kkiapay_response
-        db.commit()
-        
-        return {
-            "payment_id": new_payment.id,
-            "transaction_id": kkiapay_response["transaction_id"],
-            "payment_url": kkiapay_response["payment_url"],
-            "status": "pending"
-        }
+        if payment_in.provider == PaymentProvider.FEDAPAY:
+            # Créer la transaction FedaPay
+            fedapay_response = await fedapay_service.create_transaction(
+                amount=payment_in.amount,
+                description=f"Achat template {template.name}",
+                customer_email=current_user.email,
+                customer_firstname=current_user.full_name or "Client"
+            )
+            
+            new_payment.provider_payment_id = str(fedapay_response["transaction_id"])
+            new_payment.meta_data = fedapay_response["data"]
+            db.commit()
+            
+            return {
+                "payment_id": new_payment.id,
+                "transaction_id": fedapay_response["transaction_id"],
+                "status": "pending"
+            }
+        else:
+            # Créer la transaction KkiaPay
+            callback_url = f"{os.getenv('BACKEND_URL', 'http://localhost:8000')}/api/payments/kkiapay/callback"
+            
+            kkiapay_response = await kkiapay_service.create_payment(
+                amount=payment_in.amount,
+                reason=f"Achat template {template.name}",
+                callback_url=callback_url
+            )
+            
+            # Mettre à jour le payment avec l'ID KkiaPay
+            new_payment.provider_payment_id = kkiapay_response["transaction_id"]
+            new_payment.meta_data = kkiapay_response
+            db.commit()
+            
+            return {
+                "payment_id": new_payment.id,
+                "transaction_id": kkiapay_response["transaction_id"],
+                "payment_url": kkiapay_response["payment_url"],
+                "status": "pending"
+            }
         
     except Exception as e:
         # En cas d'erreur, marquer le paiement comme failed
@@ -197,5 +218,3 @@ async def verify_template_access(
         )
     
     return PaymentVerification(has_access=False)
-
-import os

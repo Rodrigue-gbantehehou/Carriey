@@ -7,6 +7,8 @@ class PaymentCreate(BaseModel):
     template_id: str
     amount: Decimal
     currency: str = "XOF"
+    provider: Optional[str] = "kkiapay" # kkiapay ou fedapay
+
 
 class PaymentOut(BaseModel):
     id: str

@@ -6,12 +6,24 @@ import json
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
+env_path = os.path.join(os.path.dirname(__file__), ".env")
+load_dotenv(env_path)
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "CVtor"
     VERSION: str = "1.0.0"
     API_V1_STR: str = "/api/v1"
+    
+    # Payment Keys
+    KKIAPAY_PUBLIC_KEY: Optional[str] = None
+    KKIAPAY_PRIVATE_KEY: Optional[str] = None
+    KKIAPAY_SECRET: Optional[str] = None
+    KKIAPAY_API_URL: str = "https://api.kkiapay.me/api/v1"
+    KKIAPAY_SANDBOX: bool = True
+    
+    FEDAPAY_PUBLIC_KEY: Optional[str] = None
+    FEDAPAY_SECRET_KEY: Optional[str] = None
+    FEDAPAY_SANDBOX: bool = True
     
     # Paths
     BASE_DIR: str = os.path.dirname(os.path.abspath(__file__))

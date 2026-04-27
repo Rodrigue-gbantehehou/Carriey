@@ -9,22 +9,21 @@ load_dotenv()
 class KkiapayConfig:
     """Configuration centralisée pour kkiapay"""
     
-    PUBLIC_KEY = os.getenv("KKIAPAY_PUBLIC_KEY", "")
-    PRIVATE_KEY = os.getenv("KKIAPAY_PRIVATE_KEY", "")
-    SECRET = os.getenv("KKIAPAY_SECRET", "")
-    SANDBOX = os.getenv("KKIAPAY_SANDBOX", "true").lower() == "true"
+    def __init__(self):
+        self.PUBLIC_KEY = os.getenv("KKIAPAY_PUBLIC_KEY", "")
+        self.PRIVATE_KEY = os.getenv("KKIAPAY_PRIVATE_KEY", "")
+        self.SECRET = os.getenv("KKIAPAY_SECRET", "")
+        self.SANDBOX = os.getenv("KKIAPAY_SANDBOX", "true").lower() == "true"
     
-    @classmethod
-    def is_configured(cls) -> bool:
+    def is_configured(self) -> bool:
         """Vérifie si kkiapay est correctement configuré"""
-        return bool(cls.PUBLIC_KEY and cls.PRIVATE_KEY and cls.SECRET)
+        return bool(self.PUBLIC_KEY and self.PRIVATE_KEY and self.SECRET)
     
-    @classmethod
-    def get_config_dict(cls) -> dict:
+    def get_config_dict(self) -> dict:
         """Retourne la configuration sous forme de dictionnaire"""
         return {
-            "public_key": cls.PUBLIC_KEY,
-            "private_key": cls.PRIVATE_KEY,
-            "secret": cls.SECRET,
-            "sandbox": cls.SANDBOX
+            "public_key": self.PUBLIC_KEY,
+            "private_key": self.PRIVATE_KEY,
+            "secret": self.SECRET,
+            "sandbox": self.SANDBOX
         }
