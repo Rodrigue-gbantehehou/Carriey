@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 export default function Footer() {
   return (
-    <footer className="bg-brand-text text-white py-16 sm:py-24 border-t border-white/5">
+    <footer className="bg-brand-text text-white py-6 sm:py-8 border-t border-white/5">
       <div className="container mx-auto px-4 sm:px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
           <div className="col-span-1 md:col-span-2">
@@ -17,10 +17,10 @@ export default function Footer() {
               <span className="text-2xl font-black text-white tracking-tight">CVTor</span>
             </Link>
             <p className="text-gray-400 mb-8 max-w-sm text-sm font-medium leading-relaxed">
-              La solution n°1 en Afrique pour créer des CV professionnels qui attirent l&apos;attention des recruteurs. Propulsé par l&apos;IA et adapté aux réalités locales.
+              Créer des CV professionnels qui attirent l&apos;attention des recruteurs. Propulsé par l&apos;IA et adapté aux réalités locales.
             </p>
             <div className="flex gap-4">
-              {/* Social Placeholders */}
+              {/*
               <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-brand-cta transition-colors cursor-pointer">
                 <span className="text-xs font-bold">In</span>
               </div>
@@ -30,6 +30,7 @@ export default function Footer() {
               <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-brand-cta transition-colors cursor-pointer">
                 <span className="text-xs font-bold">Tw</span>
               </div>
+              */}
             </div>
           </div>
 
@@ -48,20 +49,24 @@ export default function Footer() {
             <ul className="space-y-4 text-gray-400 text-sm font-medium">
               <li><Link href="/contact" className="hover:text-brand-cta transition-colors">Nous contacter</Link></li>
               <li><Link href="/faq" className="hover:text-brand-cta transition-colors">Aide en ligne</Link></li>
+              {/*
               <li><span className="block text-white/40">Abidjan, Côte d&apos;Ivoire</span></li>
               <li><span className="block text-white/40">contact@cvtor.pro</span></li>
+              */}
             </ul>
           </div>
         </div>
 
         <div className="pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
           <p className="text-gray-500 text-sm font-medium">
-            © 2025 CVTor – Conçu avec passion par <span className="text-white">Akemar Service</span> 💡
+            © 2026 CVTor
           </p>
+          {/*
           <div className="flex gap-8 text-xs font-bold text-gray-500 uppercase tracking-widest">
             <a href="#" className="hover:text-white transition-colors">Confidentialité</a>
             <a href="#" className="hover:text-white transition-colors">Conditions</a>
           </div>
+          */}
         </div>
       </div>
     </footer>

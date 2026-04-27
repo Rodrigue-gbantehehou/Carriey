@@ -3,7 +3,7 @@ import config from '@/lib/config'
 import Link from 'next/link'
 
 async function getLogs(token: string) {
-    const res = await fetch(`${config.apiBaseUrl}/admin/audit/`, {
+    const res = await fetch(`${config.apiBaseUrl}/admin/audit-logs/`, {
         headers: {
             Authorization: `Bearer ${token}`
         },

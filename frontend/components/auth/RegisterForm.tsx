@@ -190,12 +190,6 @@ export default function RegisterForm() {
             </p>
           </div>
 
-          <div className="mt-8 pt-8 border-t border-gray-100 text-center text-xs text-[#777777] leading-relaxed">
-            En vous inscrivant, vous acceptez nos{' '}
-            <Link href="/terms" className="text-[#00C896] hover:underline font-bold">Conditions</Link>
-            {' '}et notre{' '}
-            <Link href="/privacy" className="text-[#00C896] hover:underline font-bold">Confidentialité</Link>.
-          </div>
         </div>
       </div>
     </div>

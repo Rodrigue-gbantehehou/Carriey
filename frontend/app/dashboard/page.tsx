@@ -1,8 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useSession, signOut } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import LogoutButton from '../../components/auth/LogoutButton'
+import TemplatePreview from '../../components/layout/TemplatePreview'
 import Link from 'next/link'
 import Image from 'next/image'
 import config from '@/lib/config'
@@ -391,16 +393,7 @@ export default function DashboardPage() {
                                 return (
                                     <div key={template.id} className="group bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-2xl hover:border-brand-cta/30 transition-all flex flex-col">
                                         <div className="aspect-[4/5] bg-gray-50 relative flex items-center justify-center overflow-hidden">
-                                            {/* Dummy template visual placeholder */}
-                                            <div className="w-[70%] bg-white aspect-[1/1.414] shadow-2xl rounded-sm p-4 opacity-40 group-hover:scale-110 transition-transform duration-500">
-                                                <div className="w-1/2 h-2 bg-gray-200 rounded-full mb-3" />
-                                                <div className="w-3/4 h-1.5 bg-gray-100 rounded-full mb-8" />
-                                                <div className="space-y-2">
-                                                    <div className="w-full h-1 bg-gray-100 rounded-full" />
-                                                    <div className="w-full h-1 bg-gray-100 rounded-full" />
-                                                    <div className="w-2/3 h-1 bg-gray-100 rounded-full" />
-                                                </div>
-                                            </div>
+                                            <TemplatePreview template={template} />
                                             
                                             <div className="absolute inset-0 bg-brand-text/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-6 text-center">
                                                 <Link href={`/editor?template=${template.slug}`} className="px-6 py-3 bg-brand-cta text-white font-black rounded-xl shadow-2xl transition-all hover:scale-105 active:scale-95 no-underline">

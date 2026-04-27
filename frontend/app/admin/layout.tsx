@@ -8,14 +8,22 @@ export default async function AdminLayout({
     children: React.ReactNode
 }) {
     const session = await auth()
-
+    
+    console.log("[AdminLayout] Session check:", { 
+        hasSession: !!session, 
+        userEmail: session?.user?.email,
+        role: session?.user?.role 
+    })
+    
     // Protect admin routes
     if (!session) {
+        console.warn("[AdminLayout] No session found, redirecting to login...")
         redirect('/login?callbackUrl=/admin')
     }
 
     // Check role
-    if (session.user.role !== 'admin' && session.user.role !== 'super_admin') {
+    const userRole = session.user.role?.toLowerCase()
+    if (userRole !== 'admin' && userRole !== 'super_admin') {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-100">
                 <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full">

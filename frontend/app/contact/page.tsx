@@ -35,7 +35,7 @@ export default function ContactPage() {
               <p className="text-gray-400 font-medium leading-relaxed mb-12">
                 Vous avez une question, une suggestion ou besoin d&apos;aide ? Notre équipe ivoirienne est à votre écoute.
               </p>
-
+ {/*
               <div className="space-y-8">
                 <div className="flex items-center gap-5 group">
                   <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center group-hover:bg-brand-cta transition-colors">
@@ -62,6 +62,7 @@ export default function ContactPage() {
                   </div>
                 </div>
               </div>
+*/}
             </div>
 
             <div className="relative z-10 pt-12 border-t border-white/10 mt-12">
