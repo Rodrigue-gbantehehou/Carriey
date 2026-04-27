@@ -302,7 +302,6 @@ function EditorPageContent() {
             // Mix de DATA SAMPLE avec Onboarding (nom + secteur)
             const sector = searchParams.get('sector') || onboardingData.sector
             const sampleData = getSampleData(sector)
-
             setData({
               ...sampleData,
               profile: {
@@ -321,7 +320,8 @@ function EditorPageContent() {
                 if (accessRes.ok) {
                   const accessData = await accessRes.json()
                   if (!accessData.has_access) {
-                    // User doesn't have access → block exports and open payment modal
+                    setHasTemplateAccess(false)
+                    setPendingExport('pdf')
                     // Ne pas ouvrir automatiquement la modal, laisser l'utilisateur éditer d'abord
                     // setShowDownloadModal(true)
                   } else {
@@ -521,7 +521,12 @@ function EditorPageContent() {
         console.log('Triggering download for:', res.url)
         await triggerDownload(res.url, 'CV.pdf')
       }
-    } finally { setExporting(null) }
+    } catch (error: any) {
+      console.error('PDF Export error:', error)
+      toast.error(error.message || "Erreur lors de l'export PDF")
+    } finally { 
+      setExporting(null) 
+    }
   }
 
   const handleExportDocx = async (ignoreAuth = false, guestData?: { email: string; name: string }, plan?: string, paymentId?: string) => {
@@ -560,7 +565,12 @@ function EditorPageContent() {
         console.log('Triggering download for:', res.url)
         await triggerDownload(res.url, 'CV.docx')
       }
-    } finally { setExporting(null) }
+    } catch (error: any) {
+      console.error('DOCX Export error:', error)
+      toast.error(error.message || "Erreur lors de l'export DOCX")
+    } finally { 
+      setExporting(null) 
+    }
   }
 
   const handleGenerateAI = async () => {
