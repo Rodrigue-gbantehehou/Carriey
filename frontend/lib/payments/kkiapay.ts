@@ -56,7 +56,7 @@ export class KkiaPayProvider implements PaymentProvider {
           sandbox: this.isSandbox,
           email: customer.email,
           name: customer.name,
-          phone: customer.phone || '',
+          phone: customer.phoneNumber || '',
         }
 
         // Handle success/failure via events if the SDK supports them
