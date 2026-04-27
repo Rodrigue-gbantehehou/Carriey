@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
 import { PaymentFactory } from '@/lib/payments/factory'
 import { toast } from 'react-hot-toast'
 import config from '@/lib/config'
@@ -50,9 +51,22 @@ type ModalStep = 'identity' | 'pricing' | 'payment'
 
 export default function DownloadFlowModal({ isOpen, onClose, onSuccess, templatePrice, templateName }: DownloadFlowModalProps) {
   console.log("DownloadFlowModal Render:", { isOpen, templatePrice, templateName })
+  const { data: session } = useSession()
   const [step, setStep] = useState<ModalStep>('identity')
   const [email, setEmail] = useState('')
   const [name, setName] = useState('')
+
+  // Pré-remplir les données si l'utilisateur est connecté
+  useEffect(() => {
+    if (session?.user) {
+      if (session.user.email) setEmail(session.user.email)
+      if (session.user.name) setName(session.user.name)
+      
+      // Si on a déjà les infos, on peut potentiellement sauter l'étape identity
+      // Mais restons prudents et laissons l'utilisateur confirmer
+    }
+  }, [session])
+
   const [selectedPlan, setSelectedPlan] = useState<'single' | 'trial'>('trial')
   const [isProcessing, setIsProcessing] = useState(false)
   const isSandbox = process.env.NEXT_PUBLIC_PAYMENT_SANDBOX === 'true'

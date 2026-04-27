@@ -322,9 +322,8 @@ function EditorPageContent() {
                   const accessData = await accessRes.json()
                   if (!accessData.has_access) {
                     // User doesn't have access → block exports and open payment modal
-                    setHasTemplateAccess(false)
-                    setPendingExport('pdf')
-                    setShowDownloadModal(true)
+                    // Ne pas ouvrir automatiquement la modal, laisser l'utilisateur éditer d'abord
+                    // setShowDownloadModal(true)
                   } else {
                     setHasTemplateAccess(true)
                   }
