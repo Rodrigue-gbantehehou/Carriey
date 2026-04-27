@@ -4,6 +4,7 @@ from typing import List
 
 from database import get_db
 from models.user import User, UserRole
+from utils.audit import log_audit
 from auth.deps import get_current_super_admin
 from auth.schemas import UserOut
 
@@ -31,6 +32,10 @@ async def update_user_role(
     
     user.role = new_role
     db.commit()
+
+    # Log audit
+    log_audit(db, admin.id, "update_role", "user", user.id, {"new_role": new_role, "user_email": user.email})
+
     return {"message": f"Rôle de {user.email} mis à jour vers {new_role}"}
 
 @router.patch("/{user_id}/toggle-active")
@@ -46,4 +51,9 @@ async def toggle_user_active(
     
     user.is_active = not user.is_active
     db.commit()
+
+    # Log audit
+    action = "activate" if user.is_active else "deactivate"
+    log_audit(db, admin.id, action, "user", user.id, {"user_email": user.email})
+
     return {"is_active": user.is_active}

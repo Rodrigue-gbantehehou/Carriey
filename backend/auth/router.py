@@ -8,6 +8,7 @@ from auth import schemas, utils
 from auth.deps import get_current_user, get_current_active_user
 from models.user import User, UserRole
 from database import get_db
+from utils.audit import log_audit
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -47,6 +48,9 @@ async def login_for_access_token(
     access_token = utils.create_access_token(
         data={"sub": user.email}, expires_delta=access_token_expires
     )
+
+    # Log audit
+    log_audit(db, user.id, "login", "user", user.id, {"email": user.email})
     
     return {"access_token": access_token, "token_type": "bearer"}
 
@@ -81,6 +85,9 @@ async def register_user(user_in: schemas.UserCreate, db: Session = Depends(get_d
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+    
+    # Log audit
+    log_audit(db, new_user.id, "register", "user", new_user.id, {"email": new_user.email})
     
     return new_user
 

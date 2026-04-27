@@ -41,6 +41,7 @@ export default async function AdminLayout({
         { label: 'Vue d\'ensemble', href: '/admin' },
         { label: 'Modèles de CV', href: '/admin/templates' },
         { label: 'Utilisateurs', href: '/admin/users' },
+        { label: 'Paiements', href: '/admin/payments' },
         { label: 'Logs Système', href: '/admin/audit' },
     ]
 

@@ -46,6 +46,7 @@ from routers.resumes import router as resumes_router
 from routers.admin_users import router as admin_users_router
 from routers.exports import router as exports_router
 from routers.personas import router as personas_router
+from routers.admin_payments import router as admin_payments_router
 from database import engine, Base, get_db
 import models.persona # Ensure model is registered for create_all
 
@@ -88,6 +89,7 @@ app.include_router(admin_stats_router, prefix="/api/admin/stats", tags=["admin-s
 app.include_router(admin_templates_upload_router, prefix="/api", tags=["admin"])
 app.include_router(admin_audit_router, prefix="/api", tags=["admin"])
 app.include_router(admin_users_router, prefix="/api", tags=["admin"])
+app.include_router(admin_payments_router, prefix="/api", tags=["admin"])
 app.include_router(personas_router, prefix="/api", tags=["personas"])
 
 

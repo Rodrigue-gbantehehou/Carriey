@@ -39,6 +39,8 @@ backend/static/*
 
 # Application data
 **/cvtor.db
+**/*.db
+**/*.sqlite3
 **/*.pdf
 **/*.docx
 **/*.log
