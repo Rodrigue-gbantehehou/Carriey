@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useSession } from 'next-auth/react'
+import { useSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import LogoutButton from '../../components/auth/LogoutButton'
 import TemplatePreview from '../../components/layout/TemplatePreview'
