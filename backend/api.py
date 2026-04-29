@@ -221,9 +221,42 @@ async def _get_or_create_export_user(req: ExportRequest, current_user: Optional[
                 # En mode Sandbox local, on est plus souple car les webhooks ne reviennent pas vers localhost
                 is_sandbox = os.getenv("KKIAPAY_SANDBOX") == "true" or os.getenv("PAYMENT_SANDBOX") == "true"
                 
-                if (payment and payment.status == PaymentStatus.SUCCESS) or is_sandbox:
-                    # En sandbox, si le paiement n'existe pas encore en DB (ex: guest local), on le crée
-                    if not payment and is_sandbox:
+                payment_valid = False
+                
+                if payment and payment.status == PaymentStatus.SUCCESS:
+                    payment_valid = True
+                else:
+                    # Tenter de vérifier avec l'API FedaPay
+                    try:
+                        from services.fedapay import fedapay_service
+                        from models.payment import PaymentProvider
+                        
+                        status_info = await fedapay_service.verify_transaction(str(req.payment_id))
+                        if status_info and status_info.get("status") in ["approved", "success"]:
+                            payment_valid = True
+                            
+                            if not payment:
+                                payment = Payment(
+                                    provider_payment_id=str(req.payment_id),
+                                    user_id=target_user_id,
+                                    template_id=template.id,
+                                    amount=300 if req.plan == "trial" else template.price,
+                                    currency="XOF",
+                                    status=PaymentStatus.SUCCESS,
+                                    provider=PaymentProvider.FEDAPAY
+                                )
+                                db.add(payment)
+                                db.commit()
+                                db.refresh(payment)
+                            elif payment.status != PaymentStatus.SUCCESS:
+                                payment.status = PaymentStatus.SUCCESS
+                                db.commit()
+                    except Exception as e:
+                        print(f"Erreur vérification dynamique FedaPay: {e}")
+                
+                if not payment_valid and is_sandbox:
+                    payment_valid = True
+                    if not payment:
                         from models.payment import PaymentProvider
                         payment = Payment(
                             id=str(req.payment_id) if "-" in str(req.payment_id) else None,
@@ -233,15 +266,16 @@ async def _get_or_create_export_user(req: ExportRequest, current_user: Optional[
                             amount=300 if req.plan == "trial" else template.price,
                             currency="XOF",
                             status=PaymentStatus.SUCCESS,
-                            provider=PaymentProvider.KKIAPAY # Par défaut
+                            provider=PaymentProvider.KKIAPAY
                         )
                         db.add(payment)
                         db.commit()
                         db.refresh(payment)
 
+                if payment_valid:
                     # On accorde l'accès
                     expires_at = datetime.now() + timedelta(days=14) if req.plan == "trial" else None
-                    TemplateAccessService.grant_access(db=db, user_id=target_user_id, template_id=template.id, expires_at=expires_at, payment_id=payment.id)
+                    TemplateAccessService.grant_access(db=db, user_id=target_user_id, template_id=template.id, expires_at=expires_at, payment_id=payment.id if payment else None)
                 else:
                     raise HTTPException(status_code=402, detail="Paiement requis ou non validé")
             else:
