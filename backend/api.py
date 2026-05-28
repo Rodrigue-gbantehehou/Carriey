@@ -352,6 +352,11 @@ async def export_pdf(
                 )
         
         return {"file": str(out_pdf), "url": url}
+    except HTTPException:
+        # Nettoyer en cas d'erreur si tmp_html existe
+        if 'tmp_html' in locals():
+            tmp_html.unlink(missing_ok=True)
+        raise
     except Exception as e:
         import traceback
         error_detail = f"{str(e)}\n{traceback.format_exc()}"
@@ -398,6 +403,8 @@ async def export_docx_endpoint(
                 )
 
         return {"file": str(out_docx), "url": url}
+    except HTTPException:
+        raise
     except Exception as e:
         import traceback
         print(f"DOCX export error: {traceback.format_exc()}")

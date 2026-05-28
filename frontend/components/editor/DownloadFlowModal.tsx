@@ -136,7 +136,7 @@ export default function DownloadFlowModal({ isOpen, onClose, onSuccess, template
       />
       
       <div 
-        className="relative w-full max-w-lg bg-white rounded-[32px] shadow-2xl overflow-hidden border border-gray-100 animate-in zoom-in-95 slide-in-from-bottom-4 duration-500"
+        className="relative w-full max-w-lg bg-white rounded-[24px] sm:rounded-[32px] shadow-2xl flex flex-col overflow-hidden border border-gray-100 animate-in zoom-in-95 slide-in-from-bottom-4 duration-500 max-h-[95vh]"
       >
         {/* Header decoration */}
         <div className="absolute top-0 left-0 w-full h-1.5 bg-brand-cta" />
@@ -152,7 +152,7 @@ export default function DownloadFlowModal({ isOpen, onClose, onSuccess, template
           <Icons.Close />
         </button>
 
-        <div className="p-8 sm:p-12">
+        <div className="p-6 sm:p-12 overflow-y-auto">
           {step === 'identity' && (
             <div className="space-y-8 animate-in slide-in-from-right-4 duration-300">
               <div className="text-center space-y-3">

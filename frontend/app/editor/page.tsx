@@ -523,7 +523,13 @@ function EditorPageContent() {
       }
     } catch (error: any) {
       console.error('PDF Export error:', error)
-      toast.error(error.message || "Erreur lors de l'export PDF")
+      const errorMsg = error?.message || ""
+      if (errorMsg.includes("Paiement requis") || errorMsg.includes("402")) {
+        setPendingExport('pdf')
+        setShowDownloadModal(true)
+      } else {
+        toast.error(errorMsg || "Erreur lors de l'export PDF")
+      }
     } finally { 
       setExporting(null) 
     }
@@ -567,7 +573,13 @@ function EditorPageContent() {
       }
     } catch (error: any) {
       console.error('DOCX Export error:', error)
-      toast.error(error.message || "Erreur lors de l'export DOCX")
+      const errorMsg = error?.message || ""
+      if (errorMsg.includes("Paiement requis") || errorMsg.includes("402")) {
+        setPendingExport('docx')
+        setShowDownloadModal(true)
+      } else {
+        toast.error(errorMsg || "Erreur lors de l'export DOCX")
+      }
     } finally { 
       setExporting(null) 
     }

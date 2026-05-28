@@ -77,6 +77,7 @@ export class FedaPayProvider implements PaymentProvider {
         console.log('Running FedaPay.init with universal options...')
         const checkout = fp.init({
           public_key: this.publicKey,
+          environment: this.isSandbox ? 'sandbox' : 'live',
           transaction: {
             amount: amount.value,
             description: `CVTor - ${customer.email}`,
