@@ -23,11 +23,17 @@ export default function UsersAdmin() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await fetch(`${config.apiBaseUrl}/admin/users`, {
+        const res = await fetch(`${config.apiBaseUrl}/admin/users/`, {
           headers: {
             'Authorization': `Bearer ${session?.user?.accessToken}`
           }
         })
+        if (res.status === 401) {
+          toast.error("Session expirée. Veuillez vous reconnecter.");
+          const { signOut } = await import('next-auth/react');
+          signOut({ callbackUrl: '/login' });
+          return;
+        }
         if (!res.ok) throw new Error('Erreur lors du chargement des utilisateurs')
         const data = await res.json()
         setUsers(data)

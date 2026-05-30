@@ -29,8 +29,8 @@ export default function PaymentsAdmin() {
     const fetchPayments = async () => {
       try {
         const url = filter 
-          ? `${config.apiBaseUrl}/admin/payments?status=${filter}`
-          : `${config.apiBaseUrl}/admin/payments`
+          ? `${config.apiBaseUrl}/admin/payments/?status=${filter}`
+          : `${config.apiBaseUrl}/admin/payments/`
           
         const res = await fetch(url, {
           headers: {

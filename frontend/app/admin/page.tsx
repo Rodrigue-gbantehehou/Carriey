@@ -31,6 +31,14 @@ export default function AdminDashboard() {
             'Authorization': `Bearer ${session?.user?.accessToken}`
           }
         })
+        if (res.status === 401) {
+          toast.error("Session expirée. Veuillez vous reconnecter.");
+          // We can import signOut from next-auth/react
+          // The component already imports useSession, we will add signOut to imports later if missing.
+          const { signOut } = await import('next-auth/react');
+          signOut({ callbackUrl: '/login' });
+          return;
+        }
         if (!res.ok) throw new Error('Erreur lors du chargement des statistiques')
         const data = await res.json()
         setStats(data)
