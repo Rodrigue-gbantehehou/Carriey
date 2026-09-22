@@ -282,7 +282,7 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
   );
 
   return (
-    <div className="py-6 sm:py-10 max-w-5xl mx-auto font-sans">
+    <div className="py-6 sm:py-10 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto font-sans">
       
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
@@ -334,7 +334,7 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
 
         {/* Canvas Area */}
         <div className="lg:col-span-8">
-          <div className="bg-[#f8f9fa] bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] rounded-3xl p-4 sm:p-8 flex items-start justify-center min-h-[600px] border border-gray-200 relative overflow-hidden">
+          <div className="bg-[#f8f9fa] bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] rounded-3xl p-4 sm:p-8 flex flex-col items-center min-h-[600px] border border-gray-200 relative overflow-auto custom-scrollbar">
             
             {/* Zoom Controls */}
             <div className="absolute top-4 right-4 z-10 bg-white/90 backdrop-blur-sm rounded-full shadow-sm border border-gray-200 flex items-center p-1">
@@ -357,14 +357,14 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
 
             {/* Document Container */}
             <div 
-              className="flex items-center justify-center pt-10 pb-10"
+              className="relative mt-8 mb-8"
               style={{
                 width: `calc(210mm * ${scale})`,
                 height: `calc(297mm * ${scale})`,
               }}
             >
               <div 
-                className="bg-white origin-top transition-transform duration-200 border border-gray-100"
+                className="bg-white absolute top-0 left-0 origin-top-left transition-transform duration-200 border border-gray-100"
                 style={{ 
                   width: '210mm', 
                   minHeight: '297mm',
