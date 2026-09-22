@@ -273,7 +273,7 @@ export function BoldTheme({ data, accent }: { data: PublicPageData; accent: stri
         <div className="flex items-center gap-6">
           {photo ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={photo} alt={name} className="w-24 h-24 object-cover rounded-2xl flex-shrink-0 ring-2" style={{ ringColor: accent }} />
+            <img src={photo} alt={name} className="w-24 h-24 object-cover rounded-2xl flex-shrink-0 border-2" style={{ borderColor: accent }} />
           ) : (
             <div className="w-24 h-24 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${accent}20` }}>
               <User className="w-12 h-12" style={{ color: accent }} />
