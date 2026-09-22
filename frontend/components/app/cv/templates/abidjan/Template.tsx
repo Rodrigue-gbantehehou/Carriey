@@ -1,7 +1,7 @@
 import React from 'react';
+import './style.css';
 import { TemplateProps } from '@/types/cv';
-import Image from 'next/image';
-import { TemplateStyles, RemoteStyles, CVSection, ItemGroup, SkillTag } from '../BaseComponents';
+import { TemplateStyles, CVSection, ItemGroup, SkillTag } from '../BaseComponents';
 import { getSafeData, isSectionEnabled, getSectionLabel } from '../utils';
 
 const AbidjanTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBaseUrl }) => {
@@ -10,7 +10,6 @@ const AbidjanTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBa
   
   return (
     <div className={`cv-rendering-root cv-container abidjan-template sector-${(config.sector || 'general').toLowerCase()}`}>
-      <RemoteStyles templateName={config.templateName} apiBaseUrl={apiBaseUrl} />
       <TemplateStyles config={config} />
       
       {/* Header Centralisé */}
@@ -26,12 +25,8 @@ const AbidjanTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBa
           <div className="profile-photo-wrap" style={{ transform: config.tokens.spacing === 'compact' ? 'scale(0.85)' : 'none' }}>
             {profile.photo ? (
               <div className="profile-photo" style={{ position: 'relative', overflow: 'hidden', borderRadius: 'var(--photo-shape, 50%)' }}>
-                <Image 
-                  src={profile.photo} 
-                  alt={profile.name} 
-                  fill 
-                  style={{ objectFit: 'cover' }}
-                />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={profile.photo} alt={profile.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               </div>
             ) : (
               <div className="photo-placeholder"><i className="fas fa-user"></i></div>

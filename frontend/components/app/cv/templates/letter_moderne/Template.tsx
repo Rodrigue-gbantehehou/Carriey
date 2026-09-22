@@ -1,4 +1,5 @@
 import React from 'react';
+import './style.css';
 import { TemplateProps } from '@/types/cv';
 
 export default function Template({ data, config, apiBaseUrl }: TemplateProps) {

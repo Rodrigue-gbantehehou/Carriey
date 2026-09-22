@@ -1,7 +1,7 @@
 import React from 'react';
+import './style.css';
 import { TemplateProps } from '@/types/cv';
-import Image from 'next/image';
-import { TemplateStyles, RemoteStyles, CVSection, ItemGroup, SkillTag } from '../BaseComponents';
+import { TemplateStyles, CVSection, ItemGroup, SkillTag } from '../BaseComponents';
 import { getSafeData, isSectionEnabled, getSectionLabel } from '../utils';
 
 const RodrigueTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBaseUrl }) => {
@@ -10,7 +10,6 @@ const RodrigueTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiB
   
   return (
     <div className="cv-rendering-root cv-container rodrigue-template">
-      <RemoteStyles templateName={config.templateName} apiBaseUrl={apiBaseUrl} />
       <TemplateStyles config={config} />
       
       {/* Sidebar */}
@@ -19,12 +18,8 @@ const RodrigueTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiB
           <div className="profile-photo-wrap">
             {profile.photo ? (
               <div className="profile-photo" style={{ position: 'relative', overflow: 'hidden', borderRadius: 'var(--photo-shape, 50%)' }}>
-                <Image 
-                  src={profile.photo} 
-                  alt={profile.name || 'Photo'} 
-                  fill 
-                  style={{ objectFit: 'cover' }}
-                />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={profile.photo} alt={profile.name || 'Photo'} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               </div>
             ) : (
               <div className="photo-placeholder"><i className="fas fa-magic"></i></div>

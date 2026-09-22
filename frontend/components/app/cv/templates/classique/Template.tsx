@@ -1,6 +1,7 @@
 import React from 'react';
+import './style.css';
 import { TemplateProps } from '@/types/cv';
-import { TemplateStyles, CVSection, ItemGroup, SkillTag, RemoteStyles } from '../BaseComponents';
+import { TemplateStyles, CVSection, ItemGroup, SkillTag } from '../BaseComponents';
 import { getSafeData, isSectionEnabled, getSectionLabel } from '../utils';
 
 const ClassiqueTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBaseUrl }) => {
@@ -9,7 +10,6 @@ const ClassiqueTemplate: React.FC<TemplateProps> = ({ data: rawData, config, api
   
   return (
     <div className="cv-rendering-root cv-container classique-template">
-      <RemoteStyles templateName={config.templateName} apiBaseUrl={apiBaseUrl} />
       <TemplateStyles config={config} />
       
       {/* Header */}
