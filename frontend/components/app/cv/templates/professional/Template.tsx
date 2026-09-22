@@ -1,8 +1,7 @@
 
 import React from 'react';
-import './style.css';
 import { TemplateProps } from '@/types/cv';
-import { TemplateStyles, CVSection, ItemGroup, SkillBar } from '../BaseComponents';
+import { TemplateStyles, CVSection, ItemGroup, SkillBar , RemoteStyles} from '../BaseComponents';
 import { getSafeData, isSectionEnabled, getSectionLabel } from '../utils';
 
 const ProfessionalTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBaseUrl }) => {
@@ -11,6 +10,7 @@ const ProfessionalTemplate: React.FC<TemplateProps> = ({ data: rawData, config, 
   
   return (
     <div className="cv-rendering-root cv-container professional-template">
+      <RemoteStyles templateName={config.templateName} apiBaseUrl={apiBaseUrl} />
       <TemplateStyles config={config} />
       
       {/* Executive Header */}

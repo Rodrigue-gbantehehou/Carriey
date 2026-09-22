@@ -33,7 +33,15 @@ export const getSafeData = (data: any) => {
       institution: edu.institution || edu.school || 'Établissement',
       dates: edu.dates || edu.year || (edu.start && edu.end ? `${edu.start} - ${edu.end}` : edu.start || edu.end || ''),
     })),
-    skills: data.skills || { groups: [] },
+    skills: (() => {
+      if (!data.skills) return { groups: [] };
+      if (Array.isArray(data.skills)) {
+        const items = data.skills.map((s: any) => typeof s === 'string' ? s : s.name || '').filter(Boolean);
+        return { groups: [{ label: '', items }] };
+      }
+      if (data.skills.groups) return data.skills;
+      return { groups: [] };
+    })(),
     languages: data.languages || [],
     projects: (data.projects || []).map((proj: any) => ({
       ...proj,
