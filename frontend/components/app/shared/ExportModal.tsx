@@ -20,10 +20,10 @@ interface ExportModalProps {
   isOpen: boolean;
   onClose: () => void;
   cv: CV;
-  onPrint: () => void;
+  onExport: (format: string, quality: string) => Promise<void>;
 }
 
-export default function ExportModal({ isOpen, onClose, cv, onPrint }: ExportModalProps) {
+export default function ExportModal({ isOpen, onClose, cv, onExport }: ExportModalProps) {
   const [format, setFormat] = useState('pdf');
   const [quality, setQuality] = useState('standard');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -35,27 +35,25 @@ export default function ExportModal({ isOpen, onClose, cv, onPrint }: ExportModa
 
   if (!isOpen || !cv) return null;
 
-  const handleExport = () => {
+  const handleExport = async () => {
     if (!isUnlocked) {
       setIsProcessing(true);
-      setTimeout(() => {
+      setTimeout(async () => {
         setIsUnlocked(true);
         setIsProcessing(false);
         // Lancer le téléchargement automatiquement après le "paiement"
-        if (format === 'pdf') {
-          onPrint();
-          onClose();
-        }
+        setIsProcessing(true);
+        await onExport(format, quality);
+        setIsProcessing(false);
+        onClose();
       }, 1500);
       return;
     }
 
-    if (format === 'pdf') {
-      onPrint();
-      onClose();
-    } else {
-      alert("L'export Word sera bientôt disponible !");
-    }
+    setIsProcessing(true);
+    await onExport(format, quality);
+    setIsProcessing(false);
+    onClose();
   };
 
   return (

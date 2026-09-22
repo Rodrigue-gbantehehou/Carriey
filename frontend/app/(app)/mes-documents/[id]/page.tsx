@@ -86,10 +86,50 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
     fetchProfile();
   }, [cv, profile, session, params.id]);
 
-  const handlePrint = useReactToPrint({
-    contentRef: printRef,
-    documentTitle: cv?.title || 'CV',
-  });
+  const handleExportAction = async (format: string, quality: string) => {
+    if (!cv) return;
+    if (format === 'pdf') {
+      try {
+        const { exportPdf } = await import('@/lib/api');
+        
+        // Mock template object as required by exportPdf
+        const templateObj = {
+          id: cv.template_id,
+          templateName: cv.template_id,
+          name: cv.template_id,
+          description: '',
+          price: 0,
+          thumbnail: '',
+          category: 'all'
+        };
+
+        const res = await exportPdf(
+          templateObj as any,
+          adapterData as any,
+          undefined,
+          templateConfig as any,
+          session?.user?.accessToken
+        );
+
+        if (res.url) {
+          // Trigger file download
+          const link = document.createElement('a');
+          link.href = res.url;
+          link.setAttribute('download', `${cv.title || 'CV'}.pdf`);
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+      } catch (err) {
+        console.error("Erreur lors de l'export PDF:", err);
+        alert("Une erreur est survenue lors de la génération du PDF.");
+      }
+    } else {
+      alert("L'export Word sera bientôt disponible !");
+    }
+  };
+
+
 
   if (!mounted || localLoading) return null;
 
@@ -423,7 +463,7 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
         isOpen={isExportModalOpen} 
         onClose={() => setIsExportModalOpen(false)} 
         cv={cv} 
-        onPrint={handlePrint} 
+        onExport={handleExportAction} 
       />
       
       <style dangerouslySetInnerHTML={{__html: `
