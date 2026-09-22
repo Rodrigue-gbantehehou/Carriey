@@ -27,22 +27,39 @@ interface TemplateRendererProps extends Omit<TemplateProps, 'apiBaseUrl'> {
  * Main renderer component that dynamically loads the selected template
  */
 export const CVTemplateRenderer: React.FC<TemplateRendererProps> = ({ templateName, data, config, apiBaseUrl }) => {
-  const TemplateComponent = TEMPLATE_REGISTRY[templateName.toLowerCase()] || TEMPLATE_REGISTRY.classique;
+  const safeTemplateName = (templateName || 'classique').toLowerCase();
+  const TemplateComponent = TEMPLATE_REGISTRY[safeTemplateName] || TEMPLATE_REGISTRY.classique;
 
-  // Normaliser la configuration des sections pour les templates 2 colonnes
-  // afin que les sections "sidebar" (compétences, langues, contact, etc.) s'affichent toujours
-  const isTwoColumn = ['abidjan', 'dakar', 'moderne', 'professional', 'tokyo', 'creatif', 'rodrigue'].includes(templateName.toLowerCase());
-  const normalizedConfig = { ...config };
+  const isTwoColumn = ['abidjan', 'dakar', 'moderne', 'professional', 'tokyo', 'creatif', 'rodrigue'].includes(safeTemplateName);
   
-  if (isTwoColumn && normalizedConfig.sections) {
-    normalizedConfig.sections = normalizedConfig.sections.map((s: any) => {
-      // Forcer ces sections dans la colonne de gauche car ces templates ne les gèrent que là
-      if (['skills', 'languages', 'contact', 'identity', 'interests', 'photo'].includes(s.type)) {
-        return { ...s, column: 'left' };
-      }
-      return s;
-    });
-  }
+  const defaultSections = [
+    { type: 'photo', enabled: true, column: 'left' },
+    { type: 'identity', enabled: true, column: 'left' },
+    { type: 'contact', enabled: true, column: 'left' },
+    { type: 'skills', enabled: true, column: 'left' },
+    { type: 'languages', enabled: true, column: 'left' },
+    { type: 'interests', enabled: true, column: 'left' },
+    { type: 'summary', enabled: true, column: 'right' },
+    { type: 'experience', enabled: true, column: 'right' },
+    { type: 'education', enabled: true, column: 'right' },
+    { type: 'projects', enabled: true, column: 'right' },
+    { type: 'references', enabled: true, column: 'right' },
+  ];
+
+  const sectionsToUse = config?.sections && config.sections.length > 0 ? config.sections : defaultSections;
+
+  const normalizedSections = sectionsToUse.map((s: any) => {
+    if (isTwoColumn && ['skills', 'languages', 'contact', 'identity', 'interests', 'photo'].includes(s.type)) {
+      return { ...s, column: s.column || 'left' };
+    }
+    return s;
+  });
+
+  const normalizedConfig = {
+    ...config,
+    templateName: safeTemplateName,
+    sections: normalizedSections,
+  };
 
   return (
     <Suspense fallback={<div className="p-8 text-center">Chargement du template...</div>}>

@@ -11,7 +11,7 @@ import { useReactToPrint } from 'react-to-print';
 import ExportModal from '@/components/app/shared/ExportModal';
 import { ThemeThumbnail } from '@/components/app/cv/shared/ThemeThumbnail';
 
-import { TEMPLATE_REGISTRY } from '@/components/app/cv/templates';
+import { CVTemplateRenderer, TEMPLATE_REGISTRY } from '@/components/app/cv/templates';
 import { THEMES } from '@/config/themes';
 import { API_BASE } from '@/lib/api';
 
@@ -202,19 +202,19 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
 
   // Resolve the actual template slug (fallback to classique if the UUID isn't in registry)
   const resolvedTemplateName = TEMPLATE_REGISTRY[cv.template_id] ? cv.template_id : 'classique';
-  const ActiveTemplateComponent = TEMPLATE_REGISTRY[resolvedTemplateName] || TEMPLATE_REGISTRY.classique;
 
-  // Fake config to satisfy the old template props
+  // Config with explicit section settings & columns for sidebar components
   const templateConfig = {
     templateName: resolvedTemplateName,
     sections: [
-      { type: 'profile', enabled: true },
-      { type: 'summary', enabled: !!profile?.bio && !(cv.content?.disabledSections || []).includes('about') },
-      { type: 'experience', enabled: !!profile?.experiences?.length && !(cv.content?.disabledSections || []).includes('experiences') },
-      { type: 'education', enabled: !!profile?.educations?.length && !(cv.content?.disabledSections || []).includes('educations') },
-      { type: 'skills', enabled: !!profile?.skills?.length && !(cv.content?.disabledSections || []).includes('skills') },
-      { type: 'projects', enabled: !!profile?.projects?.length && !(cv.content?.disabledSections || []).includes('projects') },
-      { type: 'contact', enabled: true },
+      { type: 'profile', enabled: true, column: 'left' },
+      { type: 'contact', enabled: true, column: 'left' },
+      { type: 'skills', enabled: !(cv.content?.disabledSections || []).includes('skills'), column: 'left' },
+      { type: 'languages', enabled: !(cv.content?.disabledSections || []).includes('languages'), column: 'left' },
+      { type: 'summary', enabled: !!profile?.bio && !(cv.content?.disabledSections || []).includes('about'), column: 'right' },
+      { type: 'experience', enabled: !(cv.content?.disabledSections || []).includes('experiences'), column: 'right' },
+      { type: 'education', enabled: !(cv.content?.disabledSections || []).includes('educations'), column: 'right' },
+      { type: 'projects', enabled: !(cv.content?.disabledSections || []).includes('projects'), column: 'right' },
     ]
   };
 
@@ -418,7 +418,8 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
               >
                 <div ref={printRef} className="print-container h-full">
                   <Suspense fallback={<div className="h-full w-full flex items-center justify-center text-gray-500 font-semibold bg-white">Chargement du modèle...</div>}>
-                    <ActiveTemplateComponent 
+                    <CVTemplateRenderer 
+                      templateName={cv.template_id}
                       data={adapterData as any} 
                       config={templateConfig as any} 
                       apiBaseUrl={API_BASE} 

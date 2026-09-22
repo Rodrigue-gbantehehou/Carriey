@@ -1,7 +1,7 @@
 import React from 'react';
 import { TemplateProps } from '@/types/cv';
 import { TemplateStyles, CVSection, ItemGroup, SkillBar, DateRange, SkillTag , RemoteStyles} from '../BaseComponents';
-import { getSafeData, isSectionEnabled, getSectionLabel } from '../utils';
+import { getSafeData, isSectionEnabled, getSectionLabel, getLeftColumnSections, getRightColumnSections } from '../utils';
 
 const TokyoTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBaseUrl }) => {
   const data = getSafeData(rawData);
@@ -27,7 +27,7 @@ const TokyoTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBase
         )}
 
         {/* Dynamic Sidebar Sections */}
-        {config.sections.filter(s => s.enabled && s.column === 'left').map((section) => {
+        {getLeftColumnSections(config).map((section: any) => {
           switch (section.type) {
             case 'contact':
               return (
@@ -40,11 +40,11 @@ const TokyoTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBase
                 </CVSection>
               );
             case 'skills':
-              return skills?.groups && (
+              return skills?.groups && skills.groups.length > 0 && (
                 <CVSection key="skills" title={getSectionLabel(config, 'skills', 'Compétences')} className="sidebar-section">
                   <div className="skills-list">
-                    {skills.groups.flatMap((g: any) => g.items || []).map((skill: string, sIdx: number) => (
-                      <SkillBar key={sIdx} name={skill} />
+                    {skills.groups.flatMap((g: any) => g.items || []).map((skill: any, sIdx: number) => (
+                      <SkillBar key={sIdx} name={typeof skill === 'string' ? skill : skill.name || ''} />
                     ))}
                   </div>
                 </CVSection>
@@ -118,7 +118,7 @@ const TokyoTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBase
           )}
         </header>
 
-        {config.sections.filter(s => s.enabled && s.column !== 'left').map((section) => {
+        {getRightColumnSections(config).map((section: any) => {
           switch (section.type) {
             case 'summary':
               return summary && (

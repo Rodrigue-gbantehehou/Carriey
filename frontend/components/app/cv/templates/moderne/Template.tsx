@@ -1,15 +1,11 @@
 import React from 'react';
 import { TemplateProps } from '@/types/cv';
 import { TemplateStyles, CVSection, ItemGroup , RemoteStyles} from '../BaseComponents';
-import { getSafeData, isSectionEnabled, getSectionLabel } from '../utils';
+import { getSafeData, isSectionEnabled, getSectionLabel, getLeftColumnSections, getRightColumnSections } from '../utils';
 
 const ModerneTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBaseUrl }) => {
   const data = getSafeData(rawData);
   const { profile, summary, experience, education, skills, languages, projects, custom_sections } = data;
-  
-  const sectionsInColumn = (column: 'left' | 'right' | 'full') => {
-    return config.sections.filter(s => s.enabled && (s.column === column || (!s.column && column === 'right')));
-  };
 
   return (
     <div className="cv-rendering-root cv-container moderne-template">
@@ -67,18 +63,18 @@ const ModerneTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBa
             </div>
           )}
 
-          {sectionsInColumn('left').map((section) => {
+          {getLeftColumnSections(config).map((section: any) => {
             switch (section.type) {
               case 'skills':
-                return skills?.groups && (
+                return skills?.groups && skills.groups.length > 0 && (
                   <div key="skills" className="sidebar-section">
                     <h3 className="sidebar-title">{getSectionLabel(config, 'skills', 'Expertise')}</h3>
                     {skills.groups.map((group: any, gIdx: number) => (
                       <div key={gIdx} className="skill-category">
                         {group.label && <h4>{group.label}</h4>}
                         <div className="skill-items">
-                          {(group.items || []).map((skill: string, sIdx: number) => (
-                            <div key={sIdx} className="skill-item">{skill}</div>
+                          {(group.items || []).map((skill: any, sIdx: number) => (
+                            <div key={sIdx} className="skill-item">{typeof skill === 'string' ? skill : skill.name || ''}</div>
                           ))}
                         </div>
                       </div>
@@ -145,7 +141,7 @@ const ModerneTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBa
 
         {/* Main Content */}
         <main className="right-column">
-          {sectionsInColumn('right').map((section) => {
+          {getRightColumnSections(config).map((section: any) => {
             switch (section.type) {
               case 'summary':
                 return summary && (

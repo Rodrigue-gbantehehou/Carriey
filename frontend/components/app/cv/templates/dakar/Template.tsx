@@ -1,7 +1,7 @@
 import React from 'react';
 import { TemplateProps } from '@/types/cv';
 import { TemplateStyles, CVSection, ItemGroup, SkillTag , RemoteStyles} from '../BaseComponents';
-import { getSafeData, isSectionEnabled, getSectionLabel } from '../utils';
+import { getSafeData, isSectionEnabled, getSectionLabel, getLeftColumnSections, getRightColumnSections } from '../utils';
 
 const DakarTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBaseUrl }) => {
   const data = getSafeData(rawData);
@@ -38,7 +38,7 @@ const DakarTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBase
             </div>
           )}
 
-          {config.sections.filter(s => s.enabled && s.column === 'left').map((section) => {
+          {getLeftColumnSections(config).map((section: any) => {
             switch (section.type) {
               case 'identity':
                 return (profile.age || profile.nationality || (profile as any).marital_status) && (
@@ -61,11 +61,11 @@ const DakarTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBase
                   </CVSection>
                 );
               case 'skills':
-                return skills?.groups && (
+                return skills?.groups && skills.groups.length > 0 && (
                   <CVSection key="skills" title={getSectionLabel(config, 'skills', 'Compétences')} className="sidebar-section">
                     <div className="skills-wrap">
-                      {skills.groups.flatMap((g: any) => g.items || []).map((skill: string, sIdx: number) => (
-                        <SkillTag key={sIdx}>{skill}</SkillTag>
+                      {skills.groups.flatMap((g: any) => g.items || []).map((skill: any, sIdx: number) => (
+                        <SkillTag key={sIdx}>{typeof skill === 'string' ? skill : skill.name || ''}</SkillTag>
                       ))}
                     </div>
                   </CVSection>
@@ -122,7 +122,7 @@ const DakarTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBase
 
         {/* Colonne droite */}
         <div className="right-column">
-          {config.sections.filter(s => s.enabled && s.column !== 'left').map((section) => {
+          {getRightColumnSections(config).map((section: any) => {
             switch (section.type) {
               case 'summary':
                 return summary && (

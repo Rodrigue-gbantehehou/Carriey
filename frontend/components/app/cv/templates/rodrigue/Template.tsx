@@ -1,7 +1,7 @@
 import React from 'react';
 import { TemplateProps } from '@/types/cv';
 import { TemplateStyles, CVSection, ItemGroup, SkillTag , RemoteStyles} from '../BaseComponents';
-import { getSafeData, isSectionEnabled, getSectionLabel } from '../utils';
+import { getSafeData, isSectionEnabled, getSectionLabel, getLeftColumnSections, getRightColumnSections } from '../utils';
 
 const RodrigueTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBaseUrl }) => {
   const data = getSafeData(rawData);
@@ -27,7 +27,7 @@ const RodrigueTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiB
           </div>
         )}
 
-        {config.sections.filter(s => s.enabled && s.column === 'left').map((section) => {
+        {getLeftColumnSections(config).map((section: any) => {
           switch (section.type) {
             case 'contact':
               return (
@@ -50,11 +50,11 @@ const RodrigueTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiB
                 </CVSection>
               );
             case 'skills':
-              return skills?.groups && (
+              return skills?.groups && skills.groups.length > 0 && (
                 <CVSection key="skills" title={getSectionLabel(config, 'skills', 'Vibes / Tech')} className="sidebar-section">
                   <div className="skills-wrap">
-                    {skills.groups.flatMap((g: any) => g.items || []).map((skill: string, sIdx: number) => (
-                      <SkillTag key={sIdx}>{skill}</SkillTag>
+                    {skills.groups.flatMap((g: any) => g.items || []).map((skill: any, sIdx: number) => (
+                      <SkillTag key={sIdx}>{typeof skill === 'string' ? skill : skill.name || ''}</SkillTag>
                     ))}
                   </div>
                 </CVSection>
@@ -116,7 +116,7 @@ const RodrigueTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiB
           )}
         </header>
 
-        {config.sections.filter(s => s.enabled && s.column !== 'left').map((section) => {
+        {getRightColumnSections(config).map((section: any) => {
           switch (section.type) {
             case 'summary':
               return summary && (

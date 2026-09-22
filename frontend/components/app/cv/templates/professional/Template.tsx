@@ -2,7 +2,7 @@
 import React from 'react';
 import { TemplateProps } from '@/types/cv';
 import { TemplateStyles, CVSection, ItemGroup, SkillBar , RemoteStyles} from '../BaseComponents';
-import { getSafeData, isSectionEnabled, getSectionLabel } from '../utils';
+import { getSafeData, isSectionEnabled, getSectionLabel, getLeftColumnSections, getRightColumnSections } from '../utils';
 
 const ProfessionalTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBaseUrl }) => {
   const data = getSafeData(rawData);
@@ -37,7 +37,7 @@ const ProfessionalTemplate: React.FC<TemplateProps> = ({ data: rawData, config, 
             </div>
           )}
 
-          {config.sections.filter(s => s.enabled && s.column === 'left').map((section) => {
+          {getLeftColumnSections(config).map((section: any) => {
             switch (section.type) {
               case 'contact':
                 return (
@@ -60,11 +60,11 @@ const ProfessionalTemplate: React.FC<TemplateProps> = ({ data: rawData, config, 
                   </CVSection>
                 );
               case 'skills':
-                return skills?.groups && (
+                return skills?.groups && skills.groups.length > 0 && (
                   <CVSection key="skills" title={getSectionLabel(config, 'skills', 'Expertise')} className="sidebar-section">
                     <div className="skills-list">
-                      {skills.groups.flatMap((g: any) => g.items || []).map((skill: string, sIdx: number) => (
-                        <SkillBar key={sIdx} name={skill} level={85} />
+                      {skills.groups.flatMap((g: any) => g.items || []).map((skill: any, sIdx: number) => (
+                        <SkillBar key={sIdx} name={typeof skill === 'string' ? skill : skill.name || ''} level={85} />
                       ))}
                     </div>
                   </CVSection>
@@ -111,7 +111,7 @@ const ProfessionalTemplate: React.FC<TemplateProps> = ({ data: rawData, config, 
 
         {/* Main Content */}
         <main className="right-column" style={{ flex: 1 }}>
-          {config.sections.filter(s => s.enabled && s.column !== 'left').map((section) => {
+          {getRightColumnSections(config).map((section: any) => {
             switch (section.type) {
               case 'summary':
                 return summary && (
