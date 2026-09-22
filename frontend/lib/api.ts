@@ -199,7 +199,46 @@ export async function exportPdf(
   templateId?: string | null,
   paymentId?: string
 ): Promise<ExportResponse> {
-  const response = await fetch(`${API_BASE}/export/pdf`, {
+  const response = await fetch(`${API_BASE}/exports/export/pdf`, {
+    method: 'POST',
+    headers: getDefaultHeaders({}, accessToken),
+    body: JSON.stringify({
+      template_name: template.templateName,
+      data,
+      out,
+      config,
+      guest_email: guestData?.email,
+      guest_name: guestData?.name,
+      plan,
+      template_id: templateId,
+      payment_id: paymentId ? String(paymentId) : undefined
+    }),
+  });
+  const res = await handleResponse<ExportResponse>(response);
+  
+  // Ensure the URL is absolute if it's a relative path from the backend
+  if (res.url && res.url.startsWith('/')) {
+    const urlObj = new URL(API_BASE);
+    const backendBase = `${urlObj.protocol}//${urlObj.host}`;
+    res.url = `${backendBase}${res.url}`;
+  }
+  
+  return res;
+}
+
+// === Export DOCX ===
+export async function exportDocx(
+  template: Template, 
+  data: ResumeData, 
+  out?: string, 
+  config?: any, 
+  accessToken?: string,
+  guestData?: { email: string; name: string },
+  plan: string = 'trial',
+  templateId?: string | null,
+  paymentId?: string
+): Promise<ExportResponse> {
+  const response = await fetch(`${API_BASE}/exports/export/docx`, {
     method: 'POST',
     headers: getDefaultHeaders({}, accessToken),
     body: JSON.stringify({
@@ -225,42 +264,13 @@ export async function exportPdf(
   return res;
 }
 
-// === Export DOCX ===
-export async function exportDocx(
-  template: Template, 
-  data: ResumeData, 
-  out?: string, 
-  config?: any, 
-  accessToken?: string,
-  guestData?: { email: string; name: string },
-  plan: string = 'trial',
-  templateId?: string | null,
-  paymentId?: string
-): Promise<ExportResponse> {
-  const response = await fetch(`${API_BASE}/export/docx`, {
-    method: 'POST',
-    headers: getDefaultHeaders({}, accessToken),
-    body: JSON.stringify({
-      template_name: template.templateName,
-      data,
-      out,
-      config,
-      guest_email: guestData?.email,
-      guest_name: guestData?.name,
-      plan,
-      template_id: templateId,
-      payment_id: paymentId ? String(paymentId) : undefined
-    }),
+// === Get Print Data ===
+export async function getPrintData(printId: string): Promise<{ template_name: string; data: any; config: any }> {
+  const response = await fetch(`${API_BASE}/exports/print-data/${printId}`, {
+    method: 'GET',
+    headers: getDefaultHeaders(),
   });
-  const res = await handleResponse<ExportResponse>(response);
-  
-  // Ensure the URL is absolute if it's a relative path from the backend
-  if (res.url && res.url.startsWith('/')) {
-    const backendBase = API_BASE.replace(/\/api$/, '');
-    res.url = `${backendBase}${res.url}`;
-  }
-  
-  return res;
+  return handleResponse(response);
 }
 
 // === Génération de contenu IA ===

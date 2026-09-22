@@ -26,7 +26,7 @@ from app.core.config import settings
 
 router = APIRouter()
 
-BASE_DIR = Path(__file__).parent.parent.resolve()
+BASE_DIR = Path(__file__).resolve().parents[4]
 STATIC_DIR = BASE_DIR / "static"
 STATIC_DIR.mkdir(exist_ok=True)
 
@@ -224,6 +224,7 @@ async def export_pdf(
         print_url = f"{frontend_url}/print?id={request_id}"
 
         def run_pdf_cmd():
+            res = None
             # 1. Rendu React unifié (100% WYSIWYG)
             try:
                 print(f"[PDF Export] Tentative de rendu React WYSIWYG via {print_url}")
@@ -232,15 +233,21 @@ async def export_pdf(
                 if res.returncode == 0 and out_pdf.exists() and out_pdf.stat().st_size > 1000:
                     print("[PDF Export] ✅ Rendu React réussi avec fidélité absolue !")
                     return res
-                print(f"[PDF Export] Rendu React code {res.returncode}, repli sur Jinja2.")
+                print(f"[PDF Export] Rendu React code {res.returncode}, repli sur Jinja2 (qui échouera si templates supprimés).")
             except Exception as react_err:
                 print(f"[PDF Export] Exception rendu React: {react_err}. Repli sur Jinja2...")
 
-            # 2. Repli de secours : Rendu Jinja2
-            html = render_html_by_name(req.template_name, req.data, config_override=req.config)
-            tmp_html.write_text(html, encoding="utf-8")
-            cmd = [sys.executable, str(BASE_DIR / "generate_pdf_from_html.py"), "--html", str(tmp_html), "--out", str(out_pdf)]
-            return subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+            # 2. Repli de secours : Rendu Jinja2 (Sera en échec car les fichiers ont été supprimés)
+            try:
+                html = render_html_by_name(req.template_name, req.data, config_override=req.config)
+                tmp_html.write_text(html, encoding="utf-8")
+                cmd = [sys.executable, str(BASE_DIR / "generate_pdf_from_html.py"), "--html", str(tmp_html), "--out", str(out_pdf)]
+                return subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+            except Exception as e:
+                print(f"Jinja2 Render Error: {e}")
+                # We return the original failed res from React if Jinja2 fails
+                if res is not None: return res
+                raise e
             
         result = await asyncio.to_thread(run_pdf_cmd)
         if result and result.returncode != 0 and (not out_pdf.exists() or out_pdf.stat().st_size == 0):

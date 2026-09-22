@@ -108,7 +108,11 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
           adapterData as any,
           undefined,
           templateConfig as any,
-          session?.user?.accessToken
+          session?.user?.accessToken,
+          undefined,
+          'trial',
+          cv.template_id,
+          "sandbox-bypass-id"
         );
 
         if (res.url) {
