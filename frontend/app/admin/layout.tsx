@@ -78,7 +78,7 @@ export default async function AdminLayout({
                             </svg>
                         </div>
                         <div>
-                            <div className="font-black text-gray-900 text-lg leading-none">CVtor</div>
+                            <div className="font-black text-gray-900 text-lg leading-none">{process.env.NEXT_PUBLIC_APP_NAME || 'Carriey'}</div>
                             <div className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">Admin</div>
                         </div>
                     </Link>

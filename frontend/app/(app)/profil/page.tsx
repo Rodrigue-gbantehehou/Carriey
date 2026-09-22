@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { useProfileStore } from '@/store/profile';
 import ExperienceList from '@/components/app/profile/ExperienceList';
 import EducationList from '@/components/app/profile/EducationList';
@@ -246,9 +247,18 @@ function AccordionBlock({ section, profile, about, setAbout, updateProfile, defa
 }) {
   const [open, setOpen] = useState(defaultOpen);
 
-  const handleSave = () => {
-    localStorage.setItem('cariey_draft_profile', JSON.stringify(profile));
-    alert("Vos modifications ont été sauvegardées avec succès !");
+  const { data: session } = useSession();
+
+  const handleSave = async () => {
+    if (!session?.user?.accessToken) return;
+    try {
+      const { profileApi } = await import('@/lib/profile-api');
+      await profileApi.updateProfile(session.user.accessToken, profile);
+      alert("Vos modifications ont été sauvegardées avec succès !");
+    } catch (err) {
+      console.error("Error saving profile", err);
+      alert("Erreur lors de la sauvegarde.");
+    }
   };
 
   return (
@@ -287,6 +297,7 @@ function AccordionBlock({ section, profile, about, setAbout, updateProfile, defa
 }
 
 export default function ProfilPage() {
+  const { data: session } = useSession();
   const { profile, setProfile, updateProfile, setLoading, isLoading } = useProfileStore();
   const [about, setAbout] = useState('');
   
@@ -296,24 +307,26 @@ export default function ProfilPage() {
   const [newSectionType, setNewSectionType] = useState<'text' | 'simple_list' | 'detailed_list'>('text');
 
   useEffect(() => {
-    setLoading(true);
-    const raw = localStorage.getItem('cariey_draft_profile');
-    const draft = raw ? JSON.parse(raw) : null;
-    setTimeout(() => {
-      setProfile({
-        id: draft?.id || '1', user_id: draft?.user_id || 'user_1',
-        username: draft?.username || '', title: draft?.title || '',
-        bio: draft?.bio || '', contact_email: draft?.contact_email || '',
-        visibility: draft?.visibility || 'public',
-        experiences: draft?.experiences || [], educations: draft?.educations || [],
-        skills: draft?.skills || [], projects: draft?.projects || [],
-        certifications: draft?.certifications || [],
-        custom_sections: draft?.custom_sections || [],
-      });
-      setAbout(draft?.bio || '');
-      setLoading(false);
-    }, 300);
-  }, [setProfile, setLoading]);
+    const fetchProfile = async () => {
+      if (session?.user?.accessToken) {
+        setLoading(true);
+        try {
+          const { profileApi } = await import('@/lib/profile-api');
+          const data = await profileApi.getProfile(session.user.accessToken);
+          if (data) {
+            setProfile(data);
+            setAbout(data.bio || '');
+          }
+        } catch (err) {
+          console.error("Error fetching profile", err);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    
+    fetchProfile();
+  }, [session, setProfile, setLoading]);
 
   const handleAddCustomSection = (e?: React.FormEvent) => {
     e?.preventDefault();

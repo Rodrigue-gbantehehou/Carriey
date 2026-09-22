@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'CVtor - Éditeur de CV Professionnel avec IA',
+  title: `${process.env.NEXT_PUBLIC_APP_NAME || 'Carriey'} - Éditeur de CV Professionnel avec IA`,
   description: 'Créez un CV professionnel en quelques minutes avec l\'IA',
 };
 

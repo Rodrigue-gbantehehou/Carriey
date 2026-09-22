@@ -1,6 +1,6 @@
-# CVtor - Éditeur de CV en Temps Réel
+# Carriey - Éditeur de CV en Temps Réel
 
-**CVtor** est une application moderne pour créer, éditer et exporter des CV professionnels. L'application utilise une architecture hybride pour offrir une expérience d'édition fluide tout en garantissant une génération de fichiers (PDF/DOCX) de haute qualité.
+**Carriey** est une application moderne pour créer, éditer et exporter des CV professionnels. L'application utilise une architecture hybride pour offrir une expérience d'édition fluide tout en garantissant une génération de fichiers (PDF/DOCX) de haute qualité.
 
 ## 🚀 Architecture de Rendu
 

@@ -27,7 +27,7 @@ function getCompletionPercent(profile: any, about: string): number {
 
 export default function AccueilPage() {
   const { data: session } = useSession();
-  const { profile, setProfile } = useProfileStore();
+  const { profile, setProfile, setLoading } = useProfileStore();
   const { cvs } = useCvStore();
   const { openCreateModal } = useUiStore();
   const [about, setAbout] = useState('');
@@ -41,23 +41,27 @@ export default function AccueilPage() {
 
   useEffect(() => {
     setMounted(true);
-    const raw = localStorage.getItem('cariey_draft_profile');
-    const draft = raw ? JSON.parse(raw) : null;
-    if (draft) {
-      setProfile({
-        id: draft.id || '1', user_id: draft.user_id || 'user_1',
-        username: draft.username || '', title: draft.title || '',
-        bio: draft.bio || '', contact_email: draft.contact_email || '',
-        contact_phone: draft.contact_phone || '', location: draft.location || '',
-        website: draft.website || '', linkedin_url: draft.linkedin_url || '', github_url: draft.github_url || '',
-        visibility: draft.visibility || 'public',
-        experiences: draft.experiences || [], educations: draft.educations || [],
-        skills: draft.skills || [], projects: draft.projects || [],
-        certifications: draft.certifications || [],
-      });
-      setAbout(draft.bio || '');
-    }
-  }, [setProfile]);
+    
+    const fetchProfile = async () => {
+      if (session?.user?.accessToken) {
+        setLoading(true);
+        try {
+          const { profileApi } = await import('@/lib/profile-api');
+          const data = await profileApi.getProfile(session.user.accessToken);
+          if (data) {
+            setProfile(data);
+            setAbout(data.bio || '');
+          }
+        } catch (err) {
+          console.error("Error fetching profile", err);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    
+    fetchProfile();
+  }, [session, setProfile, setLoading]);
 
   if (!mounted) return null;
 

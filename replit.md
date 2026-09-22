@@ -1,8 +1,8 @@
 
-# Présentation du Projet CVtor
+# Présentation du Projet Carriey
 
 ## 📌 Aperçu Général
-CVtor est un constructeur de CV moderne et intelligent qui combine :
+Carriey est un constructeur de CV moderne et intelligent qui combine :
 - Un éditeur visuel avec glisser-déposer
 - Des modèles personnalisables
 - Une prévisualisation en temps réel

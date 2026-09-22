@@ -41,6 +41,7 @@ export interface ProfileCertification {
   name: string;
   issuer: string;
   date?: string;
+  url?: string;
 }
 
 export interface CustomSectionItem {
@@ -57,6 +58,32 @@ export interface CustomSection {
   type?: 'text' | 'simple_list' | 'detailed_list';
   content?: string;
   items?: CustomSectionItem[];
+}
+
+export interface ProfileLanguage {
+  id: string;
+  name: string;
+  level?: string;
+}
+
+export interface ProfileAchievement {
+  id: string;
+  title: string;
+  description?: string;
+  date?: string;
+}
+
+export interface ProfileLink {
+  id: string;
+  label: string;
+  url: string;
+}
+
+export interface ProfileDocument {
+  id: string;
+  title: string;
+  type?: string;
+  file_url: string;
 }
 
 export interface MasterProfile {
@@ -78,5 +105,9 @@ export interface MasterProfile {
   skills: ProfileSkill[];
   projects: ProfileProject[];
   certifications: ProfileCertification[];
+  languages: ProfileLanguage[];
+  achievements: ProfileAchievement[];
+  links: ProfileLink[];
+  documents: ProfileDocument[];
   custom_sections?: CustomSection[];
 }

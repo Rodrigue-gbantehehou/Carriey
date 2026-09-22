@@ -4,19 +4,7 @@ import { useState } from 'react';
 import { useProfileStore } from '@/store/profile';
 import { Globe, Award, X, ExternalLink, Trash2, Plus } from 'lucide-react';
 
-interface Language {
-  id: string;
-  name: string;
-  level: string;
-}
-
-interface Certification {
-  id: string;
-  name: string;
-  issuer: string;
-  date?: string;
-  url?: string;
-}
+import { ProfileLanguage, ProfileCertification } from '@/types/profile';
 
 const LANGUAGE_LEVELS = ['Notions', 'Intermédiaire', 'Courant', 'Bilingue', 'Langue maternelle'];
 
@@ -24,18 +12,19 @@ const inputClass = "block w-full rounded-md border border-gray-200 bg-white py-2
 
 // ---------- Languages ----------
 export function LanguagesList() {
-  const [languages, setLanguages] = useState<Language[]>([]);
+  const { profile, addLanguage, removeLanguage } = useProfileStore();
+  const languages = profile?.languages || [];
   const [isAdding, setIsAdding] = useState(false);
-  const [form, setForm] = useState<Partial<Language>>({});
+  const [form, setForm] = useState<Partial<ProfileLanguage>>({});
 
   const handleAdd = () => {
     if (!form.name || !form.level) return;
-    setLanguages(prev => [...prev, { id: crypto.randomUUID(), name: form.name!, level: form.level! }]);
+    addLanguage({ id: crypto.randomUUID(), name: form.name, level: form.level });
     setForm({});
     setIsAdding(false);
   };
 
-  const remove = (id: string) => setLanguages(prev => prev.filter(l => l.id !== id));
+  const remove = (id: string) => removeLanguage(id);
 
   return (
     <div className="space-y-4">
@@ -89,18 +78,19 @@ export function LanguagesList() {
 
 // ---------- Certifications ----------
 export function CertificationsList() {
-  const [certifications, setCertifications] = useState<Certification[]>([]);
+  const { profile, addCertification, removeCertification } = useProfileStore();
+  const certifications = profile?.certifications || [];
   const [isAdding, setIsAdding] = useState(false);
-  const [form, setForm] = useState<Partial<Certification>>({});
+  const [form, setForm] = useState<Partial<ProfileCertification>>({});
 
   const handleAdd = () => {
     if (!form.name || !form.issuer) return;
-    setCertifications(prev => [...prev, { id: crypto.randomUUID(), name: form.name!, issuer: form.issuer!, date: form.date, url: form.url }]);
+    addCertification({ id: crypto.randomUUID(), name: form.name, issuer: form.issuer, date: form.date, url: form.url });
     setForm({});
     setIsAdding(false);
   };
 
-  const remove = (id: string) => setCertifications(prev => prev.filter(c => c.id !== id));
+  const remove = (id: string) => removeCertification(id);
 
   return (
     <div className="space-y-4">

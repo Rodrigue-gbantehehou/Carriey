@@ -80,7 +80,7 @@ export class FedaPayProvider implements PaymentProvider {
           environment: this.isSandbox ? 'sandbox' : 'live',
           transaction: {
             amount: amount.value,
-            description: `CVTor - ${customer.email}`,
+            description: `${process.env.NEXT_PUBLIC_APP_NAME || 'Carriey'} - ${customer.email}`,
             custom_metadata: metadata
           },
           customer: {

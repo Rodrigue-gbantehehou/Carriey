@@ -1,6 +1,6 @@
-# Guide de Déploiement CVtor
+# Guide de Déploiement Carriey
 
-Ce guide vous accompagne dans la mise en ligne de votre application CVtor en utilisant des services gratuits.
+Ce guide vous accompagne dans la mise en ligne de votre application Carriey en utilisant des services gratuits.
 
 ## 1. Base de données : TiDB Cloud (MySQL)
 
@@ -33,7 +33,7 @@ Ce guide vous accompagne dans la mise en ligne de votre application CVtor en uti
 2. Importez votre projet depuis GitHub.
 3. Allez dans le dossier `frontend` pour les réglages du projet (Root Directory: `frontend`).
 4. Configurez les variables d'environnement (Environment Variables) :
-   - `NEXT_PUBLIC_API_URL` : L'URL que Render vous donnera pour le backend (ex: `https://cvtor-backend.onrender.com/api`).
+   - `NEXT_PUBLIC_API_URL` : L'URL que Render vous donnera pour le backend (ex: `https://carriey-backend.onrender.com/api`).
    - `NEXTAUTH_URL` : L'URL de votre frontend Vercel.
    - `NEXTAUTH_SECRET` : Une chaîne aléatoire longue pour la sécurité.
 

@@ -54,7 +54,7 @@ export default function AdminReportsPage() {
             const url = window.URL.createObjectURL(blob)
             const a = document.createElement('a')
             a.href = url
-            a.download = `cvtor_utilisateurs_${new Date().toISOString().split('T')[0]}.csv`
+            a.download = `${(process.env.NEXT_PUBLIC_APP_NAME || 'carriey').toLowerCase()}_utilisateurs_${new Date().toISOString().split('T')[0]}.csv`
             document.body.appendChild(a)
             a.click()
             window.URL.revokeObjectURL(url)
@@ -78,7 +78,7 @@ export default function AdminReportsPage() {
             const url = window.URL.createObjectURL(blob)
             const a = document.createElement('a')
             a.href = url
-            a.download = `cvtor_paiements_${new Date().toISOString().split('T')[0]}.csv`
+            a.download = `${(process.env.NEXT_PUBLIC_APP_NAME || 'carriey').toLowerCase()}_paiements_${new Date().toISOString().split('T')[0]}.csv`
             document.body.appendChild(a)
             a.click()
             window.URL.revokeObjectURL(url)

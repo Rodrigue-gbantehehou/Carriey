@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { MasterProfile, ProfileExperience, ProfileEducation, ProfileSkill, ProfileProject } from '@/types/profile';
+import { MasterProfile, ProfileExperience, ProfileEducation, ProfileSkill, ProfileProject, ProfileCertification, ProfileLanguage, ProfileAchievement, ProfileLink, ProfileDocument } from '@/types/profile';
 
 type ProfileState = {
   profile: MasterProfile | null;
@@ -29,6 +29,26 @@ type ProfileState = {
   addProject: (project: ProfileProject) => void;
   updateProject: (id: string, data: Partial<ProfileProject>) => void;
   removeProject: (id: string) => void;
+
+  // Certifications
+  addCertification: (cert: ProfileCertification) => void;
+  removeCertification: (id: string) => void;
+
+  // Languages
+  addLanguage: (lang: ProfileLanguage) => void;
+  removeLanguage: (id: string) => void;
+
+  // Achievements
+  addAchievement: (ach: ProfileAchievement) => void;
+  removeAchievement: (id: string) => void;
+
+  // Links
+  addLink: (link: ProfileLink) => void;
+  removeLink: (id: string) => void;
+
+  // Documents
+  addDocument: (doc: ProfileDocument) => void;
+  removeDocument: (id: string) => void;
 };
 
 export const useProfileStore = create<ProfileState>((set) => ({
@@ -102,6 +122,61 @@ export const useProfileStore = create<ProfileState>((set) => ({
     profile: state.profile ? {
       ...state.profile,
       projects: state.profile.projects.filter((p) => p.id !== id),
+    } : null,
+  })),
+
+  // Certifications
+  addCertification: (cert) => set((state) => ({
+    profile: state.profile ? { ...state.profile, certifications: [...state.profile.certifications, cert] } : null,
+  })),
+  removeCertification: (id) => set((state) => ({
+    profile: state.profile ? {
+      ...state.profile,
+      certifications: state.profile.certifications.filter((c) => c.id !== id),
+    } : null,
+  })),
+
+  // Languages
+  addLanguage: (lang) => set((state) => ({
+    profile: state.profile ? { ...state.profile, languages: [...(state.profile.languages || []), lang] } : null,
+  })),
+  removeLanguage: (id) => set((state) => ({
+    profile: state.profile ? {
+      ...state.profile,
+      languages: (state.profile.languages || []).filter((l) => l.id !== id),
+    } : null,
+  })),
+
+  // Achievements
+  addAchievement: (ach) => set((state) => ({
+    profile: state.profile ? { ...state.profile, achievements: [...(state.profile.achievements || []), ach] } : null,
+  })),
+  removeAchievement: (id) => set((state) => ({
+    profile: state.profile ? {
+      ...state.profile,
+      achievements: (state.profile.achievements || []).filter((a) => a.id !== id),
+    } : null,
+  })),
+
+  // Links
+  addLink: (link) => set((state) => ({
+    profile: state.profile ? { ...state.profile, links: [...(state.profile.links || []), link] } : null,
+  })),
+  removeLink: (id) => set((state) => ({
+    profile: state.profile ? {
+      ...state.profile,
+      links: (state.profile.links || []).filter((l) => l.id !== id),
+    } : null,
+  })),
+
+  // Documents
+  addDocument: (doc) => set((state) => ({
+    profile: state.profile ? { ...state.profile, documents: [...(state.profile.documents || []), doc] } : null,
+  })),
+  removeDocument: (id) => set((state) => ({
+    profile: state.profile ? {
+      ...state.profile,
+      documents: (state.profile.documents || []).filter((d) => d.id !== id),
     } : null,
   })),
 }));

@@ -40,7 +40,7 @@ export default function MainLayout({
             <div className="flex">
               <div className="flex-shrink-0 flex items-center">
                 <Link href="/" className="text-xl font-bold text-gray-800">
-                  CVTor
+                  {process.env.NEXT_PUBLIC_APP_NAME || 'Carriey'}
                 </Link>
               </div>
               <div className="hidden sm:ml-6 sm:flex sm:space-x-8">

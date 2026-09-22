@@ -94,5 +94,5 @@ export const authOptions: NextAuthOptions = {
       return session;
     }
   },
-  secret: process.env.NEXTAUTH_SECRET || 'cvtor_super_secret_jwt_key_development_2026',
+  secret: process.env.NEXTAUTH_SECRET || 'carriey_super_secret_jwt_key_development_2026',
 };
