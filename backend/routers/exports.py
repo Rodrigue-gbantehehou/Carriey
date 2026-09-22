@@ -1,226 +1,340 @@
-from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
-from fastapi.responses import FileResponse
-from sqlalchemy.orm import Session
-from pathlib import Path
+import os
+import sys
 import uuid
+import asyncio
+import subprocess
+from pathlib import Path
+from typing import Optional, Dict, Any, Union
+from datetime import datetime, timedelta
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import JSONResponse
+from sqlalchemy.orm import Session
+from pydantic import BaseModel
 
 from database import get_db
-from models.user import User
-from models.resume import Resume
-from models.export import Export, ExportFormat, ExportStatus
+from models.user import User, UserRole
 from models.template import Template
-from schemas.export import ExportCreate, ExportOut, ExportListOut
-from auth.deps import get_current_active_user
+from models.payment import Payment, PaymentStatus
+from auth.deps import get_optional_user
+from auth.schemas import UserOut
+from auth.utils import create_access_token, get_password_hash, SECRET_KEY, ALGORITHM
+from services.template_access_service import TemplateAccessService
+from services.rendering_service import render_html_by_name
+from export_docx import export_docx
+from config import settings
 
-router = APIRouter(prefix="/exports", tags=["exports"])
+router = APIRouter(tags=["exports"])
 
 BASE_DIR = Path(__file__).parent.parent.resolve()
-TEMPLATES_DIR = BASE_DIR / "templates"
+STATIC_DIR = BASE_DIR / "static"
+STATIC_DIR.mkdir(exist_ok=True)
 
-def render_html_from_resume(resume: Resume, template: Template) -> str:
-    """Génère le HTML à partir d'un resume et son template"""
-    from jinja2 import Environment, FileSystemLoader, select_autoescape
-    
-    template_folder = template.folder_name.lower()
-    tpl_dir = TEMPLATES_DIR / template_folder
-    
-    env = Environment(
-        loader=FileSystemLoader(str(tpl_dir)),
-        autoescape=select_autoescape(["html", "jinja2"])
-    )
-    
-    jinja_template = env.get_template("template.jinja2")
-    
-    # Charger le CSS
-    css_path = tpl_dir / "style.css"
-    css_content = css_path.read_text(encoding="utf-8") if css_path.exists() else ""
-    
-    # Extraire les @import pour les fonts
-    import re
-    font_links = []
-    import_pattern = r"@import\s+url\(['\"]?([^'\"]+)['\"]?\);"
-    imports = re.findall(import_pattern, css_content)
-    for url in imports:
-        font_links.append(f'<link rel="stylesheet" href="{url}" />')
-    css_without_imports = re.sub(import_pattern, '', css_content)
-    
-    html_body = jinja_template.render(data=resume.content, template=template.definition)
-    font_links_html = '\n  '.join(font_links)
-    
-    html_full = f"""<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8" />
-  <title>{resume.title}</title>
-  {font_links_html}
-  <style>{css_without_imports}</style>
-</head>
-<body>
-{html_body}
-</body>
-</html>"""
-    
-    return html_full
+# --- MODELS ---
+class PreviewRequest(BaseModel):
+    template_name: str
+    data: Dict[str, Any]
+    config: Optional[Dict[str, Any]] = None
 
-async def generate_pdf_task(export_id: str, resume: Resume, template: Template, db: Session):
-    """Tâche en arrière-plan pour générer le PDF"""
-    from generate_pdf_from_html import html_to_pdf
+class ExportRequest(BaseModel):
+    template_name: str
+    data: Dict[str, Any]
+    config: Optional[Dict[str, Any]] = None
+    out: Optional[str] = None
+    # Infos Guest & Paiement
+    guest_email: Optional[str] = None
+    guest_name: Optional[str] = None
+    plan: Optional[str] = "trial"  # "trial" ou "single"
+    payment_id: Optional[Union[str, int]] = None
+    template_id: Optional[str] = None
+
+class SetPasswordRequest(BaseModel):
+    token: str
+    password: str
+
+# --- CACHE D'IMPRESSION REACT WYSIWYG ---
+_PRINT_CACHE: Dict[str, Any] = {}
+
+async def _cleanup_print_cache(cache_id: str, delay: int = 300):
+    await asyncio.sleep(delay)
+    _PRINT_CACHE.pop(cache_id, None)
+
+@router.get("/print-data/{print_id}")
+async def get_print_data(print_id: str):
+    """Fournit les données de CV temporaires à la vue d'impression React Playwright"""
+    payload = _PRINT_CACHE.get(print_id)
+    if not payload:
+        raise HTTPException(status_code=404, detail="Données d'impression expirées ou introuvables")
+    return payload
+
+@router.post("/preview")
+async def preview_html(req: PreviewRequest):
+    """Génère un aperçu HTML du CV (accès public)"""
+    try:
+        cfg = req.config or {}
+        cfg["is_preview"] = True
+        html_content = render_html_by_name(req.template_name, req.data, config_override=cfg)
+        return {"html": html_content}
+    except Exception as e:
+        import traceback
+        print(f"Preview error: {traceback.format_exc()}")
+        raise HTTPException(status_code=400, detail=str(e))
+
+async def _get_or_create_export_user(req: ExportRequest, current_user: Optional[UserOut], db: Session):
+    """Gère la création/récupération d'utilisateur pour l'export avec vérification du paiement"""
+    import secrets
+
+    # 1. Vérifier si le template est gratuit
+    template = db.query(Template).filter(Template.slug == req.template_name).first()
+    if not template and req.template_id:
+        template = db.query(Template).filter(Template.id == req.template_id).first()
+    
+    is_free = template and template.price == 0
+    
+    # 2. Identifier l'utilisateur cible
+    target_user_id = None
+    is_new_user = False
+    setup_token = None
+
+    if current_user:
+        target_user_id = current_user.id
+    elif req.guest_email:
+        user = db.query(User).filter(User.email == req.guest_email).first()
+        if not user:
+            random_pass = secrets.token_urlsafe(16)
+            user = User(
+                email=req.guest_email,
+                full_name=req.guest_name or "Client CVTor",
+                hashed_password=get_password_hash(random_pass),
+                role=UserRole.USER,
+                is_active=True
+            )
+            db.add(user)
+            db.commit()
+            db.refresh(user)
+            is_new_user = True
+            setup_token = create_access_token(
+                data={"sub": user.email, "purpose": "setup_password"},
+                expires_delta=timedelta(days=7)
+            )
+        target_user_id = user.id
+
+    # 3. Vérification de l'accès / Paiement (Sauf pour les ADMINS)
+    is_admin = current_user and current_user.role in ["ADMIN", "SUPER_ADMIN"]
+    
+    if not is_free and not is_admin:
+        has_access = target_user_id and template and TemplateAccessService.check_user_access(db, target_user_id, template.id)
+        
+        if not has_access:
+            if req.payment_id:
+                payment = db.query(Payment).filter(
+                    (Payment.id == req.payment_id) | (Payment.provider_payment_id == req.payment_id)
+                ).first()
+                
+                is_sandbox = os.getenv("KKIAPAY_SANDBOX") == "true" or os.getenv("PAYMENT_SANDBOX") == "true"
+                payment_valid = False
+                
+                if payment and payment.status == PaymentStatus.SUCCESS:
+                    payment_valid = True
+                else:
+                    try:
+                        from services.fedapay import fedapay_service
+                        from models.payment import PaymentProvider
+                        
+                        status_info = await fedapay_service.verify_transaction(str(req.payment_id))
+                        if status_info and status_info.get("status") in ["approved", "success"]:
+                            payment_valid = True
+                            
+                            if not payment:
+                                payment = Payment(
+                                    provider_payment_id=str(req.payment_id),
+                                    user_id=target_user_id,
+                                    template_id=template.id if template else None,
+                                    amount=300 if req.plan == "trial" else (template.price if template else 1000),
+                                    currency="XOF",
+                                    status=PaymentStatus.SUCCESS,
+                                    provider=PaymentProvider.FEDAPAY
+                                )
+                                db.add(payment)
+                                db.commit()
+                                db.refresh(payment)
+                            elif payment.status != PaymentStatus.SUCCESS:
+                                payment.status = PaymentStatus.SUCCESS
+                                db.commit()
+                    except Exception as e:
+                        print(f"Erreur vérification dynamique FedaPay: {e}")
+                
+                if not payment_valid and is_sandbox:
+                    payment_valid = True
+                    if not payment and template:
+                        from models.payment import PaymentProvider
+                        payment = Payment(
+                            id=str(req.payment_id) if "-" in str(req.payment_id) else None,
+                            provider_payment_id=str(req.payment_id),
+                            user_id=target_user_id,
+                            template_id=template.id,
+                            amount=300 if req.plan == "trial" else template.price,
+                            currency="XOF",
+                            status=PaymentStatus.SUCCESS,
+                            provider=PaymentProvider.KKIAPAY
+                        )
+                        db.add(payment)
+                        db.commit()
+                        db.refresh(payment)
+
+                if payment_valid and template and target_user_id:
+                    expires_at = datetime.now() + timedelta(days=14) if req.plan == "trial" else None
+                    TemplateAccessService.grant_access(db=db, user_id=target_user_id, template_id=template.id, expires_at=expires_at, payment_id=payment.id if payment else None)
+                else:
+                    raise HTTPException(status_code=402, detail="Paiement requis ou non validé")
+            else:
+                raise HTTPException(status_code=402, detail="Paiement requis pour ce modèle")
+    elif is_free and target_user_id and template:
+        TemplateAccessService.grant_access(db=db, user_id=target_user_id, template_id=template.id)
+
+    return target_user_id, is_new_user, setup_token
+
+@router.post("/export/pdf")
+async def export_pdf(
+    req: ExportRequest,
+    current_user: Optional[UserOut] = Depends(get_optional_user),
+    db: Session = Depends(get_db)
+):
+    """Exporte le CV en PDF (moteur React unifié avec repli Jinja2)"""
+    from services.mailer_service import mailer_service
+    tmp_html = None
     
     try:
-        # Générer HTML
-        html_content = render_html_from_resume(resume, template)
+        target_user_id, is_new_user, setup_token = await _get_or_create_export_user(req, current_user, db)
+        request_id = str(uuid.uuid4())
         
-        # Fichiers temporaires
-        tmp_html = BASE_DIR / f"_tmp_export_{export_id}.html"
-        tmp_html.write_text(html_content, encoding="utf-8")
-        
-        # Générer PDF
-        output_pdf = BASE_DIR / f"export_{export_id}.pdf"
-        html_to_pdf(tmp_html, output_pdf)
-        
-        # Nettoyer HTML temporaire
-        tmp_html.unlink(missing_ok=True)
-        
-        # Mettre à jour l'export
-        export = db.query(Export).filter(Export.id == export_id).first()
-        if export:
-            export.status = ExportStatus.DONE
-            export.file_url = f"/static/export_{export_id}.pdf"
-            db.commit()
+        # Mettre en cache pour la route d'impression React WYSIWYG
+        _PRINT_CACHE[request_id] = {
+            "template_name": req.template_name,
+            "data": req.data,
+            "config": req.config or {}
+        }
+        asyncio.create_task(_cleanup_print_cache(request_id))
+
+        safe_filename = f"CV_{request_id}.pdf"
+        out_pdf = STATIC_DIR / safe_filename
+        tmp_html = BASE_DIR / f"_tmp_render_{request_id}.html"
+
+        frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5000")
+        print_url = f"{frontend_url}/print?id={request_id}"
+
+        def run_pdf_cmd():
+            # 1. Rendu React unifié (100% WYSIWYG)
+            try:
+                print(f"[PDF Export] Tentative de rendu React WYSIWYG via {print_url}")
+                cmd = [sys.executable, str(BASE_DIR / "generate_pdf_from_html.py"), "--url", print_url, "--out", str(out_pdf)]
+                res = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+                if res.returncode == 0 and out_pdf.exists() and out_pdf.stat().st_size > 1000:
+                    print("[PDF Export] ✅ Rendu React réussi avec fidélité absolue !")
+                    return res
+                print(f"[PDF Export] Rendu React code {res.returncode}, repli sur Jinja2.")
+            except Exception as react_err:
+                print(f"[PDF Export] Exception rendu React: {react_err}. Repli sur Jinja2...")
+
+            # 2. Repli de secours : Rendu Jinja2
+            html = render_html_by_name(req.template_name, req.data, config_override=req.config)
+            tmp_html.write_text(html, encoding="utf-8")
+            cmd = [sys.executable, str(BASE_DIR / "generate_pdf_from_html.py"), "--html", str(tmp_html), "--out", str(out_pdf)]
+            return subprocess.run(cmd, capture_output=True, text=True, timeout=30)
             
+        result = await asyncio.to_thread(run_pdf_cmd)
+        if result and result.returncode != 0 and (not out_pdf.exists() or out_pdf.stat().st_size == 0):
+            print(f"PDF Generator Error: {result.stderr}")
+            raise RuntimeError(f"Erreur lors de la génération du PDF: {result.stderr}")
+
+        url = f"/static/{out_pdf.name}" if out_pdf.exists() else None
+
+        # 3. Envoyer l'email de confirmation
+        if url and (is_new_user or req.guest_email):
+            email = req.guest_email or (current_user.email if current_user else None)
+            name: str = req.guest_name or (current_user.full_name if (current_user and current_user.full_name) else None) or "Client"
+            
+            if email:
+                setup_link = f"{os.getenv('FRONTEND_URL', 'http://localhost:5000')}/set-password?token={setup_token}" if setup_token else None
+                mailer_service.send_welcome_and_cv(
+                    recipient_email=email,
+                    full_name=name,
+                    pdf_path=str(out_pdf) if out_pdf.exists() else None,
+                    setup_link=setup_link
+                )
+        
+        return {"file": str(out_pdf), "url": url}
+    except HTTPException:
+        raise
     except Exception as e:
-        # Marquer comme failed
-        export = db.query(Export).filter(Export.id == export_id).first()
-        if export:
-            export.status = ExportStatus.FAILED
-            export.meta_data = {"error": str(e)}
-            db.commit()
+        import traceback
+        print(f"PDF export error: {traceback.format_exc()}")
+        raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        if tmp_html is not None:
+            try:
+                tmp_html.unlink(missing_ok=True)
+            except Exception:
+                pass
 
-@router.post("/", response_model=ExportOut, status_code=status.HTTP_201_CREATED)
-async def create_export(
-    export_in: ExportCreate,
-    background_tasks: BackgroundTasks,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+@router.post("/export/docx")
+async def export_docx_endpoint(
+    req: ExportRequest,
+    current_user: Optional[UserOut] = Depends(get_optional_user),
+    db: Session = Depends(get_db)
 ):
-    """Crée un export PDF/DOCX d'un CV"""
-    # Vérifier que le resume appartient à l'utilisateur
-    resume = db.query(Resume).filter(
-        Resume.id == export_in.resume_id,
-        Resume.user_id == current_user.id
-    ).first()
-    
-    if not resume:
-        raise HTTPException(status_code=404, detail="CV non trouvé")
-    
-    # Récupérer le template
-    template = db.query(Template).filter(Template.id == resume.template_id).first()
-    if not template:
-        raise HTTPException(status_code=404, detail="Template non trouvé")
-    
-    # Créer l'export
-    new_export = Export(
-        resume_id=export_in.resume_id,
-        format=ExportFormat.PDF if export_in.format.lower() == "pdf" else ExportFormat.DOCX,
-        status=ExportStatus.QUEUED
-    )
-    
-    db.add(new_export)
-    db.commit()
-    db.refresh(new_export)
-    
-    # Lancer la génération en arrière-plan (pour PDF uniquement pour l'instant)
-    if export_in.format.lower() == "pdf":
-        new_export.status = ExportStatus.RUNNING
+    """Exporte le CV en DOCX"""
+    from services.mailer_service import mailer_service
+    try:
+        target_user_id, is_new_user, setup_token = await _get_or_create_export_user(req, current_user, db)
+        
+        request_id = str(uuid.uuid4())
+        safe_filename = f"CV_{request_id}.docx"
+        out_docx = STATIC_DIR / safe_filename
+        
+        result_path = export_docx(req.data, out_docx)
+        url = f"/static/{out_docx.name}" if out_docx.exists() else None
+        
+        if url and (is_new_user or req.guest_email):
+            email = req.guest_email or (current_user.email if current_user else None)
+            name: str = req.guest_name or (current_user.full_name if (current_user and current_user.full_name) else None) or "Client"
+            
+            if email:
+                setup_link = f"{os.getenv('FRONTEND_URL', 'http://localhost:5000')}/set-password?token={setup_token}" if setup_token else None
+                mailer_service.send_welcome_and_cv(
+                    recipient_email=email, 
+                    full_name=name, 
+                    setup_link=setup_link
+                )
+
+        return {"file": str(out_docx), "url": url}
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        print(f"DOCX export error: {traceback.format_exc()}")
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.post("/auth/set-password")
+async def set_password(req: SetPasswordRequest, db: Session = Depends(get_db)):
+    """Définit le mot de passe après un achat invité"""
+    from jose import jwt
+    try:
+        payload = jwt.decode(req.token, SECRET_KEY, algorithms=[ALGORITHM])
+        email = payload.get("sub")
+        purpose = payload.get("purpose")
+        
+        if not email or purpose != "setup_password":
+            raise HTTPException(status_code=400, detail="Token invalide ou expiré")
+            
+        user = db.query(User).filter(User.email == email).first()
+        if not user:
+            raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+            
+        user.hashed_password = get_password_hash(req.password)
         db.commit()
-        background_tasks.add_task(generate_pdf_task, new_export.id, resume, template, db)
-    else:
-        # DOCX non implémenté pour l'instant
-        new_export.status = ExportStatus.FAILED
-        new_export.meta_data = {"error": "Format DOCX non encore implémenté"}
-        db.commit()
-    
-    return new_export
+        
+        return {"message": "Mot de passe défini avec succès"}
+    except Exception:
+        raise HTTPException(status_code=400, detail="Lien invalide ou expiré")
 
-@router.get("/resume/{resume_id}", response_model=List[ExportListOut])
-async def list_resume_exports(
-    resume_id: str,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
-):
-    """Liste tous les exports d'un CV"""
-    # Vérifier que le resume appartient à l'utilisateur
-    resume = db.query(Resume).filter(
-        Resume.id == resume_id,
-        Resume.user_id == current_user.id
-    ).first()
-    
-    if not resume:
-        raise HTTPException(status_code=404, detail="CV non trouvé")
-    
-    exports = db.query(Export).filter(Export.resume_id == resume_id).all()
-    return exports
-
-@router.get("/{export_id}", response_model=ExportOut)
-async def get_export(
-    export_id: str,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
-):
-    """Récupère les détails d'un export"""
-    export = db.query(Export).filter(Export.id == export_id).first()
-    
-    if not export:
-        raise HTTPException(status_code=404, detail="Export non trouvé")
-    
-    # Vérifier que le resume appartient à l'utilisateur
-    resume = db.query(Resume).filter(
-        Resume.id == export.resume_id,
-        Resume.user_id == current_user.id
-    ).first()
-    
-    if not resume:
-        raise HTTPException(status_code=403, detail="Accès refusé")
-    
-    return export
-
-@router.get("/{export_id}/download")
-async def download_export(
-    export_id: str,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
-):
-    """Télécharge un fichier exporté"""
-    export = db.query(Export).filter(Export.id == export_id).first()
-    
-    if not export:
-        raise HTTPException(status_code=404, detail="Export non trouvé")
-    
-    # Vérifier que le resume appartient à l'utilisateur
-    resume = db.query(Resume).filter(
-        Resume.id == export.resume_id,
-        Resume.user_id == current_user.id
-    ).first()
-    
-    if not resume:
-        raise HTTPException(status_code=403, detail="Accès refusé")
-    
-    # Vérifier que l'export est terminé
-    if export.status != ExportStatus.DONE:
-        raise HTTPException(status_code=400, detail="Export pas encore prêt")
-    
-    if not export.file_url:
-        raise HTTPException(status_code=404, detail="Fichier non trouvé")
-    
-    # Construire le chemin du fichier
-    file_path = BASE_DIR / export.file_url.replace("/static/", "")
-    
-    if not file_path.exists():
-        raise HTTPException(status_code=404, detail="Fichier non trouvé")
-    
-    return FileResponse(
-        path=file_path,
-        filename=f"{resume.title}.{export.format.value}",
-        media_type="application/pdf" if export.format == ExportFormat.PDF else "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    )

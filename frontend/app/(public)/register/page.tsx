@@ -2,8 +2,8 @@ import { Suspense } from 'react';
 import RegisterForm from '@/components/auth/RegisterForm';
 
 export const metadata = {
-  title: 'Inscription - CVtor',
-  description: 'Créez votre compte CVtor pour commencer à créer des CV professionnels',
+  title: 'Inscription - CARIEY',
+  description: 'Créez votre compte CARIEY pour commencer à centraliser votre parcours',
 };
 
 export default function RegisterPage() {

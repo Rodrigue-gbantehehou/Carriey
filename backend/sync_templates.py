@@ -3,6 +3,12 @@ import os
 import sys
 from pathlib import Path
 
+if sys.platform == "win32" and hasattr(sys.stdout, "reconfigure"):
+    try:
+        getattr(sys.stdout, "reconfigure")(encoding="utf-8")
+    except Exception:
+        pass
+
 # Add current directory to path so we can import from local modules
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 

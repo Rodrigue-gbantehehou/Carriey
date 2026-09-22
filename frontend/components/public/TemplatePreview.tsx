@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { CVTemplateRenderer } from '../cv-templates';
+import { CVTemplateRenderer } from '@/components/app/cv/templates';
 import { API_BASE } from '@/lib/api';
 import { CVData, TemplateConfig } from '@/types/cv';
 
@@ -231,6 +231,23 @@ export default function TemplatePreview({ template, data = DEFAULT_MOCK_DATA, se
   };
 
   if (!isVisible) return <div ref={containerRef} className="w-full h-full bg-gray-50/50" />;
+
+  if (template?.preview_image) {
+    const src = template.preview_image.startsWith('http')
+      ? template.preview_image
+      : `${API_BASE}${template.preview_image}`;
+    return (
+      <div ref={containerRef} className="w-full h-full relative overflow-hidden bg-[#FBFBFB] flex items-center justify-center">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={src}
+          alt={template.name || template.slug}
+          className="w-full h-full object-cover object-top"
+          loading="lazy"
+        />
+      </div>
+    );
+  }
 
   return (
     <div 

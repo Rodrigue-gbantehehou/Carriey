@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Mail, Lock, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import config from '@/lib/config';
 
 export default function LoginForm() {
@@ -12,7 +12,6 @@ export default function LoginForm() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
 
@@ -27,8 +26,6 @@ export default function LoginForm() {
     try {
       setIsLoading(true);
       setError('');
-      console.log("[Login] Starting login for:", email);
-      console.log("[Login] API URL:", config.apiBaseUrl);
 
       const result = await signIn('credentials', {
         redirect: false,
@@ -36,121 +33,115 @@ export default function LoginForm() {
         password,
       });
 
-      console.log("[Login] Result:", result);
-
       if (result?.error) {
-        console.error("[Login] Auth error:", result.error);
         setError('Identifiants invalides ou erreur de connexion.');
       } else {
-        console.log("[Login] Success! Redirecting...");
-        router.push(callbackUrl);
+        window.location.href = callbackUrl;
       }
     } catch (err: any) {
-      console.error("[Login] Exception:", err);
-      setError('Impossible de contacter le serveur. Vérifiez votre connexion.');
+      setError('Impossible de contacter le serveur.');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F5F5F5] relative overflow-hidden px-4 py-12">
-      {/* Background Blobs */}
-      <div className="absolute top-0 -left-4 w-72 h-72 bg-[#00C896] rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob"></div>
-      <div className="absolute top-0 -right-4 w-72 h-72 bg-[#00C896] rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-2000"></div>
-      <div className="absolute -bottom-8 left-20 w-72 h-72 bg-[#00C896] rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-4000"></div>
+    <div className="flex min-h-screen bg-white">
+      {/* Left side: Image/Pattern */}
+      <div className="relative hidden w-0 flex-1 lg:block bg-gray-50 border-r border-gray-100 overflow-hidden">
+        {/* Subtle grid pattern for premium tech feel */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+        
+        <div className="absolute inset-0 flex flex-col items-center justify-center p-12 text-center">
+          <div className="bg-white/60 backdrop-blur-md rounded-2xl border border-gray-200 p-12 max-w-lg shadow-xl shadow-gray-200/50">
+             <div className="w-16 h-16 bg-indigo-600 text-white rounded-xl flex items-center justify-center font-black text-2xl mb-6 mx-auto">C</div>
+             <h3 className="text-2xl font-bold text-gray-900 mb-4">Gérez votre carrière depuis un seul endroit.</h3>
+             <p className="text-gray-500">Centralisez vos expériences, générez des CV sur-mesure et publiez un profil web en un clic.</p>
+          </div>
+        </div>
+      </div>
 
-      <div className="max-w-md w-full relative">
-        <div className="glass-emerald rounded-3xl sm:rounded-[2rem] shadow-2xl p-6 sm:p-10">
-          <div className="text-center mb-8 sm:mb-10">
-            <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 bg-[#00C896] rounded-2xl mb-4 sm:mb-6 shadow-lg shadow-[#00C896]/20">
-              <Lock className="text-white w-7 h-7 sm:w-8 sm:h-8" />
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-black text-[#1C1C1C] tracking-tight">
-              Bon retour parmi nous
+      {/* Right side: Form */}
+      <div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
+        <div className="mx-auto w-full max-w-sm lg:w-96">
+          <div className="mb-8">
+            <Link href="/" className="inline-block">
+              <span className="text-2xl font-black tracking-tighter text-indigo-600">CARIEY</span>
+            </Link>
+            <h2 className="mt-8 text-2xl font-bold tracking-tight text-gray-900">
+              Connexion
             </h2>
-            <p className="mt-2 sm:mt-3 text-[#777777] font-medium text-sm sm:text-base">
-              Connectez-vous pour continuer à créer
+            <p className="mt-2 text-sm text-gray-500">
+              Content de vous revoir. Veuillez saisir vos identifiants.
             </p>
           </div>
 
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
-              <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-              <p className="text-sm text-red-600 font-medium">{error}</p>
-            </div>
-          )}
+          <div className="mt-8">
+            {error && (
+              <div className="mb-4 rounded-md border border-red-200 bg-red-50 p-4">
+                <p className="text-sm font-medium text-red-800">{error}</p>
+              </div>
+            )}
 
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            <div className="space-y-4">
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#777777] group-focus-within:text-[#00C896] transition-colors">
-                  <Mail className="w-5 h-5" />
+            <form className="space-y-6" onSubmit={handleSubmit}>
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-900">
+                  Adresse email
+                </label>
+                <div className="mt-2">
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="block w-full rounded-md border border-gray-200 bg-white py-2.5 px-3 text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none sm:text-sm sm:leading-6 transition-all"
+                  />
                 </div>
-                <input
-                  id="email-address"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  className="block w-full pl-11 pr-4 py-3.5 bg-white/50 border border-gray-200 rounded-2xl text-[#1C1C1C] placeholder:text-[#777777] focus:ring-2 focus:ring-[#00C896]/20 focus:border-[#00C896] focus:bg-white outline-none transition-all"
-                  placeholder="Adresse email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
               </div>
 
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#777777] group-focus-within:text-[#00C896] transition-colors">
-                  <Lock className="w-5 h-5" />
+              <div>
+                <div className="flex items-center justify-between">
+                  <label htmlFor="password" className="block text-sm font-medium text-gray-900">
+                    Mot de passe
+                  </label>
+                  <div className="text-sm">
+                    <Link href="/forgot-password" className="font-semibold text-indigo-600 hover:text-indigo-500">
+                      Mot de passe oublié ?
+                    </Link>
+                  </div>
                 </div>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  required
-                  className="block w-full pl-11 pr-4 py-3.5 bg-white/50 border border-gray-200 rounded-2xl text-[#1C1C1C] placeholder:text-[#777777] focus:ring-2 focus:ring-[#00C896]/20 focus:border-[#00C896] focus:bg-white outline-none transition-all"
-                  placeholder="Mot de passe"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
+                <div className="mt-2">
+                  <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    autoComplete="current-password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="block w-full rounded-md border border-gray-200 bg-white py-2.5 px-3 text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none sm:text-sm sm:leading-6 transition-all"
+                  />
+                </div>
               </div>
-            </div>
 
-            <div className="flex items-center justify-end">
-              <Link 
-                href="/forgot-password" 
-                className="text-sm font-semibold text-[#00C896] hover:text-[#00B285] transition-colors"
-              >
-                Mot de passe oublié ?
-              </Link>
-            </div>
+              <div>
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors disabled:opacity-50"
+                >
+                  {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Se connecter'}
+                </button>
+              </div>
+            </form>
 
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="group relative w-full flex justify-center items-center gap-2 py-4 px-6 bg-[#00C896] hover:bg-[#00B285] text-white text-base font-bold rounded-2xl shadow-xl shadow-[#00C896]/20 transition-all active:scale-[0.98] disabled:opacity-70 disabled:active:scale-100"
-            >
-              {isLoading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <>
-                  Se connecter
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </>
-              )}
-            </button>
-          </form>
-
-          <div className="mt-10 text-center">
-            <p className="text-[#777777] font-medium">
+            <p className="mt-8 text-center text-sm text-gray-500">
               Pas encore de compte ?{' '}
-              <Link 
-                href="/register" 
-                className="text-[#00C896] font-bold hover:underline decoration-2 underline-offset-4 transition-all"
-              >
-                Créer un compte
+              <Link href="/register" className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500">
+                S'inscrire
               </Link>
             </p>
           </div>

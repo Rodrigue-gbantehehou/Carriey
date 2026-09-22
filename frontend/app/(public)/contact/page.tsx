@@ -1,7 +1,7 @@
 'use client';
 
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
+import Navbar from '@/components/public/Navbar';
+import Footer from '@/components/public/Footer';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
@@ -21,7 +21,7 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen bg-[#F5F5F5]">
-      <Navbar />
+
 
       <main className="py-20 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto shadow-2xl shadow-black/5 rounded-[40px] overflow-hidden bg-white flex flex-col md:flex-row border border-gray-100">
@@ -126,7 +126,7 @@ export default function ContactPage() {
         </div>
       </main>
 
-      <Footer />
+
     </div>
   );
 }

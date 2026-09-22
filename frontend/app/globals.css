@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -6,23 +8,21 @@ html, body {
   height: 100%;
   overflow-x: hidden;
   width: 100%;
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-main); 
+  color: var(--text-main);
 }
 
 :root {
-  --bg-main: #F5F5F5;
-  --text-main: #1C1C1C;
-  --text-muted: #777777;
-  --color-cta: #00C896;
-  --color-cta-hover: #00B285;
-  --color-emerald-light: #E6F9F4;
-  --color-emerald-glow: rgba(0, 200, 150, 0.2);
+  --bg-main: #FAFAFA;
+  --text-main: #0F172A;
+  --text-muted: #64748B;
+  --color-cta: #4F46E5; /* Indigo 600 */
+  --color-cta-hover: #4338CA;
+  --color-emerald-light: #EEF2FF;
+  --color-emerald-glow: rgba(79, 70, 229, 0.2);
 }
 
-body { 
-  background-color: var(--bg-main); 
-  color: var(--text-main);
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
 
 @keyframes marquee {
   0% { transform: translateX(0); }

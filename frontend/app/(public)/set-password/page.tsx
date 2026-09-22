@@ -27,10 +27,10 @@ function SetPasswordContent() {
 
     setLoading(true)
     try {
-      const response = await fetch(`${config.apiBaseUrl}/auth/set-password`, {
+      const response = await fetch(`${config.apiBaseUrl}/auth/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, password }),
+        body: JSON.stringify({ token, new_password: password }),
       })
 
       if (response.ok) {

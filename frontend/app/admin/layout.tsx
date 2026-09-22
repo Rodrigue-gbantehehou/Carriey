@@ -1,35 +1,63 @@
-import { auth } from '@/lib/auth'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth-options'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { headers } from 'next/headers'
+import config from '@/lib/config'
+
+// Sidebar nav items
+const navSections = [
+    {
+        title: 'Général',
+        items: [
+            { label: 'Vue d\'ensemble', href: '/admin', icon: '📊', exact: true },
+        ]
+    },
+    {
+        title: 'Contenu',
+        items: [
+            { label: 'Documents', href: '/admin/resumes', icon: '📄' },
+            { label: 'Modèles', href: '/admin/templates', icon: '🎨' },
+        ]
+    },
+    {
+        title: 'Communauté',
+        items: [
+            { label: 'Utilisateurs', href: '/admin/users', icon: '👥' },
+            { label: 'Paiements', href: '/admin/payments', icon: '💳' },
+        ]
+    },
+    {
+        title: 'Outils',
+        items: [
+            { label: 'Rapports', href: '/admin/reports', icon: '📈' },
+            { label: 'Logs Système', href: '/admin/audit', icon: '🔍' },
+        ]
+    },
+]
 
 export default async function AdminLayout({
     children,
 }: {
     children: React.ReactNode
 }) {
-    const session = await auth()
-    
-    console.log("[AdminLayout] Session check:", { 
-        hasSession: !!session, 
-        userEmail: session?.user?.email,
-        role: session?.user?.role 
-    })
-    
-    // Protect admin routes
+    const session = await getServerSession(authOptions)
+
     if (!session) {
-        console.warn("[AdminLayout] No session found, redirecting to login...")
         redirect('/login?callbackUrl=/admin')
     }
 
-    // Check role
     const userRole = session.user.role?.toLowerCase()
     if (userRole !== 'admin' && userRole !== 'super_admin') {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-100">
-                <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full">
-                    <h1 className="text-2xl font-bold text-red-600 mb-4">Accès Refusé</h1>
-                    <p className="mb-6">Vous n&apos;avez pas les droits nécessaires pour accéder à cette section.</p>
-                    <Link href="/" className="text-blue-600 hover:underline">
+            <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                <div className="bg-white p-10 rounded-2xl shadow-xl max-w-md w-full text-center">
+                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <span className="text-3xl">🔒</span>
+                    </div>
+                    <h1 className="text-2xl font-black text-gray-900 mb-2">Accès Refusé</h1>
+                    <p className="text-gray-500 mb-6">Vous n&apos;avez pas les droits nécessaires.</p>
+                    <Link href="/" className="inline-block px-6 py-3 bg-gray-900 text-white font-bold rounded-xl hover:bg-black transition-all">
                         Retour à l&apos;accueil
                     </Link>
                 </div>
@@ -37,46 +65,98 @@ export default async function AdminLayout({
         )
     }
 
-    const navItems = [
-        { label: 'Vue d\'ensemble', href: '/admin' },
-        { label: 'Modèles de CV', href: '/admin/templates' },
-        { label: 'Utilisateurs', href: '/admin/users' },
-        { label: 'Paiements', href: '/admin/payments' },
-        { label: 'Logs Système', href: '/admin/audit' },
-    ]
-
     return (
-        <div className="min-h-screen bg-gray-100 flex">
-            {/* Sidebar */}
-            <aside className="w-64 bg-white shadow-md">
-                <div className="p-6 border-b">
-                    <h2 className="text-xl font-bold text-gray-800">Admin CVTor</h2>
-                    <p className="text-sm text-gray-500 mt-1">{session.user.email}</p>
+        <div className="min-h-screen bg-gray-50 flex">
+            {/* ── Sidebar ── */}
+            <aside className="w-64 bg-white border-r border-gray-100 flex flex-col shadow-sm fixed inset-y-0 left-0 z-30">
+                {/* Logo */}
+                <div className="px-6 py-5 border-b border-gray-100">
+                    <Link href="/" className="flex items-center gap-2 group">
+                        <div className="w-9 h-9 bg-emerald-500 rounded-xl flex items-center justify-center shadow-md">
+                            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div className="font-black text-gray-900 text-lg leading-none">CVtor</div>
+                            <div className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">Admin</div>
+                        </div>
+                    </Link>
                 </div>
-                <nav className="p-4">
-                    <ul className="space-y-2">
-                        {navItems.map((item) => (
-                            <li key={item.href}>
-                                <Link
-                                    href={item.href}
-                                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
-                                >
-                                    {item.label}
-                                </Link>
-                            </li>
-                        ))}
-                    </ul>
+
+                {/* User info */}
+                <div className="px-4 py-3 border-b border-gray-50 bg-gray-50/50">
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center text-emerald-700 font-black text-sm">
+                            {session.user.email?.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="overflow-hidden">
+                            <div className="text-xs font-bold text-gray-700 truncate">{session.user.name || session.user.email?.split('@')[0]}</div>
+                            <div className="text-[10px] font-bold uppercase tracking-widest text-emerald-600">{userRole?.replace('_', ' ')}</div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Nav */}
+                <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-5">
+                    {navSections.map((section) => (
+                        <div key={section.title}>
+                            <div className="px-3 mb-2 text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                {section.title}
+                            </div>
+                            <ul className="space-y-0.5">
+                                {section.items.map((item) => (
+                                    <li key={item.href}>
+                                        <Link
+                                            href={item.href}
+                                            className="flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-gray-600 rounded-xl hover:bg-gray-50 hover:text-gray-900 transition-all group"
+                                        >
+                                            <span className="text-base">{item.icon}</span>
+                                            <span>{item.label}</span>
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    ))}
                 </nav>
-                <div className="p-4 border-t mt-auto">
-                    <Link href="/" className="block text-center px-4 py-2 text-sm text-gray-600 hover:text-gray-900 border rounded hover:bg-gray-50">
-                        Retour au site
+
+                {/* Footer */}
+                <div className="px-3 py-4 border-t border-gray-100 space-y-1">
+                    <Link
+                        href="/"
+                        className="flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-gray-500 rounded-xl hover:bg-gray-50 hover:text-gray-700 transition-all"
+                    >
+                        <span>🌐</span>
+                        <span>Voir le site</span>
+                    </Link>
+                    <Link
+                        href="/dashboard"
+                        className="flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-gray-500 rounded-xl hover:bg-gray-50 hover:text-gray-700 transition-all"
+                    >
+                        <span>👤</span>
+                        <span>Mon espace</span>
                     </Link>
                 </div>
             </aside>
 
-            {/* Main Content */}
-            <main className="flex-1 p-8 overflow-y-auto">
-                {children}
+            {/* ── Main content ── */}
+            <main className="flex-1 ml-64 min-h-screen">
+                {/* Top bar */}
+                <header className="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-gray-100 px-8 h-16 flex items-center justify-between">
+                    <div className="text-sm text-gray-400 font-medium">
+                        Panel d&apos;administration
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <span className="text-xs font-bold text-gray-500 bg-gray-100 px-3 py-1.5 rounded-full">
+                            {session.user.email}
+                        </span>
+                    </div>
+                </header>
+
+                <div className="p-8">
+                    {children}
+                </div>
             </main>
         </div>
     )

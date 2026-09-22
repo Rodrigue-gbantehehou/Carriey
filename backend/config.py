@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     
     # Paths
     BASE_DIR: str = os.path.dirname(os.path.abspath(__file__))
-    TEMPLATES_DIR: str = os.getenv("TEMPLATES_DIR", os.path.join(os.path.dirname(BASE_DIR), "frontend", "components", "cv-templates"))
+    TEMPLATES_DIR: str = os.getenv("TEMPLATES_DIR", os.path.join(os.path.dirname(BASE_DIR), "frontend", "components", "app", "cv", "templates"))
     DATA_DIR: str = os.getenv("DATA_DIR", os.path.join(BASE_DIR, "data"))
     
     # Database

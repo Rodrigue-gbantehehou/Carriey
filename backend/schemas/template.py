@@ -9,9 +9,11 @@ class TemplateBase(BaseModel):
     description: Optional[str] = None
     price: Decimal = Decimal("0")
     currency: str = "XOF"
+    preview_image: Optional[str] = None
     folder_name: Optional[str] = None
     definition: Dict[str, Any]
     json_schema: Optional[Dict[str, Any]] = None
+    template_type: str = "cv"
     is_active: bool = True
 
 class TemplateCreate(TemplateBase):
@@ -19,8 +21,11 @@ class TemplateCreate(TemplateBase):
 
 class TemplateUpdate(BaseModel):
     name: Optional[str] = None
+    slug: Optional[str] = None
     description: Optional[str] = None
     price: Optional[Decimal] = None
+    currency: Optional[str] = None
+    preview_image: Optional[str] = None
     is_active: Optional[bool] = None
     definition: Optional[Dict[str, Any]] = None
 
@@ -45,6 +50,7 @@ class TemplateListOut(BaseModel):
     currency: str
     is_active: bool
     is_system: bool
+    template_type: str = "cv"
     definition: Dict[str, Any]
     created_at: datetime
 

@@ -20,6 +20,7 @@ class Template(Base):
     version = Column(Integer, default=1)
     is_active = Column(Boolean, default=True)
     is_system = Column(Boolean, default=False)
+    template_type = Column(String(20), default='cv')  # cv | cover_letter | both
     
     created_by = Column(String(36), ForeignKey("users.id"), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

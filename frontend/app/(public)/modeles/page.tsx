@@ -6,8 +6,8 @@ import { useSession } from 'next-auth/react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import config from '@/lib/config'
 import { useEditorStore } from '@/store/editor'
-import Navbar from '@/components/layout/Navbar'
-import TemplatePreview from '@/components/layout/TemplatePreview'
+import Navbar from '@/components/public/Navbar'
+import TemplatePreview from '@/components/public/TemplatePreview'
 
 // Palette par défaut pour l'aperçu
 const DEFAULT_PALETTE = { primary: '#2563eb', secondary: '#1e40af', accent: '#f59e0b' }
@@ -94,17 +94,36 @@ const PREVIEW_DATA = {
 function TemplateCard({ template, onSelect, selectedSector, previewData }: { template: any; onSelect: (t: any) => void; selectedSector?: string; previewData?: any }) {
   const meta = TEMPLATE_META[template.slug] || DEFAULT_META
   const isRecommended = selectedSector && meta.tags?.includes(selectedSector)
+  const isFree = !template.price || parseFloat(template.price) === 0
+  const formattedPrice = isFree ? 'Gratuit' : `${template.price} ${template.currency || 'FCFA'}`
+  const displayName = template.name || template.slug?.charAt(0).toUpperCase() + template.slug?.slice(1)
 
   return (
     <div 
-      className={`group bg-white border ${isRecommended ? 'border-brand-cta ring-4 ring-brand-cta/5' : 'border-gray-100 hover:border-brand-cta/30'} rounded-2xl overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 flex flex-col h-full relative cursor-pointer`}
+      className={`group bg-white border ${isRecommended ? 'border-brand-cta ring-4 ring-brand-cta/5' : 'border-gray-100 hover:border-brand-cta/30'} rounded-2xl overflow-hidden hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-500 flex flex-col h-full relative cursor-pointer`}
       onClick={() => onSelect(template)}
     >
+      {/* Badge Recommandé */}
       {isRecommended && (
         <div className="absolute top-4 right-4 z-20 bg-brand-cta text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg animate-bounce">
           RECOMMANDÉ
         </div>
       )}
+
+      {/* Badge Prix / Gratuité */}
+      <div className="absolute top-4 left-4 z-20">
+        {isFree ? (
+          <span className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-500 text-white text-[10px] font-black uppercase tracking-wider rounded-full shadow-md">
+            <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+            Gratuit
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-black uppercase tracking-wider rounded-full shadow-md">
+            ⭐ Premium
+          </span>
+        )}
+      </div>
+
       <div className="relative aspect-[1/1.414] overflow-hidden bg-gray-50/50">
         <TemplatePreview 
           template={template} 
@@ -119,6 +138,39 @@ function TemplateCard({ template, onSelect, selectedSector, previewData }: { tem
           >
             Utiliser ce modèle
           </div>
+        </div>
+      </div>
+
+      {/* Carte d'information sous l'aperçu */}
+      <div className="p-4 bg-white border-t border-gray-100 flex flex-col justify-between flex-grow">
+        <div>
+          <div className="flex items-center justify-between gap-2 mb-1">
+            <h3 className="font-bold text-base text-brand-text group-hover:text-brand-cta transition-colors">
+              {displayName}
+            </h3>
+            <span className={`text-xs font-black px-2.5 py-0.5 rounded-full ${
+              isFree ? 'bg-emerald-50 text-emerald-700' : 'bg-orange-50 text-orange-700'
+            }`}>
+              {formattedPrice}
+            </span>
+          </div>
+          <p className="text-xs text-brand-muted line-clamp-2 leading-relaxed mb-3">
+            {meta.description}
+          </p>
+        </div>
+
+        <div className="flex items-center justify-between text-[11px] pt-2 border-t border-gray-50">
+          <span className="text-gray-400 capitalize font-medium">
+            {meta.category || 'Général'}
+          </span>
+          {meta.isAtsFriendly && (
+            <span className="inline-flex items-center gap-1 text-emerald-600 font-semibold">
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+              </svg>
+              Optimisé ATS
+            </span>
+          )}
         </div>
       </div>
     </div>
@@ -192,7 +244,18 @@ function ModelesPageContent() {
   const handleSelect = async (template: any) => {
     const def = template.definition || {}
     const sectorId = SECTOR_ID_MAP[selectedSector] || 'tech'
-    
+
+    // Si le candidat a déjà rédigé un CV, ouvrir directement l'éditeur avec le modèle choisi sans perte de données
+    const hasExistingData = typeof window !== 'undefined' && (
+      Boolean(localStorage.getItem('cvtor_cv_data')) ||
+      Boolean(localStorage.getItem('cvtor_profile'))
+    )
+
+    if (hasExistingData) {
+      router.push(`/editor?template=${template.slug}`)
+      return
+    }
+
     const params = new URLSearchParams({
       step: 'method',
       template: template.slug,
@@ -224,7 +287,7 @@ function ModelesPageContent() {
 
   return (
     <div className="min-h-screen bg-brand-bg flex flex-col">
-      <Navbar />
+
 
       {/* ── Entête Responsive ── */}
       <header className="bg-white border-b border-gray-100 py-12 sm:py-20 relative overflow-hidden">

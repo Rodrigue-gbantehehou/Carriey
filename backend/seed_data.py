@@ -1,7 +1,15 @@
 import os
+import sys
 import json
 import uuid
 from pathlib import Path
+
+if sys.platform == "win32" and hasattr(sys.stdout, "reconfigure"):
+    try:
+        getattr(sys.stdout, "reconfigure")(encoding="utf-8")
+    except Exception:
+        pass
+
 from sqlalchemy.orm import Session
 from database import engine, SessionLocal, Base
 from models.user import User, UserRole
@@ -40,7 +48,7 @@ def seed_admin_user(db: Session):
 
 def seed_templates(db: Session, admin_user: User):
     """Créer les templates depuis les dossiers existants"""
-    template_folders = ["professional", "moderne", "classique", "tokyo"]
+    template_folders = ["professional", "moderne", "classique", "tokyo", "letter_classique", "letter_moderne", "letter_professional"]
     
     for folder_name in template_folders:
         template_dir = TEMPLATES_DIR / folder_name
@@ -73,6 +81,7 @@ def seed_templates(db: Session, admin_user: User):
             currency="XOF",
             folder_name=folder_name,
             definition=definition,
+            template_type=definition.get("template_type", "cv"),
             is_active=True,
             is_system=True,
             created_by=admin_user.id
@@ -110,8 +119,10 @@ def seed_personas(db: Session):
     from lib.personas import PERSONAS
     
     for p_info in PERSONAS:
-        sector = p_info['sector']
-        levels = p_info['levels']
+        sector = p_info.get('sector')
+        levels = p_info.get('levels')
+        if not isinstance(levels, dict):
+            continue
         
         for level_id, content in levels.items():
             existing = db.query(Persona).filter(

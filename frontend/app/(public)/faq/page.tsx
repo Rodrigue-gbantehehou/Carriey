@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
+import Navbar from '@/components/public/Navbar';
+import Footer from '@/components/public/Footer';
 
 const faqs = [
   {
@@ -30,7 +30,7 @@ const faqs = [
 export default function FAQPage() {
   return (
     <div className="min-h-screen bg-[#F5F5F5]">
-      <Navbar />
+
       
       <main className="py-20 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
         <div className="text-center mb-16">
@@ -72,7 +72,7 @@ export default function FAQPage() {
           </Link>
         </div>
       </main>
-      <Footer />
+
     </div>
   );
 }

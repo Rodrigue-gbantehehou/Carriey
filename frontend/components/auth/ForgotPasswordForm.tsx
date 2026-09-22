@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Mail, ArrowRight, Loader2, AlertCircle, CheckCircle2, ChevronLeft } from 'lucide-react';
+import { Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 export default function ForgotPasswordForm() {
   const [email, setEmail] = useState('');
@@ -21,10 +21,14 @@ export default function ForgotPasswordForm() {
     try {
       setIsLoading(true);
       setError('');
-      
-      // Simulation d'envoi d'email (le backend n'a pas encore l'endpoint)
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/auth/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      // Toujours afficher le succès (pour ne pas révéler si l'email existe)
       setIsSuccess(true);
     } catch (err) {
       setError('Une erreur est survenue. Veuillez réessayer.');
@@ -34,97 +38,99 @@ export default function ForgotPasswordForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F5F5F5] relative overflow-hidden px-4 py-12">
-      {/* Background Blobs */}
-      <div className="absolute top-0 -left-4 w-72 h-72 bg-[#00C896] rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob"></div>
-      <div className="absolute top-0 -right-4 w-72 h-72 bg-[#00C896] rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-2000"></div>
-      <div className="absolute -bottom-8 left-20 w-72 h-72 bg-[#00C896] rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-4000"></div>
+    <div className="flex min-h-screen bg-white">
+      {/* Left side: Image/Pattern */}
+      <div className="relative hidden w-0 flex-1 lg:block bg-gray-50 border-r border-gray-100 overflow-hidden">
+        {/* Subtle grid pattern for premium tech feel */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+        
+        <div className="absolute inset-0 flex flex-col items-center justify-center p-12 text-center">
+          <div className="bg-white/60 backdrop-blur-md rounded-2xl border border-gray-200 p-12 max-w-lg shadow-xl shadow-gray-200/50">
+             <div className="w-16 h-16 bg-indigo-600 text-white rounded-xl flex items-center justify-center font-black text-2xl mb-6 mx-auto">C</div>
+             <h3 className="text-2xl font-bold text-gray-900 mb-4">Ne perdez pas le fil.</h3>
+             <p className="text-gray-500">Récupérez l'accès à votre Master Profile et retrouvez toutes vos données professionnelles intactes.</p>
+          </div>
+        </div>
+      </div>
 
-      <div className="max-w-md w-full relative">
-        <div className="glass-emerald rounded-3xl sm:rounded-[2rem] shadow-2xl p-6 sm:p-10">
-          <Link 
-            href="/login" 
-            className="inline-flex items-center gap-2 text-sm font-bold text-[#777777] hover:text-[#00C896] transition-colors mb-6 sm:mb-8 group"
-          >
-            <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            Retour à la connexion
-          </Link>
-
-          {!isSuccess ? (
-            <>
-              <div className="text-center mb-8 sm:mb-10">
-                <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 bg-[#00C896] rounded-2xl mb-4 sm:mb-6 shadow-lg shadow-[#00C896]/20">
-                  <Mail className="text-white w-7 h-7 sm:w-8 sm:h-8" />
-                </div>
-                <h2 className="text-2xl sm:text-3xl font-black text-[#1C1C1C] tracking-tight">
-                  Mot de passe oublié ?
+      {/* Right side: Form */}
+      <div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
+        <div className="mx-auto w-full max-w-sm lg:w-96">
+          <div className="mb-8">
+            <Link href="/" className="inline-block">
+              <span className="text-2xl font-black tracking-tighter text-indigo-600">CARIEY</span>
+            </Link>
+            {!isSuccess && (
+              <>
+                <h2 className="mt-8 text-2xl font-bold tracking-tight text-gray-900">
+                  Mot de passe oublié
                 </h2>
-                <p className="mt-2 sm:mt-3 text-[#777777] font-medium leading-relaxed text-sm sm:text-base">
-                  Pas de panique ! Entrez votre email et nous vous enverrons un lien pour réinitialiser votre mot de passe.
+                <p className="mt-2 text-sm text-gray-500">
+                  Entrez votre email pour recevoir un lien de réinitialisation.
+                </p>
+              </>
+            )}
+          </div>
+
+          <div className="mt-8">
+            {!isSuccess ? (
+              <>
+                {error && (
+                  <div className="mb-4 rounded-md border border-red-200 bg-red-50 p-4">
+                    <p className="text-sm font-medium text-red-800">{error}</p>
+                  </div>
+                )}
+
+                <form className="space-y-6" onSubmit={handleSubmit}>
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-900">
+                      Adresse email
+                    </label>
+                    <div className="mt-2">
+                      <input
+                        id="email"
+                        name="email"
+                        type="email"
+                        autoComplete="email"
+                        required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="block w-full rounded-md border border-gray-200 bg-white py-2.5 px-3 text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none sm:text-sm sm:leading-6 transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <button
+                      type="submit"
+                      disabled={isLoading}
+                      className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors disabled:opacity-50"
+                    >
+                      {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Envoyer le lien'}
+                    </button>
+                  </div>
+                </form>
+              </>
+            ) : (
+              <div className="text-center">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100 mb-6">
+                  <CheckCircle2 className="h-8 w-8 text-green-600" />
+                </div>
+                <h2 className="text-2xl font-bold tracking-tight text-gray-900 mb-2">
+                  Vérifiez votre boîte mail
+                </h2>
+                <p className="text-sm text-gray-500 mb-8">
+                  Nous avons envoyé un lien de réinitialisation à <span className="font-semibold text-gray-900">{email}</span>.
                 </p>
               </div>
+            )}
 
-              {error && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
-                  <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-                  <p className="text-sm text-red-600 font-medium">{error}</p>
-                </div>
-              )}
-
-              <form className="space-y-6" onSubmit={handleSubmit}>
-                <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#777777] group-focus-within:text-[#00C896] transition-colors">
-                    <Mail className="w-5 h-5" />
-                  </div>
-                  <input
-                    id="email-address"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    className="block w-full pl-11 pr-4 py-3.5 bg-white/50 border border-gray-200 rounded-2xl text-[#1C1C1C] placeholder:text-[#777777] focus:ring-2 focus:ring-[#00C896]/20 focus:border-[#00C896] focus:bg-white outline-none transition-all"
-                    placeholder="Votre adresse email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="group relative w-full flex justify-center items-center gap-2 py-4 px-6 bg-[#00C896] hover:bg-[#00B285] text-white text-base font-bold rounded-2xl shadow-xl shadow-[#00C896]/20 transition-all active:scale-[0.98] disabled:opacity-70 disabled:active:scale-100"
-                >
-                  {isLoading ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <>
-                      Envoyer le lien
-                      <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                    </>
-                  )}
-                </button>
-              </form>
-            </>
-          ) : (
-            <div className="text-center py-4">
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-emerald-50 rounded-full mb-8 animate-bounce duration-1000">
-                <CheckCircle2 className="text-[#00C896] w-12 h-12" />
-              </div>
-              <h2 className="text-3xl font-black text-[#1C1C1C] tracking-tight mb-4">
-                Email envoyé !
-              </h2>
-              <p className="text-[#777777] font-medium leading-relaxed mb-10">
-                Nous avons envoyé un lien de réinitialisation à <span className="text-[#1C1C1C] font-bold">{email}</span>. 
-                Pensez à vérifier vos courriers indésirables.
-              </p>
-              <Link 
-                href="/login"
-                className="inline-flex items-center justify-center w-full py-4 px-6 bg-white border-2 border-[#00C896] text-[#00C896] text-base font-bold rounded-2xl hover:bg-emerald-50 transition-all active:scale-[0.98]"
-              >
-                Retourner à la connexion
+            <p className="mt-8 text-center text-sm text-gray-500">
+              <Link href="/login" className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500">
+                &larr; Retour à la connexion
               </Link>
-            </div>
-          )}
+            </p>
+          </div>
         </div>
       </div>
     </div>

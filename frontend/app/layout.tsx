@@ -7,9 +7,10 @@ import { Toaster } from 'react-hot-toast';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'CVtor - Éditeur de CV Professionnel avec IA',
-  description: 'Créez un CV professionnel en quelques minutes avec l\'IA',
+  title: 'CARIEY - Your professional profile, everywhere.',
+  description: 'Votre parcours professionnel, simplement.',
 };
+
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

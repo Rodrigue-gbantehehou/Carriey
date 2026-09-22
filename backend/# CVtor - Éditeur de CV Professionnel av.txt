@@ -1,0 +1,14 @@
+# CVtor - Éditeur de CV Professionnel avec IA
+
+[CVTor](http://localhost:5000/)
+[Modèles](http://localhost:5000/modeles)
+[FAQ](http://localhost:5000/faq)
+[Tarifs](http://localhost:5000/tarifs)
+[Contact](http://localhost:5000/contact)
+[Connexion](http://localhost:5000/login)
+[Créer mon CV](http://localhost:5000/onboarding)
+
+# Choisissez votre modèle idéal
+Des CV conçus par des experts en recrutement avec des designs haute performance pour propulser votre carrière.
+0 Modèles disponibles
+CVtor — Performance Architect

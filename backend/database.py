@@ -29,9 +29,9 @@ else:
     # ssl_args pour TiDB Cloud et autres services sécurisés
     connect_args = {}
     if "mysql" in DATABASE_URL:
-        # TiDB Cloud nécessite SSL. Sur Render et la plupart des plateformes Linux, 
-        # le certificat CA système est suffisant pour vérifier l'identité du serveur.
-        connect_args["ssl"] = {"reject_unauthorized": True}
+        # TiDB Cloud ou hébergement nécessitant SSL explicite
+        if "tidb" in DATABASE_URL or os.getenv("DB_SSL") == "true":
+            connect_args["ssl"] = {"reject_unauthorized": True}
         
     # pool_pre_ping=True est important pour les bases cloud qui coupent les connexions inactives
     engine = create_engine(

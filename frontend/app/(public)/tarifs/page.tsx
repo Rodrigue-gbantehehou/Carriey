@@ -1,12 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
+import Navbar from '@/components/public/Navbar';
+import Footer from '@/components/public/Footer';
 
 const plans = [
   {
-    name: 'CVtor Gratuit',
+    name: 'CARIEY Gratuit',
     price: '0',
     currency: 'F CFA',
     period: '/modèle',
@@ -58,7 +58,7 @@ const plans = [
 export default function TarifsPage() {
   return (
     <div className="min-h-screen bg-[#F5F5F5]">
-      <Navbar />
+
 
       <main className="py-20 pb-32">
         <div className="container mx-auto px-4 sm:px-6">
@@ -79,7 +79,7 @@ export default function TarifsPage() {
                 key={plan.name}
                 className={`relative bg-white rounded-3xl border transition-all duration-300 p-8 flex flex-col ${
                   plan.popular
-                    ? 'border-brand-cta shadow-2xl shadow-emerald-500/10 scale-105 z-10'
+                    ? 'border-brand-cta shadow-2xl shadow-indigo-500/10 scale-105 z-10'
                     : 'border-gray-100 shadow-sm hover:shadow-md'
                 }`}
               >
@@ -107,7 +107,7 @@ export default function TarifsPage() {
                   href="/editor"
                   className={`block w-full py-4 rounded-xl font-bold text-center transition-all mb-8 ${
                     plan.popular
-                      ? 'bg-brand-cta text-white hover:bg-emerald-600 shadow-lg shadow-emerald-500/20'
+                      ? 'bg-brand-cta text-white hover:bg-indigo-700 shadow-lg shadow-indigo-500/20'
                       : 'bg-brand-text text-white hover:bg-black'
                   }`}
                 >
@@ -118,10 +118,10 @@ export default function TarifsPage() {
                   {plan.features.map((feature, index) => (
                     <li key={index} className="flex items-center gap-3">
                       <div className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center ${
-                        feature.included ? 'bg-emerald-100' : 'bg-gray-100 text-gray-400'
+                        feature.included ? 'bg-indigo-100' : 'bg-gray-100 text-gray-400'
                       }`}>
                         {feature.included ? (
-                          <svg className="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-3 h-3 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                           </svg>
                         ) : (
@@ -168,7 +168,7 @@ export default function TarifsPage() {
         </div>
       </main>
 
-      <Footer />
+
     </div>
   );
 }

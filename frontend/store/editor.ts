@@ -21,6 +21,9 @@ export type CustomSection = {
 
 export type Template = {
   id?: string
+  slug?: string
+  name?: string
+  price?: string | number
   templateName: string
   displayName?: string
   market?: string
@@ -64,6 +67,7 @@ export type OnboardingData = {
 }
 
 export type ResumeData = any & {
+  doc_type?: 'cv' | 'cover_letter';
   custom_sections?: CustomSection[];
 }
 

@@ -1,4 +1,5 @@
-import { auth } from '@/lib/auth'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth-options'
 import config from '@/lib/config'
 import Link from 'next/link'
 
@@ -18,8 +19,23 @@ async function getLogs(token: string) {
 }
 
 export default async function AdminAuditPage() {
-    const session = await auth()
-    const logs = await getLogs(session!.user.accessToken)
+    const session = await getServerSession(authOptions)
+    
+    if (!session?.user?.accessToken) {
+        return (
+            <div className="space-y-6">
+                <h1 className="text-3xl font-bold text-gray-900">Logs Système</h1>
+                <p className="text-red-600">Session expirée. Veuillez vous reconnecter.</p>
+            </div>
+        )
+    }
+
+    let logs: any[] = []
+    try {
+        logs = await getLogs(session.user.accessToken)
+    } catch (e) {
+        console.error('[AdminAuditPage] Failed to fetch logs:', e)
+    }
 
     return (
         <div className="space-y-6">

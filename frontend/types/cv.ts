@@ -66,6 +66,7 @@ export interface CVCustomSection {
 }
 
 export interface CVData {
+  doc_type?: 'cv' | 'cover_letter';
   profile: CVProfile;
   summary?: string;
   experience?: CVExperience[];
@@ -76,6 +77,19 @@ export interface CVData {
   interests?: string[];
   references?: { name: string; title?: string; company?: string; phone?: string; email?: string }[];
   custom_sections?: CVCustomSection[];
+  recipient?: {
+    company_name?: string;
+    contact_name?: string;
+    contact_title?: string;
+    address?: string;
+  };
+  letter_body?: {
+    subject?: string;
+    date_location?: string;
+    opening?: string;
+    body?: string;
+    closing?: string;
+  };
 }
 
 export interface TemplateSection {

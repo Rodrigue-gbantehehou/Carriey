@@ -2,8 +2,8 @@ import { Suspense } from 'react';
 import LoginForm from '@/components/auth/LoginForm';
 
 export const metadata = {
-  title: 'Connexion - CVtor',
-  description: 'Connectez-vous à votre compte CVtor pour accéder à vos CV',
+  title: 'Connexion - CARIEY',
+  description: 'Connectez-vous à votre compte CARIEY pour accéder à votre profil master',
 };
 
 export default function LoginPage() {

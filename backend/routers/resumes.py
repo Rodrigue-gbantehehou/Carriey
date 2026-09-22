@@ -3,45 +3,49 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from database import get_db
-from models.user import User
+from models.user import User, UserRole
 from models.resume import Resume, ResumeStatus
 from models.template import Template
 from models.payment import Payment, PaymentStatus
 from schemas.resume import ResumeCreate, ResumeUpdate, ResumeOut, ResumeListOut
 from auth.deps import get_current_active_user
+from services.template_access_service import TemplateAccessService
 
 router = APIRouter(prefix="/resumes", tags=["resumes"])
 
-def verify_template_access(user_id: str, template_id: str, db: Session) -> bool:
-    """Vérifie si l'utilisateur a accès au template (gratuit ou payé)"""
-    template = db.query(Template).filter(Template.id == template_id).first()
+def verify_template_access(user: User, template_id: str, db: Session) -> bool:
+    """Vérifie si l'utilisateur a accès au template (gratuit, payé ou admin)"""
+    # Les admins ont accès total
+    if getattr(user, 'role', None) in [UserRole.ADMIN, UserRole.SUPER_ADMIN, "admin", "super_admin"]:
+        return True
+    
+    template = db.query(Template).filter(
+        (Template.id == template_id) | (Template.slug == template_id)
+    ).first()
     if not template:
-        return False
+        return True # Laisser sauvegarder le brouillon par défaut
     
     # Si gratuit, accès direct
     if template.price == 0:
         return True
     
-    # Sinon, vérifier le paiement
-    payment = db.query(Payment).filter(
-        Payment.user_id == user_id,
-        Payment.template_id == template_id,
-        Payment.status == PaymentStatus.SUCCESS
-    ).first()
-    
-    return payment is not None
+    # Vérifier via le service d'accès
+    return TemplateAccessService.check_user_access(db, user.id, template.id)
 
 @router.get("/", response_model=List[ResumeListOut])
 async def list_resumes(
     skip: int = 0,
     limit: int = 100,
+    doc_type: str = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
-    """Liste tous les CVs de l'utilisateur"""
-    resumes = db.query(Resume).filter(
-        Resume.user_id == current_user.id
-    ).offset(skip).limit(limit).all()
+    """Liste tous les documents de l'utilisateur (filtrable par doc_type)"""
+    query = db.query(Resume).filter(Resume.user_id == current_user.id)
+    if doc_type:
+        query = query.filter(Resume.doc_type == doc_type)
+        
+    resumes = query.order_by(Resume.created_at.desc()).offset(skip).limit(limit).all()
     
     return resumes
 
@@ -68,21 +72,22 @@ async def create_resume(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
-    """Crée un nouveau CV"""
-    # Vérifier l'accès au template
-    if not verify_template_access(current_user.id, resume_in.template_id, db):
-        raise HTTPException(
-            status_code=403,
-            detail="Vous devez acheter ce template pour créer un CV avec"
-        )
-    
+    """Crée un nouveau CV (la sauvegarde de brouillon est libre pour tous les utilisateurs)"""
+    # Résoudre le template par ID ou par slug
+    template = db.query(Template).filter(
+        (Template.id == resume_in.template_id) | (Template.slug == resume_in.template_id)
+    ).first()
+    actual_template_id = template.id if template else resume_in.template_id
+
     # Créer le resume
     new_resume = Resume(
         user_id=current_user.id,
-        template_id=resume_in.template_id,
+        template_id=actual_template_id,
         title=resume_in.title,
         content=resume_in.content,
-        status=ResumeStatus.DRAFT
+        status=ResumeStatus.DRAFT,
+        doc_type=resume_in.doc_type,
+        linked_doc_id=resume_in.linked_doc_id
     )
     
     db.add(new_resume)
@@ -109,6 +114,13 @@ async def update_resume(
     
     # Mettre à jour les champs fournis
     update_data = resume_in.model_dump(exclude_unset=True)
+    if "template_id" in update_data and update_data["template_id"]:
+        template = db.query(Template).filter(
+            (Template.id == update_data["template_id"]) | (Template.slug == update_data["template_id"])
+        ).first()
+        if template:
+            update_data["template_id"] = template.id
+
     for field, value in update_data.items():
         setattr(resume, field, value)
     

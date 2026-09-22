@@ -155,17 +155,52 @@ async def kkiapay_webhook(
         raise HTTPException(status_code=404, detail="Paiement non trouvé")
     
     # Mettre à jour le statut
-    if webhook_status == "SUCCESS" or webhook_status == "SUCCESSFUL":
+    prev_status = payment.status
+    if webhook_status in ("SUCCESS", "SUCCESSFUL"):
         payment.status = PaymentStatus.SUCCESS
     elif webhook_status == "FAILED":
         payment.status = PaymentStatus.FAILED
     elif webhook_status == "CANCELLED":
         payment.status = PaymentStatus.CANCELLED
-    
+
     payment.meta_data = {**(payment.meta_data or {}), "webhook": data}
-    
     db.commit()
-    
+
+    # Accorder l'accès au template si paiement réussi (et pas déjà accordé)
+    if payment.status == PaymentStatus.SUCCESS and prev_status != PaymentStatus.SUCCESS:
+        from services.template_access_service import TemplateAccessService
+        from models.template import Template
+        from models.user import User
+
+        template = db.query(Template).filter(Template.id == payment.template_id).first()
+        user = db.query(User).filter(User.id == payment.user_id).first()
+
+        if template and user:
+            try:
+                TemplateAccessService.grant_access(
+                    db=db,
+                    user_id=user.id,
+                    template_id=template.id,
+                    expires_at=None,  # accès permanent après achat complet
+                    payment_id=payment.id
+                )
+                print(f"[Webhook KkiaPay] ✅ Accès au template '{template.name}' accordé à {user.email}")
+            except Exception as e:
+                print(f"[Webhook KkiaPay] Erreur grant_access: {e}")
+
+            # Envoyer email de confirmation
+            try:
+                from services.mailer_service import mailer_service
+                mailer_service.send_payment_confirmation(
+                    recipient_email=user.email,
+                    full_name=user.full_name or user.email,
+                    template_name=template.name,
+                    amount=float(payment.amount),
+                    currency=payment.currency or "XOF"
+                )
+            except Exception as e:
+                print(f"[Webhook KkiaPay] Erreur email confirmation: {e}")
+
     return {"status": "ok", "payment_id": payment.id}
 
 @router.get("/{payment_id}/status", response_model=PaymentOut)

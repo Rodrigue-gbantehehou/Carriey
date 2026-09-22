@@ -4,20 +4,20 @@ import Link from 'next/link';
 
 export default function Footer() {
   return (
-    <footer className="bg-brand-text text-white py-6 sm:py-8 border-t border-white/5">
+    <footer className="bg-white text-gray-900 py-12 sm:py-16 border-t border-gray-100">
       <div className="container mx-auto px-4 sm:px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
           <div className="col-span-1 md:col-span-2">
             <Link href="/" className="flex items-center gap-2 mb-6 group">
-              <div className="w-10 h-10 bg-brand-cta rounded-xl flex items-center justify-center group-hover:rotate-12 transition-transform">
+              <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform shadow-md shadow-indigo-500/20">
                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
-              <span className="text-2xl font-black text-white tracking-tight">CVTor</span>
+              <span className="text-2xl font-black text-gray-900 tracking-tight">CARIEY</span>
             </Link>
-            <p className="text-gray-400 mb-8 max-w-sm text-sm font-medium leading-relaxed">
-              Créer des CV professionnels qui attirent l&apos;attention des recruteurs. Propulsé par l&apos;IA et adapté aux réalités locales.
+            <p className="text-gray-500 mb-8 max-w-sm text-sm font-medium leading-relaxed">
+              Votre parcours professionnel, partout avec vous. Créez des CV qui reflètent votre vraie valeur.
             </p>
             <div className="flex gap-4">
               {/*
@@ -35,31 +35,31 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="font-bold text-white mb-6 text-sm uppercase tracking-widest">Navigation</h4>
-            <ul className="space-y-4 text-gray-400 text-sm font-medium">
-              <li><Link href="/modeles" className="hover:text-brand-cta transition-colors">Modèles de CV</Link></li>
-              <li><Link href="/tarifs" className="hover:text-brand-cta transition-colors">Tarifs & Plans</Link></li>
-              <li><Link href="/faq" className="hover:text-brand-cta transition-colors">Foire Aux Questions</Link></li>
-              <li><Link href="/editor" className="hover:text-brand-cta transition-colors">Créer mon CV</Link></li>
+            <h4 className="font-bold text-gray-900 mb-6 text-sm uppercase tracking-widest">Navigation</h4>
+            <ul className="space-y-4 text-gray-500 text-sm font-medium">
+              <li><Link href="/modeles" className="hover:text-indigo-600 transition-colors">Modèles de CV</Link></li>
+              <li><Link href="/tarifs" className="hover:text-indigo-600 transition-colors">Tarifs & Plans</Link></li>
+              <li><Link href="/faq" className="hover:text-indigo-600 transition-colors">Foire Aux Questions</Link></li>
+              <li><Link href="/start" className="hover:text-indigo-600 transition-colors">Créer mon profil</Link></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="font-bold text-white mb-6 text-sm uppercase tracking-widest">Support & Contact</h4>
-            <ul className="space-y-4 text-gray-400 text-sm font-medium">
-              <li><Link href="/contact" className="hover:text-brand-cta transition-colors">Nous contacter</Link></li>
-              <li><Link href="/faq" className="hover:text-brand-cta transition-colors">Aide en ligne</Link></li>
+            <h4 className="font-bold text-gray-900 mb-6 text-sm uppercase tracking-widest">Support & Contact</h4>
+            <ul className="space-y-4 text-gray-500 text-sm font-medium">
+              <li><Link href="/contact" className="hover:text-indigo-600 transition-colors">Nous contacter</Link></li>
+              <li><Link href="/faq" className="hover:text-indigo-600 transition-colors">Aide en ligne</Link></li>
               {/*
-              <li><span className="block text-white/40">Abidjan, Côte d&apos;Ivoire</span></li>
-              <li><span className="block text-white/40">contact@cvtor.pro</span></li>
+              <li><span className="block text-gray-400">Abidjan, Côte d&apos;Ivoire</span></li>
+              <li><span className="block text-gray-400">contact@cariey.com</span></li>
               */}
             </ul>
           </div>
         </div>
 
-        <div className="pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
-          <p className="text-gray-500 text-sm font-medium">
-            © 2026 CVTor
+        <div className="pt-10 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-6">
+          <p className="text-gray-400 text-sm font-medium">
+            © {new Date().getFullYear()} CARIEY
           </p>
           {/*
           <div className="flex gap-8 text-xs font-bold text-gray-500 uppercase tracking-widest">

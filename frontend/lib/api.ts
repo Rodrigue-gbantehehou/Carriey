@@ -286,6 +286,43 @@ export async function generateContent(req: GenerateRequest, accessToken?: string
   return handleResponse<GenerateResponse>(response);
 }
 
+/**
+ * Génère ou reformule un résumé professionnel percutant avec l'IA
+ */
+export async function generateSummaryAI(role: string, currentSummary?: string, accessToken?: string): Promise<string | null> {
+  try {
+    const res = await generateContent({
+      prompt: `Rédige un résumé professionnel captivant et percutant de 3-4 phrases en français pour le poste: ${role}.${currentSummary ? ` En tenant compte du profil existant : "${currentSummary}"` : ''}`,
+      role: role
+    }, accessToken);
+    return res.data?.summary || null;
+  } catch (err) {
+    console.error('Erreur génération résumé IA:', err);
+    return null;
+  }
+}
+
+/**
+ * Génère 3 réalisations percutantes avec verbes d'action pour une expérience donnée
+ */
+export async function generateExperienceBulletsAI(role: string, company: string, accessToken?: string): Promise<string[] | null> {
+  try {
+    const res = await generateContent({
+      prompt: `Donne 3 puces de réalisations chiffrées et concrètes avec verbes d'action pour le poste "${role}" chez "${company || 'l\'entreprise'}".`,
+      role: role
+    }, accessToken);
+    if (res.data?.experience && res.data.experience.length > 0) {
+      const exp = res.data.experience[0];
+      if (exp.bullets && exp.bullets.length > 0) return exp.bullets;
+      if (exp.description) return [exp.description];
+    }
+    return null;
+  } catch (err) {
+    console.error('Erreur génération expériences IA:', err);
+    return null;
+  }
+}
+
 // Vérification de la connexion au serveur
 export async function checkServerStatus(): Promise<boolean> {
   try {

@@ -1,4 +1,6 @@
 import os
+import sys
+import subprocess
 import json
 from pathlib import Path
 from typing import List, Dict, Any, Optional
@@ -12,13 +14,16 @@ from models.user import User
 from models.template import Template, TemplateAsset
 from schemas.template import TemplateCreate, TemplateUpdate, TemplateOut, TemplateListOut, TemplateFiles
 from auth.deps import get_current_admin, get_current_super_admin
-from services.rendering_service import render_html_from_strings, PLACEHOLDER_PHOTO_B64
+from services.rendering_service import render_html_from_strings, render_html_by_name, PLACEHOLDER_PHOTO_B64
+from generate_pdf_from_html import take_screenshot
+from routers.exports import _PRINT_CACHE
 
 from config import settings
 
 # Get the base templates directory from settings
 TEMPLATES_DIR = Path(settings.TEMPLATES_DIR)
 BASE_DIR = Path(settings.BASE_DIR)
+STATIC_DIR = BASE_DIR / "static"
 
 # Dummy data for live preview
 PREVIEW_DUMMY_DATA = {
@@ -293,6 +298,89 @@ async def toggle_template_active(
     db.refresh(template)
     
     return template
+
+@router.post("/{template_id}/generate-preview")
+async def generate_template_preview(
+    template_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin)
+):
+    """Génère une miniature PNG haute résolution pour le template via Playwright"""
+    template = db.query(Template).filter(
+        (Template.id == template_id) | (Template.slug == template_id)
+    ).first()
+    if not template:
+        raise HTTPException(status_code=404, detail="Template non trouvé")
+    
+    preview_dir = STATIC_DIR / "previews"
+    preview_dir.mkdir(parents=True, exist_ok=True)
+    out_filename = f"{template.slug}.png"
+    out_png = preview_dir / out_filename
+
+    # Inscrire les données dummy dans le cache d'impression pour le rendu React WYSIWYG
+    preview_token = f"preview_{template.slug}"
+    _PRINT_CACHE[preview_token] = {
+        "data": PREVIEW_DUMMY_DATA,
+        "config": template.definition or {},
+        "template_name": template.slug
+    }
+
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5000")
+    target_url = f"{frontend_url}/print?id={preview_token}"
+    screenshot_ok = False
+
+    # 1. Tenter le rendu React via /print (Playwright via sous-processus isolé)
+    try:
+        cmd = [sys.executable, str(BASE_DIR / "generate_pdf_from_html.py"), "--screenshot", "--url", target_url, "--out", str(out_png)]
+        res = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        if res.returncode == 0 and out_png.exists() and out_png.stat().st_size > 500:
+            screenshot_ok = True
+        else:
+            print(f"[Generate Preview] Notice: React print screenshot code {res.returncode}, stderr: {res.stderr}")
+    except Exception as err:
+        print(f"[Generate Preview] Exception: {err}, falling back to Jinja2")
+
+    # 2. Repli Jinja2 si le rendu React n'a pas pu être capturé
+    if not screenshot_ok:
+        import tempfile
+        temp_html_path = None
+        try:
+            html_content = render_html_by_name(template.slug, PREVIEW_DUMMY_DATA, config_override=template.definition or {})
+            with tempfile.NamedTemporaryFile(suffix=".html", delete=False, mode="w", encoding="utf-8") as f:
+                f.write(html_content)
+                temp_html_path = f.name
+            cmd = [sys.executable, str(BASE_DIR / "generate_pdf_from_html.py"), "--screenshot", "--html", str(temp_html_path), "--out", str(out_png)]
+            res = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+            if res.returncode == 0 and out_png.exists() and out_png.stat().st_size > 500:
+                screenshot_ok = True
+            else:
+                print(f"[Generate Preview] Jinja2 fallback stderr: {res.stderr}")
+        except Exception as jinja_err:
+            print(f"[Generate Preview] Jinja2 fallback failed: {jinja_err}")
+        finally:
+            if temp_html_path and os.path.exists(temp_html_path):
+                try:
+                    os.remove(temp_html_path)
+                except Exception:
+                    pass
+
+    if not screenshot_ok or not out_png.exists():
+        raise HTTPException(
+            status_code=500,
+            detail="Impossible de capturer la miniature. Assurez-vous que Playwright Chromium est disponible."
+        )
+
+    # Mettre à jour l'URL de la miniature dans le template
+    preview_url = f"/static/previews/{out_filename}"
+    template.preview_image = preview_url
+    db.commit()
+    db.refresh(template)
+
+    return {
+        "message": "Miniature générée avec succès",
+        "preview_image": preview_url,
+        "template_id": template.id
+    }
 
 @router.get("/{template_id}/assets", response_model=List[dict])
 async def get_template_assets(

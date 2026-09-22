@@ -1,60 +1,37 @@
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
+import Link from 'next/link'
 import config from '@/lib/config'
-
-// Debounce hook
-function useDebounce<T>(value: T, delay: number): T {
-  const [debouncedValue, setDebouncedValue] = useState<T>(value)
-  useEffect(() => {
-    const handler = setTimeout(() => setDebouncedValue(value), delay)
-    return () => clearTimeout(handler)
-  }, [value, delay])
-  return debouncedValue
-}
-
-type CodeTab = 'json' | 'css' | 'jinja'
-type MainTab = 'info' | 'code'
 
 export default function EditTemplatePage() {
   const { data: session } = useSession()
   const router = useRouter()
   const { id } = useParams()
+
   const [template, setTemplate] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isGeneratingPreview, setIsGeneratingPreview] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
-  const [isSavingFiles, setIsSavingFiles] = useState(false)
-  const [activeTab, setActiveTab] = useState<MainTab>('info')
-  const [activeCodeTab, setActiveCodeTab] = useState<CodeTab>('jinja')
-  const [showPreview, setShowPreview] = useState(true)
-  const [previewHtml, setPreviewHtml] = useState<string>('')
-  const [isRendering, setIsRendering] = useState(false)
-  const [previewScale, setPreviewScale] = useState(0.6)
 
   const [formData, setFormData] = useState({
     name: '',
+    slug: '',
     description: '',
-    price: '',
+    price: '0',
     currency: 'XOF',
+    preview_image: '',
     is_active: true
   })
 
-  const [fileContents, setFileContents] = useState({
-    template_json: '',
-    style_css: '',
-    template_jinja2: ''
-  })
-
-  const debouncedFileContents = useDebounce(fileContents, 600)
-
-  // Fetch template data
+  // Charger le template
   useEffect(() => {
     const fetchTemplate = async () => {
-      if (!session?.user?.accessToken) return
+      if (!session?.user?.accessToken || !id) return
       try {
         const response = await fetch(`${config.apiBaseUrl}/admin/templates/${id}`, {
           headers: { 'Authorization': `Bearer ${session.user.accessToken}` }
@@ -64,73 +41,24 @@ export default function EditTemplatePage() {
         setTemplate(data)
         setFormData({
           name: data.name || '',
+          slug: data.slug || '',
           description: data.description || '',
-          price: data.price || '0',
+          price: data.price ? String(data.price) : '0',
           currency: data.currency || 'XOF',
+          preview_image: data.preview_image || '',
           is_active: data.is_active !== false
         })
-      } catch (err) {
-        setError('Erreur lors du chargement du template')
+      } catch (err: any) {
+        setError(err.message || 'Erreur lors du chargement du template')
       } finally {
         setIsLoading(false)
       }
     }
 
-    const fetchTemplateFiles = async () => {
-      try {
-        const response = await fetch(`${config.apiBaseUrl}/admin/templates/${id}/files`, {
-          headers: { 'Authorization': `Bearer ${session?.user?.accessToken}` }
-        })
-        if (response.ok) {
-          const files = await response.json()
-          setFileContents(files)
-        }
-      } catch (err) {
-        console.error('Erreur lors du chargement des fichiers:', err)
-      }
-    }
-
-    if (id && session?.user?.accessToken) {
-      fetchTemplate()
-      fetchTemplateFiles()
-    }
+    fetchTemplate()
   }, [id, session])
 
-  // Live preview: trigger on debounced file content changes
-  useEffect(() => {
-    if (!session?.user?.accessToken || activeTab !== 'code') return
-    if (!debouncedFileContents.template_jinja2 && !debouncedFileContents.style_css) return
-
-    const fetchPreview = async () => {
-      setIsRendering(true)
-      try {
-        const response = await fetch(`${config.apiBaseUrl}/admin/templates/preview-live`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session.user.accessToken}`
-          },
-          body: JSON.stringify({
-            template_json: debouncedFileContents.template_json,
-            style_css: debouncedFileContents.style_css,
-            template_jinja2: debouncedFileContents.template_jinja2
-          })
-        })
-        if (response.ok) {
-          const html = await response.text()
-          setPreviewHtml(html)
-        }
-      } catch (err) {
-        console.error('Preview error:', err)
-      } finally {
-        setIsRendering(false)
-      }
-    }
-
-    fetchPreview()
-  }, [debouncedFileContents, session, activeTab])
-
-  const handleInputChange = (e: any) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target
     if (type === 'checkbox') {
       setFormData(prev => ({ ...prev, [name]: (e.target as HTMLInputElement).checked }))
@@ -145,73 +73,80 @@ export default function EditTemplatePage() {
     setIsSubmitting(true)
     setError(null)
     setSuccess(null)
+
     try {
       const response = await fetch(`${config.apiBaseUrl}/admin/templates/${id}`, {
         method: 'PUT',
-        body: JSON.stringify(formData),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.user.accessToken}`
         },
+        body: JSON.stringify({
+          name: formData.name,
+          slug: formData.slug,
+          description: formData.description,
+          price: parseFloat(formData.price) || 0,
+          currency: formData.currency,
+          preview_image: formData.preview_image || null,
+          is_active: formData.is_active
+        })
       })
+
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.detail || 'Erreur lors de la mise à jour')
+        const errData = await response.json()
+        throw new Error(errData.detail || 'Erreur lors de la mise à jour')
       }
-      setSuccess('Template mis à jour avec succès!')
-      setTimeout(() => { router.push('/admin/templates'); router.refresh() }, 1500)
+
+      const updated = await response.json()
+      setTemplate(updated)
+      setSuccess('Modèle enregistré avec succès !')
+      setTimeout(() => setSuccess(null), 3000)
     } catch (err: any) {
-      setError(err.message || 'Une erreur est survenue')
+      setError(err.message || 'Une erreur est survenue lors de la sauvegarde')
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  const handleSaveFiles = async () => {
-    if (!session?.user?.accessToken) return
-    setIsSavingFiles(true)
+  // Génération automatique de la miniature via Playwright
+  const handleGeneratePreview = async () => {
+    if (!session?.user?.accessToken || !id) return
+    setIsGeneratingPreview(true)
     setError(null)
     setSuccess(null)
+
     try {
-      const response = await fetch(`${config.apiBaseUrl}/admin/templates/${id}/files`, {
-        method: 'PUT',
+      const response = await fetch(`${config.apiBaseUrl}/admin/templates/${id}/generate-preview`, {
+        method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.user.accessToken}`
-        },
-        body: JSON.stringify(fileContents)
+        }
       })
+
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.detail || 'Erreur lors de la sauvegarde')
+        const errData = await response.json()
+        throw new Error(errData.detail || 'Erreur lors de la génération de la miniature')
       }
-      setSuccess('Fichiers enregistrés ✓')
-      setTimeout(() => setSuccess(null), 3000)
+
+      const resData = await response.json()
+      const refreshedUrl = `${resData.preview_image}?t=${Date.now()}`
+      setFormData(prev => ({ ...prev, preview_image: resData.preview_image }))
+      setTemplate((prev: any) => ({ ...prev, preview_image: refreshedUrl }))
+      setSuccess('Miniature haute fidélité générée avec succès !')
+      setTimeout(() => setSuccess(null), 4000)
     } catch (err: any) {
-      setError(err.message || 'Erreur lors de la sauvegarde')
+      setError(err.message || 'Impossible de générer la miniature')
     } finally {
-      setIsSavingFiles(false)
+      setIsGeneratingPreview(false)
     }
   }
-
-  const handleFileContentChange = (tab: CodeTab, value: string) => {
-    const key = tab === 'json' ? 'template_json' : tab === 'css' ? 'style_css' : 'template_jinja2'
-    setFileContents(prev => ({ ...prev, [key]: value }))
-  }
-
-  const getLineCount = (tab: CodeTab) => {
-    const content = tab === 'json' ? fileContents.template_json : tab === 'css' ? fileContents.style_css : fileContents.template_jinja2
-    return content.split('\n').length
-  }
-
-  const currentContent = activeCodeTab === 'json' ? fileContents.template_json : activeCodeTab === 'css' ? fileContents.style_css : fileContents.template_jinja2
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-950 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-10 h-10 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-gray-400 text-sm">Chargement du template...</p>
+          <div className="w-10 h-10 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+          <p className="text-gray-400 text-sm">Chargement des paramètres du modèle...</p>
         </div>
       </div>
     )
@@ -219,347 +154,398 @@ export default function EditTemplatePage() {
 
   if (!template) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-400">Template non trouvé.</p>
-          <button onClick={() => router.push('/admin/templates')} className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm">
-            Retour aux templates
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center p-6">
+        <div className="bg-gray-900 border border-gray-800 p-8 rounded-2xl text-center max-w-md">
+          <div className="w-12 h-12 rounded-full bg-red-900/30 text-red-400 flex items-center justify-center mx-auto mb-4 text-xl">⚠️</div>
+          <h2 className="text-lg font-bold text-white mb-2">Modèle introuvable</h2>
+          <p className="text-gray-400 text-sm mb-6">Le modèle demandé n&apos;existe pas ou a été supprimé.</p>
+          <button
+            onClick={() => router.push('/admin/templates')}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-medium transition-colors"
+          >
+            Retour à la liste des modèles
           </button>
         </div>
       </div>
     )
   }
 
+  const isFree = parseFloat(formData.price) === 0
+  const previewSrc = formData.preview_image
+    ? (formData.preview_image.startsWith('http') ? formData.preview_image : `${config.apiBaseUrl}${formData.preview_image}`)
+    : null
+
   return (
-    <div className="min-h-screen bg-gray-950 flex flex-col" style={{ fontFamily: "'Inter', sans-serif" }}>
-      {/* ── Top Bar ── */}
-      <header className="flex items-center justify-between px-4 py-2 bg-gray-900 border-b border-gray-800 shrink-0">
+    <div className="min-h-screen bg-gray-950 text-gray-100 flex flex-col font-sans">
+      {/* ── Top Header ── */}
+      <header className="sticky top-0 z-30 bg-gray-900/90 backdrop-blur border-b border-gray-800 px-6 py-3.5 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => router.back()}
-            className="flex items-center gap-1.5 text-gray-400 hover:text-white transition-colors text-sm"
+          <Link
+            href="/admin/templates"
+            className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white transition-colors bg-gray-800 hover:bg-gray-700 px-2.5 py-1.5 rounded-lg"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            Retour
-          </button>
-          <div className="w-px h-4 bg-gray-700" />
+            Modèles
+          </Link>
+          <div className="h-4 w-px bg-gray-700" />
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-            <span className="text-white font-semibold text-sm">{template.name}</span>
-            <span className="text-gray-500 text-xs font-mono bg-gray-800 px-2 py-0.5 rounded">{template.slug}</span>
-            {template.is_system && (
-              <span className="text-xs bg-blue-900/50 text-blue-300 border border-blue-700 px-2 py-0.5 rounded-full">Système</span>
+            <span className="text-sm font-semibold text-white">{template.name}</span>
+            <span className="text-xs font-mono bg-gray-800 text-gray-400 px-2 py-0.5 rounded border border-gray-700">
+              {template.slug}
+            </span>
+            {formData.is_active ? (
+              <span className="text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+                Actif
+              </span>
+            ) : (
+              <span className="text-[11px] font-medium bg-gray-800 text-gray-500 border border-gray-700 px-2 py-0.5 rounded-full">
+                Inactif
+              </span>
             )}
+            <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${isFree ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' : 'bg-purple-500/10 text-purple-300 border border-purple-500/20'}`}>
+              {isFree ? 'Gratuit' : `${formData.price} ${formData.currency}`}
+            </span>
           </div>
         </div>
 
-        {/* Tab switcher */}
-        <div className="flex items-center gap-1 bg-gray-800 p-1 rounded-lg">
-          <button
-            onClick={() => setActiveTab('info')}
-            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${activeTab === 'info' ? 'bg-blue-600 text-white shadow' : 'text-gray-400 hover:text-white'}`}
+        {/* Action buttons */}
+        <div className="flex items-center gap-3">
+          <a
+            href={`/editor?template=${formData.slug || template.slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-400 bg-blue-950/40 hover:bg-blue-900/50 border border-blue-800 rounded-lg transition-colors"
           >
-            ⚙ Informations
-          </button>
-          <button
-            onClick={() => setActiveTab('code')}
-            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${activeTab === 'code' ? 'bg-blue-600 text-white shadow' : 'text-gray-400 hover:text-white'}`}
-          >
-            {'</>'} Éditeur
-          </button>
-        </div>
+            <span>🚀</span> Tester dans l&apos;éditeur
+          </a>
 
-        {/* Right actions */}
-        <div className="flex items-center gap-2">
-          {success && (
-            <span className="text-green-400 text-xs flex items-center gap-1">
-              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              {success}
-            </span>
-          )}
-          {error && (
-            <span className="text-red-400 text-xs">{error}</span>
-          )}
+          <button
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="flex items-center gap-2 px-4 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors disabled:opacity-50 shadow-sm"
+          >
+            {isSubmitting && <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+            {isSubmitting ? 'Enregistrement...' : 'Enregistrer'}
+          </button>
         </div>
       </header>
 
-      {/* ── Main Content ── */}
-      {activeTab === 'info' ? (
-        /* ── Info Tab ── */
-        <div className="flex-1 overflow-auto p-6">
-          <div className="max-w-2xl mx-auto">
-            <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Name */}
-              <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
-                <h2 className="text-sm font-semibold text-gray-300 mb-4 uppercase tracking-wider">Informations</h2>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Nom du template</label>
-                    <input
-                      type="text" name="name" required value={formData.name}
-                      onChange={handleInputChange}
-                      className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
-                      placeholder="Ex: Template Moderne"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Description</label>
-                    <textarea
-                      name="description" rows={3} value={formData.description}
-                      onChange={handleInputChange}
-                      className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors resize-none"
-                      placeholder="Description du template..."
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Pricing */}
-              <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
-                <h2 className="text-sm font-semibold text-gray-300 mb-4 uppercase tracking-wider">Tarification</h2>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Prix</label>
-                    <input
-                      type="number" name="price" min="0" step="0.01" value={formData.price}
-                      onChange={handleInputChange}
-                      className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
-                      placeholder="0.00"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Devise</label>
-                    <select
-                      name="currency" value={formData.currency} onChange={handleInputChange}
-                      className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
-                    >
-                      <option value="XOF">XOF (FCFA)</option>
-                      <option value="EUR">EUR (Euro)</option>
-                      <option value="USD">USD (Dollar)</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              {/* Status */}
-              <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
-                <h2 className="text-sm font-semibold text-gray-300 mb-4 uppercase tracking-wider">Statut</h2>
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <div className="relative">
-                    <input type="checkbox" name="is_active" checked={formData.is_active} onChange={handleInputChange} className="sr-only" />
-                    <div className={`w-10 h-5 rounded-full transition-colors ${formData.is_active ? 'bg-blue-600' : 'bg-gray-700'}`}></div>
-                    <div className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${formData.is_active ? 'translate-x-5' : ''}`}></div>
-                  </div>
-                  <span className="text-sm text-gray-300">{formData.is_active ? 'Template actif' : 'Template inactif'}</span>
-                </label>
-                <p className="text-xs text-gray-500 mt-2 ml-13">Les templates actifs sont visibles par les utilisateurs.</p>
-              </div>
-
-              {/* System info */}
-              <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
-                <h2 className="text-sm font-semibold text-gray-300 mb-4 uppercase tracking-wider">Informations système</h2>
-                <dl className="grid grid-cols-2 gap-3 text-xs">
-                  {[
-                    { label: 'ID', value: template.id },
-                    { label: 'Slug', value: template.slug },
-                    { label: 'Dossier', value: template.folder_name },
-                    { label: 'Version', value: `v${template.version}` },
-                    { label: 'Type', value: template.is_system ? 'Système' : 'Personnalisé' },
-                    { label: 'Créé le', value: new Date(template.created_at).toLocaleDateString('fr-FR') },
-                  ].map(({ label, value }) => (
-                    <div key={label}>
-                      <dt className="text-gray-500 mb-1">{label}</dt>
-                      <dd className="font-mono text-gray-300 bg-gray-800 px-2 py-1 rounded truncate">{value}</dd>
-                    </div>
-                  ))}
-                </dl>
-              </div>
-
-              <div className="flex justify-end gap-3 pb-6">
-                <button type="button" onClick={() => router.back()}
-                  className="px-4 py-2 text-sm text-gray-400 hover:text-white border border-gray-700 rounded-lg hover:border-gray-600 transition-colors">
-                  Annuler
-                </button>
-                <button type="submit" disabled={isSubmitting}
-                  className="px-5 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2">
-                  {isSubmitting && <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />}
-                  {isSubmitting ? 'Enregistrement...' : 'Enregistrer'}
-                </button>
-              </div>
-            </form>
+      {/* Notifications */}
+      {success && (
+        <div className="bg-emerald-950/80 border-b border-emerald-800/80 text-emerald-200 px-6 py-2.5 text-xs flex items-center justify-between animate-fadeIn">
+          <div className="flex items-center gap-2">
+            <span>✓</span>
+            <span>{success}</span>
           </div>
-        </div>
-      ) : (
-        /* ── Code Editor Tab ── */
-        <div className="flex-1 flex overflow-hidden">
-          {/* Left: Editor */}
-          <div className={`flex flex-col ${showPreview ? 'w-1/2' : 'w-full'} border-r border-gray-800 transition-all`}>
-            {/* File tabs + actions */}
-            <div className="flex items-center justify-between bg-gray-900 border-b border-gray-800 px-2 shrink-0">
-              <div className="flex">
-                {([
-                  { key: 'jinja', label: 'template.jinja2', color: 'text-orange-400', icon: '🧩' },
-                  { key: 'css', label: 'style.css', color: 'text-blue-400', icon: '🎨' },
-                  { key: 'json', label: 'template.json', color: 'text-green-400', icon: '⚙' },
-                ] as const).map(({ key, label, color, icon }) => (
-                  <button
-                    key={key}
-                    onClick={() => setActiveCodeTab(key)}
-                    className={`flex items-center gap-1.5 px-4 py-2.5 text-xs border-b-2 transition-all ${activeCodeTab === key
-                        ? `border-blue-500 ${color} bg-gray-800`
-                        : 'border-transparent text-gray-500 hover:text-gray-300'
-                      }`}
-                  >
-                    <span>{icon}</span>
-                    <span className="font-mono">{label}</span>
-                    <span className="text-gray-600 text-[10px]">{getLineCount(key)}L</span>
-                  </button>
-                ))}
-              </div>
-              <div className="flex items-center gap-2 pr-2">
-                <button
-                  onClick={() => setShowPreview(p => !p)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md transition-all ${showPreview ? 'bg-blue-600/20 text-blue-400 border border-blue-700' : 'text-gray-400 hover:text-white border border-gray-700'}`}
-                >
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                  {showPreview ? 'Masquer' : 'Aperçu'}
-                </button>
-                <button
-                  onClick={handleSaveFiles}
-                  disabled={isSavingFiles}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-green-600 hover:bg-green-500 text-white rounded-md transition-colors disabled:opacity-50"
-                >
-                  {isSavingFiles ? (
-                    <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-                    </svg>
-                  )}
-                  {isSavingFiles ? 'Sauvegarde...' : 'Sauvegarder'}
-                </button>
-              </div>
-            </div>
-
-            {/* Editor area with line numbers */}
-            <div className="flex-1 flex overflow-hidden bg-gray-950">
-              {/* Line numbers */}
-              <div className="select-none text-right pr-3 pl-3 pt-4 text-gray-600 text-xs font-mono leading-5 bg-gray-950 border-r border-gray-800 overflow-hidden shrink-0 w-12">
-                {currentContent.split('\n').map((_, i) => (
-                  <div key={i}>{i + 1}</div>
-                ))}
-              </div>
-              {/* Textarea */}
-              <textarea
-                className="flex-1 p-4 font-mono text-sm bg-gray-950 text-gray-100 focus:outline-none resize-none leading-5 tab-size-2"
-                spellCheck={false}
-                value={currentContent}
-                onChange={(e) => handleFileContentChange(activeCodeTab, e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Tab') {
-                    e.preventDefault()
-                    const start = e.currentTarget.selectionStart
-                    const end = e.currentTarget.selectionEnd
-                    const newValue = currentContent.substring(0, start) + '  ' + currentContent.substring(end)
-                    handleFileContentChange(activeCodeTab, newValue)
-                    setTimeout(() => {
-                      e.currentTarget.selectionStart = e.currentTarget.selectionEnd = start + 2
-                    }, 0)
-                  }
-                }}
-                style={{ caretColor: '#60a5fa' }}
-              />
-            </div>
-
-            {/* Status bar */}
-            <div className="flex items-center justify-between px-4 py-1 bg-blue-600 text-white text-[10px] font-mono shrink-0">
-              <span>
-                {activeCodeTab === 'jinja' ? 'Jinja2' : activeCodeTab === 'css' ? 'CSS' : 'JSON'}
-                {' · '}
-                {getLineCount(activeCodeTab)} lignes
-                {' · '}
-                {currentContent.length} caractères
-              </span>
-              <span className="flex items-center gap-2">
-                {isRendering && (
-                  <span className="flex items-center gap-1 text-blue-200">
-                    <div className="w-2 h-2 border border-white border-t-transparent rounded-full animate-spin" />
-                    Rendu...
-                  </span>
-                )}
-                UTF-8 · LF
-              </span>
-            </div>
-          </div>
-
-          {/* Right: Live Preview */}
-          {showPreview && (
-            <div className="w-1/2 flex flex-col bg-gray-100">
-              {/* Preview header */}
-              <div className="flex items-center justify-between px-4 py-2 bg-gray-900 border-b border-gray-800 shrink-0">
-                <div className="flex items-center gap-2">
-                  <div className="flex gap-1.5">
-                    <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                    <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                  </div>
-                  <span className="text-gray-400 text-xs ml-2">Aperçu en direct</span>
-                  {isRendering && (
-                    <div className="w-3 h-3 border-2 border-blue-400 border-t-transparent rounded-full animate-spin ml-1" />
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-gray-500 text-xs">Zoom</span>
-                  <input
-                    type="range" min="30" max="100" value={previewScale * 100}
-                    onChange={(e) => setPreviewScale(parseInt(e.target.value) / 100)}
-                    className="w-20 h-1 accent-blue-500"
-                  />
-                  <span className="text-gray-400 text-xs w-8">{Math.round(previewScale * 100)}%</span>
-                </div>
-              </div>
-
-              {/* Preview iframe */}
-              <div className="flex-1 overflow-auto bg-gray-200 p-4">
-                {previewHtml ? (
-                  <div
-                    className="bg-white shadow-2xl mx-auto origin-top transition-transform"
-                    style={{
-                      width: `${100 / previewScale}%`,
-                      transform: `scale(${previewScale})`,
-                      transformOrigin: 'top left',
-                      minHeight: '297mm',
-                    }}
-                  >
-                    <iframe
-                      srcDoc={previewHtml}
-                      className="w-full border-0"
-                      style={{ height: '297mm', display: 'block' }}
-                      title="Template Preview"
-                      sandbox="allow-same-origin"
-                    />
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center h-full text-gray-500">
-                    <svg className="w-12 h-12 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    <p className="text-sm font-medium">Aperçu en attente</p>
-                    <p className="text-xs mt-1">Commencez à éditer le template pour voir l&apos;aperçu</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+          <button onClick={() => setSuccess(null)} className="text-emerald-400 hover:text-white text-xs">✕</button>
         </div>
       )}
+      {error && (
+        <div className="bg-red-950/80 border-b border-red-800/80 text-red-200 px-6 py-2.5 text-xs flex items-center justify-between animate-fadeIn">
+          <div className="flex items-center gap-2">
+            <span>⚠️</span>
+            <span>{error}</span>
+          </div>
+          <button onClick={() => setError(null)} className="text-red-400 hover:text-white text-xs">✕</button>
+        </div>
+      )}
+
+      {/* ── Main Container ── */}
+      <main className="flex-1 max-w-6xl w-full mx-auto p-6 md:p-8">
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* ── Left Column: Form Settings (7 cols) ── */}
+          <div className="lg:col-span-7 space-y-6">
+            {/* Card: Commercial Info */}
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-sm">
+              <h2 className="text-sm font-semibold text-white mb-1 flex items-center gap-2">
+                <span>📝</span> Paramètres Commerciaux
+              </h2>
+              <p className="text-xs text-gray-400 mb-5">
+                Configurez le nom et la description présentés aux candidats dans le catalogue public.
+              </p>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-300 mb-1.5">
+                    Nom d&apos;affichage du modèle <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    required
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    placeholder="Ex: Moderne Professionnel"
+                    className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3.5 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-gray-300 mb-1.5">
+                    Identifiant technique (Slug) <span className="text-red-400">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      name="slug"
+                      required
+                      value={formData.slug}
+                      onChange={handleInputChange}
+                      placeholder="moderne"
+                      className="w-full bg-gray-800/80 border border-gray-700 rounded-xl px-3.5 py-2.5 font-mono text-xs text-gray-200 focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
+                  <p className="text-[11px] text-gray-500 mt-1">
+                    Correspond au composant React <code className="text-blue-400">@/components/cv-templates/{formData.slug || 'slug'}</code>
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-gray-300 mb-1.5">
+                    Description commerciale
+                  </label>
+                  <textarea
+                    name="description"
+                    rows={4}
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    placeholder="Ex: Idéal pour les profils techniques, cadres et ingénieurs. Mise en page optimisée ATS avec hiérarchie claire."
+                    className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3.5 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none leading-relaxed"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Card: Pricing & Status */}
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-sm">
+              <h2 className="text-sm font-semibold text-white mb-1 flex items-center gap-2">
+                <span>💰</span> Tarification & Visibilité
+              </h2>
+              <p className="text-xs text-gray-400 mb-5">
+                Définissez le modèle économique et le statut d&apos;affichage dans l&apos;application.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+                <div>
+                  <label className="block text-xs font-medium text-gray-300 mb-1.5">Prix d&apos;export</label>
+                  <input
+                    type="number"
+                    name="price"
+                    min="0"
+                    step="50"
+                    value={formData.price}
+                    onChange={handleInputChange}
+                    className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3.5 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    placeholder="0"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-gray-300 mb-1.5">Devise</label>
+                  <select
+                    name="currency"
+                    value={formData.currency}
+                    onChange={handleInputChange}
+                    className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3.5 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  >
+                    <option value="XOF">XOF (Franc CFA)</option>
+                    <option value="EUR">EUR (€ Euro)</option>
+                    <option value="USD">USD ($ Dollar)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Free template hint */}
+              {isFree ? (
+                <div className="bg-blue-950/30 border border-blue-800/40 rounded-xl p-3.5 mb-5 flex items-start gap-2.5 text-xs text-blue-300">
+                  <span className="text-blue-400 text-sm">💡</span>
+                  <span>
+                    <strong>Modèle Gratuit :</strong> Ce modèle sera immédiatement téléchargeable en 1 clic pour tous les utilisateurs sans aucune barrière de paiement.
+                  </span>
+                </div>
+              ) : (
+                <div className="bg-purple-950/30 border border-purple-800/40 rounded-xl p-3.5 mb-5 flex items-start gap-2.5 text-xs text-purple-300">
+                  <span className="text-purple-400 text-sm">🔒</span>
+                  <span>
+                    <strong>Modèle Premium :</strong> Le candidat paiera {formData.price} {formData.currency} via Mobile Money (FedaPay / KkiaPay) avant de générer son PDF haute fidélité.
+                  </span>
+                </div>
+              )}
+
+              {/* Status Toggle */}
+              <div className="pt-2 border-t border-gray-800/60">
+                <label className="flex items-center justify-between cursor-pointer py-1">
+                  <div>
+                    <span className="text-sm font-medium text-white block">Statut de publication</span>
+                    <span className="text-xs text-gray-400 block">
+                      Rendre ce modèle sélectionnable dans l&apos;éditeur et visible sur /modeles
+                    </span>
+                  </div>
+                  <div className="relative inline-flex items-center">
+                    <input
+                      type="checkbox"
+                      name="is_active"
+                      checked={formData.is_active}
+                      onChange={handleInputChange}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            {/* Bottom Actions */}
+            <div className="flex items-center justify-between pt-2">
+              <Link
+                href="/admin/templates"
+                className="px-4 py-2 text-xs font-medium text-gray-400 hover:text-white border border-gray-800 hover:border-gray-700 rounded-xl transition-colors"
+              >
+                Annuler
+              </Link>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="px-6 py-2.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-xl transition-all shadow-md hover:shadow-blue-600/20 disabled:opacity-50 flex items-center gap-2"
+              >
+                {isSubmitting && <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+                {isSubmitting ? 'Sauvegarde...' : 'Sauvegarder les modifications'}
+              </button>
+            </div>
+          </div>
+
+          {/* ── Right Column: Visual & Preview (5 cols) ── */}
+          <div className="lg:col-span-5 space-y-6">
+            {/* Card: Thumbnail Preview */}
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-sm font-semibold text-white flex items-center gap-2">
+                    <span>🖼️</span> Miniature du Modèle
+                  </h2>
+                  <p className="text-xs text-gray-400">
+                    Aperçu présenté aux candidats dans le catalogue
+                  </p>
+                </div>
+              </div>
+
+              {/* Thumbnail Display Box */}
+              <div className="aspect-[1/1.414] w-full max-w-[320px] mx-auto bg-gray-950 rounded-xl border border-gray-800 overflow-hidden shadow-inner flex items-center justify-center relative group">
+                {previewSrc ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={previewSrc}
+                    alt={`Aperçu du modèle ${formData.name}`}
+                    className="w-full h-full object-cover object-top transition-transform duration-300 group-hover:scale-[1.02]"
+                  />
+                ) : (
+                  <div className="p-6 text-center text-gray-500">
+                    <svg className="w-12 h-12 mx-auto mb-3 text-gray-600 stroke-[1.2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <p className="text-xs font-medium text-gray-400">Aucune miniature enregistrée</p>
+                    <p className="text-[11px] text-gray-600 mt-1">Générez une capture automatique ci-dessous</p>
+                  </div>
+                )}
+
+                {/* Overlay hover action */}
+                <div className="absolute inset-0 bg-gray-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                  <a
+                    href={`/editor?template=${formData.slug || template.slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-medium shadow-lg hover:bg-blue-500 transition-colors"
+                  >
+                    Ouvrir dans l&apos;éditeur
+                  </a>
+                </div>
+              </div>
+
+              {/* Automatic Generation Button */}
+              <div className="mt-5 space-y-3">
+                <button
+                  type="button"
+                  onClick={handleGeneratePreview}
+                  disabled={isGeneratingPreview}
+                  className="w-full py-2.5 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-semibold rounded-xl shadow-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isGeneratingPreview ? (
+                    <>
+                      <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Capture Playwright en cours...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>⚡</span>
+                      <span>Régénérer la miniature avec Playwright</span>
+                    </>
+                  )}
+                </button>
+
+                <div className="pt-2">
+                  <label className="block text-[11px] font-medium text-gray-400 mb-1">
+                    Ou renseigner manuellement l&apos;URL de l&apos;image :
+                  </label>
+                  <input
+                    type="text"
+                    name="preview_image"
+                    value={formData.preview_image}
+                    onChange={handleInputChange}
+                    placeholder="/static/previews/moderne.png"
+                    className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 font-mono text-xs text-gray-300 focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Card: Architecture & React Info */}
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-sm">
+              <h2 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+                <span>⚛️</span> Architecture Modèle React
+              </h2>
+              <div className="space-y-2.5 text-xs text-gray-400">
+                <div className="flex justify-between py-1 border-b border-gray-800">
+                  <span>Moteur de rendu :</span>
+                  <span className="font-mono text-white">Next.js 14 WYSIWYG</span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-gray-800">
+                  <span>Moteur PDF :</span>
+                  <span className="font-mono text-white">Playwright Headless</span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-gray-800">
+                  <span>Version :</span>
+                  <span className="font-mono text-gray-300">v{template.version || 1}</span>
+                </div>
+                <div className="flex justify-between py-1">
+                  <span>Dernière mise à jour :</span>
+                  <span className="text-gray-300">
+                    {template.updated_at ? new Date(template.updated_at).toLocaleDateString('fr-FR') : 'N/A'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="mt-4 pt-3 border-t border-gray-800 flex justify-between">
+                <Link
+                  href="/modeles"
+                  target="_blank"
+                  className="text-xs text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1"
+                >
+                  <span>↗</span> Voir sur le catalogue public
+                </Link>
+                <Link
+                  href={`/print?template=${formData.slug || template.slug}`}
+                  target="_blank"
+                  className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+                >
+                  Tester vue print
+                </Link>
+              </div>
+            </div>
+          </div>
+        </form>
+      </main>
     </div>
   )
 }

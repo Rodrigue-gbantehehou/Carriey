@@ -143,17 +143,25 @@ export default function UsersAdmin() {
                     </span>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <button 
-                      onClick={() => handleToggleActive(user)}
-                      disabled={updatingId === user.id}
-                      className={`text-xs font-bold px-4 py-2 rounded-lg transition-all ${
-                        user.is_active 
-                        ? 'text-red-600 bg-red-50 hover:bg-red-600 hover:text-white' 
-                        : 'text-green-600 bg-green-50 hover:bg-green-600 hover:text-white'
-                      }`}
-                    >
-                      {user.is_active ? 'Désactiver' : 'Activer'}
-                    </button>
+                    <div className="flex items-center justify-end gap-2">
+                        <a 
+                            href={`/admin/users/${user.id}`}
+                            className="text-xs font-bold px-3 py-1.5 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition-all border border-gray-200 inline-block"
+                        >
+                            Profil
+                        </a>
+                        <button 
+                        onClick={() => handleToggleActive(user)}
+                        disabled={updatingId === user.id}
+                        className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-all ${
+                            user.is_active 
+                            ? 'text-red-600 bg-red-50 hover:bg-red-600 hover:text-white' 
+                            : 'text-green-600 bg-green-50 hover:bg-green-600 hover:text-white'
+                        }`}
+                        >
+                        {user.is_active ? 'Désactiver' : 'Activer'}
+                        </button>
+                    </div>
                   </td>
                 </tr>
               ))}
