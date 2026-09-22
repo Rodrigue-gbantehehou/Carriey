@@ -6,8 +6,10 @@ import { useRouter } from 'next/navigation';
 import { Plus, FileText, Clock, Trash2, Edit2, Search } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ThemeThumbnail } from '@/components/app/cv/shared/ThemeThumbnail';
+import { useSession } from 'next-auth/react';
+import { cvApi } from '@/lib/cv-api';
 
 const TABS = [
   { id: 'all', label: 'Tous' },
@@ -19,14 +21,47 @@ const TABS = [
 
 export default function MesDocumentsPage() {
   const router = useRouter();
-  const { cvs, removeCv } = useCvStore();
+  const { data: session } = useSession();
+  const { cvs, setCvs, removeCv, setLoading, loading } = useCvStore();
   const { openCreateModal } = useUiStore();
   const [activeTab, setActiveTab] = useState('all');
   const [mounted, setMounted] = useState(false);
 
-  // Pour la V1, tous les documents stockés sont des CVs. 
-  // Le filtrage est visuel pour préparer la V2.
+  useEffect(() => {
+    setMounted(true);
+    const fetchCvs = async () => {
+      if (session?.user?.accessToken) {
+        setLoading(true);
+        try {
+          const data = await cvApi.getResumes(session.user.accessToken);
+          setCvs(data);
+        } catch (err) {
+          console.error("Erreur lors de la récupération des documents", err);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    fetchCvs();
+  }, [session, setCvs, setLoading]);
+
+  const handleDelete = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    if (confirm('Voulez-vous vraiment supprimer ce document ?')) {
+      try {
+        if (session?.user?.accessToken) {
+          await cvApi.deleteResume(session.user.accessToken, id);
+        }
+        removeCv(id);
+      } catch (err) {
+        alert("Erreur lors de la suppression");
+      }
+    }
+  };
+
   const filteredDocs = activeTab === 'all' || activeTab === 'cv' ? cvs : [];
+
+  if (!mounted) return null;
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -108,7 +143,7 @@ export default function MesDocumentsPage() {
             >
               <div className="aspect-[1/1.4] bg-gray-100 border-b border-gray-100 relative overflow-hidden flex items-center justify-center p-4">
                 <div className="w-full h-full bg-white shadow-sm rounded-sm p-2 relative border border-gray-100 transition-transform group-hover:scale-[1.02]">
-                  <ThemeThumbnail templateId={cv.templateId || 'classique'} />
+                  <ThemeThumbnail templateId={cv.template_id || 'classique'} />
                 </div>
                 
                 {/* Overlay with edit button */}
@@ -126,12 +161,7 @@ export default function MesDocumentsPage() {
                     {cv.title}
                   </h3>
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (confirm('Voulez-vous vraiment supprimer ce document ?')) {
-                        removeCv(cv.id);
-                      }
-                    }}
+                    onClick={(e) => handleDelete(e, cv.id)}
                     className="text-gray-400 hover:text-red-500 p-1.5 -mr-1.5 rounded-lg hover:bg-red-50 transition-colors"
                     title="Supprimer"
                   >
@@ -145,7 +175,7 @@ export default function MesDocumentsPage() {
                   </div>
                   <div className="flex items-center gap-1.5 text-gray-400">
                     <Clock className="w-3.5 h-3.5" />
-                    {formatDistanceToNow(new Date(cv.updatedAt), { addSuffix: true, locale: fr })}
+                    {formatDistanceToNow(new Date(cv.updated_at || cv.created_at), { addSuffix: true, locale: fr })}
                   </div>
                 </div>
               </div>

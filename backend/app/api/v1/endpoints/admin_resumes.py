@@ -14,7 +14,7 @@ from app.models.resume import Resume, ResumeStatus, DocType
 from app.models.template import Template
 from app.api.dependencies import get_current_admin
 
-router = APIRouter(prefix="/admin/resumes", tags=["admin-resumes"])
+router = APIRouter()
 
 
 # ─── Schemas ──────────────────────────────────────────────────────────────────

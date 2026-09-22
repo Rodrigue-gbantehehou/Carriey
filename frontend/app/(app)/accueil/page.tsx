@@ -6,7 +6,7 @@ import { useSession } from 'next-auth/react';
 import { useProfileStore } from '@/store/profile';
 import { useCvStore } from '@/store/cv';
 import { useUiStore } from '@/store/ui';
-import { FileText, Plus, Target, User, Upload, MoreHorizontal, Edit2 } from 'lucide-react';
+import { FileText, Plus, Target, User, Briefcase, TrendingUp, ChevronRight, Award, Clock } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useRouter } from 'next/navigation';
@@ -34,10 +34,10 @@ export default function AccueilPage() {
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
 
-  const firstName = session?.user?.name?.split(' ')[0] || profile?.username || 'vous';
+  const firstName = profile?.first_name || session?.user?.name?.split(' ')[0] || profile?.username || 'vous';
   const completion = getCompletionPercent(profile, about);
   
-  const recentDocs = [...cvs].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()).slice(0, 5);
+  const recentDocs = [...cvs].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()).slice(0, 3);
 
   useEffect(() => {
     setMounted(true);
@@ -66,150 +66,132 @@ export default function AccueilPage() {
   if (!mounted) return null;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 space-y-12">
+    <div className="px-4 py-5 space-y-6">
       
-      {/* Page Header (identical to mes-documents) */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Bonjour {firstName} 👋</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Que voulez-vous faire aujourd'hui ?
-          </p>
-        </div>
+      {/* Header compact */}
+      <div>
+        <h1 className="text-xl font-bold text-gray-900 tracking-tight">Bonjour {firstName} 👋</h1>
+        <p className="text-sm text-gray-500 mt-0.5">
+          Voici votre tableau de bord.
+        </p>
       </div>
 
-      {/* Block 1: Profile */}
-      <section>
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-          <p className="text-sm font-semibold text-gray-700 mb-4">Votre profil est complété à {completion} %</p>
+      {/* Completion Card (Dense) */}
+      <div className="bg-gradient-to-br from-indigo-600 to-indigo-800 rounded-2xl p-4 shadow-lg shadow-indigo-600/20 text-white relative overflow-hidden">
+        <div className="relative z-10">
+          <div className="flex justify-between items-end mb-3">
+            <div>
+              <p className="text-indigo-100 text-xs font-medium mb-1">PROFIL PROFESSIONNEL</p>
+              <p className="text-lg font-bold">Complété à {completion}%</p>
+            </div>
+            <Link href="/profil" className="bg-white/20 hover:bg-white/30 transition-colors backdrop-blur-md rounded-full p-2">
+              <ChevronRight className="w-5 h-5 text-white" />
+            </Link>
+          </div>
           
-          <div className="h-3 rounded-full bg-gray-100 overflow-hidden mb-6 max-w-2xl">
+          <div className="h-1.5 rounded-full bg-white/20 overflow-hidden">
             <div
-              className="h-full rounded-full bg-indigo-600 transition-all duration-700"
+              className="h-full rounded-full bg-white transition-all duration-1000 ease-out"
               style={{ width: `${completion}%` }}
             />
           </div>
-          
-          <Link
-            href="/profil"
-            className="inline-flex items-center justify-center text-sm font-semibold text-white bg-indigo-600 px-6 py-2.5 rounded-xl hover:bg-indigo-700 transition-all shadow-md shadow-indigo-600/20"
-          >
-            Continuer mon profil
-          </Link>
-        </div>
-      </section>
-
-      {/* Separator */}
-      <hr className="border-gray-200" />
-
-      {/* Block 2: Actions */}
-      <section>
-        <div className="mb-6">
-          <h2 className="text-lg font-bold text-gray-900">Actions rapides</h2>
-          <p className="text-sm text-gray-500 mt-1">Créez, adaptez ou importez vos documents.</p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Decor */}
+        <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 bg-white opacity-5 rounded-full blur-2xl pointer-events-none" />
+      </div>
+
+      {/* Quick Actions (Grid 2x2) */}
+      <section>
+        <h2 className="text-sm font-bold text-gray-900 mb-3 px-1 uppercase tracking-wider">Actions rapides</h2>
+        
+        <div className="grid grid-cols-2 gap-3">
           <button 
             onClick={openCreateModal}
-            className="flex flex-col items-center justify-center gap-3 p-6 rounded-2xl border border-gray-200 hover:border-indigo-600 hover:bg-indigo-50/50 transition-all text-center group bg-white shadow-sm"
+            className="flex flex-col items-start gap-2 p-3.5 rounded-xl border border-gray-100 bg-white shadow-sm hover:border-indigo-300 hover:shadow-md transition-all active:scale-95"
           >
-            <div className="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Plus className="w-6 h-6" />
+            <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+              <Plus className="w-4 h-4" />
             </div>
-            <div>
-              <p className="font-bold text-gray-900 text-sm">Créer un CV</p>
+            <div className="text-left">
+              <p className="font-bold text-gray-900 text-xs">Créer CV</p>
+              <p className="text-[10px] text-gray-500 mt-0.5 leading-tight">Générer un document</p>
             </div>
           </button>
           
           <button 
             onClick={() => alert('Bientôt disponible !')}
-            className="flex flex-col items-center justify-center gap-3 p-6 rounded-2xl border border-gray-200 hover:border-indigo-600 hover:bg-indigo-50/50 transition-all text-center group bg-white shadow-sm"
+            className="flex flex-col items-start gap-2 p-3.5 rounded-xl border border-gray-100 bg-white shadow-sm hover:border-emerald-300 hover:shadow-md transition-all active:scale-95"
           >
-            <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Target className="w-6 h-6" />
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <Target className="w-4 h-4" />
             </div>
-            <div>
-              <p className="font-bold text-gray-900 text-sm">Adapter à une offre</p>
+            <div className="text-left">
+              <p className="font-bold text-gray-900 text-xs">Cibler offre</p>
+              <p className="text-[10px] text-gray-500 mt-0.5 leading-tight">Adapter par IA</p>
             </div>
           </button>
           
           <Link 
-            href="/profil"
-            className="flex flex-col items-center justify-center gap-3 p-6 rounded-2xl border border-gray-200 hover:border-indigo-600 hover:bg-indigo-50/50 transition-all text-center group bg-white shadow-sm"
+            href="/candidatures"
+            className="flex flex-col items-start gap-2 p-3.5 rounded-xl border border-gray-100 bg-white shadow-sm hover:border-blue-300 hover:shadow-md transition-all active:scale-95"
           >
-            <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <User className="w-6 h-6" />
+            <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+              <Briefcase className="w-4 h-4" />
             </div>
-            <div>
-              <p className="font-bold text-gray-900 text-sm">Voir mon profil</p>
+            <div className="text-left">
+              <p className="font-bold text-gray-900 text-xs">Candidatures</p>
+              <p className="text-[10px] text-gray-500 mt-0.5 leading-tight">Suivre l'avancement</p>
             </div>
           </Link>
           
-          <button 
-            onClick={() => alert('Bientôt disponible !')}
-            className="flex flex-col items-center justify-center gap-3 p-6 rounded-2xl border border-gray-200 hover:border-indigo-600 hover:bg-indigo-50/50 transition-all text-center group bg-white shadow-sm"
+          <Link 
+            href="/stats"
+            className="flex flex-col items-start gap-2 p-3.5 rounded-xl border border-gray-100 bg-white shadow-sm hover:border-orange-300 hover:shadow-md transition-all active:scale-95"
           >
-            <div className="w-12 h-12 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Upload className="w-6 h-6" />
+            <div className="w-8 h-8 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center">
+              <TrendingUp className="w-4 h-4" />
             </div>
-            <div>
-              <p className="font-bold text-gray-900 text-sm">Importer un CV</p>
+            <div className="text-left">
+              <p className="font-bold text-gray-900 text-xs">Statistiques</p>
+              <p className="text-[10px] text-gray-500 mt-0.5 leading-tight">Voir les métriques</p>
             </div>
-          </button>
+          </Link>
         </div>
       </section>
 
-      {/* Separator */}
-      <hr className="border-gray-200" />
-
-      {/* Block 3: Recent Documents */}
+      {/* Recent Activity / Docs */}
       <section>
-        <div className="flex items-end justify-between mb-6">
-          <div>
-            <h2 className="text-lg font-bold text-gray-900">Documents récents</h2>
-            <p className="text-sm text-gray-500 mt-1">Vos derniers CV et lettres de motivation.</p>
-          </div>
-          <Link href="/mes-documents" className="text-sm font-semibold text-indigo-600 hover:text-indigo-700">
-            Tout voir
-          </Link>
+        <div className="flex items-center justify-between mb-3 px-1">
+          <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Récemment</h2>
+          <Link href="/mes-documents" className="text-xs font-semibold text-indigo-600 hover:text-indigo-700">Voir tout</Link>
         </div>
         
-        {recentDocs.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-2xl border border-gray-200 shadow-sm">
-            <FileText className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-            <p className="text-sm font-medium text-gray-500">Vous n'avez pas encore de documents.</p>
-          </div>
-        ) : (
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-            <div className="divide-y divide-gray-100">
-              {recentDocs.map(doc => (
-                <div key={doc.id} className="flex items-center justify-between p-5 hover:bg-gray-50 transition-colors group">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center">
-                      <FileText className="w-5 h-5 text-gray-400 group-hover:text-indigo-500 transition-colors" />
-                    </div>
-                    <div>
-                      <p className="font-bold text-gray-900">{doc.title}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-4">
-                    <button 
-                      onClick={() => router.push(`/mes-documents/${doc.id}`)}
-                      className="hidden sm:flex items-center gap-1.5 px-4 py-2 bg-white border border-gray-200 text-gray-700 text-sm font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm"
-                    >
-                      Modifier
-                    </button>
-                    <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                      <MoreHorizontal className="w-5 h-5" />
-                    </button>
+        <div className="space-y-2.5">
+          {recentDocs.length > 0 ? (
+            recentDocs.map((doc) => (
+              <div key={doc.id} className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100 shadow-sm active:bg-gray-50 transition-colors">
+                <div className="w-10 h-10 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center flex-shrink-0">
+                  <FileText className="w-5 h-5 text-gray-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-gray-900 text-sm truncate">{doc.title}</p>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <Clock className="w-3 h-3 text-gray-400" />
+                    <p className="text-[11px] text-gray-500 truncate">
+                      Modifié il y a {formatDistanceToNow(new Date(doc.updated_at), { addSuffix: false, locale: fr })}
+                    </p>
                   </div>
                 </div>
-              ))}
+              </div>
+            ))
+          ) : (
+            <div className="flex flex-col items-center justify-center p-6 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+              <FileText className="w-6 h-6 text-gray-300 mb-2" />
+              <p className="text-xs font-medium text-gray-500">Aucun document récent</p>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </section>
       
     </div>

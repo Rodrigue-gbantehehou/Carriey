@@ -7,7 +7,7 @@ from app.db.session import get_db
 from app.models.persona import Persona
 from app.schemas.persona import PersonaOut, SectorOut
 
-router = APIRouter(prefix="/personas", tags=["personas"])
+router = APIRouter()
 
 @router.get("/sectors", response_model=List[str])
 async def list_sectors(db: Session = Depends(get_db)):

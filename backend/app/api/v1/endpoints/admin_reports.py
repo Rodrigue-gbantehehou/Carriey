@@ -19,7 +19,7 @@ from app.models.resume import Resume, DocType
 from app.models.template import Template
 from app.api.dependencies import get_current_admin
 
-router = APIRouter(prefix="/admin/reports", tags=["admin-reports"])
+router = APIRouter()
 
 
 # ─── Export CSV Utilisateurs ──────────────────────────────────────────────────

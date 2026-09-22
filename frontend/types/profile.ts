@@ -89,6 +89,8 @@ export interface ProfileDocument {
 export interface MasterProfile {
   id: string;
   user_id: string;
+  first_name?: string;
+  last_name?: string;
   username?: string;
   title?: string;
   bio?: string;
@@ -98,6 +100,7 @@ export interface MasterProfile {
   website?: string;
   linkedin_url?: string;
   github_url?: string;
+  photo_url?: string;
   visibility: 'public' | 'private' | 'link_only';
   
   experiences: ProfileExperience[];

@@ -3,6 +3,7 @@
 import { useCvStore } from '@/store/cv';
 import { useProfileStore } from '@/store/profile';
 import { MasterProfile } from '@/types/profile';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useRef, Suspense } from 'react';
 import { ArrowLeft, Download, LayoutTemplate, Palette, Check, Settings2, ZoomIn, ZoomOut, X, SlidersHorizontal } from 'lucide-react';
@@ -39,16 +40,41 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
   const cv = cvs.find(c => c.id === params.id);
   const printRef = useRef<HTMLDivElement>(null);
 
+  const { data: session } = useSession();
+  const [localLoading, setLocalLoading] = useState(false);
+
   useEffect(() => {
     setMounted(true);
-  }, []);
+    
+    // Fetch CV if it's missing from store
+    const fetchCv = async () => {
+      if (!cv && session?.user?.accessToken) {
+        setLocalLoading(true);
+        try {
+          const { cvApi } = await import('@/lib/cv-api');
+          const data = await cvApi.getResumes(session.user.accessToken); // Or get single resume
+          const found = data.find((c: any) => c.id === params.id);
+          if (found) {
+            updateCv(params.id, found); // Or setCvs if needed, wait updateCv only modifies existing
+            // Since cvs is empty, we must use addCv or setCvs
+            useCvStore.getState().setCvs(data);
+          }
+        } catch (err) {
+          console.error(err);
+        } finally {
+          setLocalLoading(false);
+        }
+      }
+    };
+    fetchCv();
+  }, [cv, session, params.id]);
 
   const handlePrint = useReactToPrint({
     contentRef: printRef,
     documentTitle: cv?.title || 'CV',
   });
 
-  if (!mounted) return null;
+  if (!mounted || localLoading) return null;
 
   if (!cv) {
     return (
@@ -61,19 +87,24 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
     );
   }
 
+  const displayName = profile?.first_name || profile?.last_name 
+    ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() 
+    : profile?.username || 'Votre Nom';
+
   // --- Adapter Logic (MasterProfile -> Template Data Format) ---
   const adapterData = {
     profile: {
-      name: profile?.username || 'Votre Nom', // We don't have first/last name fields yet in master profile, just username for now
+      name: displayName,
+
       title: profile?.title || '',
       email: profile?.contact_email || '',
       phone: profile?.contact_phone || '',
       location: profile?.location || '',
       website: profile?.website || '',
-      photo: (profile as any)?.photo_url || '',
+      photo: (profile as any)?.photo_url ? require('@/lib/photo-url').getPhotoUrl((profile as any).photo_url) : '',
     },
     experience: profile?.experiences
-      ?.filter(exp => !(cv.disabledItems?.experiences || []).includes(exp.id))
+      ?.filter(exp => !(cv.content?.disabledItems?.experiences || []).includes(exp.id))
       .map(exp => ({
         position: exp.title,
         company: exp.company,
@@ -83,7 +114,7 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
         description: exp.description,
       })) || [],
     education: profile?.educations
-      ?.filter(edu => !(cv.disabledItems?.educations || []).includes(edu.id))
+      ?.filter(edu => !(cv.content?.disabledItems?.educations || []).includes(edu.id))
       .map(edu => ({
         degree: edu.degree,
         institution: edu.school,
@@ -93,7 +124,7 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
         description: edu.description,
       })) || [],
     projects: profile?.projects
-      ?.filter(proj => !(cv.disabledItems?.projects || []).includes(proj.id))
+      ?.filter(proj => !(cv.content?.disabledItems?.projects || []).includes(proj.id))
       .map(proj => ({
         name: proj.name,
         description: proj.description || '',
@@ -108,18 +139,18 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
     custom_sections: [],
   };
 
-  const ActiveTemplateComponent = TEMPLATE_REGISTRY[cv.templateId] || TEMPLATE_REGISTRY.classique;
+  const ActiveTemplateComponent = TEMPLATE_REGISTRY[cv.template_id] || TEMPLATE_REGISTRY.classique;
 
   // Fake config to satisfy the old template props
   const templateConfig = {
-    templateName: cv.templateId,
+    templateName: cv.template_id,
     sections: [
       { type: 'profile', enabled: true },
-      { type: 'summary', enabled: !!profile?.bio && !(cv.disabledSections || []).includes('about') },
-      { type: 'experience', enabled: !!profile?.experiences?.length && !(cv.disabledSections || []).includes('experiences') },
-      { type: 'education', enabled: !!profile?.educations?.length && !(cv.disabledSections || []).includes('educations') },
-      { type: 'skills', enabled: !!profile?.skills?.length && !(cv.disabledSections || []).includes('skills') },
-      { type: 'projects', enabled: !!profile?.projects?.length && !(cv.disabledSections || []).includes('projects') },
+      { type: 'summary', enabled: !!profile?.bio && !(cv.content?.disabledSections || []).includes('about') },
+      { type: 'experience', enabled: !!profile?.experiences?.length && !(cv.content?.disabledSections || []).includes('experiences') },
+      { type: 'education', enabled: !!profile?.educations?.length && !(cv.content?.disabledSections || []).includes('educations') },
+      { type: 'skills', enabled: !!profile?.skills?.length && !(cv.content?.disabledSections || []).includes('skills') },
+      { type: 'projects', enabled: !!profile?.projects?.length && !(cv.content?.disabledSections || []).includes('projects') },
       { type: 'contact', enabled: true },
     ]
   };
@@ -230,13 +261,13 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
                   {THEMES.map(t => (
                     <button
                       key={t.id}
-                      onClick={() => { updateCv(cv.id, { templateId: t.id }); setShowThemeSelector(false); }}
-                      className={`relative aspect-[1/1.4] rounded-xl border-2 overflow-hidden flex flex-col transition-all bg-white group ${cv.templateId === t.id ? 'border-indigo-600 shadow-md shadow-indigo-100' : 'border-gray-100 hover:border-indigo-300'}`}
+                      onClick={() => { updateCv(cv.id, { template_id: t.id }); setShowThemeSelector(false); }}
+                      className={`relative aspect-[1/1.4] rounded-xl border-2 overflow-hidden flex flex-col transition-all bg-white group ${cv.template_id === t.id ? 'border-indigo-600 shadow-md shadow-indigo-100' : 'border-gray-100 hover:border-indigo-300'}`}
                     >
                       <div className="flex-1 p-3 bg-gray-50 flex items-center justify-center border-b border-gray-100">
                         <ThemeThumbnail templateId={t.id} />
                       </div>
-                      {cv.templateId === t.id && (
+                      {cv.template_id === t.id && (
                         <div className="absolute top-2 right-2 w-5 h-5 bg-indigo-600 rounded-full flex items-center justify-center text-white shadow-sm z-10">
                           <Check className="w-3 h-3" />
                         </div>
@@ -276,10 +307,10 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
                       <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Modèle de CV</h3>
                       <div className="p-3 border border-gray-200 rounded-xl flex items-center gap-4 bg-gray-50/50">
                         <div className="w-12 h-16 bg-white shadow-sm border border-gray-200 rounded-md overflow-hidden p-1 flex-shrink-0">
-                          <ThemeThumbnail templateId={cv.templateId} />
+                          <ThemeThumbnail templateId={cv.template_id} />
                         </div>
                         <div className="flex-1 text-left">
-                          <p className="text-sm font-bold text-gray-900">{THEMES.find(t => t.id === cv.templateId)?.label}</p>
+                          <p className="text-sm font-bold text-gray-900">{THEMES.find(t => t.id === cv.template_id)?.label}</p>
                           <button 
                             onClick={() => setShowThemeSelector(true)} 
                             className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 hover:underline mt-1"

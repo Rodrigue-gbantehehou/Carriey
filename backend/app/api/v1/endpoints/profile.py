@@ -1,7 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
 from typing import List
+from pathlib import Path
 import uuid
+import os
 
 from app.db.session import get_db
 from app.models.user import User
@@ -21,17 +23,22 @@ from app.schemas.profile import (
 from app.crud.crud_profile import profile as crud_profile
 from app.api.dependencies import get_current_active_user
 
-router = APIRouter(prefix="/profile", tags=["profile"])
+router = APIRouter()
 
 @router.get("/me", response_model=MasterProfileOut)
 async def get_my_profile(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
-    """Get the current user's master profile."""
+    """Get the current user's master profile. Creates it if it doesn't exist."""
     profile_db = crud_profile.get_by_user(db, user_id=current_user.id)
     if not profile_db:
-        raise HTTPException(status_code=404, detail="Profil non trouvé")
+        # Create an empty profile automatically
+        new_profile = MasterProfile(user_id=current_user.id)
+        db.add(new_profile)
+        db.commit()
+        db.refresh(new_profile)
+        return new_profile
     return profile_db
 
 @router.post("/me", response_model=MasterProfileOut, status_code=status.HTTP_201_CREATED)
@@ -68,6 +75,51 @@ async def update_my_profile(
     
     updated_profile = crud_profile.update(db, db_obj=profile_db, obj_in=profile_in)
     return updated_profile
+
+@router.post("/me/photo", response_model=MasterProfileOut)
+async def upload_profile_photo(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Upload a profile photo. Saves to /static/photos/ and stores the URL."""
+    profile_db = crud_profile.get_by_user(db, user_id=current_user.id)
+    if not profile_db:
+        raise HTTPException(status_code=404, detail="Profil non trouvé")
+    
+    ALLOWED = ["image/jpeg", "image/png", "image/webp", "image/gif"]
+    if file.content_type not in ALLOWED:
+        raise HTTPException(status_code=400, detail="Format non supporté. Utilisez JPEG, PNG ou WebP.")
+    
+    contents = await file.read()
+    if len(contents) > 5 * 1024 * 1024:  # 5MB max
+        raise HTTPException(status_code=400, detail="La photo ne doit pas dépasser 5 Mo.")
+    
+    # Save file to /static/photos/
+    ext = file.filename.rsplit('.', 1)[-1].lower() if file.filename and '.' in file.filename else 'jpg'
+    # profile.py is at: backend/app/api/v1/endpoints/profile.py → parents[4] = backend/
+    BASE_DIR = Path(__file__).resolve().parents[4]
+    photos_dir = BASE_DIR / "static" / "photos"
+    photos_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Delete old photo if it exists and is a local file
+    if profile_db.photo_url and '/static/photos/' in str(profile_db.photo_url):
+        old_filename = profile_db.photo_url.split('/static/photos/')[-1]
+        old_path = photos_dir / old_filename
+        if old_path.exists():
+            old_path.unlink()
+    
+    filename = f"{current_user.id}_{uuid.uuid4().hex[:8]}.{ext}"
+    file_path = photos_dir / filename
+    with open(file_path, 'wb') as f:
+        f.write(contents)
+    
+    # Store as a server-relative URL
+    photo_url = f"/static/photos/{filename}"
+    profile_db.photo_url = photo_url
+    db.commit()
+    db.refresh(profile_db)
+    return profile_db
 
 # --- Helper for sub-entities ---
 
@@ -115,6 +167,29 @@ def register_sub_entity_routes(
         db.delete(entity)
         db.commit()
         return None
+
+    @router.put(f"/me/{path}/{{entity_id}}", response_model=out_schema)
+    async def update_entity(
+        entity_id: str,
+        entity_in: create_schema,
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_active_user)
+    ):
+        profile = db.query(MasterProfile).filter(MasterProfile.user_id == current_user.id).first()
+        if not profile:
+            raise HTTPException(status_code=404, detail="Profil non trouvé")
+            
+        entity = db.query(model_class).filter(model_class.id == entity_id, model_class.profile_id == profile.id).first()
+        if not entity:
+            raise HTTPException(status_code=404, detail=f"{entity_name} non trouvé(e)")
+            
+        update_data = entity_in.model_dump(exclude_unset=True)
+        for field, value in update_data.items():
+            setattr(entity, field, value)
+            
+        db.commit()
+        db.refresh(entity)
+        return entity
 
 # Register all sub-entities
 register_sub_entity_routes(router, "experiences", Experience, ExperienceCreate, ExperienceOut, "Expérience")

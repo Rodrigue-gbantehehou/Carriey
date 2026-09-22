@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { useCvStore } from '@/store/cv';
 import { useProfileStore } from '@/store/profile';
 import { ChevronRight, ChevronLeft, Briefcase, FileText, CheckCircle2, Lock } from 'lucide-react';
@@ -31,8 +32,11 @@ export default function CreateCvWizard() {
   const { profile } = useProfileStore();
   const { addCv } = useCvStore();
   
+  const { data: session } = useSession();
+  
   const [step, setStep] = useState(1);
   const [usage, setUsage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Sections toggle
   const [enabledSections, setEnabledSections] = useState<string[]>(
@@ -63,37 +67,53 @@ export default function CreateCvWizard() {
     });
   };
 
-  const handleFinish = (themeId: string) => {
-    // Determine disabled sections
-    const disabledSections = SECTIONS.map(s => s.id).filter(id => !enabledSections.includes(id));
+  const handleFinish = async (themeId: string) => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     
-    // Determine disabled items
-    const disabledItems: Record<string, string[]> = {};
-    if (profile?.experiences) {
-      disabledItems.experiences = profile.experiences.filter(e => !includedItems.experiences?.includes(e.id)).map(e => e.id);
+    try {
+      // Determine disabled sections
+      const disabledSections = SECTIONS.map(s => s.id).filter(id => !enabledSections.includes(id));
+      
+      // Determine disabled items
+      const disabledItems: Record<string, string[]> = {};
+      if (profile?.experiences) {
+        disabledItems.experiences = profile.experiences.filter(e => !includedItems.experiences?.includes(e.id)).map(e => e.id);
+      }
+      if (profile?.educations) {
+        disabledItems.educations = profile.educations.filter(e => !includedItems.educations?.includes(e.id)).map(e => e.id);
+      }
+      if (profile?.projects) {
+        disabledItems.projects = profile.projects.filter(e => !includedItems.projects?.includes(e.id)).map(e => e.id);
+      }
+      
+      const { cvApi } = await import('@/lib/cv-api');
+      
+      if (!session?.user?.accessToken) {
+        throw new Error("Non authentifié");
+      }
+      
+      const payload = {
+        title: `CV - ${usage || 'Général'}`,
+        template_id: themeId,
+        doc_type: 'cv',
+        content: {
+          usage,
+          disabledSections,
+          disabledItems,
+        }
+      };
+      
+      const newCv = await cvApi.createResume(session.user.accessToken, payload);
+      
+      addCv(newCv);
+      router.push(`/mes-documents/${newCv.id}`);
+    } catch (err) {
+      console.error(err);
+      alert("Erreur lors de la création du CV");
+      setIsSubmitting(false);
     }
-    if (profile?.educations) {
-      disabledItems.educations = profile.educations.filter(e => !includedItems.educations?.includes(e.id)).map(e => e.id);
-    }
-    if (profile?.projects) {
-      disabledItems.projects = profile.projects.filter(e => !includedItems.projects?.includes(e.id)).map(e => e.id);
-    }
-
-    const newCv = {
-      id: crypto.randomUUID(),
-      title: `CV - ${usage || 'Général'}`,
-      templateId: themeId,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      usage,
-      disabledSections,
-      disabledItems,
-    };
-
-    addCv(newCv);
-    router.push(`/mes-documents/${newCv.id}`);
   };
-
   return (
     <div className="min-h-screen bg-gray-50 pt-8 pb-20">
       <div className="max-w-2xl mx-auto px-4">

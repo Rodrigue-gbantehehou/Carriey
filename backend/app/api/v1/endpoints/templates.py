@@ -10,7 +10,7 @@ from app.schemas.auth import UserOut
 from app.services.template_access_service import TemplateAccessService
 from app.models.user_template_access import UserTemplateAccess
 
-router = APIRouter(prefix="/templates", tags=["templates"])
+router = APIRouter()
 
 @router.get("/my-access")
 async def get_my_template_access(

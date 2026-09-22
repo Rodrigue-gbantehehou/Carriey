@@ -89,7 +89,7 @@ class LivePreviewRequest(BaseModel):
     style_css: str = ""
     template_jinja2: str = ""
 
-router = APIRouter(prefix="/admin/templates", tags=["admin-templates"])
+router = APIRouter()
 
 @router.post("/preview-live", response_class=HTMLResponse)
 async def preview_template_live(

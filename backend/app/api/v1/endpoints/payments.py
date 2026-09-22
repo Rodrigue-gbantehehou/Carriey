@@ -14,7 +14,7 @@ from app.api.dependencies import get_current_active_user
 from app.services.kkiapay import kkiapay_service
 from app.services.fedapay import fedapay_service
 
-router = APIRouter(prefix="/payments", tags=["payments"])
+router = APIRouter()
 
 @router.post("/create", response_model=Dict[str, Any])
 async def create_payment(

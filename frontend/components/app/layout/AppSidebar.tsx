@@ -6,6 +6,8 @@ import {
   Home, User, FileText, Briefcase, Palette, Settings, LogOut,
 } from 'lucide-react';
 import { signOut, useSession } from 'next-auth/react';
+import { useProfileStore } from '@/store/profile';
+import { useEffect } from 'react';
 
 const NAV = [
   { href: '/accueil',       label: 'Accueil',         icon: Home },
@@ -18,6 +20,13 @@ const NAV = [
 export default function AppSidebar() {
   const pathname = usePathname();
   const { data: session } = useSession();
+  const setToken = useProfileStore((state) => state.setToken);
+
+  useEffect(() => {
+    if (session?.user?.accessToken) {
+      setToken(session.user.accessToken);
+    }
+  }, [session, setToken]);
 
   const name = session?.user?.name || session?.user?.email?.split('@')[0] || 'Vous';
   const initial = name.charAt(0).toUpperCase();

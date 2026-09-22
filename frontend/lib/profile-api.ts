@@ -50,6 +50,16 @@ export const profileApi = {
       headers: getHeaders(token)
     });
     if (!res.ok) throw new Error(`Failed to delete ${entity}`);
-    return true;
+    return res.status === 204 ? null : res.json();
+  },
+
+  updateSubEntity: async (token: string, entity: string, id: string, data: any) => {
+    const res = await fetch(`${API_BASE}/profile/me/${entity}/${id}`, {
+      method: 'PUT',
+      headers: getHeaders(token),
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error(`Failed to update ${entity}`);
+    return res.json();
   }
 };

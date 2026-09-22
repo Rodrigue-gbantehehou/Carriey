@@ -15,7 +15,7 @@ export default function RegisterForm() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
+  const callbackUrl = searchParams.get('callbackUrl') || '/accueil';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

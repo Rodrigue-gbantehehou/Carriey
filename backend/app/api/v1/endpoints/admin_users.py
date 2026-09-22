@@ -13,7 +13,7 @@ from app.utils.audit import log_audit
 from app.api.dependencies import get_current_super_admin, get_current_admin
 from app.schemas.auth import UserOut
 
-router = APIRouter(prefix="/admin/users", tags=["admin"])
+router = APIRouter()
 
 
 # ─── Schemas ──────────────────────────────────────────────────────────────────

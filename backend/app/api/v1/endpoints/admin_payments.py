@@ -10,7 +10,7 @@ from app.models.payment import Payment, PaymentStatus
 from app.models.template import Template
 from app.api.dependencies import get_current_admin
 
-router = APIRouter(prefix="/admin/payments", tags=["admin-payments"])
+router = APIRouter()
 
 @router.get("/")
 async def list_payments(

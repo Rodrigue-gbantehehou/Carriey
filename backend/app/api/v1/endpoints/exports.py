@@ -24,7 +24,7 @@ from app.services.rendering_service import render_html_by_name
 from export_docx import export_docx
 from app.core.config import settings
 
-router = APIRouter(tags=["exports"])
+router = APIRouter()
 
 BASE_DIR = Path(__file__).parent.parent.resolve()
 STATIC_DIR = BASE_DIR / "static"

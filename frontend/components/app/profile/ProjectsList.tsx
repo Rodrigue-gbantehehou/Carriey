@@ -4,8 +4,9 @@ import { useState } from 'react';
 import { useProfileStore } from '@/store/profile';
 import { ProfileProject } from '@/types/profile';
 import { FolderKanban, ExternalLink, Pencil, Trash2, Plus } from 'lucide-react';
+import BottomSheet from '@/components/app/shared/BottomSheet';
 
-const inputClass = "block w-full rounded-md border border-gray-200 bg-white py-2.5 px-3 text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none text-sm transition-all";
+const inputClass = "block w-full rounded-xl border border-gray-200 bg-white py-3 px-4 text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none text-sm transition-all";
 
 const emptyProject: Partial<ProfileProject> = {};
 
@@ -18,157 +19,159 @@ export default function ProjectsList() {
 
   const projects = profile?.projects || [];
 
-  const handleAdd = () => {
+  const handleSave = () => {
     if (!form.name) return;
-    addProject({
-      id: crypto.randomUUID(),
-      name: form.name,
-      description: form.description,
-      url: form.url,
-      start_date: form.start_date,
-      end_date: form.end_date,
-    });
-    setIsAdding(false);
-    setForm(emptyProject);
-    setShowDetails(false);
+    const fmtDate = (d?: string) => (d && d.length === 7) ? `${d}-01` : (d || undefined);
+    
+    if (editingId) {
+      updateProject(editingId, { ...form, start_date: fmtDate(form.start_date), end_date: fmtDate(form.end_date) });
+    } else {
+      addProject({
+        id: crypto.randomUUID(),
+        name: form.name,
+        description: form.description,
+        url: form.url,
+        start_date: fmtDate(form.start_date),
+        end_date: fmtDate(form.end_date),
+      });
+    }
+    
+    closeSheet();
   };
 
-  const handleUpdate = (id: string) => {
-    updateProject(id, form);
-    setEditingId(null);
+  const startAdd = () => {
     setForm(emptyProject);
+    setEditingId(null);
     setShowDetails(false);
+    setIsAdding(true);
   };
 
   const startEdit = (project: ProfileProject) => {
-    setEditingId(project.id);
     setForm(project);
+    setEditingId(project.id);
     setShowDetails(!!project.description);
+    setIsAdding(true);
   };
 
-  const cancelEdit = () => {
-    setEditingId(null);
+  const closeSheet = () => {
     setIsAdding(false);
+    setEditingId(null);
     setForm(emptyProject);
-    setShowDetails(false);
   };
-
-  const ProjectForm = ({ onSave, onCancel }: { onSave: () => void; onCancel: () => void }) => (
-    <div className="rounded-xl border border-gray-200 bg-gray-50 p-5 space-y-4">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="sm:col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">Nom du projet <span className="text-red-400">*</span></label>
-          <input type="text" value={form.name || ''} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Ex : Portfolio personnel, App mobile…" className={inputClass} />
-        </div>
-        <div className="sm:col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">Lien du projet</label>
-          <input type="url" value={form.url || ''} onChange={e => setForm({ ...form, url: e.target.value })} placeholder="https://mon-projet.com" className={inputClass} />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">Date de début</label>
-          <input type="month" value={form.start_date || ''} onChange={e => setForm({ ...form, start_date: e.target.value })} className={inputClass} />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">Date de fin</label>
-          <input type="month" value={form.end_date || ''} onChange={e => setForm({ ...form, end_date: e.target.value })} className={inputClass} />
-        </div>
-        <div className="sm:col-span-2 mt-2">
-          {showDetails ? (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Description (optionnel)</label>
-              <textarea
-                rows={3}
-                value={form.description || ''}
-                onChange={e => setForm({ ...form, description: e.target.value })}
-                placeholder="Contexte du projet, technologies utilisées, résultats…"
-                className={`${inputClass} resize-none`}
-                autoFocus
-              />
-              <button type="button" onClick={() => setShowDetails(false)} className="mt-1 text-xs text-gray-400 hover:text-gray-600 transition-colors">
-                − Masquer la description
-              </button>
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setShowDetails(true)}
-              className="text-sm text-indigo-500 hover:text-indigo-700 font-medium flex items-center gap-1 transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              Ajouter une description
-            </button>
-          )}
-        </div>
-      </div>
-      <div className="flex justify-end gap-3 pt-2">
-        <button onClick={onCancel} className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Annuler</button>
-        <button onClick={onSave} className="px-4 py-2 text-sm font-semibold bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors">Enregistrer</button>
-      </div>
-    </div>
-  );
 
   return (
     <div className="space-y-4">
-      {/* Empty state */}
-      {projects.length === 0 && !isAdding && (
-        <div className="rounded-xl border-2 border-dashed border-gray-200 p-12 text-center">
-          <div className="mx-auto w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center mb-3">
-            <FolderKanban className="w-6 h-6 text-gray-400" />
+      {projects.length === 0 && (
+        <div className="rounded-xl border-2 border-dashed border-gray-200 p-8 text-center flex flex-col items-center">
+          <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-3">
+            <Plus className="w-6 h-6 text-gray-300" />
           </div>
-          <p className="text-sm font-medium text-gray-500">Aucun projet ajouté</p>
-          <p className="text-xs text-gray-400 mt-1">Partagez vos réalisations, travaux ou projets personnels.</p>
+          <p className="text-sm font-medium text-gray-600">Aucun projet ajouté</p>
+          <p className="text-xs text-gray-400 mt-1">Vos réalisations, travaux ou projets personnels.</p>
         </div>
       )}
 
-      {/* Existing items */}
-      {projects.map((project) => (
-        editingId === project.id ? (
-          <ProjectForm key={project.id} onSave={() => handleUpdate(project.id)} onCancel={cancelEdit} />
-        ) : (
-          <div key={project.id} className="group relative rounded-xl border border-gray-200 bg-white p-5 hover:border-gray-300 transition-all">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-semibold text-gray-900">{project.name}</h3>
-                  {project.url && (
-                    <a href={project.url} target="_blank" rel="noreferrer" className="text-indigo-500 hover:text-indigo-700 transition-colors">
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
+      {projects.length > 0 && (
+        <div className="space-y-3">
+          {projects.map(project => (
+            <div key={project.id} className="group relative rounded-xl border border-gray-100 bg-white p-5 shadow-sm hover:border-gray-300 transition-all">
+              <div className="flex justify-between items-start gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-bold text-gray-900 text-base">{project.name}</h4>
+                    {project.url && (
+                      <a href={project.url} target="_blank" rel="noreferrer" className="text-indigo-500 hover:text-indigo-700 transition-colors bg-indigo-50 p-1.5 rounded-lg">
+                        <ExternalLink className="w-4 h-4" />
+                      </a>
+                    )}
+                  </div>
+                  
+                  {(project.start_date || project.end_date) && (
+                    <div className="flex items-center gap-2 mt-1 text-xs text-gray-500 font-medium">
+                      <span>{project.start_date || '?'}</span>
+                      <span>—</span>
+                      <span>{project.end_date || 'En cours'}</span>
+                    </div>
+                  )}
+                  
+                  {project.description && (
+                    <p className="mt-3 text-sm text-gray-600 leading-relaxed bg-gray-50 p-3 rounded-lg border border-gray-100 line-clamp-3">
+                      {project.description}
+                    </p>
                   )}
                 </div>
-                {(project.start_date || project.end_date) && (
-                  <p className="mt-0.5 text-xs text-gray-400">
-                    {project.start_date?.substring(0, 7).replace('-', '/') || '?'} — {project.end_date?.substring(0, 7).replace('-', '/') || 'En cours'}
-                  </p>
-                )}
-                {project.description && <p className="mt-2 text-sm text-gray-500 line-clamp-2">{project.description}</p>}
-              </div>
-              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button onClick={() => startEdit(project)} className="p-1.5 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                  <Pencil className="w-4 h-4" />
-                </button>
-                <button onClick={() => removeProject(project.id)} className="p-1.5 rounded-md hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors">
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                
+                <div className="flex items-center gap-1">
+                  <button onClick={() => startEdit(project)} className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
+                    <Pencil className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => { if(confirm("Supprimer ce projet ?")) removeProject(project.id); }} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        )
-      ))}
-
-      {/* Add form */}
-      {isAdding && <ProjectForm onSave={handleAdd} onCancel={cancelEdit} />}
-
-      {/* Add button */}
-      {!isAdding && (
-        <button
-          onClick={() => setIsAdding(true)}
-          className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-200 py-3 text-sm font-medium text-gray-400 hover:border-indigo-300 hover:text-indigo-600 transition-all"
-        >
-          <Plus className="w-4 h-4" />
-          Ajouter un projet
-        </button>
+          ))}
+        </div>
       )}
+
+      <button onClick={startAdd} className="flex items-center gap-2 text-sm font-semibold text-indigo-600 hover:text-indigo-700 transition-colors w-full justify-center py-3.5 rounded-xl border border-dashed border-indigo-200 hover:bg-indigo-50">
+        <Plus className="w-4 h-4" /> Ajouter un projet
+      </button>
+
+      <BottomSheet isOpen={isAdding || !!editingId} onClose={closeSheet} title={editingId ? "Modifier le projet" : "Ajouter un projet"}>
+        <div className="space-y-5 pb-6">
+          <div className="grid grid-cols-1 gap-5">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Nom du projet <span className="text-red-400">*</span></label>
+              <input type="text" autoFocus value={form.name || ''} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Ex : Portfolio personnel, App mobile…" className={inputClass} />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Lien du projet</label>
+              <input type="url" value={form.url || ''} onChange={e => setForm({ ...form, url: e.target.value })} placeholder="https://mon-projet.com" className={inputClass} />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Date de début</label>
+                <input type="month" value={form.start_date || ''} onChange={e => setForm({ ...form, start_date: e.target.value })} className={inputClass} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Date de fin</label>
+                <input type="month" value={form.end_date || ''} onChange={e => setForm({ ...form, end_date: e.target.value })} className={inputClass} />
+              </div>
+            </div>
+
+            {showDetails ? (
+              <div className="animate-in fade-in slide-in-from-top-4 duration-300">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Description (optionnel)</label>
+                <textarea
+                  rows={4}
+                  value={form.description || ''}
+                  onChange={e => setForm({ ...form, description: e.target.value })}
+                  placeholder="Contexte, technos utilisées, résultats…"
+                  className={`${inputClass} resize-y`}
+                />
+              </div>
+            ) : (
+              <button type="button" onClick={() => setShowDetails(true)} className="text-sm font-medium text-indigo-600 hover:text-indigo-700 text-left">
+                + Ajouter une description
+              </button>
+            )}
+          </div>
+          
+          <div className="pt-4">
+            <button
+              onClick={handleSave}
+              disabled={!form.name}
+              className="w-full bg-indigo-600 text-white font-semibold py-3.5 px-4 rounded-xl hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-indigo-600/20"
+            >
+              Enregistrer
+            </button>
+          </div>
+        </div>
+      </BottomSheet>
     </div>
   );
 }

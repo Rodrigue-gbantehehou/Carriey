@@ -24,6 +24,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.core.config import settings
 from app.api.v1.api import api_router
+from sqlalchemy import text
 from app.db.session import engine, Base
 # Ensure all models are loaded for create_all
 import app.models.user
@@ -33,9 +34,31 @@ import app.models.payment
 import app.models.resume
 import app.models.template
 import app.models.audit
+import app.models.public_page
 
 # Create tables (simple auto-migration at startup for now)
 Base.metadata.create_all(bind=engine)
+
+# Add columns manually if they don't exist
+try:
+    with engine.connect() as conn:
+        try:
+            conn.execute(text("ALTER TABLE master_profiles ADD COLUMN first_name VARCHAR(100) DEFAULT NULL"))
+            conn.commit()
+        except Exception:
+            pass # Column already exists
+        try:
+            conn.execute(text("ALTER TABLE master_profiles ADD COLUMN last_name VARCHAR(100) DEFAULT NULL"))
+            conn.commit()
+        except Exception:
+            pass # Column already exists
+        try:
+            conn.execute(text("ALTER TABLE master_profiles ADD COLUMN photo_url TEXT DEFAULT NULL"))
+            conn.commit()
+        except Exception:
+            pass # Column already exists
+except Exception as e:
+    print(f"Migration error: {e}")
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -59,6 +82,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 STATIC_DIR = BASE_DIR / "static"
 STATIC_DIR.mkdir(exist_ok=True)
 (STATIC_DIR / "previews").mkdir(parents=True, exist_ok=True)
+(STATIC_DIR / "photos").mkdir(parents=True, exist_ok=True)
 
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 

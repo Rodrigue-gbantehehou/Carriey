@@ -11,7 +11,7 @@ from app.schemas.resume import ResumeCreate, ResumeUpdate, ResumeOut, ResumeList
 from app.api.dependencies import get_current_active_user
 from app.services.template_access_service import TemplateAccessService
 
-router = APIRouter(prefix="/resumes", tags=["resumes"])
+router = APIRouter()
 
 def verify_template_access(user: User, template_id: str, db: Session) -> bool:
     """Vérifie si l'utilisateur a accès au template (gratuit, payé ou admin)"""

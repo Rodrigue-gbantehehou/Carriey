@@ -8,7 +8,7 @@ from app.models.user import User
 from app.models.audit import AuditLog
 from app.api.dependencies import get_current_admin
 
-router = APIRouter(prefix="/admin/audit-logs", tags=["admin-audit"])
+router = APIRouter()
 
 class AuditLogOut:
     """Schema pour les logs d'audit"""

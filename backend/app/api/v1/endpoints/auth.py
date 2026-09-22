@@ -12,7 +12,7 @@ from app.models.user import User, UserRole
 from app.db.session import get_db
 from app.utils.audit import log_audit
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter()
 
 
 # --- Schemas locaux ---

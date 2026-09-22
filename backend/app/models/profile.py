@@ -16,6 +16,8 @@ class MasterProfile(Base):
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id = Column(String(36), ForeignKey("users.id", ondelete="CASCADE"), unique=True, nullable=False)
     username = Column(String(191), unique=True, nullable=True, index=True) # For public URL e.g. /u/username
+    first_name = Column(String(100), nullable=True)
+    last_name = Column(String(100), nullable=True)
     title = Column(String(255), nullable=True) # e.g. "Full Stack Developer"
     bio = Column(Text, nullable=True)
     location = Column(String(255), nullable=True)
@@ -24,6 +26,7 @@ class MasterProfile(Base):
     website = Column(String(255), nullable=True)
     linkedin_url = Column(String(255), nullable=True)
     github_url = Column(String(255), nullable=True)
+    photo_url = Column(Text, nullable=True)  # Stored as base64 data URL or external URL
     
     visibility = Column(Enum(Visibility), default=Visibility.PRIVATE)
     

@@ -150,6 +150,8 @@ class Document(DocumentBase):
         from_attributes = True
 
 class MasterProfileBase(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
     username: Optional[str] = None
     title: Optional[str] = None
     bio: Optional[str] = None
@@ -159,6 +161,7 @@ class MasterProfileBase(BaseModel):
     website: Optional[str] = None
     linkedin_url: Optional[str] = None
     github_url: Optional[str] = None
+    photo_url: Optional[str] = None
     visibility: Visibility = Visibility.PRIVATE
 
 class MasterProfileCreate(MasterProfileBase):

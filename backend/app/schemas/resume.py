@@ -45,6 +45,7 @@ class ResumeListOut(BaseModel):
     linked_doc_id: Optional[str] = None
     content: Optional[Dict[str, Any]] = None
     created_at: datetime
+    updated_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
