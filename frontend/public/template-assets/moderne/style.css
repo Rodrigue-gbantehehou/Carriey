@@ -28,7 +28,7 @@ body {
 
 .cv-container {
   width: 210mm;
-  min-height: auto;
+  min-height: 297mm;
   background: white;
   margin: 0 auto;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);

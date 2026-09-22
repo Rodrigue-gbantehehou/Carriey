@@ -196,7 +196,12 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
       groups: profile?.skills?.length ? [{ items: profile.skills.map(s => s.name) }] : []
     },
     summary: profile?.bio || '',
-    languages: [],
+    languages: profile?.languages
+      ?.filter(lang => !(cv.content?.disabledItems?.languages || []).includes(lang.id))
+      .map(lang => ({
+        name: lang.name,
+        level: lang.level || '',
+      })) || [],
     custom_sections: [],
   };
 

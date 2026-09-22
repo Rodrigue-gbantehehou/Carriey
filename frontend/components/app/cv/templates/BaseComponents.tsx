@@ -33,6 +33,10 @@ export const TemplateStyles = ({ config }: { config: any }) => {
       --section-gap: calc(24px * var(--spacing-multiplier));
       --item-gap: calc(16px * var(--spacing-multiplier));
     }
+    .cv-container {
+      min-height: 297mm;
+      box-sizing: border-box;
+    }
   `;
 
   return <style dangerouslySetInnerHTML={{ __html: cssVars }} />;
