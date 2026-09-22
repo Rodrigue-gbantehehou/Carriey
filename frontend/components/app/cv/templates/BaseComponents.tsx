@@ -91,9 +91,8 @@ export const RemoteStyles = ({ templateName, apiBaseUrl }: { templateName: strin
     const fetchCss = async () => {
       try {
         const cacheBuster = new Date().getTime();
-        // baseUrl removes the /api suffix to reach the static mount
-        const baseUrl = apiBaseUrl.replace(/\/api$/, '');
-        const response = await fetch(`${baseUrl}/template-assets/${slug}/style.css?v=${cacheBuster}`);
+        // Fetch directly from the Next.js public directory
+        const response = await fetch(`/template-assets/${slug}/style.css?v=${cacheBuster}`);
         if (response.ok) {
           const text = await response.text();
           setCss(text);

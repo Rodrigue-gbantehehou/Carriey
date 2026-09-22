@@ -57,6 +57,18 @@ try:
             conn.commit()
         except Exception:
             pass # Column already exists
+            
+        # Resumes table migrations
+        try:
+            conn.execute(text("ALTER TABLE resumes ADD COLUMN doc_type VARCHAR(20) DEFAULT 'cv'"))
+            conn.commit()
+        except Exception:
+            pass
+        try:
+            conn.execute(text("ALTER TABLE resumes ADD COLUMN linked_doc_id VARCHAR(36) DEFAULT NULL"))
+            conn.commit()
+        except Exception:
+            pass
 except Exception as e:
     print(f"Migration error: {e}")
 

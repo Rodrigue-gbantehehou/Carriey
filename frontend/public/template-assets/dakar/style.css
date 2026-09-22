@@ -1,0 +1,343 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.cv-rendering-root {
+    --color-primary: #1E293B;
+    /* Indigo Deep */
+    --color-secondary: #F8FAFC;
+    /* Slate 50 */
+    --color-accent: #F97316;
+    /* Vibrant Orange */
+    --color-text: #334155;
+    --font-heading: 'Outfit', sans-serif;
+    --font-body: 'Outfit', sans-serif;
+    --sidebar-width: 38%;
+    --border-radius: 4px;
+    --spacing-multiplier: 1;
+}
+
+body {
+    font-family: var(--font-body);
+    font-size: calc(var(--font-size-base, 14px) * min(var(--spacing-multiplier, 1), 1.1));
+    background: #F1F5F9;
+    color: var(--color-text);
+    line-height: var(--line-height, 1.5);
+}
+
+.cv-container {
+    width: 210mm;
+    min-height: auto;
+    background: white;
+    margin: 0 auto;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── En-tête (Afro-Chic Style) ── */
+.header-band {
+    background: var(--color-primary);
+    padding: calc(30px * var(--spacing-multiplier, 1)) calc(40px * var(--spacing-multiplier, 1));
+    display: flex;
+    align-items: center;
+    gap: calc(22px * var(--spacing-multiplier, 1));
+    position: relative;
+    overflow: hidden;
+}
+
+.header-band::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 150px;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(249, 115, 22, 0.1));
+}
+
+.header-text {
+    flex: 1;
+    color: white;
+}
+
+.header-name {
+    font-size: 3.0em;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+}
+
+.header-title {
+    font-size: 1.43em;
+    color: var(--color-accent);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+/* ── Layout ── */
+.main-layout {
+    display: flex;
+    flex: 1;
+}
+
+/* ── Colonne Gauche (Infos & Profil) ── */
+.left-column {
+    width: var(--sidebar-width);
+    background: var(--color-secondary);
+    padding: calc(30px * var(--spacing-multiplier, 1)) calc(25px * var(--spacing-multiplier, 1));
+    display: flex;
+    flex-direction: column;
+    gap: calc(22px * var(--spacing-multiplier, 1));
+    border-right: 1px solid #E2E8F0;
+}
+
+.profile-photo-wrap {
+    text-align: center;
+}
+
+.profile-photo,
+.photo-placeholder {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    border: 3px solid var(--color-accent);
+    margin: 0 auto 15px;
+    background: white;
+    padding: 4px;
+}
+
+.profile-photo img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.photo-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3.21em;
+    color: #CBD5E1;
+}
+
+.sidebar-title {
+    font-size: 1em;
+    font-weight: 700;
+    color: var(--color-primary);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sidebar-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #CBD5E1;
+}
+
+.contact-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.contact-item {
+    display: flex;
+    gap: 12px;
+    font-size: 0.93em;
+    color: #475569;
+}
+
+.contact-item i {
+    color: var(--color-accent);
+    font-size: 1em;
+    margin-top: 3px;
+}
+
+.identity-list {
+    display: grid;
+    gap: 12px;
+}
+
+.identity-item {
+    font-size: 1em;
+    color: #475569;
+  break-inside: avoid;
+}
+
+.identity-label {
+    font-weight: 700;
+    color: var(--color-primary);
+    font-size: 0.86em;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.skills-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.skill-tag {
+    background: white;
+    color: var(--color-primary);
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 0.86em;
+    font-weight: 600;
+    border: 1px solid #E2E8F0;
+}
+
+/* ── Colonne Droite (Parcours) ── */
+.right-column {
+    flex: 1;
+    padding: calc(30px * var(--spacing-multiplier, 1)) calc(35px * var(--spacing-multiplier, 1));
+}
+
+.section-title {
+    font-size: 1.29em;
+    font-weight: 700;
+    color: var(--color-primary);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: calc(12px * var(--spacing-multiplier, 1));
+    display: flex;
+    align-items: center;
+    gap: calc(12px * var(--spacing-multiplier, 1));
+}
+
+.section-title i {
+    color: var(--color-accent);
+    font-size: 1.14em;
+}
+
+.experience-item {
+    margin-bottom: 12px;
+    position: relative;
+    padding-left: 20px;
+  break-inside: avoid;
+}
+
+.experience-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 8px;
+    width: 2px;
+    height: 100%;
+    background: #E2E8F0;
+}
+
+.exp-dot {
+    position: absolute;
+    left: -4px;
+    top: 8px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--color-accent);
+}
+
+.exp-title {
+    font-size: 1.29em;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: 4px;
+}
+
+.exp-company {
+    font-size: 1.07em;
+    color: var(--color-accent);
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.exp-dates {
+    font-size: 0.86em;
+    font-weight: 700;
+    color: #94A3B8;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: block;
+}
+
+.exp-tasks {
+    list-style: none;
+    margin-top: 12px;
+}
+
+.exp-tasks li {
+    position: relative;
+    padding-left: 18px;
+    margin-bottom: 8px;
+    font-size: 1em;
+    line-height: 1.6;
+}
+
+.exp-tasks li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--color-accent);
+    font-weight: bold;
+}
+
+.education-item {
+    margin-bottom: 15px;
+  break-inside: avoid;
+}
+
+.edu-degree {
+    font-weight: 700;
+    font-size: 1.14em;
+    color: var(--color-primary);
+}
+
+.edu-school {
+    color: var(--color-accent);
+    font-weight: 600;
+    font-size: 1em;
+}
+
+.edu-dates {
+    font-size: 0.86em;
+    color: #94A3B8;
+    font-weight: 700;
+    display: block;
+    margin-top: 4px;
+}
+
+@media print {
+    body {
+        background: white;
+    }
+
+    .cv-container {
+        box-shadow: none;
+        margin: 0;
+    }
+
+    .header-band,
+    .left-column {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}
+
+@page {
+    size: A4;
+    margin: 0;
+}

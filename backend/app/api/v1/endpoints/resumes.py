@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -36,7 +36,7 @@ def verify_template_access(user: User, template_id: str, db: Session) -> bool:
 async def list_resumes(
     skip: int = 0,
     limit: int = 100,
-    doc_type: str = None,
+    doc_type: Optional[str] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
@@ -66,35 +66,71 @@ async def get_resume(
     
     return resume
 
-@router.post("/", response_model=ResumeOut, status_code=status.HTTP_201_CREATED)
+from fastapi import Request
+
+from pydantic import ValidationError
+from app.models.resume import DocType as DocTypeEnum
+
+@router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_resume(
-    resume_in: ResumeCreate,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
-    """Crée un nouveau CV (la sauvegarde de brouillon est libre pour tous les utilisateurs)"""
-    # Résoudre le template par ID ou par slug
-    template = db.query(Template).filter(
-        (Template.id == resume_in.template_id) | (Template.slug == resume_in.template_id)
-    ).first()
-    actual_template_id = template.id if template else resume_in.template_id
+    try:
+        body = await request.json()
+        try:
+            resume_in = ResumeCreate(**body)
+        except ValidationError as ve:
+            print("Pydantic Validation Error on Request:", ve)
+            raise HTTPException(status_code=422, detail=ve.errors())
+        
+        # Résoudre le template
+        template = db.query(Template).filter(
+            (Template.id == resume_in.template_id) | (Template.slug == resume_in.template_id)
+        ).first()
 
-    # Créer le resume
-    new_resume = Resume(
-        user_id=current_user.id,
-        template_id=actual_template_id,
-        title=resume_in.title,
-        content=resume_in.content,
-        status=ResumeStatus.DRAFT,
-        doc_type=resume_in.doc_type,
-        linked_doc_id=resume_in.linked_doc_id
-    )
-    
-    db.add(new_resume)
-    db.commit()
-    db.refresh(new_resume)
-    
-    return new_resume
+        actual_template_id = template.id if template else None
+
+        try:
+            doc_type_val = DocTypeEnum(resume_in.doc_type) if resume_in.doc_type else DocTypeEnum.CV
+        except ValueError:
+            doc_type_val = DocTypeEnum.CV
+
+        new_resume = Resume(
+            user_id=current_user.id,
+            template_id=actual_template_id,
+            title=resume_in.title,
+            content=resume_in.content or {},
+            status=ResumeStatus.DRAFT,
+            doc_type=doc_type_val,
+            linked_doc_id=resume_in.linked_doc_id
+        )
+        
+        db.add(new_resume)
+        db.commit()
+        db.refresh(new_resume)
+        
+        # Create a dict that matches ResumeOut to avoid response_model issues
+        return {
+            "id": new_resume.id,
+            "user_id": new_resume.user_id,
+            "title": new_resume.title,
+            "template_id": new_resume.template_id,
+            "content": new_resume.content,
+            "status": new_resume.status.value if hasattr(new_resume.status, 'value') else new_resume.status,
+            "doc_type": new_resume.doc_type.value if hasattr(new_resume.doc_type, 'value') else new_resume.doc_type,
+            "linked_doc_id": new_resume.linked_doc_id,
+            "created_at": new_resume.created_at
+        }
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+
 
 @router.put("/{resume_id}", response_model=ResumeOut)
 async def update_resume(

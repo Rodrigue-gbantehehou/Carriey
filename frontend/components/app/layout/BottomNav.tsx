@@ -2,13 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, User, FileText, Briefcase } from 'lucide-react';
+import { Home, User, FileText, Globe } from 'lucide-react';
 
 const NAV = [
-  { href: '/accueil',      label: 'Accueil',      icon: Home },
-  { href: '/profil',       label: 'Profil',       icon: User },
-  { href: '/mes-documents', label: 'Documents',    icon: FileText },
-  { href: '/candidatures', label: 'Candidatures', icon: Briefcase },
+  { href: '/accueil',      label: 'Accueil',   icon: Home },
+  { href: '/profil',       label: 'Profil',    icon: User },
+  { href: '/mes-documents', label: 'Documents', icon: FileText },
+  { href: '/mes-pages',    label: 'Pages',     icon: Globe },
 ];
 
 export default function BottomNav() {

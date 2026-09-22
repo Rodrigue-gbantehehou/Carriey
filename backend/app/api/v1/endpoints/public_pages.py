@@ -2,12 +2,14 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime, timezone
+import re
 
 from app.db.session import get_db
 from app.models.user import User
-from app.models.profile import MasterProfile
+from app.models.public_page import PublicPage
 from app.schemas.public_page import PublicPageCreate, PublicPageUpdate, PublicPageOut, SlugCheckOut
-from app.crud import crud_public_page, crud_profile
+from app.crud import crud_public_page
+from app.crud.crud_profile import profile as profile_crud
 from app.api.dependencies import get_current_active_user
 
 router = APIRouter()
@@ -16,6 +18,20 @@ router = APIRouter()
 # ──────────────────────────────────────────────
 # Auth-required routes
 # ──────────────────────────────────────────────
+
+@router.get("/check-slug", response_model=SlugCheckOut)
+async def check_slug(
+    slug: str = Query(..., min_length=3, max_length=100),
+    exclude_id: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Check if a slug is available. Returns a suggestion if not."""
+    clean = re.sub(r'[^a-z0-9\-]', '-', slug.lower()).strip('-')
+    available = crud_public_page.slug_available(db, clean, exclude_id=exclude_id)
+    suggestion = None if available else crud_public_page.suggest_slug(db, clean)
+    return SlugCheckOut(slug=clean, available=available, suggestion=suggestion)
+
 
 @router.get("/", response_model=List[PublicPageOut])
 async def list_my_pages(
@@ -34,9 +50,10 @@ async def create_page(
 ):
     """Create a new public page."""
     if not crud_public_page.slug_available(db, obj_in.slug):
+        suggestion = crud_public_page.suggest_slug(db, obj_in.slug)
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=f"Le slug '{obj_in.slug}' est déjà utilisé. Essayez : {crud_public_page.suggest_slug(db, obj_in.slug)}"
+            detail=f"Le slug '{obj_in.slug}' est déjà utilisé. Suggestion : {suggestion}"
         )
     return crud_public_page.create(db, user_id=current_user.id, obj_in=obj_in)
 
@@ -49,8 +66,9 @@ async def update_page(
     current_user: User = Depends(get_current_active_user)
 ):
     """Update a public page. Only the owner can edit."""
-    from app.models.public_page import PublicPage
-    page = db.query(PublicPage).filter(PublicPage.id == page_id, PublicPage.user_id == current_user.id).first()
+    page = db.query(PublicPage).filter(
+        PublicPage.id == page_id, PublicPage.user_id == current_user.id
+    ).first()
     if not page:
         raise HTTPException(status_code=404, detail="Page non trouvée")
 
@@ -76,23 +94,8 @@ async def delete_page(
         raise HTTPException(status_code=404, detail="Page non trouvée")
 
 
-@router.get("/check-slug", response_model=SlugCheckOut)
-async def check_slug(
-    slug: str = Query(..., min_length=3, max_length=100),
-    exclude_id: Optional[str] = Query(None),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
-):
-    """Check if a slug is available. Returns a suggestion if not."""
-    import re
-    clean = re.sub(r'[^a-z0-9\-]', '-', slug.lower())
-    available = crud_public_page.slug_available(db, clean, exclude_id=exclude_id)
-    suggestion = None if available else crud_public_page.suggest_slug(db, clean)
-    return SlugCheckOut(slug=clean, available=available, suggestion=suggestion)
-
-
 # ──────────────────────────────────────────────
-# Public routes (no auth)
+# Public routes (no auth required)
 # ──────────────────────────────────────────────
 
 @router.get("/public/{slug}")
@@ -110,16 +113,15 @@ async def get_public_page(slug: str, db: Session = Depends(get_db)):
         now = datetime.now(timezone.utc)
         exp = page.expires_at
         if exp.tzinfo is None:
-            from datetime import timezone as tz
-            exp = exp.replace(tzinfo=tz.utc)
+            exp = exp.replace(tzinfo=timezone.utc)
         if now > exp:
             raise HTTPException(status_code=410, detail="Ce lien a expiré")
 
-    # Increment views (fire-and-forget style)
+    # Increment views
     crud_public_page.increment_views(db, page)
 
     # Fetch owner's profile
-    profile = crud_profile.profile.get_by_user(db, user_id=page.user_id)
+    profile = profile_crud.get_by_user(db, user_id=page.user_id)
     if not profile:
         raise HTTPException(status_code=404, detail="Profil introuvable")
 
@@ -133,9 +135,7 @@ async def get_public_page(slug: str, db: Session = Depends(get_db)):
             return [i for i in items if i.id in pinned[section_key]]
         return items
 
-    from app.schemas.profile import MasterProfile as MasterProfileOut
-
-    result = {
+    return {
         "page": {
             "id": page.id,
             "slug": page.slug,
@@ -161,16 +161,23 @@ async def get_public_page(slug: str, db: Session = Depends(get_db)):
             "github_url": profile.github_url,
             "photo_url": profile.photo_url if page.show_photo else None,
             "experiences": [
-                {"id": e.id, "title": e.title, "company": e.company, "location": e.location,
-                 "start_date": str(e.start_date) if e.start_date else None,
-                 "end_date": str(e.end_date) if e.end_date else None,
-                 "current": e.current, "description": e.description}
+                {
+                    "id": e.id, "title": e.title, "company": e.company,
+                    "location": e.location,
+                    "start_date": str(e.start_date) if e.start_date else None,
+                    "end_date": str(e.end_date) if e.end_date else None,
+                    "current": e.current, "description": e.description
+                }
                 for e in filter_list(profile.experiences, "experiences")
             ],
             "educations": [
-                {"id": e.id, "degree": e.degree, "school": e.school, "location": e.location,
-                 "start_date": str(e.start_date) if e.start_date else None,
-                 "end_date": str(e.end_date) if e.end_date else None, "description": e.description}
+                {
+                    "id": e.id, "degree": e.degree, "school": e.school,
+                    "location": e.location,
+                    "start_date": str(e.start_date) if e.start_date else None,
+                    "end_date": str(e.end_date) if e.end_date else None,
+                    "description": e.description
+                }
                 for e in filter_list(profile.educations, "education")
             ],
             "skills": [
@@ -178,14 +185,18 @@ async def get_public_page(slug: str, db: Session = Depends(get_db)):
                 for s in filter_list(profile.skills, "skills")
             ],
             "projects": [
-                {"id": p.id, "name": p.name, "description": p.description, "url": p.url,
-                 "start_date": str(p.start_date) if p.start_date else None,
-                 "end_date": str(p.end_date) if p.end_date else None}
+                {
+                    "id": p.id, "name": p.name, "description": p.description, "url": p.url,
+                    "start_date": str(p.start_date) if p.start_date else None,
+                    "end_date": str(p.end_date) if p.end_date else None
+                }
                 for p in filter_list(profile.projects, "projects")
             ],
             "certifications": [
-                {"id": c.id, "name": c.name, "issuer": c.issuer,
-                 "date": str(c.date) if c.date else None, "url": c.url}
+                {
+                    "id": c.id, "name": c.name, "issuer": c.issuer,
+                    "date": str(c.date) if c.date else None, "url": c.url
+                }
                 for c in filter_list(profile.certifications, "certifications")
             ],
             "languages": [
@@ -193,10 +204,8 @@ async def get_public_page(slug: str, db: Session = Depends(get_db)):
                 for l in filter_list(profile.languages, "languages")
             ],
             "links": [
-                {"id": l.id, "label": l.label, "url": l.url}
-                for l in filter_list(profile.links, "links")
+                {"id": lnk.id, "label": lnk.label, "url": lnk.url}
+                for lnk in filter_list(profile.links, "links")
             ],
         }
     }
-
-    return result

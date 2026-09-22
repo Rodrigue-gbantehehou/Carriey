@@ -11,11 +11,11 @@ if sys.platform == "win32" and hasattr(sys.stdout, "reconfigure"):
         pass
 
 from sqlalchemy.orm import Session
-from database import engine, SessionLocal, Base
-from models.user import User, UserRole
-from models.template import Template
-from models.persona import Persona
-from auth.utils import get_password_hash
+from app.db.session import engine, SessionLocal, Base
+from app.models.user import User, UserRole
+from app.models.template import Template
+from app.models.persona import Persona
+from app.core.security import get_password_hash
 
 BASE_DIR = Path(__file__).parent.resolve()
 TEMPLATES_DIR = BASE_DIR.parent / "frontend" / "components" / "cv-templates"

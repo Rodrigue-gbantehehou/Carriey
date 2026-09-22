@@ -29,30 +29,38 @@ export default function CreateDocumentModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
+    <div className="fixed inset-0 z-50 flex flex-col justify-end sm:items-center sm:justify-center">
       {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity" 
+      <div
+        className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm"
         onClick={closeCreateModal}
       />
-      
-      {/* Modal Content */}
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden z-10 animate-in fade-in zoom-in duration-200">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+
+      {/* Modal — bottom sheet on mobile, centered card on sm+ */}
+      <div className="relative bg-white w-full sm:max-w-2xl sm:rounded-2xl rounded-t-3xl shadow-2xl z-10 overflow-hidden">
+
+        {/* Drag handle (mobile only) */}
+        <div className="flex justify-center pt-3 pb-1 sm:hidden">
+          <div className="w-10 h-1 bg-gray-200 rounded-full" />
+        </div>
+
+        {/* Header */}
+        <div className="flex items-start justify-between px-5 py-4 border-b border-gray-100">
           <div>
-            <h2 className="text-xl font-bold text-gray-900">Que voulez-vous créer ?</h2>
-            <p className="text-sm text-gray-500 mt-1">Choisissez le type de document à générer à partir de votre profil.</p>
+            <h2 className="text-lg font-bold text-gray-900">Que voulez-vous créer ?</h2>
+            <p className="text-xs text-gray-500 mt-0.5">Choisissez le type de document à générer.</p>
           </div>
-          <button 
+          <button
             onClick={closeCreateModal}
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors ml-4 flex-shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="p-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* Grid */}
+        <div className="p-4 pb-8 sm:pb-6">
+          <div className="grid grid-cols-3 gap-3">
             {DOC_TYPES.map(doc => {
               const Icon = doc.icon;
               return (
@@ -61,35 +69,35 @@ export default function CreateDocumentModal() {
                   disabled={!doc.active || isCreating}
                   onClick={doc.id === 'cv' ? handleCreateCv : undefined}
                   className={`
-                    flex flex-col items-center justify-center p-6 rounded-xl border-2 transition-all text-center group relative
-                    ${doc.active 
-                      ? 'border-gray-200 hover:border-indigo-600 hover:shadow-lg hover:shadow-indigo-600/10 bg-white cursor-pointer' 
-                      : 'border-gray-100 bg-gray-50/50 opacity-60 cursor-not-allowed'
+                    flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all text-center group relative
+                    ${doc.active
+                      ? 'border-gray-200 hover:border-indigo-600 hover:shadow-md hover:shadow-indigo-600/10 bg-white cursor-pointer'
+                      : 'border-gray-100 bg-gray-50/50 opacity-50 cursor-not-allowed'
                     }
                   `}
                 >
                   <div className={`
-                    w-12 h-12 rounded-full flex items-center justify-center mb-4 transition-colors
+                    w-9 h-9 rounded-full flex items-center justify-center mb-2 transition-colors
                     ${doc.active ? 'bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white' : 'bg-gray-200 text-gray-400'}
                   `}>
-                    <Icon className="w-6 h-6" />
+                    <Icon className="w-4 h-4" />
                   </div>
-                  <h3 className={`font-semibold mb-1 ${doc.active ? 'text-gray-900' : 'text-gray-500'}`}>
+                  <h3 className={`text-xs font-bold leading-tight ${doc.active ? 'text-gray-900' : 'text-gray-500'}`}>
                     {doc.label}
                   </h3>
-                  <p className="text-xs text-gray-400 line-clamp-2">
+                  <p className="text-[10px] text-gray-400 mt-0.5 line-clamp-2 hidden sm:block">
                     {doc.desc}
                   </p>
-                  
+
                   {!doc.active && (
-                    <span className="absolute top-3 right-3 text-[10px] font-bold tracking-wider uppercase text-gray-400 bg-gray-200/50 px-2 py-0.5 rounded-full">
+                    <span className="absolute top-2 right-2 text-[9px] font-bold uppercase text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-full">
                       Bientôt
                     </span>
                   )}
-                  
+
                   {doc.id === 'cv' && isCreating && (
                     <div className="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                      <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+                      <div className="w-5 h-5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
                     </div>
                   )}
                 </button>
