@@ -5,10 +5,16 @@ import { useProfileStore } from '@/store/profile';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useRef } from 'react';
-import { ArrowLeft, Download, Save, Loader2, ZoomIn, ZoomOut, CheckCircle2, PenTool, LayoutTemplate, FileText, X } from 'lucide-react';
+import { ArrowLeft, Download, Save, Loader2, ZoomIn, ZoomOut, CheckCircle2, PenTool, LayoutTemplate, FileText, X, Palette, Settings2, Check } from 'lucide-react';
 import { PageFlow, PageNumberPlugin, mmToPx } from 'pageflow-js';
 import { cvApi } from '@/lib/cv-api';
 import { API_BASE } from '@/lib/api';
+
+const LETTER_THEMES = [
+  { id: 'classic', label: 'Classique' },
+  { id: 'modern', label: 'Moderne' },
+  { id: 'minimal', label: 'Épuré' }
+];
 
 export default function CoverLetterEditorPage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -22,6 +28,7 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [scale, setScale] = useState(0.5);
   const [isMobileFormOpen, setIsMobileFormOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<'content' | 'design'>('content');
   
   const cv = cvs.find(c => c.id === params.id);
   const { data: session } = useSession();
@@ -122,6 +129,18 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
     }
   };
 
+  const handleSelectTheme = async (themeId: string) => {
+    if (!cv) return;
+    updateCv(cv.id, { template_id: themeId });
+    if (session?.user?.accessToken) {
+      try {
+        await cvApi.updateResume(session.user.accessToken, cv.id, { template_id: themeId });
+      } catch (err) {
+        console.error('Erreur lors de la sauvegarde du thème', err);
+      }
+    }
+  };
+
   useEffect(() => {
     if (!mounted || localLoading || !sourceRef.current || !targetRef.current) return;
     let isCancelled = false;
@@ -151,7 +170,7 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
       isCancelled = true;
       clearTimeout(timeoutId);
     };
-  }, [mounted, localLoading, formData, profile]);
+  }, [mounted, localLoading, formData, profile, cv?.template_id]); // Added template_id to trigger reflow
 
   const handleExportPdf = () => {
     window.print();
@@ -179,6 +198,8 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
   const displayName = profile?.first_name || profile?.last_name
     ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim()
     : profile?.username || 'Votre Nom';
+
+  const currentTemplate = cv.template_id || 'classic';
 
   const FormContent = () => (
     <div className="space-y-6">
@@ -277,6 +298,37 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
     </div>
   );
 
+  const DesignContent = () => (
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Choix du modèle</h3>
+        <div className="grid grid-cols-2 gap-3">
+          {LETTER_THEMES.map(t => (
+            <button
+              key={t.id}
+              onClick={() => handleSelectTheme(t.id)}
+              className={`relative aspect-[1/1.2] rounded-xl border-2 overflow-hidden flex flex-col transition-all bg-white group ${currentTemplate === t.id ? 'border-indigo-600 shadow-md shadow-indigo-100' : 'border-gray-100 hover:border-indigo-300'}`}
+            >
+              <div className="flex-1 bg-gray-50/50 p-2 border-b border-gray-50 flex items-center justify-center">
+                {t.id === 'classic' && <div className="w-full h-full bg-white border border-gray-200 shadow-sm rounded flex flex-col p-1.5"><div className="w-1/2 h-1 bg-gray-300 mb-2"/><div className="w-1/3 h-1 bg-gray-300 ml-auto mb-2"/><div className="w-full h-1 bg-gray-200 mb-0.5"/><div className="w-full h-1 bg-gray-200 mb-0.5"/><div className="w-3/4 h-1 bg-gray-200"/></div>}
+                {t.id === 'modern' && <div className="w-full h-full bg-white border border-gray-200 shadow-sm rounded flex flex-col p-1.5 border-l-4 border-l-indigo-500"><div className="w-1/2 h-1 bg-gray-800 mb-2"/><div className="w-1/3 h-1 bg-gray-400 ml-auto mb-2"/><div className="w-full h-1 bg-gray-200 mb-0.5"/><div className="w-full h-1 bg-gray-200 mb-0.5"/><div className="w-3/4 h-1 bg-gray-200"/></div>}
+                {t.id === 'minimal' && <div className="w-full h-full bg-white border border-gray-200 shadow-sm rounded flex flex-col p-1.5 items-center justify-center"><div className="w-1/2 h-1 bg-gray-400 mb-3"/><div className="w-full h-1 bg-gray-100 mb-0.5"/><div className="w-full h-1 bg-gray-100 mb-0.5"/><div className="w-3/4 h-1 bg-gray-100"/></div>}
+              </div>
+              {currentTemplate === t.id && (
+                <div className="absolute top-1.5 right-1.5 w-4 h-4 bg-indigo-600 rounded-full flex items-center justify-center text-white shadow-sm z-10">
+                  <Check className="w-2.5 h-2.5" />
+                </div>
+              )}
+              <div className="p-2 text-center bg-white">
+                <span className="text-xs font-semibold text-gray-900">{t.label}</span>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="py-6 sm:py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto font-sans min-h-screen selection:bg-indigo-100 selection:text-indigo-900">
       <style dangerouslySetInnerHTML={{__html: `
@@ -318,7 +370,7 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
             onClick={() => setIsMobileFormOpen(true)}
             className="lg:hidden inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-full font-semibold text-sm hover:bg-gray-200 transition-colors"
           >
-            <PenTool className="w-4 h-4" /> Éditer
+            <Settings2 className="w-4 h-4" /> Options
           </button>
           <button
             onClick={handleSave}
@@ -343,11 +395,21 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
         {/* Desktop Sidebar */}
         <div className="hidden lg:block lg:col-span-4 space-y-6">
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 sticky top-6">
-            <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
-              <PenTool className="w-5 h-5 text-indigo-600" />
-              Rédaction
-            </h2>
-            <FormContent />
+            <div className="flex p-1 bg-gray-100/80 rounded-xl mb-6">
+              <button
+                onClick={() => setActiveTab('design')}
+                className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium rounded-lg transition-all ${activeTab === 'design' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
+              >
+                <Palette className="w-4 h-4" /> Modèle
+              </button>
+              <button
+                onClick={() => setActiveTab('content')}
+                className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium rounded-lg transition-all ${activeTab === 'content' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
+              >
+                <PenTool className="w-4 h-4" /> Contenu
+              </button>
+            </div>
+            {activeTab === 'content' ? <FormContent /> : <DesignContent />}
           </div>
         </div>
 
@@ -378,7 +440,7 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
             <div
               className="relative mt-8 mb-8"
               style={{
-                width: `calc(210mm * ${scale})`,
+                width: \`calc(210mm * \${scale})\`,
                 transformOrigin: 'top center',
               }}
             >
@@ -386,66 +448,180 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
                 className="origin-top-left transition-transform duration-200"
                 style={{
                   width: '210mm',
-                  transform: `scale(${scale})`,
+                  transform: \`scale(\${scale})\`,
                 }}
               >
                 {/* SOURCE: Hidden off-screen so PageFlow can measure it */}
                 <div style={{ position: 'absolute', left: '-9999px', top: 0, width: '210mm' }}>
-                  <div ref={sourceRef} className="font-sans text-gray-900 leading-relaxed text-[11pt]">
-                    
-                    {/* Header (Sender Info) */}
-                    <div className="mb-14 border-b-2 border-gray-900 pb-6">
-                      <h1 className="text-3xl font-black text-gray-900 mb-2 uppercase tracking-tight">{displayName}</h1>
-                      <div className="text-gray-600 text-sm font-medium flex items-center gap-3 flex-wrap">
-                        {profile?.contact_phone && <span>{profile.contact_phone}</span>}
-                        {profile?.contact_phone && profile?.contact_email && <span className="w-1 h-1 rounded-full bg-gray-300" />}
-                        {profile?.contact_email && <span>{profile.contact_email}</span>}
-                        {(profile?.contact_phone || profile?.contact_email) && profile?.location && <span className="w-1 h-1 rounded-full bg-gray-300" />}
-                        {profile?.location && <span>{profile.location}</span>}
-                      </div>
-                    </div>
+                  
+                  <div ref={sourceRef} className="bg-white">
+                    {currentTemplate === 'classic' && (
+                      <div className="font-sans text-gray-900 leading-relaxed text-[11pt]">
+                        {/* Header (Sender Info) */}
+                        <div className="mb-14 border-b border-gray-300 pb-6">
+                          <h1 className="text-3xl font-black text-gray-900 mb-2 uppercase tracking-tight">{displayName}</h1>
+                          <div className="text-gray-600 text-sm flex items-center gap-3 flex-wrap">
+                            {profile?.contact_phone && <span>{profile.contact_phone}</span>}
+                            {profile?.contact_phone && profile?.contact_email && <span>•</span>}
+                            {profile?.contact_email && <span>{profile.contact_email}</span>}
+                            {(profile?.contact_phone || profile?.contact_email) && profile?.location && <span>•</span>}
+                            {profile?.location && <span>{profile.location}</span>}
+                          </div>
+                        </div>
 
-                    {/* Recipient & Date */}
-                    <div className="flex justify-between items-start mb-12">
-                      <div className="w-1/2">
-                        <p className="text-gray-500 text-sm font-medium mb-1">Le</p>
-                        <p className="text-gray-900 font-medium">{new Date().toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                      </div>
-                      <div className="w-1/2 text-left bg-gray-50/50 p-6 rounded-lg border border-gray-100">
-                        <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-2">À l'attention de</p>
-                        <p className="font-bold text-gray-900 text-lg">{formData.companyName}</p>
-                        {formData.recipientName && <p className="text-gray-800 font-medium mt-1">{formData.recipientName}</p>}
-                        {formData.recipientAddress && (
-                          <p className="text-gray-600 whitespace-pre-wrap mt-2 leading-snug">{formData.recipientAddress}</p>
+                        {/* Recipient & Date */}
+                        <div className="flex justify-between items-start mb-12">
+                          <div className="w-1/2">
+                            <p className="text-gray-500 text-sm mb-1">Le</p>
+                            <p className="text-gray-900">{new Date().toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                          </div>
+                          <div className="w-1/2 text-left">
+                            <p className="font-bold text-gray-900 text-lg">{formData.companyName}</p>
+                            {formData.recipientName && <p className="text-gray-800 font-medium mt-1">{formData.recipientName}</p>}
+                            {formData.recipientAddress && (
+                              <p className="text-gray-600 whitespace-pre-wrap mt-1">{formData.recipientAddress}</p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Subject */}
+                        {formData.subject && (
+                          <div className="mb-10 font-bold text-gray-900">
+                            Objet : {formData.subject}
+                          </div>
                         )}
-                      </div>
-                    </div>
 
-                    {/* Subject */}
-                    {formData.subject && (
-                      <div className="mb-10 font-bold text-gray-900 bg-gray-50 py-3 px-4 border-l-4 border-gray-900 inline-block rounded-r-lg">
-                        Objet : {formData.subject}
+                        {/* Body */}
+                        <div className="mb-6 font-medium text-gray-900">
+                          {formData.salutation}
+                        </div>
+                        
+                        <div className="whitespace-pre-wrap mb-10 text-justify text-gray-700 leading-[1.8]">
+                          {formData.body}
+                        </div>
+
+                        <div className="mb-16 text-gray-700">
+                          {formData.closing}
+                        </div>
+
+                        {/* Signature */}
+                        <div className="text-right">
+                          <p className="text-gray-500 text-sm mb-2">Cordialement,</p>
+                          <p className="font-bold text-gray-900 text-lg">{displayName}</p>
+                        </div>
                       </div>
                     )}
 
-                    {/* Body */}
-                    <div className="mb-6 font-medium text-gray-900">
-                      {formData.salutation}
-                    </div>
-                    
-                    <div className="whitespace-pre-wrap mb-10 text-justify text-gray-700 leading-[1.8]">
-                      {formData.body}
-                    </div>
+                    {currentTemplate === 'modern' && (
+                      <div className="font-sans text-gray-900 leading-relaxed text-[11pt] pl-8 border-l-4 border-indigo-600">
+                        {/* Header (Sender Info) */}
+                        <div className="mb-12">
+                          <h1 className="text-3xl font-bold text-indigo-900 mb-2 tracking-tight">{displayName}</h1>
+                          <div className="text-gray-600 text-sm flex items-center gap-3 flex-wrap font-medium">
+                            {profile?.contact_phone && <span>{profile.contact_phone}</span>}
+                            {profile?.contact_phone && profile?.contact_email && <span className="w-1.5 h-1.5 rounded-full bg-indigo-200" />}
+                            {profile?.contact_email && <span>{profile.contact_email}</span>}
+                            {(profile?.contact_phone || profile?.contact_email) && profile?.location && <span className="w-1.5 h-1.5 rounded-full bg-indigo-200" />}
+                            {profile?.location && <span>{profile.location}</span>}
+                          </div>
+                        </div>
 
-                    <div className="mb-16 text-gray-700">
-                      {formData.closing}
-                    </div>
+                        {/* Recipient & Date */}
+                        <div className="flex flex-col gap-6 mb-12">
+                          <div className="text-gray-500 text-sm">
+                            Le {new Date().toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })}
+                          </div>
+                          <div className="bg-gray-50 p-6 rounded-lg self-end w-2/3 border border-gray-100">
+                            <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-2">À l'attention de</p>
+                            <p className="font-bold text-indigo-900 text-lg">{formData.companyName}</p>
+                            {formData.recipientName && <p className="text-gray-800 font-medium mt-1">{formData.recipientName}</p>}
+                            {formData.recipientAddress && (
+                              <p className="text-gray-600 whitespace-pre-wrap mt-2">{formData.recipientAddress}</p>
+                            )}
+                          </div>
+                        </div>
 
-                    {/* Signature */}
-                    <div className="text-right">
-                      <p className="text-gray-500 text-sm mb-2">Cordialement,</p>
-                      <p className="font-bold text-gray-900 text-lg">{displayName}</p>
-                    </div>
+                        {/* Subject */}
+                        {formData.subject && (
+                          <div className="mb-10 font-bold text-indigo-900 bg-indigo-50 py-3 px-4 rounded-lg inline-block">
+                            Objet : {formData.subject}
+                          </div>
+                        )}
+
+                        {/* Body */}
+                        <div className="mb-6 font-semibold text-gray-900">
+                          {formData.salutation}
+                        </div>
+                        
+                        <div className="whitespace-pre-wrap mb-10 text-gray-700 leading-loose">
+                          {formData.body}
+                        </div>
+
+                        <div className="mb-16 text-gray-700">
+                          {formData.closing}
+                        </div>
+
+                        {/* Signature */}
+                        <div className="text-left mt-8 pt-8 border-t border-gray-200 w-1/3">
+                          <p className="font-bold text-indigo-900 text-lg">{displayName}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {currentTemplate === 'minimal' && (
+                      <div className="font-serif text-gray-800 leading-relaxed text-[11pt] text-center">
+                        {/* Header (Sender Info) */}
+                        <div className="mb-16">
+                          <h1 className="text-2xl tracking-widest uppercase text-gray-900 mb-4">{displayName}</h1>
+                          <div className="text-gray-500 text-sm flex items-center justify-center gap-3 flex-wrap">
+                            {profile?.contact_phone && <span>{profile.contact_phone}</span>}
+                            {profile?.contact_email && <span>| {profile.contact_email}</span>}
+                            {profile?.location && <span>| {profile.location}</span>}
+                          </div>
+                        </div>
+
+                        {/* Date & Recipient */}
+                        <div className="flex flex-col items-center mb-16 text-sm">
+                          <div className="mb-8 italic text-gray-500">
+                            Fait le {new Date().toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })}
+                          </div>
+                          <div className="text-center">
+                            <p className="font-bold text-gray-900">{formData.companyName}</p>
+                            {formData.recipientName && <p className="text-gray-800">{formData.recipientName}</p>}
+                            {formData.recipientAddress && (
+                              <p className="text-gray-500 whitespace-pre-wrap mt-1">{formData.recipientAddress}</p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Subject */}
+                        {formData.subject && (
+                          <div className="mb-12 font-bold text-gray-900 uppercase text-xs tracking-wider border-b border-gray-300 pb-2 inline-block">
+                            Objet : {formData.subject}
+                          </div>
+                        )}
+
+                        <div className="text-left">
+                          {/* Body */}
+                          <div className="mb-8 font-medium text-gray-900">
+                            {formData.salutation}
+                          </div>
+                          
+                          <div className="whitespace-pre-wrap mb-10 text-justify text-gray-700 leading-[2] font-sans font-light">
+                            {formData.body}
+                          </div>
+
+                          <div className="mb-16 text-gray-700 font-sans font-light">
+                            {formData.closing}
+                          </div>
+                        </div>
+
+                        {/* Signature */}
+                        <div className="text-right mt-16 font-serif">
+                          <p className="text-xl text-gray-900 italic">{displayName}</p>
+                        </div>
+                      </div>
+                    )}
 
                   </div>
                 </div>
@@ -460,29 +636,36 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
       
       {/* Mobile Form Modal */}
       {isMobileFormOpen && (
-        <div className="fixed inset-0 z-50 bg-white flex flex-col lg:hidden">
-          <div className="flex items-center justify-between p-4 border-b border-gray-100">
+        <div className="fixed inset-0 z-50 bg-gray-50 flex flex-col lg:hidden">
+          <div className="flex items-center justify-between p-4 bg-white border-b border-gray-200">
             <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <PenTool className="w-5 h-5 text-indigo-600" />
-              Éditer la lettre
+              <Settings2 className="w-5 h-5 text-indigo-600" />
+              Options
             </h2>
             <button onClick={() => setIsMobileFormOpen(false)} className="p-2 text-gray-500 hover:bg-gray-100 rounded-full">
               <X className="w-5 h-5" />
             </button>
           </div>
           <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
-            <FormContent />
+            <div className="flex p-1 bg-white border border-gray-200 rounded-xl mb-6 shadow-sm">
+              <button
+                onClick={() => setActiveTab('design')}
+                className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium rounded-lg transition-all \${activeTab === 'design' ? 'bg-indigo-50 text-indigo-600' : 'text-gray-500 hover:text-gray-900'}`}
+              >
+                <Palette className="w-4 h-4" /> Modèle
+              </button>
+              <button
+                onClick={() => setActiveTab('content')}
+                className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium rounded-lg transition-all \${activeTab === 'content' ? 'bg-indigo-50 text-indigo-600' : 'text-gray-500 hover:text-gray-900'}`}
+              >
+                <PenTool className="w-4 h-4" /> Contenu
+              </button>
+            </div>
+            {activeTab === 'content' ? <FormContent /> : <DesignContent />}
           </div>
         </div>
       )}
 
-      <style dangerouslySetInnerHTML={{__html: `
-        .pageflow-output .pf-page {
-          box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.02) !important;
-          border-radius: 4px !important;
-          background: #ffffff !important;
-        }
-      `}} />
     </div>
   );
 }
