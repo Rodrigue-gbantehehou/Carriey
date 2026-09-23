@@ -1,18 +1,19 @@
 import React from 'react';
 import { TemplateProps } from '@/types/cv';
-import { TemplateStyles, CVSection, ItemGroup, SkillBar, DateRange, SkillTag , RemoteStyles} from '../BaseComponents';
+import { TemplateStyles, CVSection, ItemGroup, SkillBar, DateRange, SkillTag, RemoteStyles, CustomSectionContent } from '../BaseComponents';
 import { getSafeData, isSectionEnabled, getSectionLabel, getLeftColumnSections, getRightColumnSections } from '../utils';
 
 const TokyoTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBaseUrl }) => {
   const data = getSafeData(rawData);
-  const { profile, summary, experience, education, skills, languages, projects, custom_sections } = data;
+  const { profile, summary, experience, education, certifications, skills, languages, projects, custom_sections } = data;
   
   return (
     <div className="cv-rendering-root cv-container tokyo-template">
       <RemoteStyles templateName={config.templateName} apiBaseUrl={apiBaseUrl} />
       <TemplateStyles config={config} />
+      <div className="main-content" data-pf-parallel="true" style={{ display: 'flex', width: '100%' }}>
       
-      <div className="left-column">
+      <div className="left-column" data-pf-splittable="true">
         {isSectionEnabled(config, 'photo') && (
           <div className="profile-photo-wrap">
             {profile.photo ? (
@@ -36,6 +37,9 @@ const TokyoTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBase
                     {profile.location && <div className="contact-item"><i className="fas fa-map-marker-alt"></i><span>{profile.location}</span></div>}
                     {profile.phone && <div className="contact-item"><i className="fas fa-phone"></i><span>{profile.phone}</span></div>}
                     {profile.email && <div className="contact-item"><i className="fas fa-envelope"></i><span>{profile.email}</span></div>}
+                    {profile.website && <div className="contact-item"><i className="fas fa-globe"></i><span>{profile.website}</span></div>}
+                    {profile.linkedin_url && <div className="contact-item"><i className="fab fa-linkedin"></i><span>{profile.linkedin_url.replace(/^https?:\/+(www\.)?/, '')}</span></div>}
+                    {profile.github_url && <div className="contact-item"><i className="fab fa-github"></i><span>{profile.github_url.replace(/^https?:\/+(www\.)?/, '')}</span></div>}
                   </div>
                 </CVSection>
               );
@@ -44,7 +48,7 @@ const TokyoTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBase
                 <CVSection key="skills" title={getSectionLabel(config, 'skills', 'Compétences')} className="sidebar-section">
                   <div className="skills-list">
                     {skills.groups.flatMap((g: any) => g.items || []).map((skill: any, sIdx: number) => (
-                      <SkillBar key={sIdx} name={typeof skill === 'string' ? skill : skill.name || ''} />
+                      <SkillBar key={sIdx} name={typeof skill === 'string' ? skill : skill.name || ''} level={typeof skill === 'object' ? skill.level : undefined} />
                     ))}
                   </div>
                 </CVSection>
@@ -68,6 +72,7 @@ const TokyoTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBase
                   <div className="languages-list">
                     {profile.age && <div className="language-item"><span className="lang-name">Âge</span><span className="lang-level">{profile.age}</span></div>}
                     {profile.nationality && <div className="language-item"><span className="lang-name">Nationalité</span><span className="lang-level">{profile.nationality}</span></div>}
+                    {(profile as any).marital_status && <div className="language-item"><span className="lang-name">Situation</span><span className="lang-level">{(profile as any).marital_status}</span></div>}
                   </div>
                 </CVSection>
               );
@@ -87,30 +92,22 @@ const TokyoTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBase
               if (section.type.startsWith('custom_')) {
                 const customId = section.type.replace('custom_', '');
                 const custom = custom_sections?.find((c: any) => c.id === customId);
-                if (custom) {
-                  return (
-                    <CVSection key={section.type} title={custom.title} className="sidebar-section">
-                      <div style={{ fontSize: '0.9em', lineHeight: 1.4, opacity: 0.9 }}>
-                        {custom.type === 'list' ? (
-                          <ul style={{ listStyle: 'none', padding: 0 }}>
-                            {custom.content.split('\n').filter((line: string) => line.trim()).map((item: string, iIdx: number) => (
-                              <li key={iIdx} style={{ marginBottom: '4px' }}>• {item}</li>
-                            ))}
-                          </ul>
-                        ) : (
-                          <div dangerouslySetInnerHTML={{ __html: custom.content.replace(/\n/g, '<br>') }} />
-                        )}
-                      </div>
-                    </CVSection>
-                  );
-                }
+                  if (custom) {
+                    return (
+                      <CVSection key={section ? section.type : 'custom'} title={custom.title} icon={custom.icon || "fas fa-star"}>
+                        <div className="profile-text">
+                          <CustomSectionContent custom={custom} />
+                        </div>
+                      </CVSection>
+                    );
+                  }
               }
               return null;
           }
         })}
       </div>
 
-      <div className="right-column">
+      <div className="right-column" data-pf-splittable="true">
         <header className="header">
           <h1 className="name">{profile.name}</h1>
           {profile.title && (
@@ -135,7 +132,8 @@ const TokyoTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBase
                       title={exp.title} 
                       subtitle={exp.company} 
                       date={exp.dates}
-                      className="experience-item"
+                      location={exp.location}
+                      description={exp.description}
                     >
                       {exp.tasks && exp.tasks.length > 0 && (
                         <ul className="exp-tasks">
@@ -155,8 +153,43 @@ const TokyoTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBase
                       title={edu.degree} 
                       subtitle={edu.institution} 
                       date={edu.dates}
+                      location={edu.location}
+                      description={edu.description}
                       className="education-item"
                     />
+                  ))}
+                </CVSection>
+              );
+            case 'certifications':
+              return certifications && certifications.length > 0 && (
+                <CVSection key="certifications" title={getSectionLabel(config, 'certifications', 'Certifications')} className="content-section">
+                  {certifications.map((cert: any, idx: number) => (
+                    <ItemGroup 
+                      key={idx} 
+                      title={cert.name} 
+                      subtitle={cert.issuer} 
+                      date={cert.date}
+                      url={cert.url}
+                      className="education-item"
+                    />
+                  ))}
+                </CVSection>
+              );
+                        case 'references':
+              return data.references && data.references.length > 0 && (
+                <CVSection key="references" title={getSectionLabel(config, 'references', 'Références')} className="content-section section">
+                  {data.references.map((ref: any, idx: number) => (
+                    <ItemGroup 
+                      key={idx} 
+                      title={ref.name} 
+                      subtitle={ref.company || ref.title} 
+                      className="experience-item"
+                    >
+                      <div className="profile-text" style={{ marginTop: '5px' }}>
+                        {ref.email && <div><i className="fas fa-envelope" style={{marginRight: '5px'}}></i>{ref.email}</div>}
+                        {ref.phone && <div><i className="fas fa-phone" style={{marginRight: '5px'}}></i>{ref.phone}</div>}
+                      </div>
+                    </ItemGroup>
                   ))}
                 </CVSection>
               );
@@ -167,11 +200,11 @@ const TokyoTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBase
                     <ItemGroup 
                       key={idx} 
                       title={project.name} 
-                      subtitle={project.link} 
+                      date={project.dates}
+                      url={project.link}
+                      description={project.description}
                       className="experience-item"
-                    >
-                      <p className="profile-text" style={{ marginTop: '5px' }}>{project.description}</p>
-                    </ItemGroup>
+                    />
                   ))}
                 </CVSection>
               );
@@ -183,13 +216,7 @@ const TokyoTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBase
                   return (
                     <CVSection key={section.type} title={custom.title} className="content-section">
                       <div className="profile-text">
-                        {custom.type === 'list' ? (
-                          <ul className="exp-tasks">
-                            {custom.content.split('\n').filter((line: string) => line.trim()).map((item: string, iIdx: number) => <li key={iIdx}>{item}</li>)}
-                          </ul>
-                        ) : (
-                          <div dangerouslySetInnerHTML={{ __html: custom.content.replace(/\n/g, '<br>') }} />
-                        )}
+                        <CustomSectionContent custom={custom} />
                       </div>
                     </CVSection>
                   );
@@ -198,6 +225,7 @@ const TokyoTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBase
               return null;
           }
         })}
+      </div>
       </div>
     </div>
   );

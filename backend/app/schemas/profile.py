@@ -1,4 +1,4 @@
-from pydantic import BaseModel, HttpUrl, Field
+from pydantic import BaseModel, HttpUrl, Field, field_validator
 from typing import List, Optional
 from datetime import date
 from app.models.profile import Visibility
@@ -78,8 +78,15 @@ class Project(ProjectBase):
 class CertificationBase(BaseModel):
     name: str
     issuer: str
-    date: Optional[date] = None
+    date: Optional[str] = None
     url: Optional[str] = None
+
+    @field_validator('url', 'date', mode='before')
+    @classmethod
+    def empty_to_none(cls, v):
+        if v is None or v == '':
+            return None
+        return str(v)[:10] if v else None  # keep only YYYY-MM-DD part
 
 class CertificationCreate(CertificationBase):
     pass
@@ -149,6 +156,51 @@ class Document(DocumentBase):
     class Config:
         from_attributes = True
 
+# ── Custom Sections ──────────────────────────────────────────────
+
+class CustomSectionItemBase(BaseModel):
+    title: str
+    subtitle: Optional[str] = None
+    date: Optional[str] = None
+    description: Optional[str] = None
+    order: Optional[str] = '0'
+
+    @field_validator('subtitle', 'date', 'description', mode='before')
+    @classmethod
+    def empty_to_none(cls, v):
+        return None if v == '' else v
+
+class CustomSectionItemCreate(CustomSectionItemBase):
+    pass
+
+class CustomSectionItemOut(CustomSectionItemBase):
+    id: str
+    section_id: str
+
+    class Config:
+        from_attributes = True
+
+class CustomSectionBase(BaseModel):
+    title: str
+    icon: Optional[str] = None
+    type: Optional[str] = 'detailed_list'  # text | simple_list | detailed_list
+
+    @field_validator('icon', mode='before')
+    @classmethod
+    def empty_icon_to_none(cls, v):
+        return None if v == '' else v
+
+class CustomSectionCreate(CustomSectionBase):
+    pass
+
+class CustomSectionOut(CustomSectionBase):
+    id: str
+    profile_id: str
+    items: list[CustomSectionItemOut] = []
+
+    class Config:
+        from_attributes = True
+
 class MasterProfileBase(BaseModel):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
@@ -182,6 +234,7 @@ class MasterProfile(MasterProfileBase):
     achievements: List[Achievement] = []
     links: List[Link] = []
     documents: List[Document] = []
+    custom_sections: List[CustomSectionOut] = []
 
     class Config:
         from_attributes = True

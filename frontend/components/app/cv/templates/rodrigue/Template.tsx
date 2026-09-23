@@ -1,19 +1,20 @@
 import React from 'react';
 import { TemplateProps } from '@/types/cv';
-import { TemplateStyles, CVSection, ItemGroup, SkillTag , RemoteStyles} from '../BaseComponents';
+import { TemplateStyles, CVSection, ItemGroup, SkillTag, RemoteStyles, CustomSectionContent } from '../BaseComponents';
 import { getSafeData, isSectionEnabled, getSectionLabel, getLeftColumnSections, getRightColumnSections } from '../utils';
 
 const RodrigueTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBaseUrl }) => {
   const data = getSafeData(rawData);
-  const { profile, summary, experience, education, skills, languages, projects, custom_sections } = data;
+  const { profile, summary, experience, education, certifications, skills, languages, projects, custom_sections } = data;
   
   return (
     <div className="cv-rendering-root cv-container rodrigue-template">
       <RemoteStyles templateName={config.templateName} apiBaseUrl={apiBaseUrl} />
       <TemplateStyles config={config} />
       
+      <div data-pf-parallel="true" style={{ display: 'flex', width: '100%', minHeight: '100%' }}>
       {/* Sidebar */}
-      <aside className="left-column">
+      <aside className="left-column" data-pf-splittable="true">
         {isSectionEnabled(config, 'photo') && (
           <div className="profile-photo-wrap">
             {profile.photo ? (
@@ -35,7 +36,10 @@ const RodrigueTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiB
                   <div className="contact-list">
                     {profile.phone && <div className="contact-item"><i className="fas fa-mobile-alt"></i><span>{profile.phone}</span></div>}
                     {profile.email && <div className="contact-item"><i className="fas fa-at"></i><span>{profile.email}</span></div>}
+                    {profile.website && <div className="contact-item"><i className="fas fa-globe"></i><span>{profile.website}</span></div>}
                     {profile.location && <div className="contact-item"><i className="fas fa-map-pin"></i><span>{profile.location}</span></div>}
+                    {profile.linkedin_url && <div className="contact-item"><i className="fab fa-linkedin"></i><span>{profile.linkedin_url.replace(/^https?:\/+(www\.)?/, '')}</span></div>}
+                    {profile.github_url && <div className="contact-item"><i className="fab fa-github"></i><span>{profile.github_url.replace(/^https?:\/+(www\.)?/, '')}</span></div>}
                   </div>
                 </CVSection>
               );
@@ -86,17 +90,9 @@ const RodrigueTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiB
                 const custom = custom_sections?.find((c: any) => c.id === customId);
                 if (custom) {
                   return (
-                    <CVSection key={section.type} title={custom.title} className="sidebar-section">
-                      <div style={{ fontSize: '0.9em', lineHeight: 1.4, opacity: 0.9 }}>
-                        {custom.type === 'list' ? (
-                          <ul style={{ listStyle: 'none', padding: 0 }}>
-                            {custom.content.split('\n').filter((line: string) => line.trim()).map((item: string, iIdx: number) => (
-                              <li key={iIdx} style={{ marginBottom: '4px' }}>• {item}</li>
-                            ))}
-                          </ul>
-                        ) : (
-                          <div dangerouslySetInnerHTML={{ __html: custom.content.replace(/\n/g, '<br>') }} />
-                        )}
+                    <CVSection key={section ? section.type : 'custom'} title={custom.title} icon={custom.icon || "fas fa-star"}>
+                      <div className="profile-text">
+                        <CustomSectionContent custom={custom} />
                       </div>
                     </CVSection>
                   );
@@ -108,7 +104,7 @@ const RodrigueTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiB
       </aside>
 
       {/* Main Content */}
-      <main className="right-column">
+      <main className="right-column" data-pf-splittable="true">
         <header className="header-meta">
           <h1 className="name">{profile.name || 'Nom Prénom'}</h1>
           {(profile.position || profile.title) && (
@@ -133,6 +129,8 @@ const RodrigueTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiB
                       title={exp.position || exp.role || exp.title} 
                       subtitle={exp.company} 
                       date={exp.dates || exp.period || `${exp.start || ''} - ${exp.end || ''}`}
+                      location={exp.location}
+                      description={exp.description}
                       className="experience-item"
                     >
                       {(exp.tasks || exp.bullets) && (
@@ -146,7 +144,7 @@ const RodrigueTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiB
               );
             case 'education':
               return education && education.length > 0 && (
-                <CVSection key="education" title={getSectionLabel(config, 'education', 'Études')} className="content-section">
+                <CVSection key="education" title={getSectionLabel(config, 'education', 'Formations')} className="content-section">
                   <div className="education-list">
                     {education.map((edu: any, idx: number) => (
                       <div key={idx} className="edu-item">
@@ -156,10 +154,47 @@ const RodrigueTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiB
                         <div className="edu-content">
                           <div className="edu-degree">{edu.degree}</div>
                           <span className="edu-school">{edu.institution || edu.school}</span>
+                          {edu.location && <div style={{ fontSize: '0.85em', opacity: 0.8, marginTop: '2px' }}><i className="fas fa-map-marker-alt"></i> {edu.location}</div>}
+                          {edu.description && <div style={{ fontSize: '0.9em', marginTop: '4px', whiteSpace: 'pre-wrap' }}>{edu.description}</div>}
                         </div>
                       </div>
                     ))}
                   </div>
+                </CVSection>
+              );
+            case 'certifications':
+              return certifications && certifications.length > 0 && (
+                <CVSection key="certifications" title={getSectionLabel(config, 'certifications', 'Certifications')} className="content-section">
+                  <div className="education-list">
+                    {certifications.map((cert: any, idx: number) => (
+                      <div key={idx} className="edu-item">
+                        <div className="edu-year">{cert.date}</div>
+                        <div className="edu-content">
+                          <div className="edu-degree">{cert.name}</div>
+                          <span className="edu-school">{cert.issuer}</span>
+                          {cert.url && <div style={{ fontSize: '0.85em', marginTop: '2px' }}><a href={cert.url} target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'none' }}><i className="fas fa-link"></i> Lien</a></div>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CVSection>
+              );
+                        case 'references':
+              return data.references && data.references.length > 0 && (
+                <CVSection key="references" title={getSectionLabel(config, 'references', 'Références')} className="content-section section">
+                  {data.references.map((ref: any, idx: number) => (
+                    <ItemGroup 
+                      key={idx} 
+                      title={ref.name} 
+                      subtitle={ref.company || ref.title} 
+                      className="experience-item"
+                    >
+                      <div className="profile-text" style={{ marginTop: '5px' }}>
+                        {ref.email && <div><i className="fas fa-envelope" style={{marginRight: '5px'}}></i>{ref.email}</div>}
+                        {ref.phone && <div><i className="fas fa-phone" style={{marginRight: '5px'}}></i>{ref.phone}</div>}
+                      </div>
+                    </ItemGroup>
+                  ))}
                 </CVSection>
               );
             case 'projects':
@@ -169,11 +204,11 @@ const RodrigueTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiB
                     <ItemGroup 
                       key={idx} 
                       title={project.name} 
-                      subtitle={project.link} 
+                      date={project.dates}
+                      url={project.link}
+                      description={project.description}
                       className="experience-item"
-                    >
-                      <p className="about-text" style={{ marginTop: '5px' }}>{project.description}</p>
-                    </ItemGroup>
+                    />
                   ))}
                 </CVSection>
               );
@@ -185,13 +220,7 @@ const RodrigueTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiB
                   return (
                     <CVSection key={section.type} title={custom.title} className="content-section">
                       <div className="about-text">
-                        {custom.type === 'list' ? (
-                          <ul className="exp-tasks">
-                            {custom.content.split('\n').filter((line: string) => line.trim()).map((item: string, iIdx: number) => <li key={iIdx}>{item}</li>)}
-                          </ul>
-                        ) : (
-                          <div dangerouslySetInnerHTML={{ __html: custom.content.replace(/\n/g, '<br>') }} />
-                        )}
+                        <CustomSectionContent custom={custom} />
                       </div>
                     </CVSection>
                   );
@@ -201,6 +230,7 @@ const RodrigueTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiB
           }
         })}
       </main>
+      </div>
       <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
     </div>
   );

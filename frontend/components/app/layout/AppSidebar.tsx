@@ -13,7 +13,6 @@ const NAV = [
   { href: '/accueil',       label: 'Accueil',         icon: Home },
   { href: '/profil',        label: 'Mon profil',      icon: User },
   { href: '/mes-documents', label: 'Mes documents',   icon: FileText },
-  { href: '/mes-pages',     label: 'Mes pages',       icon: Globe },
   { href: '/candidatures',  label: 'Mes candidatures', icon: Briefcase },
   { href: '/themes',        label: 'Thèmes',          icon: Palette },
 ];

@@ -1,6 +1,6 @@
 import { PublicPage, PublicPageCreate, PublicPageUpdate, SlugCheck, PublicPageData } from '@/types/public-page';
 
-const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+const BASE = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
 
 function authHeaders(token: string): HeadersInit {
   return {

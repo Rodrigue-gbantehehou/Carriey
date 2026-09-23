@@ -93,5 +93,7 @@ export interface PublicPageData {
     }>;
     languages: Array<{ id: string; name: string; level?: string }>;
     links: Array<{ id: string; label: string; url: string }>;
+    references?: Array<{ id?: string; name: string; title?: string; company?: string; email?: string; phone?: string; }>;
+    custom_sections?: Array<{ id: string; title: string; content?: string; type: string; items?: any[] }>;
   };
 }

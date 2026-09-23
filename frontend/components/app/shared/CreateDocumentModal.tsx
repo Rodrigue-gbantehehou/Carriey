@@ -8,9 +8,9 @@ import { useState } from 'react';
 
 const DOC_TYPES = [
   { id: 'cv', icon: FileText, label: 'CV', desc: 'Votre CV complet', active: true },
-  { id: 'cover_letter', icon: FileBadge, label: 'Lettre de motivation', desc: 'Accompagnez votre CV', active: false },
+  { id: 'cover_letter', icon: FileBadge, label: 'Lettre de motivation', desc: 'Accompagnez votre CV', active: true },
   { id: 'portfolio', icon: Layers, label: 'Portfolio', desc: 'Présentez vos projets', active: false },
-  { id: 'profile', icon: BookOpen, label: 'Profil pro', desc: 'Document de synthèse', active: false },
+  { id: 'profile', icon: BookOpen, label: 'Profil public', desc: 'Page personnelle en ligne', active: true },
   { id: 'presentation', icon: LayoutTemplate, label: 'Présentation', desc: 'Slides personnalisés', active: false },
   { id: 'other', icon: Briefcase, label: 'Autre', desc: 'Document sur mesure', active: false },
 ];
@@ -26,6 +26,16 @@ export default function CreateDocumentModal() {
   const handleCreateCv = () => {
     closeCreateModal();
     router.push('/mes-documents/create/cv');
+  };
+
+  const handleCreateCoverLetter = () => {
+    closeCreateModal();
+    router.push('/mes-documents/create/lettre');
+  };
+
+  const handleCreateProfile = () => {
+    closeCreateModal();
+    router.push('/mes-documents?create=page');
   };
 
   return (
@@ -67,7 +77,11 @@ export default function CreateDocumentModal() {
                 <button
                   key={doc.id}
                   disabled={!doc.active || isCreating}
-                  onClick={doc.id === 'cv' ? handleCreateCv : undefined}
+                  onClick={
+                    doc.id === 'cv' ? handleCreateCv : 
+                    doc.id === 'profile' ? handleCreateProfile : 
+                    doc.id === 'cover_letter' ? handleCreateCoverLetter : undefined
+                  }
                   className={`
                     flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all text-center group relative
                     ${doc.active

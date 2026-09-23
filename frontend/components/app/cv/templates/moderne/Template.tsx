@@ -1,11 +1,11 @@
 import React from 'react';
 import { TemplateProps } from '@/types/cv';
-import { TemplateStyles, CVSection, ItemGroup , RemoteStyles} from '../BaseComponents';
+import { TemplateStyles, CVSection, ItemGroup, RemoteStyles, CustomSectionContent } from '../BaseComponents';
 import { getSafeData, isSectionEnabled, getSectionLabel, getLeftColumnSections, getRightColumnSections } from '../utils';
 
 const ModerneTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBaseUrl }) => {
   const data = getSafeData(rawData);
-  const { profile, summary, experience, education, skills, languages, projects, custom_sections } = data;
+  const { profile, summary, experience, education, certifications, skills, languages, projects, custom_sections } = data;
 
   return (
     <div className="cv-rendering-root cv-container moderne-template">
@@ -41,13 +41,31 @@ const ModerneTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBa
                 <i className="fas fa-map-marker-alt"></i>
               </div>
             )}
+            {profile.website && (
+              <div className="contact-item">
+                <span>{profile.website}</span>
+                <i className="fas fa-globe"></i>
+              </div>
+            )}
+            {profile.linkedin_url && (
+              <div className="contact-item">
+                <span>{profile.linkedin_url.replace(/^https?:\/+(www\.)?/, '')}</span>
+                <i className="fab fa-linkedin"></i>
+              </div>
+            )}
+            {profile.github_url && (
+              <div className="contact-item">
+                <span>{profile.github_url.replace(/^https?:\/+(www\.)?/, '')}</span>
+                <i className="fab fa-github"></i>
+              </div>
+            )}
           </div>
         )}
       </header>
 
-      <div className="main-content" style={{ display: 'flex', flex: 1 }}>
+      <div className="main-content" data-pf-parallel="true" style={{ display: 'flex', flex: 1 }}>
         {/* Sidebar */}
-        <aside className="left-column" style={{ width: '35%', flexShrink: 0 }}>
+        <aside className="left-column" data-pf-splittable="true" style={{ width: '35%', flexShrink: 0 }}>
           {isSectionEnabled(config, 'photo') && (
             <div className="profile-photo-wrap">
               {profile.photo ? (
@@ -94,7 +112,7 @@ const ModerneTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBa
                   </div>
                 );
               case 'identity':
-                return (profile.age || profile.nationality) && (
+                return (profile.age || profile.nationality || (profile as any).marital_status) && (
                   <div key="identity" className="sidebar-section">
                     <h3 className="sidebar-title">{getSectionLabel(config, 'identity', 'Identité')}</h3>
                     {profile.age && (
@@ -109,6 +127,12 @@ const ModerneTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBa
                         <span className="lang-level">{profile.nationality}</span>
                       </div>
                     )}
+                    {(profile as any).marital_status && (
+                      <div className="lang-item">
+                        <span className="lang-name">Statut</span>
+                        <span className="lang-level">{(profile as any).marital_status}</span>
+                      </div>
+                    )}
                   </div>
                 );
               default:
@@ -117,20 +141,11 @@ const ModerneTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBa
                   const custom = custom_sections?.find((c: any) => c.id === customId);
                   if (custom) {
                     return (
-                      <div key={section.type} className="sidebar-section">
-                        <h3 className="sidebar-title">{custom.title}</h3>
-                        <div style={{ fontSize: '0.9em', lineHeight: '1.4' }}>
-                          {custom.type === 'list' ? (
-                            <ul style={{ listStyle: 'none', padding: 0 }}>
-                              {custom.content.split('\n').filter((line: string) => line.trim()).map((item: string, iIdx: number) => (
-                                <li key={iIdx} style={{ marginBottom: '4px' }}>• {item}</li>
-                              ))}
-                            </ul>
-                          ) : (
-                            <div dangerouslySetInnerHTML={{ __html: custom.content.replace(/\n/g, '<br>') }} />
-                          )}
+                      <CVSection key={section ? section.type : 'custom'} title={custom.title} icon={custom.icon || "fas fa-star"}>
+                        <div className="profile-text">
+                          <CustomSectionContent custom={custom} />
                         </div>
-                      </div>
+                      </CVSection>
                     );
                   }
                 }
@@ -140,7 +155,7 @@ const ModerneTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBa
         </aside>
 
         {/* Main Content */}
-        <main className="right-column">
+        <main className="right-column" data-pf-splittable="true">
           {getRightColumnSections(config).map((section: any) => {
             switch (section.type) {
               case 'summary':
@@ -158,7 +173,9 @@ const ModerneTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBa
                         title={exp.title} 
                         subtitle={exp.company} 
                         date={exp.dates}
-                        className="experience-item"
+                      
+                      location={exp.location}
+                      description={exp.description}
                       >
                         {exp.tasks && exp.tasks.length > 0 && (
                           <ul className="exp-tasks">
@@ -180,23 +197,58 @@ const ModerneTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBa
                         title={edu.degree} 
                         subtitle={edu.institution} 
                         date={edu.dates}
+                        location={edu.location}
+                        description={edu.description}
                         className="edu-item"
                       />
                     ))}
                   </CVSection>
                 );
-              case 'projects':
+              case 'certifications':
+                return certifications && certifications.length > 0 && (
+                  <CVSection key="certifications" title={getSectionLabel(config, 'certifications', 'Certifications')} className="section">
+                    {certifications.map((cert: any, idx: number) => (
+                      <ItemGroup 
+                        key={idx} 
+                        title={cert.name} 
+                        subtitle={cert.issuer} 
+                        date={cert.date}
+                        url={cert.url}
+                        className="edu-item"
+                      />
+                    ))}
+                  </CVSection>
+                );
+                          case 'references':
+              return data.references && data.references.length > 0 && (
+                <CVSection key="references" title={getSectionLabel(config, 'references', 'Références')} className="content-section section">
+                  {data.references.map((ref: any, idx: number) => (
+                    <ItemGroup 
+                      key={idx} 
+                      title={ref.name} 
+                      subtitle={ref.company || ref.title} 
+                      className="experience-item"
+                    >
+                      <div className="profile-text" style={{ marginTop: '5px' }}>
+                        {ref.email && <div><i className="fas fa-envelope" style={{marginRight: '5px'}}></i>{ref.email}</div>}
+                        {ref.phone && <div><i className="fas fa-phone" style={{marginRight: '5px'}}></i>{ref.phone}</div>}
+                      </div>
+                    </ItemGroup>
+                  ))}
+                </CVSection>
+              );
+            case 'projects':
                 return projects && projects.length > 0 && (
                   <CVSection key="projects" title={getSectionLabel(config, 'projects', 'Projets')} className="section">
                     {projects.map((project: any, idx: number) => (
                       <ItemGroup 
                         key={idx} 
                         title={project.name} 
-                        subtitle={project.link} 
+                        date={project.dates}
+                        url={project.link} 
+                        description={project.description}
                         className="experience-item"
-                      >
-                        <p className="about-text" style={{ fontSize: '0.95em', marginTop: '5px' }}>{project.description}</p>
-                      </ItemGroup>
+                      />
                     ))}
                   </CVSection>
                 );
@@ -208,15 +260,7 @@ const ModerneTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBa
                     return (
                       <CVSection key={section.type} title={custom.title} className="section">
                         <div className="about-text">
-                          {custom.type === 'list' ? (
-                            <ul className="exp-tasks">
-                              {custom.content.split('\n').filter((line: string) => line.trim()).map((item: string, iIdx: number) => (
-                                <li key={iIdx}>{item}</li>
-                              ))}
-                            </ul>
-                          ) : (
-                            <div dangerouslySetInnerHTML={{ __html: custom.content.replace(/\n/g, '<br>') }} />
-                          )}
+                          <CustomSectionContent custom={custom} />
                         </div>
                       </CVSection>
                     );

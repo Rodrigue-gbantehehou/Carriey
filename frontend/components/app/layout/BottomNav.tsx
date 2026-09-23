@@ -8,7 +8,6 @@ const NAV = [
   { href: '/accueil',      label: 'Accueil',   icon: Home },
   { href: '/profil',       label: 'Profil',    icon: User },
   { href: '/mes-documents', label: 'Documents', icon: FileText },
-  { href: '/mes-pages',    label: 'Pages',     icon: Globe },
 ];
 
 export default function BottomNav() {

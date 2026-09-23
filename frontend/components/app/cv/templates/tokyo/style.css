@@ -31,7 +31,7 @@ body {
 
 .cv-container {
   width: 210mm;
-  min-height: auto;
+  min-height: 297mm;
   background: white;
   margin: 0 auto;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
@@ -203,27 +203,27 @@ body {
   break-inside: avoid;
 }
 
-.exp-header {
+.item-header {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
   margin-bottom: 8px;
 }
 
-.exp-title {
+.item-title {
   font-size: 1.21em;
   font-weight: 700;
   color: var(--color-primary);
 }
 
-.exp-dates {
+.item-date {
   font-size: 0.79em;
   font-weight: 700;
   color: #94A3B8;
   text-transform: uppercase;
 }
 
-.exp-company {
+.item-subtitle {
   color: var(--color-accent);
   font-weight: 600;
   font-size: 0.93em;
@@ -278,6 +278,28 @@ body {
 .edu-dates {
   color: #94A3B8;
   font-weight: 500;
+}
+
+/* Languages */
+.language-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  break-inside: avoid;
+}
+
+.lang-name {
+  font-weight: 600;
+  color: var(--color-primary);
+  font-size: 1em;
+}
+
+.lang-level {
+  font-size: 0.85em;
+  color: #94A3B8;
+  font-weight: 600;
+  text-transform: uppercase;
 }
 
 @media print {

@@ -8,13 +8,14 @@ import EducationList from '@/components/app/profile/EducationList';
 import SkillsList from '@/components/app/profile/SkillsList';
 import ProjectsList from '@/components/app/profile/ProjectsList';
 import { LanguagesList, CertificationsList } from '@/components/app/profile/ExtrasLists';
+import { CustomSectionsList } from '@/components/app/profile/CustomSectionsList';
 import BottomSheet from '@/components/app/shared/BottomSheet';
 import Link from 'next/link';
 import { getPhotoUrl } from '@/lib/photo-url';
 
 import {
   User, FileText, Briefcase, GraduationCap, Wrench,
-  FolderOpen, Award, Globe, Eye, Pencil, Camera, MapPin, Mail, Phone, Link as LinkIcon
+  FolderOpen, Award, Globe, Eye, Pencil, Camera, MapPin, Mail, Phone, Link as LinkIcon, List
 } from 'lucide-react';
 
 const inputClass = "block w-full rounded-xl border border-gray-200 bg-white py-3 px-4 text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none text-sm transition-all";
@@ -119,7 +120,7 @@ export default function ProfilPage() {
     try {
       const formData = new FormData();
       formData.append('file', file);
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'}/profile/me/photo`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || '/api/v1'}/profile/me/photo`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${session.user.accessToken}` },
         body: formData,
@@ -265,6 +266,12 @@ export default function ProfilPage() {
       <section>
         <SectionTitle icon={<Globe className="w-4 h-4" />} title="Langues" />
         <LanguagesList />
+      </section>
+
+      {/* 9. Custom Sections */}
+      <section>
+        <SectionTitle icon={<List className="w-4 h-4" />} title="Sections Personnalisées" />
+        <CustomSectionsList />
       </section>
 
 

@@ -1,15 +1,13 @@
 from pydantic import BaseModel
-from typing import Optional, Dict, Any, Literal
+from typing import Optional, Dict, Any
 from datetime import datetime
-
-DocTypeEnum = Literal["cv", "cover_letter"]
 
 
 class ResumeBase(BaseModel):
     title: str
     template_id: Optional[str] = None
     content: Dict[str, Any]
-    doc_type: DocTypeEnum = "cv"
+    doc_type: str = "cv"
     linked_doc_id: Optional[str] = None
 
 
@@ -21,7 +19,7 @@ class ResumeUpdate(BaseModel):
     title: Optional[str] = None
     content: Optional[Dict[str, Any]] = None
     status: Optional[str] = None
-    doc_type: Optional[DocTypeEnum] = None
+    doc_type: Optional[str] = None
     linked_doc_id: Optional[str] = None
 
 
@@ -29,6 +27,7 @@ class ResumeOut(ResumeBase):
     id: str
     user_id: str
     status: str
+
     created_at: datetime
     updated_at: Optional[datetime] = None
 

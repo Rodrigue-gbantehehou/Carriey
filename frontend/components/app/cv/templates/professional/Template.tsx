@@ -1,12 +1,12 @@
 
 import React from 'react';
 import { TemplateProps } from '@/types/cv';
-import { TemplateStyles, CVSection, ItemGroup, SkillBar , RemoteStyles} from '../BaseComponents';
+import { TemplateStyles, CVSection, ItemGroup, SkillBar, RemoteStyles, CustomSectionContent } from '../BaseComponents';
 import { getSafeData, isSectionEnabled, getSectionLabel, getLeftColumnSections, getRightColumnSections } from '../utils';
 
 const ProfessionalTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBaseUrl }) => {
   const data = getSafeData(rawData);
-  const { profile, summary, experience, education, skills, languages, projects, custom_sections } = data;
+  const { profile, summary, experience, education, certifications, skills, languages, projects, custom_sections } = data;
   
   return (
     <div className="cv-rendering-root cv-container professional-template">
@@ -21,9 +21,9 @@ const ProfessionalTemplate: React.FC<TemplateProps> = ({ data: rawData, config, 
         )}
       </header>
 
-      <div className="main-layout" style={{ display: 'flex', flex: 1, width: '100%' }}>
+      <div className="main-layout" data-pf-parallel="true" style={{ display: 'flex', flex: 1, width: '100%' }}>
         {/* Sidebar */}
-        <aside className="left-column" style={{ width: '32%', flexShrink: 0 }}>
+        <aside className="left-column" data-pf-splittable="true" style={{ width: '32%', flexShrink: 0 }}>
           {isSectionEnabled(config, 'photo') && (
             <div className="profile-photo-wrap">
               {profile.photo ? (
@@ -45,7 +45,10 @@ const ProfessionalTemplate: React.FC<TemplateProps> = ({ data: rawData, config, 
                     <div className="contact-list">
                       {profile.phone && <div className="contact-item"><i className="fas fa-phone"></i><span>{profile.phone}</span></div>}
                       {profile.email && <div className="contact-item"><i className="fas fa-envelope"></i><span>{profile.email}</span></div>}
+                      {profile.website && <div className="contact-item"><i className="fas fa-globe"></i><span>{profile.website}</span></div>}
                       {profile.location && <div className="contact-item"><i className="fas fa-map-marker-alt"></i><span>{profile.location}</span></div>}
+                      {profile.linkedin_url && <div className="contact-item"><i className="fab fa-linkedin"></i><span>{profile.linkedin_url.replace(/^https?:\/+(www\.)?/, '')}</span></div>}
+                      {profile.github_url && <div className="contact-item"><i className="fab fa-github"></i><span>{profile.github_url.replace(/^https?:\/+(www\.)?/, '')}</span></div>}
                     </div>
                   </CVSection>
                 );
@@ -64,7 +67,7 @@ const ProfessionalTemplate: React.FC<TemplateProps> = ({ data: rawData, config, 
                   <CVSection key="skills" title={getSectionLabel(config, 'skills', 'Expertise')} className="sidebar-section">
                     <div className="skills-list">
                       {skills.groups.flatMap((g: any) => g.items || []).map((skill: any, sIdx: number) => (
-                        <SkillBar key={sIdx} name={typeof skill === 'string' ? skill : skill.name || ''} level={85} />
+                        <SkillBar key={sIdx} name={typeof skill === 'string' ? skill : skill.name || ''} level={typeof skill === 'object' ? skill.level : undefined} />
                       ))}
                     </div>
                   </CVSection>
@@ -88,17 +91,9 @@ const ProfessionalTemplate: React.FC<TemplateProps> = ({ data: rawData, config, 
                   const custom = custom_sections?.find((c: any) => c.id === customId);
                   if (custom) {
                     return (
-                      <CVSection key={section.type} title={custom.title} className="sidebar-section">
-                        <div style={{ fontSize: '0.9em', lineHeight: 1.4, opacity: 0.9 }}>
-                          {custom.type === 'list' ? (
-                            <ul style={{ listStyle: 'none', padding: 0 }}>
-                              {custom.content.split('\n').filter((line: string) => line.trim()).map((item: string, iIdx: number) => (
-                                <li key={iIdx} style={{ marginBottom: '4px' }}>• {item}</li>
-                              ))}
-                            </ul>
-                          ) : (
-                            <div dangerouslySetInnerHTML={{ __html: custom.content.replace(/\n/g, '<br>') }} />
-                          )}
+                      <CVSection key={section ? section.type : 'custom'} title={custom.title} icon={custom.icon || "fas fa-star"}>
+                        <div className="profile-text">
+                          <CustomSectionContent custom={custom} />
                         </div>
                       </CVSection>
                     );
@@ -110,7 +105,7 @@ const ProfessionalTemplate: React.FC<TemplateProps> = ({ data: rawData, config, 
         </aside>
 
         {/* Main Content */}
-        <main className="right-column" style={{ flex: 1 }}>
+        <main className="right-column" data-pf-splittable="true" style={{ flex: 1 }}>
           {getRightColumnSections(config).map((section: any) => {
             switch (section.type) {
               case 'summary':
@@ -128,7 +123,8 @@ const ProfessionalTemplate: React.FC<TemplateProps> = ({ data: rawData, config, 
                         title={exp.title} 
                         subtitle={exp.company} 
                         date={exp.dates}
-                        className="experience-item"
+                        location={exp.location}
+                        description={exp.description}
                       >
                         {exp.tasks && exp.tasks.length > 0 && (
                           <ul className="exp-tasks">
@@ -148,23 +144,58 @@ const ProfessionalTemplate: React.FC<TemplateProps> = ({ data: rawData, config, 
                         title={edu.degree} 
                         subtitle={edu.institution} 
                         date={edu.dates}
+                        location={edu.location}
+                        description={edu.description}
                         className="education-item"
                       />
                     ))}
                   </CVSection>
                 );
-              case 'projects':
+              case 'certifications':
+                return certifications && certifications.length > 0 && (
+                  <CVSection key="certifications" title={getSectionLabel(config, 'certifications', 'Certifications')} className="content-section">
+                    {certifications.map((cert: any, idx: number) => (
+                      <ItemGroup 
+                        key={idx} 
+                        title={cert.name} 
+                        subtitle={cert.issuer} 
+                        date={cert.date}
+                        url={cert.url}
+                        className="education-item"
+                      />
+                    ))}
+                  </CVSection>
+                );
+                          case 'references':
+              return data.references && data.references.length > 0 && (
+                <CVSection key="references" title={getSectionLabel(config, 'references', 'Références')} className="content-section section">
+                  {data.references.map((ref: any, idx: number) => (
+                    <ItemGroup 
+                      key={idx} 
+                      title={ref.name} 
+                      subtitle={ref.company || ref.title} 
+                      className="experience-item"
+                    >
+                      <div className="profile-text" style={{ marginTop: '5px' }}>
+                        {ref.email && <div><i className="fas fa-envelope" style={{marginRight: '5px'}}></i>{ref.email}</div>}
+                        {ref.phone && <div><i className="fas fa-phone" style={{marginRight: '5px'}}></i>{ref.phone}</div>}
+                      </div>
+                    </ItemGroup>
+                  ))}
+                </CVSection>
+              );
+            case 'projects':
                 return projects && projects.length > 0 && (
                   <CVSection key="projects" title={getSectionLabel(config, 'projects', 'Projets')} className="content-section">
                     {projects.map((project: any, idx: number) => (
                       <ItemGroup 
                         key={idx} 
                         title={project.name} 
-                        subtitle={project.link} 
+                        date={project.dates}
+                        url={project.link} 
+                        description={project.description}
                         className="experience-item"
-                      >
-                        <p className="about-text" style={{ fontSize: '0.95em', marginTop: '5px' }}>{project.description}</p>
-                      </ItemGroup>
+                      />
                     ))}
                   </CVSection>
                 );
@@ -176,13 +207,7 @@ const ProfessionalTemplate: React.FC<TemplateProps> = ({ data: rawData, config, 
                     return (
                       <CVSection key={section.type} title={custom.title} className="content-section">
                         <div className="about-text">
-                          {custom.type === 'list' ? (
-                            <ul className="exp-tasks">
-                              {custom.content.split('\n').filter((line: string) => line.trim()).map((item: string, iIdx: number) => <li key={iIdx}>{item}</li>)}
-                            </ul>
-                          ) : (
-                            <div dangerouslySetInnerHTML={{ __html: custom.content.replace(/\n/g, '<br>') }} />
-                          )}
+                          <CustomSectionContent custom={custom} />
                         </div>
                       </CVSection>
                     );

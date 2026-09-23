@@ -7,11 +7,12 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useRef, Suspense } from 'react';
 import { ArrowLeft, Download, LayoutTemplate, Palette, Check, Settings2, ZoomIn, ZoomOut, X, SlidersHorizontal } from 'lucide-react';
-import { useReactToPrint } from 'react-to-print';
+import { PageFlow, PageNumberPlugin, mmToPx } from 'pageflow-js';
 import ExportModal from '@/components/app/shared/ExportModal';
 import { ThemeThumbnail } from '@/components/app/cv/shared/ThemeThumbnail';
+import DndList from '@/components/app/cv/editor/DndList';
 
-import { CVTemplateRenderer, TEMPLATE_REGISTRY } from '@/components/app/cv/templates';
+import { CVTemplateRenderer, TEMPLATE_REGISTRY, getDefaultSections } from '@/components/app/cv/templates';
 import { THEMES } from '@/config/themes';
 import { API_BASE } from '@/lib/api';
 
@@ -38,14 +39,15 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
 
 
   const cv = cvs.find(c => c.id === params.id);
-  const printRef = useRef<HTMLDivElement>(null);
+  const sourceRef = useRef<HTMLDivElement>(null);
+  const targetRef = useRef<HTMLDivElement>(null);
 
   const { data: session } = useSession();
   const [localLoading, setLocalLoading] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    
+
     // Fetch CV if it's missing from store
     const fetchCv = async () => {
       if (!cv && session?.user?.accessToken) {
@@ -86,12 +88,167 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
     fetchProfile();
   }, [cv, profile, session, params.id]);
 
+  // --- Computed values (safe with null cv) ---
+  const displayName = profile?.first_name || profile?.last_name
+    ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim()
+    : profile?.username || 'Votre Nom';
+
+  const adapterData = cv ? {
+    profile: {
+      name: displayName,
+      title: profile?.title || '',
+      email: profile?.contact_email || '',
+      phone: profile?.contact_phone || '',
+      location: profile?.location || '',
+      website: profile?.website || '',
+      photo: (profile as any)?.photo_url ? require('@/lib/photo-url').getPhotoUrl((profile as any).photo_url) : '',
+    },
+    experience: profile?.experiences
+      ?.filter(exp => !(cv.content?.disabledItems?.experiences || []).includes(exp.id))
+      .map(exp => ({
+        position: exp.title,
+        company: exp.company,
+        location: exp.location,
+        start: exp.start_date,
+        end: exp.current ? 'Présent' : exp.end_date,
+        description: exp.description,
+      })) || [],
+    education: profile?.educations
+      ?.filter(edu => !(cv.content?.disabledItems?.educations || []).includes(edu.id))
+      .map(edu => ({
+        degree: edu.degree,
+        institution: edu.school,
+        location: edu.location,
+        start: edu.start_date,
+        end: edu.end_date,
+        description: edu.description,
+      })) || [],
+    projects: profile?.projects
+      ?.filter(proj => !(cv.content?.disabledItems?.projects || []).includes(proj.id))
+      .map(proj => ({
+        name: proj.name,
+        description: proj.description || '',
+        link: proj.url,
+        dates: proj.start_date ? `${proj.start_date} - ${proj.end_date || 'Présent'}` : undefined,
+      })) || [],
+    skills: {
+      groups: profile?.skills?.length ? [{ items: profile.skills.map(s => s.name) }] : []
+    },
+    summary: profile?.bio || '',
+    languages: profile?.languages
+      ?.filter(lang => !(cv.content?.disabledItems?.languages || []).includes(lang.id))
+      .map(lang => ({
+        name: lang.name,
+        level: lang.level || '',
+      })) || [],
+    certifications: profile?.certifications
+      ?.filter(cert => !(cv.content?.disabledItems?.certifications || []).includes(cert.id))
+      .map(cert => ({
+        name: cert.name,
+        issuer: cert.issuer,
+        date: cert.date,
+        url: cert.url,
+      })) || [],
+    custom_sections: profile?.custom_sections || [],
+  } : null;
+
+  const rawTemplateId = (cv?.template_id || 'classique').toLowerCase();
+  const resolvedTemplateName = TEMPLATE_REGISTRY[rawTemplateId] ? rawTemplateId : 'classique';
+
+  const templateConfig = cv ? {
+    templateName: resolvedTemplateName,
+    sections: (() => {
+      // Si l'utilisateur a sauvegardé un ordre on l'utilise, sinon on prend le défaut
+      let baseSections = cv.config?.sections && cv.config.sections.length > 0 
+        ? cv.config.sections 
+        : getDefaultSections(resolvedTemplateName);
+        
+      const disabledList = cv.content?.disabledSections || [];
+      const isTypeDisabled = (type: string) => {
+        if (type === 'summary') return disabledList.includes('about') || !profile?.bio;
+        if (type === 'experience') return disabledList.includes('experiences');
+        if (type === 'education') return disabledList.includes('educations');
+        return disabledList.includes(type);
+      };
+
+      // Ensure custom sections are included in the array if they are not already there
+      const customSections = (profile?.custom_sections || []).map((cs: any) => ({
+        type: `custom_${cs.id}`,
+        label: cs.title,
+        enabled: !disabledList.includes(`custom_${cs.id}`),
+        column: cs.column || 'right',
+      }));
+
+      // Filter out custom sections that are already in baseSections to prevent duplicates
+      const existingTypes = new Set(baseSections.map((s: any) => s.type));
+      const missingCustomSections = customSections.filter((cs: any) => !existingTypes.has(cs.type));
+
+      return [...baseSections, ...missingCustomSections].map((s: any) => ({
+        ...s,
+        enabled: !isTypeDisabled(s.type)
+      }));
+    })()
+  } : null;
+
+  // --- PageFlow Execution ---
+  useEffect(() => {
+    if (!mounted || localLoading || !sourceRef.current || !targetRef.current) return;
+
+    let isCancelled = false;
+    let fallbackTimeout: ReturnType<typeof setTimeout> | null = null;
+
+    const runPageFlow = async () => {
+      if (isCancelled || !sourceRef.current || !targetRef.current) return;
+
+      try {
+
+        const pf = new PageFlow({
+          pageSize: 'A4',
+          margin: { top: 0, right: 0, bottom: mmToPx(1), left: 0 },
+          atomic: ['.header', '.item-group', '.skill-item', '.about-text', '.meta-item', '.exp-meta', '.exp-header'],
+          keepWithNext: ['.section-title', '.exp-meta', '.exp-header'],
+          pagination: { lookahead: 3, optimizeWhitespace: true },
+          plugins: [
+            new PageNumberPlugin({ position: 'bottom-right' })
+          ]
+        });
+
+        targetRef.current.innerHTML = '';
+        await pf.flow(sourceRef.current, targetRef.current);
+
+      } catch (error) {
+        console.error("PageFlow error:", error);
+      }
+    };
+
+    // Listen for 'pageflow:css-ready' dispatched by <RemoteStyles> when CSS finishes loading
+    const handleCssReady = () => {
+      if (fallbackTimeout) clearTimeout(fallbackTimeout);
+      runPageFlow();
+    };
+
+    sourceRef.current.addEventListener('pageflow:css-ready', handleCssReady);
+
+    // Fallback: run after 2s if RemoteStyles never fires (e.g. template has no remote CSS)
+    fallbackTimeout = setTimeout(() => {
+      runPageFlow();
+    }, 2000);
+
+    return () => {
+      isCancelled = true;
+      sourceRef.current?.removeEventListener('pageflow:css-ready', handleCssReady);
+      if (fallbackTimeout) clearTimeout(fallbackTimeout);
+    };
+  }, [mounted, localLoading, adapterData, templateConfig]);
+
+
+
   const handleExportAction = async (format: string, quality: string) => {
     if (!cv) return;
     if (format === 'pdf') {
       try {
         const { exportPdf } = await import('@/lib/api');
-        
+
         // Mock template object as required by exportPdf
         const templateObj = {
           id: cv.template_id,
@@ -148,88 +305,78 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
     );
   }
 
-  const displayName = profile?.first_name || profile?.last_name 
-    ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() 
-    : profile?.username || 'Votre Nom';
-
-  // --- Adapter Logic (MasterProfile -> Template Data Format) ---
-  const adapterData = {
-    profile: {
-      name: displayName,
-
-      title: profile?.title || '',
-      email: profile?.contact_email || '',
-      phone: profile?.contact_phone || '',
-      location: profile?.location || '',
-      website: profile?.website || '',
-      photo: (profile as any)?.photo_url ? require('@/lib/photo-url').getPhotoUrl((profile as any).photo_url) : '',
-    },
-    experience: profile?.experiences
-      ?.filter(exp => !(cv.content?.disabledItems?.experiences || []).includes(exp.id))
-      .map(exp => ({
-        position: exp.title,
-        company: exp.company,
-        location: exp.location,
-        start: exp.start_date,
-        end: exp.current ? 'Présent' : exp.end_date,
-        description: exp.description,
-      })) || [],
-    education: profile?.educations
-      ?.filter(edu => !(cv.content?.disabledItems?.educations || []).includes(edu.id))
-      .map(edu => ({
-        degree: edu.degree,
-        institution: edu.school,
-        location: edu.location,
-        start: edu.start_date,
-        end: edu.end_date,
-        description: edu.description,
-      })) || [],
-    projects: profile?.projects
-      ?.filter(proj => !(cv.content?.disabledItems?.projects || []).includes(proj.id))
-      .map(proj => ({
-        name: proj.name,
-        description: proj.description || '',
-        link: proj.url,
-        dates: proj.start_date ? `${proj.start_date} - ${proj.end_date || 'Présent'}` : undefined,
-      })) || [],
-    skills: {
-      groups: profile?.skills?.length ? [{ items: profile.skills.map(s => s.name) }] : []
-    },
-    summary: profile?.bio || '',
-    languages: profile?.languages
-      ?.filter(lang => !(cv.content?.disabledItems?.languages || []).includes(lang.id))
-      .map(lang => ({
-        name: lang.name,
-        level: lang.level || '',
-      })) || [],
-    custom_sections: [],
+  const handleSelectTheme = async (themeId: string) => {
+    if (!cv) return;
+    updateCv(cv.id, { template_id: themeId });
+    setShowThemeSelector(false);
+    if (session?.user?.accessToken) {
+      try {
+        const { cvApi } = await import('@/lib/cv-api');
+        await cvApi.updateResume(session.user.accessToken, cv.id, { template_id: themeId });
+      } catch (err) {
+        console.error('Erreur lors de la sauvegarde du thème', err);
+      }
+    }
   };
 
-  // Resolve the actual template slug (fallback to classique if the UUID isn't in registry)
-  const resolvedTemplateName = TEMPLATE_REGISTRY[cv.template_id] ? cv.template_id : 'classique';
+  const handleMoveSection = async (fromIndex: number, toIndex: number) => {
+    if (!templateConfig || !cv) return;
+    const newSections = [...templateConfig.sections];
+    const [moved] = newSections.splice(fromIndex, 1);
+    newSections.splice(toIndex, 0, moved);
 
-  // Config with explicit section settings & columns for sidebar components
-  const templateConfig = {
-    templateName: resolvedTemplateName,
-    sections: [
-      { type: 'profile', enabled: true, column: 'left' },
-      { type: 'contact', enabled: true, column: 'left' },
-      { type: 'skills', enabled: !(cv.content?.disabledSections || []).includes('skills'), column: 'left' },
-      { type: 'languages', enabled: !(cv.content?.disabledSections || []).includes('languages'), column: 'left' },
-      { type: 'summary', enabled: !!profile?.bio && !(cv.content?.disabledSections || []).includes('about'), column: 'right' },
-      { type: 'experience', enabled: !(cv.content?.disabledSections || []).includes('experiences'), column: 'right' },
-      { type: 'education', enabled: !(cv.content?.disabledSections || []).includes('educations'), column: 'right' },
-      { type: 'projects', enabled: !(cv.content?.disabledSections || []).includes('projects'), column: 'right' },
-    ]
+    // Save locally
+    updateCv(cv.id, { config: { ...cv.config, sections: newSections } });
+
+    // Save to DB
+    if (session?.user?.accessToken) {
+      try {
+        const { cvApi } = await import('@/lib/cv-api');
+        // On ne sauvegarde que l'ordre des types et colonnes pour ne pas polluer avec d'autres états transitoires
+        const safeSectionsToSave = newSections.map(s => ({
+            type: s.type,
+            column: s.column,
+            enabled: s.enabled
+        }));
+        await cvApi.updateResume(session.user.accessToken, cv.id, { config: { ...cv.config, sections: safeSectionsToSave } });
+      } catch (err) {
+        console.error('Erreur lors de la sauvegarde de l\'ordre des sections', err);
+      }
+    }
   };
+
+  const getFrenchLabel = (type: string, label?: string) => {
+    if (label) return label;
+    const labels: Record<string, string> = {
+      profile: 'Profil',
+      photo: 'Photo',
+      identity: 'Identité',
+      contact: 'Contact',
+      skills: 'Compétences',
+      languages: 'Langues',
+      interests: 'Centres d\'intérêt',
+      summary: 'Résumé',
+      experience: 'Expériences',
+      education: 'Formations',
+      certifications: 'Certifications',
+      projects: 'Projets',
+      references: 'Références'
+    };
+    return labels[type] || type;
+  };
+
+  const dndSections = templateConfig?.sections.map(s => ({
+    label: getFrenchLabel(s.type, s.label),
+    type: s.type
+  })) || [];
 
   const renderSidebarContent = () => (
     <>
       {showThemeSelector ? (
         <div className="flex flex-col">
           <div className="flex items-center gap-3 mb-4">
-            <button 
-              onClick={() => setShowThemeSelector(false)} 
+            <button
+              onClick={() => setShowThemeSelector(false)}
               className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -240,8 +387,8 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
             {THEMES.map(t => (
               <button
                 key={t.id}
-                onClick={() => { updateCv(cv.id, { template_id: t.id }); setShowThemeSelector(false); }}
-                className={`relative aspect-[1/1.4] rounded-xl border-2 overflow-hidden flex flex-col transition-all bg-white group ${cv.template_id === t.id ? 'border-indigo-600 shadow-md shadow-indigo-100' : 'border-gray-100 hover:border-indigo-300'}`}
+                onClick={() => handleSelectTheme(t.id)}
+                className={`relative aspect-[1/1.4] rounded-xl border-2 overflow-hidden flex flex-col transition-all bg-white group ${resolvedTemplateName === t.id.toLowerCase() ? 'border-indigo-600 shadow-md shadow-indigo-100' : 'border-gray-100 hover:border-indigo-300'}`}
               >
                 <div className="flex-1 p-2 flex items-center justify-center border-b border-gray-50 bg-gray-50/50">
                   <ThemeThumbnail templateId={t.id} />
@@ -262,13 +409,13 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
         <div className="flex flex-col">
           {/* Tabs */}
           <div className="flex p-1 bg-gray-100/80 rounded-xl mb-6">
-            <button 
+            <button
               onClick={() => setActiveTab('design')}
               className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium rounded-lg transition-all ${activeTab === 'design' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
             >
               <Palette className="w-4 h-4" /> Design
             </button>
-            <button 
+            <button
               onClick={() => setActiveTab('content')}
               className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium rounded-lg transition-all ${activeTab === 'content' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
             >
@@ -311,17 +458,28 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
                 </div>
               </div>
             ) : (
-              <div className="text-center py-8">
-                <div className="w-12 h-12 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-4 text-indigo-500">
-                  <Settings2 className="w-6 h-6" />
+              <div className="space-y-6">
+                {/* Ordre des Sections */}
+                <div>
+                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Ordre des Sections</h3>
+                  <p className="text-xs text-gray-500 mb-3">
+                    Glissez-déposez pour réorganiser. Certains templates à 2 colonnes séparent automatiquement les sections.
+                  </p>
+                  <DndList 
+                    sections={dndSections} 
+                    onMove={handleMoveSection} 
+                  />
                 </div>
-                <h3 className="text-sm font-bold text-gray-900 mb-2">Sélection du contenu</h3>
-                <p className="text-sm text-gray-500 mb-6">
-                  Dans la V2, vous pourrez gérer quelles expériences s'affichent.
-                </p>
-                <button onClick={() => router.push('/profil')} className="text-sm font-semibold text-indigo-600 hover:underline">
-                  Aller modifier le Profil
-                </button>
+
+                <div className="pt-6 border-t border-gray-100">
+                  <h3 className="text-sm font-bold text-gray-900 mb-2">Sélection du contenu</h3>
+                  <p className="text-sm text-gray-500 mb-6">
+                    Dans la V2, vous pourrez gérer quelles expériences spécifiques s'affichent.
+                  </p>
+                  <button onClick={() => router.push('/profil')} className="text-sm font-semibold text-indigo-600 hover:underline">
+                    Aller modifier le Profil
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -331,8 +489,8 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
   );
 
   return (
-    <div className="py-6 sm:py-10 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto font-sans">
-      
+    <div className="py-6 sm:py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto font-sans">
+
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
@@ -343,8 +501,8 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
             <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center">
               <LayoutTemplate className="w-5 h-5 text-indigo-600" />
             </div>
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={cv.title}
               onChange={(e) => updateCv(cv.id, { title: e.target.value })}
               className="text-2xl font-bold text-gray-900 bg-transparent focus:outline-none focus:ring-2 focus:ring-indigo-100 rounded px-2 py-1 w-full max-w-xs sm:max-w-md hover:bg-gray-50 transition-colors placeholder:text-gray-400"
@@ -353,13 +511,13 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
           </div>
         </div>
         <div className="flex items-center gap-3 mt-2 md:mt-0">
-          <button 
+          <button
             onClick={() => setIsSettingsOpen(true)}
             className="lg:hidden inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-full font-semibold text-sm hover:bg-gray-200 transition-colors"
           >
             <SlidersHorizontal className="w-4 h-4" /> Options
           </button>
-          <button 
+          <button
             onClick={() => setIsExportModalOpen(true)}
             className="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white rounded-full font-semibold text-sm hover:bg-indigo-700 transition-all shadow-md shadow-indigo-600/20 active:scale-95"
           >
@@ -383,12 +541,12 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
 
         {/* Canvas Area */}
         <div className="lg:col-span-8">
-          <div className="bg-[#f8f9fa] bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] rounded-3xl p-4 sm:p-8 flex flex-col items-center min-h-[600px] border border-gray-200 relative overflow-auto custom-scrollbar">
-            
+          <div className="rounded-3xl p-4 sm:p-8 flex flex-col items-center min-h-[600px] border border-gray-200 relative overflow-auto custom-scrollbar" style={{ background: 'radial-gradient(circle, #d1d5db 1px, #f8f9fa 1px)', backgroundSize: '20px 20px' }}>
+
             {/* Zoom Controls */}
             <div className="absolute top-4 right-4 z-10 bg-white/90 backdrop-blur-sm rounded-full shadow-sm border border-gray-200 flex items-center p-1">
-              <button 
-                onClick={() => setScale(s => Math.max(0.3, s - 0.1))} 
+              <button
+                onClick={() => setScale(s => Math.max(0.3, s - 0.1))}
                 className="p-1.5 hover:bg-gray-100 rounded-full transition-colors focus:outline-none text-gray-500"
               >
                 <ZoomOut className="w-4 h-4" />
@@ -396,8 +554,8 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
               <span className="text-xs font-bold text-gray-900 w-12 text-center cursor-default select-none">
                 {Math.round(scale * 100)}%
               </span>
-              <button 
-                onClick={() => setScale(s => Math.min(2, s + 0.1))} 
+              <button
+                onClick={() => setScale(s => Math.min(2, s + 0.1))}
                 className="p-1.5 hover:bg-gray-100 rounded-full transition-colors focus:outline-none text-gray-500"
               >
                 <ZoomIn className="w-4 h-4" />
@@ -405,35 +563,43 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
             </div>
 
             {/* Document Container */}
-            <div 
+            <div
               className="relative mt-8 mb-8"
               style={{
                 width: `calc(210mm * ${scale})`,
-                height: `calc(297mm * ${scale})`,
+                transformOrigin: 'top center',
               }}
             >
-              <div 
-                className="bg-white absolute top-0 left-0 origin-top-left transition-transform duration-200 border border-gray-100"
-                style={{ 
-                  width: '210mm', 
-                  minHeight: '297mm',
+              <div
+                className="origin-top-left transition-transform duration-200"
+                style={{
+                  width: '210mm',
                   transform: `scale(${scale})`,
-                  boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05)'
                 }}
               >
-                <div ref={printRef} className="print-container h-full">
+
+                {/* SOURCE: Hidden off-screen so PageFlow can measure it */}
+                <div
+                  ref={sourceRef}
+                  className="print-container absolute opacity-0 pointer-events-none"
+                  style={{ width: '210mm', left: '-9999px', top: 0 }}
+                >
                   <Suspense fallback={<div className="h-full w-full flex items-center justify-center text-gray-500 font-semibold bg-white">Chargement du modèle...</div>}>
-                    <CVTemplateRenderer 
+                    <CVTemplateRenderer
                       templateName={cv.template_id}
-                      data={adapterData as any} 
-                      config={templateConfig as any} 
-                      apiBaseUrl={API_BASE} 
+                      data={adapterData as any}
+                      config={templateConfig as any}
+                      apiBaseUrl={API_BASE}
                     />
                   </Suspense>
                 </div>
+
+                {/* TARGET: Where PageFlow injects the generated pages */}
+                <div ref={targetRef} className="pageflow-output" />
+
               </div>
             </div>
-            
+
           </div>
         </div>
       </div>
@@ -441,11 +607,11 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
       {/* Mobile Settings Bottom Sheet */}
       {isSettingsOpen && (
         <>
-          <div 
+          <div
             onClick={() => setIsSettingsOpen(false)}
             className="lg:hidden fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-40 transition-opacity"
           />
-          <div 
+          <div
             className={`lg:hidden fixed inset-x-0 bottom-0 max-h-[85vh] bg-white rounded-t-3xl shadow-2xl z-50 transform transition-transform duration-300 ease-out flex flex-col ${isSettingsOpen ? 'translate-y-0' : 'translate-y-full'}`}
           >
             <div className="flex justify-center py-3 bg-white rounded-t-3xl">
@@ -455,8 +621,8 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
               <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
                 <Settings2 className="w-5 h-5 text-indigo-600" /> Personnalisation
               </h2>
-              <button 
-                onClick={() => setIsSettingsOpen(false)} 
+              <button
+                onClick={() => setIsSettingsOpen(false)}
                 className="p-2 hover:bg-gray-100 rounded-full text-gray-500 transition-colors"
               >
                 <X className="w-5 h-5" />
@@ -469,14 +635,15 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
         </>
       )}
 
-      <ExportModal 
-        isOpen={isExportModalOpen} 
-        onClose={() => setIsExportModalOpen(false)} 
-        cv={cv} 
-        onExport={handleExportAction} 
+      <ExportModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        cv={cv}
+        onExport={handleExportAction}
       />
-      
-      <style dangerouslySetInnerHTML={{__html: `
+
+      <style dangerouslySetInnerHTML={{
+        __html: `
         @media print {
           body * {
             visibility: hidden;

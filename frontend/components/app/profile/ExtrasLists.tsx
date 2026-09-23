@@ -20,7 +20,7 @@ export function LanguagesList() {
 
   const handleAdd = () => {
     if (!form.name || !form.level) return;
-    addLanguage({ id: crypto.randomUUID(), name: form.name, level: form.level });
+    addLanguage({ name: form.name, level: form.level } as any);
     setForm({});
     setIsAdding(false);
   };
@@ -93,7 +93,7 @@ export function CertificationsList() {
   const handleAdd = () => {
     if (!form.name || !form.issuer) return;
     const fmtDate = (d?: string) => (d && d.length === 7) ? `${d}-01` : (d || undefined);
-    addCertification({ id: crypto.randomUUID(), name: form.name, issuer: form.issuer, date: fmtDate(form.date), url: form.url });
+    addCertification({ name: form.name, issuer: form.issuer, date: fmtDate(form.date), url: form.url } as any);
     setForm({});
     setIsAdding(false);
   };

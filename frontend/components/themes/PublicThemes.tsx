@@ -103,12 +103,69 @@ export function MinimalTheme({ data, accent }: { data: PublicPageData; accent: s
           </section>
         )}
 
-        {profile.languages?.length > 0 && (
+        {profile.languages && profile.languages.length > 0 && (
           <section>
             <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Langues</h2>
             <p className="text-sm text-gray-700">{profile.languages.map(l => l.level ? `${l.name} (${l.level})` : l.name).join(' · ')}</p>
           </section>
         )}
+      
+        {profile.certifications && profile.certifications.length > 0 && (
+          <section>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">Certifications</h2>
+            <div className="space-y-4">
+              {profile.certifications.map(c => (
+                <div key={c.id} className="border-l-2 pl-4 border-gray-200">
+                  <p className="font-bold">{c.name}</p>
+                  <p className="text-sm text-gray-600">{c.issuer}</p>
+                  <p className="text-xs text-gray-400">{fmtDate(c.date)}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {profile.references && profile.references.length > 0 && (
+          <section>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">Références</h2>
+            <div className="space-y-4">
+              {profile.references.map((r: any) => (
+                <div key={r.id || r.name} className="border-l-2 pl-4 border-gray-200">
+                  <p className="font-bold">{r.name}</p>
+                  <p className="text-sm text-gray-600">{r.company || r.title}</p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    {r.email && <span className="mr-3">{r.email}</span>}
+                    {r.phone && <span>{r.phone}</span>}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {profile.custom_sections && profile.custom_sections.length > 0 && profile.custom_sections.map((cs: any) => (
+          <section key={cs.id}>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">{cs.title}</h2>
+            {cs.type === 'list' || cs.type === 'simple_list' ? (
+              <ul className="list-disc list-inside space-y-1 text-sm text-gray-700">
+                {(cs.content || '').split('\n').filter((l: string) => l.trim()).map((l: string, i: number) => <li key={i}>{l}</li>)}
+              </ul>
+            ) : cs.type === 'detailed_list' ? (
+              <div className="space-y-4">
+                {cs.items?.map((item: any, i: number) => (
+                  <div key={i} className="border-l-2 pl-4 border-gray-200">
+                    <p className="font-bold">{item.title}</p>
+                    {item.subtitle && <p className="text-sm text-gray-600">{item.subtitle}</p>}
+                    {item.date && <p className="text-xs text-gray-400">{item.date}</p>}
+                    {item.description && <p className="text-sm text-gray-600 mt-2">{item.description}</p>}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-sm text-gray-700 leading-relaxed" dangerouslySetInnerHTML={{ __html: (cs.content || '').replace(/\n/g, '<br>') }} />
+            )}
+          </section>
+        ))}
       </div>
     </div>
   );
@@ -191,7 +248,7 @@ export function ModernTheme({ data, accent }: { data: PublicPageData; accent: st
               </div>
             </div>
           )}
-          {profile.languages?.length > 0 && (
+          {profile.languages && profile.languages.length > 0 && (
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
               <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2"><Globe className="w-4 h-4" />Langues</h2>
               <div className="space-y-2">
@@ -239,7 +296,7 @@ export function ModernTheme({ data, accent }: { data: PublicPageData; accent: st
           </div>
         )}
 
-        {profile.certifications?.length > 0 && (
+        {profile.certifications && profile.certifications.length > 0 && (
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
             <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2"><Award className="w-4 h-4" />Certifications</h2>
             <div className="space-y-3">
@@ -358,7 +415,7 @@ export function BoldTheme({ data, accent }: { data: PublicPageData; accent: stri
                 ))}
               </section>
             )}
-            {profile.languages?.length > 0 && (
+            {profile.languages && profile.languages.length > 0 && (
               <section>
                 <h2 className="text-xs font-black uppercase tracking-widest mb-3" style={{ color: accent }}>// Langues</h2>
                 {profile.languages.map(l => (
@@ -450,7 +507,7 @@ export function ElegantTheme({ data, accent }: { data: PublicPageData; accent: s
           </section>
         )}
 
-        {profile.languages?.length > 0 && (
+        {profile.languages && profile.languages.length > 0 && (
           <section className="text-center">
             <h2 className="text-xs uppercase tracking-[0.3em] text-gray-400 mb-3">— Langues —</h2>
             <p className="text-gray-700">{profile.languages.map(l => l.level ? `${l.name} (${l.level})` : l.name).join('  ·  ')}</p>

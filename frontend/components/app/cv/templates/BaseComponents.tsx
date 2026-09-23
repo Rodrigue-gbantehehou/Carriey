@@ -69,13 +69,22 @@ export const CVSection = ({ title, icon, children, className = "" }: { title?: s
   </section>
 );
 
-export const ItemGroup = ({ title, subtitle, date, children, className = "" }: { title: string; subtitle?: string; date?: string; children?: React.ReactNode; className?: string }) => (
+export const ItemGroup = ({ title, subtitle, date, location, url, description, children, className = "" }: { title: string; subtitle?: string; date?: string; location?: string; url?: string; description?: string; children?: React.ReactNode; className?: string }) => (
   <div className={`item-group ${className}`}>
     <div className="item-header">
       <h4 className="item-title">{title}</h4>
       {date && <span className="item-date">{date}</span>}
     </div>
-    {subtitle && <div className="item-subtitle">{subtitle}</div>}
+    {(subtitle || location || url) && (
+      <div className="item-subtitle">
+        {subtitle && <span>{subtitle}</span>}
+        {subtitle && (location || url) && <span style={{margin: '0 8px'}}>|</span>}
+        {location && <span className="item-location"><i className="fas fa-map-marker-alt" style={{marginRight: '4px'}}></i>{location}</span>}
+        {location && url && <span style={{margin: '0 8px'}}>|</span>}
+        {url && <a href={url} target="_blank" rel="noopener noreferrer" className="item-url" style={{color: 'inherit', textDecoration: 'none'}}><i className="fas fa-link" style={{marginRight: '4px'}}></i>{url.replace(/^https?:\/+(www\.)?/, '')}</a>}
+      </div>
+    )}
+    {description && <div className="item-description" style={{marginTop: '6px', whiteSpace: 'pre-wrap'}}>{description}</div>}
     {children && <div className="item-body">{children}</div>}
   </div>
 );
@@ -84,30 +93,86 @@ export const SkillTag = ({ children }: { children: React.ReactNode }) => (
   <span className="skill-tag">{children}</span>
 );
 
+export const CustomSectionContent = ({ custom }: { custom: any }) => {
+  if (!custom) return null;
+  
+  if (custom.type === 'detailed_list' && custom.items) {
+    return (
+      <div className="experiences-list">
+        {custom.items.map((item: any, idx: number) => (
+          <div key={idx} className="experience-item" style={{ marginBottom: '15px' }}>
+            <div className="exp-meta" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#666', marginBottom: '4px' }}>
+              {item.subtitle && <span className="exp-company">{item.subtitle}</span>}
+              {item.date && <span className="exp-dates">{item.date}</span>}
+            </div>
+            <div className="exp-header" style={{ fontWeight: 'bold', fontSize: '14px', marginBottom: '4px' }}>
+              <div className="exp-title">{item.title}</div>
+            </div>
+            {item.description && (
+              <div className="profile-text" style={{ padding: 0, marginTop: '2px', background: 'transparent', borderLeft: 'none', whiteSpace: 'pre-wrap' }}>
+                {item.description}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  }
+  
+  const content = custom.content || '';
+  if (custom.type === 'list' || custom.type === 'simple_list') {
+    const items = custom.items ? custom.items.map((i: any) => i.title) : content.split('\n').filter((line: string) => line.trim());
+    return (
+      <ul className="item-tasks exp-tasks skills-list" style={{ paddingLeft: '20px', listStyleType: 'disc' }}>
+        {items.map((item: string, iIdx: number) => (
+          <li key={iIdx}>{item}</li>
+        ))}
+      </ul>
+    );
+  }
+
+  return <div dangerouslySetInnerHTML={{ __html: content.replace(/\n/g, '<br>') }} />;
+};
+
+
+// Cache mémoire — l'import n'est fait qu'une seule fois par slug
+const CSS_CACHE: Record<string, string> = {};
+
 /**
- * Loads the CSS from the backend and injects it into a style tag.
+ * RemoteStyles: charge le CSS du template via l'API interne /api/template-css/[slug].
+ * Cette API lit directement les fichiers sources — aucune copie dans public/,
+ * aucune liste à maintenir. Ajouter un template = créer son dossier + style.css.
  */
 export const RemoteStyles = ({ templateName, apiBaseUrl }: { templateName: string; apiBaseUrl: string }) => {
+  const ref = React.useRef<HTMLSpanElement>(null);
   const [css, setCss] = React.useState<string>('');
-  const slug = templateName.toLowerCase();
+  const slug = (templateName || 'classique').toLowerCase().replace(/[^a-z0-9_-]/g, '');
 
   React.useEffect(() => {
-    const fetchCss = async () => {
-      try {
-        const cacheBuster = new Date().getTime();
-        // Fetch directly from the Next.js public directory
-        const response = await fetch(`/template-assets/${slug}/style.css?v=${cacheBuster}`);
-        if (response.ok) {
-          const text = await response.text();
-          setCss(text);
-        }
-      } catch (e) {
-        console.warn(`Failed to fetch styles for ${slug}:`, e);
-      }
-    };
-    fetchCss();
-  }, [slug, apiBaseUrl]);
+    if (CSS_CACHE[slug]) {
+      setCss(CSS_CACHE[slug]);
+      ref.current?.dispatchEvent(new CustomEvent('pageflow:css-ready', { bubbles: true }));
+      return;
+    }
 
-  if (!css) return null;
-  return <style dangerouslySetInnerHTML={{ __html: css }} />;
+    fetch(`/api/template-css/${slug}`)
+      .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.text();
+      })
+      .then(text => {
+        CSS_CACHE[slug] = text;
+        setCss(text);
+      })
+      .catch(e => console.warn(`[RemoteStyles] CSS introuvable pour "${slug}":`, e))
+      .finally(() => {
+        ref.current?.dispatchEvent(new CustomEvent('pageflow:css-ready', { bubbles: true }));
+      });
+  }, [slug]);
+
+  return (
+    <span ref={ref} style={{ display: 'none' }}>
+      {css && <style dangerouslySetInnerHTML={{ __html: css }} />}
+    </span>
+  );
 };

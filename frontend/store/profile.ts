@@ -52,6 +52,13 @@ type ProfileState = {
   // Documents
   addDocument: (doc: ProfileDocument) => Promise<void>;
   removeDocument: (id: string) => Promise<void>;
+
+  // Custom Sections
+  addCustomSection: (section: any) => Promise<void>;
+  removeCustomSection: (id: string) => Promise<void>;
+  addCustomSectionItem: (sectionId: string, item: any) => Promise<void>;
+  removeCustomSectionItem: (sectionId: string, itemId: string) => Promise<void>;
+  updateCustomSectionItem: (sectionId: string, itemId: string, data: any) => Promise<void>;
 };
 
 export const useProfileStore = create<ProfileState>((set, get) => ({
@@ -264,4 +271,90 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       set((state) => ({ profile: state.profile ? { ...state.profile, documents: (state.profile.documents || []).filter((d) => d.id !== id) } : null }));
     } catch (e) { console.error(e); }
   },
+
+  // Custom Sections
+  addCustomSection: async (section) => {
+    const { token, profile } = get();
+    if (!token || !profile) return;
+    try {
+      const added = await profileApi.addSubEntity(token, 'custom_sections', section);
+      set((state) => ({ profile: state.profile ? { ...state.profile, custom_sections: [...(state.profile.custom_sections || []), added] } : null }));
+    } catch (e) { console.error(e); }
+  },
+  removeCustomSection: async (id) => {
+    const { token, profile } = get();
+    if (!token || !profile) return;
+    try {
+      await profileApi.deleteSubEntity(token, 'custom_sections', id);
+      set((state) => ({ profile: state.profile ? { ...state.profile, custom_sections: (state.profile.custom_sections || []).filter((c: any) => c.id !== id) } : null }));
+    } catch (e) { console.error(e); }
+  },
+  addCustomSectionItem: async (sectionId, item) => {
+    const { token, profile } = get();
+    if (!token || !profile) return;
+    try {
+      const res = await fetch(`http://localhost:8000/api/v1/profile/me/custom_sections/${sectionId}/items`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify(item)
+      });
+      if (!res.ok) throw new Error("Failed to add custom section item");
+      const addedItem = await res.json();
+      set((state) => {
+        if (!state.profile) return { profile: null };
+        const updatedSections = (state.profile.custom_sections || []).map((cs: any) => {
+          if (cs.id === sectionId) {
+            return { ...cs, items: [...(cs.items || []), addedItem] };
+          }
+          return cs;
+        });
+        return { profile: { ...state.profile, custom_sections: updatedSections } };
+      });
+    } catch (e) { console.error(e); }
+  },
+  removeCustomSectionItem: async (sectionId, itemId) => {
+    const { token, profile } = get();
+    if (!token || !profile) return;
+    try {
+      const res = await fetch(`http://localhost:8000/api/v1/profile/me/custom_sections/${sectionId}/items/${itemId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error("Failed to delete custom section item");
+      set((state) => {
+        if (!state.profile) return { profile: null };
+        const updatedSections = (state.profile.custom_sections || []).map((cs: any) => {
+          if (cs.id === sectionId) {
+            return { ...cs, items: (cs.items || []).filter((i: any) => i.id !== itemId) };
+          }
+          return cs;
+        });
+        return { profile: { ...state.profile, custom_sections: updatedSections } };
+      });
+    } catch (e) { console.error(e); }
+  },
+  updateCustomSectionItem: async (sectionId, itemId, data) => {
+    const { token, profile } = get();
+    if (!token || !profile) return;
+    try {
+      const res = await fetch(`http://localhost:8000/api/v1/profile/me/custom_sections/${sectionId}/items/${itemId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify(data)
+      });
+      if (!res.ok) throw new Error("Failed to update custom section item");
+      const updatedItem = await res.json();
+      set((state) => {
+        if (!state.profile) return { profile: null };
+        const updatedSections = (state.profile.custom_sections || []).map((cs: any) => {
+          if (cs.id === sectionId) {
+            return { ...cs, items: (cs.items || []).map((i: any) => i.id === itemId ? updatedItem : i) };
+          }
+          return cs;
+        });
+        return { profile: { ...state.profile, custom_sections: updatedSections } };
+      });
+    } catch (e) { console.error(e); }
+  },
+
 }));

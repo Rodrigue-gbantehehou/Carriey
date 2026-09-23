@@ -7,7 +7,7 @@ import os
 
 from app.db.session import get_db
 from app.models.user import User
-from app.models.profile import MasterProfile, Experience, Education, Skill, Project, Certification, Language, Achievement, Link, Document
+from app.models.profile import MasterProfile, Experience, Education, Skill, Project, Certification, Language, Achievement, Link, Document, CustomSection, CustomSectionItem
 from app.schemas.profile import (
     MasterProfile as MasterProfileOut, MasterProfileUpdate, MasterProfileCreate,
     Experience as ExperienceOut, ExperienceCreate,
@@ -18,7 +18,9 @@ from app.schemas.profile import (
     Language as LanguageOut, LanguageCreate,
     Achievement as AchievementOut, AchievementCreate,
     Link as LinkOut, LinkCreate,
-    Document as DocumentOut, DocumentCreate
+    Document as DocumentOut, DocumentCreate,
+    CustomSectionOut, CustomSectionCreate,
+    CustomSectionItemOut, CustomSectionItemCreate,
 )
 from app.crud.crud_profile import profile as crud_profile
 from app.api.dependencies import get_current_active_user
@@ -201,3 +203,76 @@ register_sub_entity_routes(router, "languages", Language, LanguageCreate, Langua
 register_sub_entity_routes(router, "achievements", Achievement, AchievementCreate, AchievementOut, "Réalisation")
 register_sub_entity_routes(router, "links", Link, LinkCreate, LinkOut, "Lien")
 register_sub_entity_routes(router, "documents", Document, DocumentCreate, DocumentOut, "Document")
+register_sub_entity_routes(router, "custom_sections", CustomSection, CustomSectionCreate, CustomSectionOut, "Section")
+
+# ── Custom Section Items (nested routes) ──────────────────────────────
+
+@router.post("/me/custom_sections/{section_id}/items", response_model=CustomSectionItemOut, status_code=status.HTTP_201_CREATED)
+async def add_custom_section_item(
+    section_id: str,
+    item_in: CustomSectionItemCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    profile = db.query(MasterProfile).filter(MasterProfile.user_id == current_user.id).first()
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profil non trouvé")
+    section = db.query(CustomSection).filter(
+        CustomSection.id == section_id,
+        CustomSection.profile_id == profile.id
+    ).first()
+    if not section:
+        raise HTTPException(status_code=404, detail="Section non trouvée")
+    new_item = CustomSectionItem(section_id=section_id, **item_in.model_dump())
+    db.add(new_item)
+    db.commit()
+    db.refresh(new_item)
+    return new_item
+
+
+@router.delete("/me/custom_sections/{section_id}/items/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_custom_section_item(
+    section_id: str,
+    item_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    profile = db.query(MasterProfile).filter(MasterProfile.user_id == current_user.id).first()
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profil non trouvé")
+    item = db.query(CustomSectionItem).join(CustomSection).filter(
+        CustomSectionItem.id == item_id,
+        CustomSection.id == section_id,
+        CustomSection.profile_id == profile.id
+    ).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Élément non trouvé")
+    db.delete(item)
+    db.commit()
+    return None
+
+
+@router.put("/me/custom_sections/{section_id}/items/{item_id}", response_model=CustomSectionItemOut)
+async def update_custom_section_item(
+    section_id: str,
+    item_id: str,
+    item_in: CustomSectionItemCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    profile = db.query(MasterProfile).filter(MasterProfile.user_id == current_user.id).first()
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profil non trouvé")
+    item = db.query(CustomSectionItem).join(CustomSection).filter(
+        CustomSectionItem.id == item_id,
+        CustomSection.id == section_id,
+        CustomSection.profile_id == profile.id
+    ).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Élément non trouvé")
+    for field, value in item_in.model_dump(exclude_unset=True).items():
+        setattr(item, field, value)
+    db.commit()
+    db.refresh(item)
+    return item
+

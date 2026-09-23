@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
 
 export interface CV {
   id: string;
@@ -16,6 +16,11 @@ export interface CV {
     disabledItems?: Record<string, string[]>;
     [key: string]: any;
   };
+  config?: {
+    sections?: any[];
+    tokens?: Record<string, any>;
+    [key: string]: any;
+  };
 }
 
 export const cvApi = {
@@ -26,7 +31,14 @@ export const cvApi = {
     return res.data;
   },
 
-  createResume: async (token: string, data: { title: string, template_id: string, doc_type: string, content?: Record<string, any> }): Promise<CV> => {
+  getResume: async (token: string, id: string): Promise<CV> => {
+    const res = await axios.get(`${API_BASE}/resumes/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.data;
+  },
+
+  createResume: async (token: string, data: { title: string, template_id: string, doc_type: string, content?: Record<string, any>, config?: Record<string, any> }): Promise<CV> => {
     const res = await axios.post(`${API_BASE}/resumes/`, data, {
       headers: { Authorization: `Bearer ${token}` },
     });

@@ -47,6 +47,19 @@ async def list_resumes(
         
     resumes = query.order_by(Resume.created_at.desc()).offset(skip).limit(limit).all()
     
+    # Resolve any UUID template_ids to slugs
+    needs_commit = False
+    for resume in resumes:
+        if resume.template_id:
+            template = db.query(Template).filter(
+                (Template.id == resume.template_id) | (Template.slug == resume.template_id)
+            ).first()
+            if template and template.slug and template.slug != resume.template_id:
+                resume.template_id = template.slug
+                needs_commit = True
+    if needs_commit:
+        db.commit()
+    
     return resumes
 
 @router.get("/{resume_id}", response_model=ResumeOut)
@@ -63,6 +76,16 @@ async def get_resume(
     
     if not resume:
         raise HTTPException(status_code=404, detail="CV non trouvé")
+    
+    # Resolve template_id: if it's a UUID, convert to slug for the frontend
+    if resume.template_id:
+        template = db.query(Template).filter(
+            (Template.id == resume.template_id) | (Template.slug == resume.template_id)
+        ).first()
+        if template and template.slug and template.slug != resume.template_id:
+            resume.template_id = template.slug
+            db.commit()
+            db.refresh(resume)
     
     return resume
 
@@ -90,7 +113,7 @@ async def create_resume(
             (Template.id == resume_in.template_id) | (Template.slug == resume_in.template_id)
         ).first()
 
-        actual_template_id = template.id if template else None
+        actual_template_id = template.slug if (template and template.slug) else (template.id if template else resume_in.template_id)
 
         try:
             doc_type_val = DocTypeEnum(resume_in.doc_type) if resume_in.doc_type else DocTypeEnum.CV
@@ -154,8 +177,12 @@ async def update_resume(
         template = db.query(Template).filter(
             (Template.id == update_data["template_id"]) | (Template.slug == update_data["template_id"])
         ).first()
-        if template:
+        if template and template.slug:
+            update_data["template_id"] = template.slug
+        elif template:
             update_data["template_id"] = template.id
+        else:
+            update_data["template_id"] = update_data["template_id"]
 
     for field, value in update_data.items():
         setattr(resume, field, value)

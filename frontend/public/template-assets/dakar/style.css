@@ -225,30 +225,8 @@ body {
 }
 
 .experience-item {
-    margin-bottom: 12px;
-    position: relative;
-    padding-left: 20px;
-  break-inside: avoid;
-}
-
-.experience-item::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 8px;
-    width: 2px;
-    height: 100%;
-    background: #E2E8F0;
-}
-
-.exp-dot {
-    position: absolute;
-    left: -4px;
-    top: 8px;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: var(--color-accent);
+    margin-bottom: 16px;
+    break-inside: avoid;
 }
 
 .exp-title {
@@ -256,6 +234,28 @@ body {
     font-weight: 700;
     color: var(--color-primary);
     margin-bottom: 4px;
+}
+/* Title + date on same line */
+.exp-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 4px;
+}
+
+.edu-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 4px;
+}
+
+.exp-description {
+    font-size: 0.95em;
+    color: #64748B;
+    margin-top: 4px;
+    margin-bottom: 6px;
+    white-space: pre-wrap;
 }
 
 .exp-company {

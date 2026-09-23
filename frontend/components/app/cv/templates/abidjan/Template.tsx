@@ -1,187 +1,242 @@
 import React from 'react';
 import { TemplateProps } from '@/types/cv';
-import { TemplateStyles, CVSection, ItemGroup, SkillTag , RemoteStyles} from '../BaseComponents';
+import { TemplateStyles, CVSection, RemoteStyles, CustomSectionContent } from '../BaseComponents';
 import { getSafeData, isSectionEnabled, getSectionLabel } from '../utils';
 
 const AbidjanTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBaseUrl }) => {
   const data = getSafeData(rawData);
-  const { profile, summary, experience, education, skills, languages, projects, custom_sections } = data;
-  
+  const { profile, summary, experience, education, certifications, skills, languages, projects, custom_sections } = data;
+
+  const leftSections = config.sections.filter((s: any) => s.enabled && s.column === 'left');
+  const rightSections = config.sections.filter((s: any) => s.enabled && s.column !== 'left');
+
   return (
-    <div className={`cv-rendering-root cv-container abidjan-template sector-${(config.sector || 'general').toLowerCase()}`}>
+    <div className="cv-rendering-root cv-container abidjan-template">
       <RemoteStyles templateName={config.templateName} apiBaseUrl={apiBaseUrl} />
       <TemplateStyles config={config} />
-      
-      {/* Header Centralisé */}
-      <div className="header">
-        {/* Filigrane de secteur dynamique */}
-        <div className="header-watermark">
-          {config.sector === 'Santé' && <span>+</span>}
-          {config.sector?.includes('Tech') && <span>&lt;/&gt;</span>}
-          {config.sector === 'Commerce & Vente' && <span>$</span>}
-        </div>
 
+      {/* Header */}
+      <header className="abidjan-header">
         {isSectionEnabled(config, 'photo') && (
-          <div className="profile-photo-wrap" style={{ transform: config?.tokens?.spacing === 'compact' ? 'scale(0.85)' : 'none' }}>
+          <div className="abidjan-photo-wrap">
             {profile.photo ? (
-              <div className="profile-photo" style={{ position: 'relative', overflow: 'hidden', borderRadius: 'var(--photo-shape, 50%)' }}>
+              <div className="abidjan-photo" style={{ borderRadius: 'var(--photo-shape, 50%)' }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={profile.photo} alt={profile.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                <img src={profile.photo} alt={profile.name} />
               </div>
             ) : (
-              <div className="photo-placeholder"><i className="fas fa-user"></i></div>
+              <div className="abidjan-photo-placeholder"><i className="fas fa-user" /></div>
             )}
           </div>
         )}
-
-        <div className="header-info">
-          <div className="header-name">{profile.name}</div>
-          {profile.title && (
-            <div className="header-title">{profile.title}</div>
-          )}
-
+        <div className="abidjan-header-info">
+          <h1 className="abidjan-name">{profile.name}</h1>
+          {profile.title && <div className="abidjan-title">{profile.title}</div>}
           {isSectionEnabled(config, 'contact') && (
-            <div className="header-contact">
-              {profile.phone && <div className="contact-item"><i className="fas fa-phone"></i><span>{profile.phone}</span></div>}
-              {profile.email && <div className="contact-item"><i className="fas fa-envelope"></i><span>{profile.email}</span></div>}
-              {profile.location && <div className="contact-item"><i className="fas fa-map-marker-alt"></i><span>{profile.location}</span></div>}
+            <div className="abidjan-contact">
+              {profile.phone    && <span className="abidjan-contact-item"><i className="fas fa-phone" />{profile.phone}</span>}
+              {profile.email    && <span className="abidjan-contact-item"><i className="fas fa-envelope" />{profile.email}</span>}
+              {profile.location && <span className="abidjan-contact-item"><i className="fas fa-map-marker-alt" />{profile.location}</span>}
+              {profile.linkedin_url && <span className="abidjan-contact-item"><i className="fab fa-linkedin" />{profile.linkedin_url.replace(/^https?:\/+(www\.)?/, '')}</span>}
+              {profile.github_url   && <span className="abidjan-contact-item"><i className="fab fa-github" />{profile.github_url.replace(/^https?:\/+(www\.)?/, '')}</span>}
+              {profile.website      && <span className="abidjan-contact-item"><i className="fas fa-globe" />{profile.website}</span>}
             </div>
           )}
         </div>
-      </div>
+      </header>
 
-      {/* Corps du CV */}
-      <div className="cv-body">
-        {config.sections.filter(s => s.enabled).map((section) => {
-          switch (section.type) {
-            case 'identity':
-              return (profile.age || profile.nationality || (profile as any).marital_status) && (
-                <CVSection key="identity" title={getSectionLabel(config, 'identity', 'Identité')} icon="fas fa-id-card">
-                  <div className="identity-grid">
-                    {profile.age && <div className="identity-item"><span className="identity-label">Âge</span><span className="identity-value">{profile.age}</span></div>}
-                    {profile.nationality && <div className="identity-item"><span className="identity-label">Nationalité</span><span className="identity-value">{profile.nationality}</span></div>}
-                    {(profile as any).marital_status && <div className="identity-item"><span className="identity-label">Situation</span><span className="identity-value">{(profile as any).marital_status}</span></div>}
-                  </div>
-                </CVSection>
-              );
-            case 'summary':
-              return summary && (
-                <CVSection key="summary" title={getSectionLabel(config, 'summary', 'Profil Professionnel')} icon="fas fa-user-tie">
-                  <p className="profile-text">{summary}</p>
-                </CVSection>
-              );
-            case 'experience':
-              return experience && experience.length > 0 && (
-                <CVSection key="experience" title={getSectionLabel(config, 'experience', 'Expériences Professionnelles')} icon="fas fa-briefcase">
-                  <div className="experiences-list">
-                    {experience.map((exp: any, idx: number) => (
-                      <div key={idx} className="experience-item">
-                        <div className="exp-left">
-                          <div className="exp-dates">{exp.dates}</div>
-                          <div className="exp-company">{exp.company}</div>
-                        </div>
-                        <div className="exp-right">
-                          <div className="exp-title">{exp.title}</div>
-                          {exp.tasks && exp.tasks.length > 0 && (
-                            <ul className="exp-tasks">
-                              {exp.tasks.map((task: string, tIdx: number) => <li key={tIdx}>{task}</li>)}
-                            </ul>
-                          )}
-                        </div>
+      {/* Body — 2 colonnes, Pageflow parallel */}
+      <div className="abidjan-body" data-pf-parallel="true">
+
+        {/* Sidebar gauche */}
+        <aside className="abidjan-sidebar" data-pf-splittable="true">
+          {leftSections.map((section: any) => {
+            switch (section.type) {
+              case 'identity':
+                return (profile.age || profile.nationality || (profile as any).marital_status) && (
+                  <div key="identity" data-pf-splittable="true">
+                    <CVSection title={getSectionLabel(config, 'identity', 'Identité')} icon="fas fa-id-card">
+                      <div className="abidjan-identity">
+                        {profile.age         && <div className="abidjan-id-row"><span className="abidjan-id-label">Âge</span><span>{profile.age}</span></div>}
+                        {profile.nationality && <div className="abidjan-id-row"><span className="abidjan-id-label">Nationalité</span><span>{profile.nationality}</span></div>}
+                        {(profile as any).marital_status && <div className="abidjan-id-row"><span className="abidjan-id-label">Situation</span><span>{(profile as any).marital_status}</span></div>}
                       </div>
-                    ))}
+                    </CVSection>
                   </div>
-                </CVSection>
-              );
-            case 'education':
-              return education && education.length > 0 && (
-                <CVSection key="education" title={getSectionLabel(config, 'education', 'Formation & Diplômes')} icon="fas fa-graduation-cap">
-                  <div className="education-list">
-                    {education.map((edu: any, idx: number) => (
-                      <div key={idx} className="education-item">
-                        <div className="edu-left">
-                          <div className="edu-year">{edu.dates}</div>
-                          <div className="edu-school">{edu.institution}</div>
-                        </div>
-                        <div className="edu-right"><div className="edu-degree">{edu.degree}</div></div>
+                );
+
+              case 'skills':
+                return skills?.groups && skills.groups.length > 0 && (
+                  <div key="skills" data-pf-splittable="true">
+                    <CVSection title={getSectionLabel(config, 'skills', 'Compétences')} icon="fas fa-star">
+                      <ul className="abidjan-skill-list">
+                        {skills.groups.flatMap((g: any) => g.items || []).map((skill: any, i: number) => (
+                          <li key={i}>{typeof skill === 'object' ? skill.name : skill}</li>
+                        ))}
+                      </ul>
+                    </CVSection>
+                  </div>
+                );
+
+              case 'languages':
+                return languages && languages.length > 0 && (
+                  <div key="languages" data-pf-splittable="true">
+                    <CVSection title={getSectionLabel(config, 'languages', 'Langues')} icon="fas fa-language">
+                      <ul className="abidjan-lang-list">
+                        {languages.map((lang: any, i: number) => (
+                          <li key={i}>
+                            <strong>{lang.name}</strong>
+                            {lang.level && <span className="abidjan-lang-level"> — {lang.level}</span>}
+                          </li>
+                        ))}
+                      </ul>
+                    </CVSection>
+                  </div>
+                );
+
+              case 'interests':
+                return data.interests && data.interests.length > 0 && (
+                  <div key="interests" data-pf-splittable="true">
+                    <CVSection title={getSectionLabel(config, 'interests', "Centres d'intérêt")} icon="fas fa-heart">
+                      <div className="abidjan-tags">
+                        {data.interests.map((interest: string, i: number) => (
+                          <span key={i} className="abidjan-tag">{interest}</span>
+                        ))}
                       </div>
-                    ))}
+                    </CVSection>
                   </div>
-                </CVSection>
-              );
-            case 'skills':
-              return skills?.groups && (
-                <CVSection key="skills" title={getSectionLabel(config, 'skills', 'Compétences Spécifiques')} icon="fas fa-star">
-                  <div className="skills-list">
-                    {skills.groups.flatMap((g: any) => g.items || []).map((skill: string, sIdx: number) => (
-                      <SkillTag key={sIdx}>{skill}</SkillTag>
-                    ))}
-                  </div>
-                </CVSection>
-              );
-            case 'languages':
-              return languages && languages.length > 0 && (
-                <CVSection key="languages" title={getSectionLabel(config, 'languages', 'Langues Maîtrisées')} icon="fas fa-language">
-                  <div className="languages-list-grid">
-                    {languages.map((lang: any, lIdx: number) => (
-                      <div key={lIdx} className="language-item">
-                        <span className="lang-name">{lang.name}</span>
-                        <div className="lang-bar-bg"><div className="lang-bar-fill" style={{ width: lang.level?.includes('Maternel') || lang.level?.includes('Courant') ? '100%' : '70%' }}></div></div>
-                        <span className="lang-level">{lang.level}</span>
-                      </div>
-                    ))}
-                  </div>
-                </CVSection>
-              );
-            case 'projects':
-              return projects && projects.length > 0 && (
-                <CVSection key="projects" title={getSectionLabel(config, 'projects', 'Projets Réalisés')} icon="fas fa-lightbulb">
-                  {projects.map((project: any, idx: number) => (
-                    <div key={idx} className="experience-item">
-                      <div className="exp-left"><div className="exp-company">{project.name}</div></div>
-                      <div className="exp-right">
-                        {project.link && <div className="exp-title" style={{ fontSize: '0.9em', opacity: 0.8 }}>{project.link}</div>}
-                        <div className="profile-text" style={{ padding: 0, marginTop: '5px' }}>{project.description}</div>
-                      </div>
+                );
+
+              default:
+                if (section.type.startsWith('custom_')) {
+                  const customId = section.type.replace('custom_', '');
+                  const custom = custom_sections?.find((c: any) => c.id === customId);
+                  if (custom) return (
+                    <div key={section.type} data-pf-splittable="true">
+                      <CVSection title={custom.title} icon={custom.icon || 'fas fa-star'}>
+                        <CustomSectionContent custom={custom} />
+                      </CVSection>
                     </div>
-                  ))}
-                </CVSection>
-              );
-            case 'interests':
-              return data.interests && data.interests.length > 0 && (
-                <CVSection key="interests" title={getSectionLabel(config, 'interests', 'Centres d&apos;Intérêt')} icon="fas fa-heart">
-                  <div className="interests-list">
-                    {data.interests.map((interest: string, iIdx: number) => (
-                      <span key={iIdx} className="interest-tag">{interest}</span>
-                    ))}
-                  </div>
-                </CVSection>
-              );
-            default:
-              if (section.type.startsWith('custom_')) {
-                const customId = section.type.replace('custom_', '');
-                const custom = custom_sections?.find((c: any) => c.id === customId);
-                if (custom) {
-                  return (
-                    <CVSection key={section.type} title={custom.title} icon="fas fa-plus-circle">
-                      <div className="profile-text">
-                        {custom.type === 'list' ? (
-                          <ul className="exp-tasks">
-                            {custom.content.split('\n').filter((line: string) => line.trim()).map((item: string, iIdx: number) => <li key={iIdx}>{item}</li>)}
+                  );
+                }
+                return null;
+            }
+          })}
+        </aside>
+
+        {/* Colonne principale */}
+        <main className="abidjan-main" data-pf-splittable="true">
+          {rightSections.map((section: any) => {
+            switch (section.type) {
+              case 'summary':
+                return summary && (
+                  <CVSection key="summary" title={getSectionLabel(config, 'summary', 'Profil Professionnel')} icon="fas fa-user-tie">
+                    <p className="abidjan-summary">{summary}</p>
+                  </CVSection>
+                );
+
+              case 'experience':
+                return experience && experience.length > 0 && (
+                  <CVSection key="experience" title={getSectionLabel(config, 'experience', 'Expériences Professionnelles')} icon="fas fa-briefcase">
+                    {experience.map((exp: any, i: number) => (
+                      <div key={i} className="abidjan-item" data-pf-splittable="true">
+                        <div className="abidjan-item-header">
+                          <span className="abidjan-item-title">{exp.title}</span>
+                          {exp.dates && <span className="abidjan-item-date">{exp.dates}</span>}
+                        </div>
+                        {exp.company && <div className="abidjan-item-sub">{exp.company}{exp.location ? ` · ${exp.location}` : ''}</div>}
+                        {exp.description && <p className="abidjan-item-desc">{exp.description}</p>}
+                        {exp.tasks && exp.tasks.length > 0 && (
+                          <ul className="abidjan-tasks">
+                            {exp.tasks.map((t: string, j: number) => <li key={j}>{t}</li>)}
                           </ul>
-                        ) : (
-                          <div dangerouslySetInnerHTML={{ __html: custom.content.replace(/\n/g, '<br>') }} />
                         )}
                       </div>
+                    ))}
+                  </CVSection>
+                );
+
+              case 'education':
+                return education && education.length > 0 && (
+                  <CVSection key="education" title={getSectionLabel(config, 'education', 'Formation')} icon="fas fa-graduation-cap">
+                    {education.map((edu: any, i: number) => (
+                      <div key={i} className="abidjan-item" data-pf-splittable="true">
+                        <div className="abidjan-item-header">
+                          <span className="abidjan-item-title">{edu.degree}</span>
+                          {edu.dates && <span className="abidjan-item-date">{edu.dates}</span>}
+                        </div>
+                        {edu.institution && <div className="abidjan-item-sub">{edu.institution}{edu.location ? ` · ${edu.location}` : ''}</div>}
+                        {edu.description && <p className="abidjan-item-desc">{edu.description}</p>}
+                      </div>
+                    ))}
+                  </CVSection>
+                );
+
+              case 'certifications':
+                return certifications && certifications.length > 0 && (
+                  <CVSection key="certifications" title={getSectionLabel(config, 'certifications', 'Certifications')} icon="fas fa-certificate">
+                    {certifications.map((cert: any, i: number) => (
+                      <div key={i} className="abidjan-item" data-pf-splittable="true">
+                        <div className="abidjan-item-header">
+                          <span className="abidjan-item-title">{cert.name}</span>
+                          {cert.date && <span className="abidjan-item-date">{cert.date}</span>}
+                        </div>
+                        {cert.issuer && <div className="abidjan-item-sub">{cert.issuer}</div>}
+                        {cert.url && <a href={cert.url} target="_blank" rel="noopener noreferrer" className="abidjan-link"><i className="fas fa-link" /> {cert.url.replace(/^https?:\/+(www\.)?/, '')}</a>}
+                      </div>
+                    ))}
+                  </CVSection>
+                );
+
+              case 'projects':
+                return projects && projects.length > 0 && (
+                  <CVSection key="projects" title={getSectionLabel(config, 'projects', 'Projets')} icon="fas fa-lightbulb">
+                    {projects.map((proj: any, i: number) => (
+                      <div key={i} className="abidjan-item" data-pf-splittable="true">
+                        <div className="abidjan-item-header">
+                          <span className="abidjan-item-title">{proj.name}</span>
+                          {proj.dates && <span className="abidjan-item-date">{proj.dates}</span>}
+                        </div>
+                        {proj.link && <a href={proj.link} target="_blank" rel="noopener noreferrer" className="abidjan-link"><i className="fas fa-link" /> {proj.link.replace(/^https?:\/+(www\.)?/, '')}</a>}
+                        {proj.description && <p className="abidjan-item-desc">{proj.description}</p>}
+                      </div>
+                    ))}
+                  </CVSection>
+                );
+
+              case 'references':
+                return data.references && data.references.length > 0 && (
+                  <CVSection key="references" title={getSectionLabel(config, 'references', 'Références')} icon="fas fa-users">
+                    {data.references.map((ref: any, i: number) => (
+                      <div key={i} className="abidjan-item" data-pf-splittable="true">
+                        <div className="abidjan-item-header">
+                          <span className="abidjan-item-title">{ref.name}</span>
+                        </div>
+                        {(ref.company || ref.title) && <div className="abidjan-item-sub">{ref.company || ref.title}</div>}
+                        <div className="abidjan-ref-contacts">
+                          {ref.email && <span><i className="fas fa-envelope" /> {ref.email}</span>}
+                          {ref.phone && <span><i className="fas fa-phone" /> {ref.phone}</span>}
+                        </div>
+                      </div>
+                    ))}
+                  </CVSection>
+                );
+
+              default:
+                if (section.type.startsWith('custom_')) {
+                  const customId = section.type.replace('custom_', '');
+                  const custom = custom_sections?.find((c: any) => c.id === customId);
+                  if (custom) return (
+                    <CVSection key={section.type} title={custom.title} icon={custom.icon || 'fas fa-star'}>
+                      <CustomSectionContent custom={custom} />
                     </CVSection>
                   );
                 }
-              }
-              return null;
-          }
-        })}
+                return null;
+            }
+          })}
+        </main>
       </div>
-      <div className="cv-footer"></div>
     </div>
   );
 };

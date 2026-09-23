@@ -78,3 +78,22 @@ section {
 .animation-delay-4000 {
   animation-delay: 4s;
 }
+
+/* PageFlow specific styles */
+.pf-page {
+  background: white;
+  margin: 0 auto 24px auto;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+  /* width and height are set dynamically by the layout engine, but usually 210mm x 297mm */
+}
+
+@media print {
+  .pf-page {
+    box-shadow: none;
+    margin: 0;
+    page-break-after: always;
+    break-after: page;
+  }
+}

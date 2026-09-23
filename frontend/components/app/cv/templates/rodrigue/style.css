@@ -245,20 +245,20 @@ body {
   display: none;
 }
 
-.exp-header {
+.item-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 4px;
 }
 
-.exp-title {
+.item-title {
   font-size: 1.25em;
   font-weight: 700;
   color: var(--color-primary);
 }
 
-.exp-date {
+.item-date {
   font-size: 0.85em;
   color: var(--color-accent);
   font-weight: 600;
@@ -266,7 +266,7 @@ body {
   letter-spacing: 1px;
 }
 
-.exp-company {
+.item-subtitle {
   font-size: 1em;
   color: var(--color-text-muted);
   font-weight: 600;
@@ -339,6 +339,28 @@ body {
   color: var(--color-text-muted);
   font-size: 0.95em;
   font-weight: 600;
+}
+
+/* Languages */
+.language-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  break-inside: avoid;
+}
+
+.lang-name {
+  font-weight: 600;
+  color: var(--color-accent);
+  font-size: 1em;
+}
+
+.lang-level {
+  font-size: 0.85em;
+  color: rgba(255,255,255,0.7);
+  font-weight: 600;
+  text-transform: uppercase;
 }
 
 @media print {

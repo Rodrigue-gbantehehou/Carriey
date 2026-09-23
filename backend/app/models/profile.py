@@ -44,6 +44,7 @@ class MasterProfile(Base):
     achievements = relationship("Achievement", back_populates="profile", cascade="all, delete-orphan")
     links = relationship("Link", back_populates="profile", cascade="all, delete-orphan")
     documents = relationship("Document", back_populates="profile", cascade="all, delete-orphan")
+    custom_sections = relationship("CustomSection", back_populates="profile", cascade="all, delete-orphan", order_by="CustomSection.title")
 
 class Experience(Base):
     __tablename__ = "experiences"
@@ -111,7 +112,7 @@ class Certification(Base):
     
     name = Column(String(255), nullable=False)
     issuer = Column(String(255), nullable=False)
-    date = Column(Date, nullable=True)
+    date = Column(String(20), nullable=True)
     url = Column(String(255), nullable=True)
     
     profile = relationship("MasterProfile", back_populates="certifications")
@@ -162,3 +163,34 @@ class Document(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     profile = relationship("MasterProfile", back_populates="documents")
+
+
+class CustomSection(Base):
+    """A custom section created by the user (e.g. Publications, Bénévolat, Récompenses)."""
+    __tablename__ = "custom_sections"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    profile_id = Column(String(36), ForeignKey("master_profiles.id", ondelete="CASCADE"), nullable=False)
+
+    title = Column(String(255), nullable=False)          # Displayed section title
+    icon = Column(String(100), nullable=True)            # FontAwesome class e.g. "fas fa-trophy"
+    type = Column(String(50), default='detailed_list')   # text | simple_list | detailed_list
+
+    profile = relationship("MasterProfile", back_populates="custom_sections")
+    items = relationship("CustomSectionItem", back_populates="section", cascade="all, delete-orphan", order_by="CustomSectionItem.order")
+
+
+class CustomSectionItem(Base):
+    """An individual item inside a custom section."""
+    __tablename__ = "custom_section_items"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    section_id = Column(String(36), ForeignKey("custom_sections.id", ondelete="CASCADE"), nullable=False)
+
+    title = Column(String(255), nullable=False)
+    subtitle = Column(String(255), nullable=True)
+    date = Column(String(20), nullable=True)    # stored as string "YYYY-MM-DD" or "YYYY"
+    description = Column(Text, nullable=True)
+    order = Column(String(10), nullable=True, default='0')  # for sorting
+
+    section = relationship("CustomSection", back_populates="items")

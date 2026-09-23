@@ -1,11 +1,11 @@
 import React from 'react';
 import { TemplateProps } from '@/types/cv';
-import { TemplateStyles, CVSection, ItemGroup, SkillTag , RemoteStyles} from '../BaseComponents';
+import { TemplateStyles, CVSection, ItemGroup, SkillTag, RemoteStyles, CustomSectionContent } from '../BaseComponents';
 import { getSafeData, isSectionEnabled, getSectionLabel } from '../utils';
 
 const ClassiqueTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBaseUrl }) => {
   const data = getSafeData(rawData);
-  const { profile, summary, experience, education, skills, languages, projects, custom_sections } = data;
+  const { profile, summary, experience, education, certifications, skills, languages, projects, custom_sections } = data;
   
   return (
     <div className="cv-rendering-root cv-container classique-template">
@@ -40,6 +40,24 @@ const ClassiqueTemplate: React.FC<TemplateProps> = ({ data: rawData, config, api
                   <span>{profile.location}</span>
                 </div>
               )}
+              {profile.website && (
+                <div className="meta-item">
+                  <i className="fas fa-globe"></i>
+                  <span>{profile.website}</span>
+                </div>
+              )}
+              {profile.linkedin_url && (
+                <div className="meta-item">
+                  <i className="fab fa-linkedin"></i>
+                  <span>{profile.linkedin_url.replace(/^https?:\/+(www\.)?/, '')}</span>
+                </div>
+              )}
+              {profile.github_url && (
+                <div className="meta-item">
+                  <i className="fab fa-github"></i>
+                  <span>{profile.github_url.replace(/^https?:\/+(www\.)?/, '')}</span>
+                </div>
+              )}
             </>
           )}
 
@@ -55,6 +73,12 @@ const ClassiqueTemplate: React.FC<TemplateProps> = ({ data: rawData, config, api
                 <div className="meta-item">
                   <span className="meta-label">Nationalité:</span>
                   <span>{profile.nationality}</span>
+                </div>
+              )}
+              {(profile as any).marital_status && (
+                <div className="meta-item">
+                  <span className="meta-label">Situation:</span>
+                  <span>{(profile as any).marital_status}</span>
                 </div>
               )}
             </>
@@ -81,6 +105,8 @@ const ClassiqueTemplate: React.FC<TemplateProps> = ({ data: rawData, config, api
                     title={exp.title}
                     subtitle={exp.company}
                     date={exp.dates}
+                    location={exp.location}
+                    description={exp.description}
                   >
                     {exp.tasks && exp.tasks.length > 0 && (
                       <ul className="item-tasks">
@@ -96,13 +122,30 @@ const ClassiqueTemplate: React.FC<TemplateProps> = ({ data: rawData, config, api
 
           case 'education':
             return education && education.length > 0 ? (
-              <CVSection key="education" title={getSectionLabel(config, 'education', 'Formation Académique')}>
+              <CVSection key="education" title={getSectionLabel(config, 'education', 'Formation')}>
                 {education.map((edu: any, idx: number) => (
                   <ItemGroup 
                     key={idx}
                     title={edu.degree}
                     subtitle={edu.institution}
                     date={edu.dates}
+                    location={edu.location}
+                    description={edu.description}
+                  />
+                ))}
+              </CVSection>
+            ) : null;
+
+          case 'certifications':
+            return certifications && certifications.length > 0 ? (
+              <CVSection key="certifications" title={getSectionLabel(config, 'certifications', 'Certifications')}>
+                {certifications.map((cert: any, idx: number) => (
+                  <ItemGroup 
+                    key={idx}
+                    title={cert.name}
+                    subtitle={cert.issuer}
+                    date={cert.date}
+                    url={cert.url}
                   />
                 ))}
               </CVSection>
@@ -115,8 +158,8 @@ const ClassiqueTemplate: React.FC<TemplateProps> = ({ data: rawData, config, api
                   <div key={gIdx} className="skill-set">
                     {group.label && <h4>{group.label}</h4>}
                     <div className="skill-list">
-                      {(group.items || []).map((skill: string, sIdx: number) => (
-                        <SkillTag key={sIdx}>{skill}</SkillTag>
+                      {(group.items || []).map((skill: any, sIdx: number) => (
+                        <SkillTag key={sIdx}>{typeof skill === 'object' ? skill.name : skill}</SkillTag>
                       ))}
                     </div>
                   </div>
@@ -137,15 +180,34 @@ const ClassiqueTemplate: React.FC<TemplateProps> = ({ data: rawData, config, api
               </CVSection>
             ) : null;
 
-          case 'projects':
+                      case 'references':
+              return data.references && data.references.length > 0 && (
+                <CVSection key="references" title={getSectionLabel(config, 'references', 'Références')} className="content-section section">
+                  {data.references.map((ref: any, idx: number) => (
+                    <ItemGroup 
+                      key={idx} 
+                      title={ref.name} 
+                      subtitle={ref.company || ref.title} 
+                      className="experience-item"
+                    >
+                      <div className="profile-text" style={{ marginTop: '5px' }}>
+                        {ref.email && <div><i className="fas fa-envelope" style={{marginRight: '5px'}}></i>{ref.email}</div>}
+                        {ref.phone && <div><i className="fas fa-phone" style={{marginRight: '5px'}}></i>{ref.phone}</div>}
+                      </div>
+                    </ItemGroup>
+                  ))}
+                </CVSection>
+              );
+            case 'projects':
             return projects && projects.length > 0 ? (
               <CVSection key="projects" title={getSectionLabel(config, 'projects', 'Projets')}>
                 {projects.map((project: any, pIdx: number) => (
                   <ItemGroup 
                     key={pIdx}
                     title={project.name}
-                    subtitle={project.description}
-                    date={project.link}
+                    date={project.dates}
+                    url={project.link}
+                    description={project.description}
                   />
                 ))}
               </CVSection>
@@ -157,17 +219,9 @@ const ClassiqueTemplate: React.FC<TemplateProps> = ({ data: rawData, config, api
               const custom = custom_sections?.find((c: any) => c.id === customId);
               if (custom) {
                 return (
-                  <CVSection key={section.type} title={custom.title}>
-                    <div className="about-text">
-                      {custom.type === 'list' ? (
-                        <ul className="item-tasks">
-                          {custom.content.split('\n').filter((line: string) => line.trim()).map((item: string, iIdx: number) => (
-                            <li key={iIdx}>{item}</li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <div dangerouslySetInnerHTML={{ __html: custom.content.replace(/\n/g, '<br>') }} />
-                      )}
+                  <CVSection key={section ? section.type : 'custom'} title={custom.title} icon={custom.icon || "fas fa-star"}>
+                    <div className="profile-text">
+                      <CustomSectionContent custom={custom} />
                     </div>
                   </CVSection>
                 );
