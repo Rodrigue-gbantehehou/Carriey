@@ -12,10 +12,6 @@ export const TEMPLATE_REGISTRY: Record<string, any> = {
   professional: lazy(() => import('./professional/Template')),
   rodrigue: lazy(() => import('./rodrigue/Template')),
   tokyo: lazy(() => import('./tokyo/Template')),
-  // Lettres de motivation
-  letter_classique: lazy(() => import('./letter_classique/Template')),
-  letter_moderne: lazy(() => import('./letter_moderne/Template')),
-  letter_professional: lazy(() => import('./letter_professional/Template')),
 };
 
 interface TemplateRendererProps extends Omit<TemplateProps, 'apiBaseUrl'> {

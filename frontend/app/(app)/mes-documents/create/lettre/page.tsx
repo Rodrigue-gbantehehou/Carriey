@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useCvStore } from '@/store/cv';
 import { cvApi } from '@/lib/cv-api';
+import { API_BASE } from '@/lib/api';
 import { Sparkles, FileText, ChevronRight, ChevronLeft, Briefcase, Link as LinkIcon, AlignLeft, Building2 } from 'lucide-react';
 
 export default function CreateCoverLetterWizard() {
@@ -28,25 +29,43 @@ export default function CreateCoverLetterWizard() {
     
     setIsGenerating(true);
 
-    // Simulation de l'IA si méthode 'ai'
-    if (method === 'ai') {
-      setGenerationStep(1); // Analyse du profil
-      await new Promise(r => setTimeout(r, 1200));
-      setGenerationStep(2); // Analyse de l'offre
-      await new Promise(r => setTimeout(r, 1500));
-      setGenerationStep(3); // Rédaction
-      await new Promise(r => setTimeout(r, 1200));
-    }
-
     try {
-      // Pour l'instant on simule le texte de l'IA
-      const generatedBody = method === 'ai' 
-        ? `Suite à l'annonce publiée pour le poste, je vous soumets ma candidature avec un grand intérêt.\\n\\nMon parcours professionnel et les compétences que j'ai pu développer correspondent parfaitement aux attentes de votre offre. J'apprécie tout particulièrement les défis techniques mentionnés.\\n\\nJe serais ravi de pouvoir échanger avec vous pour vous détailler mes motivations de vive voix.`
-        : '';
+      let generatedSubject = jobTitle ? `Candidature : ${jobTitle}` : 'Candidature';
+      let generatedSalutation = 'Madame, Monsieur,';
+      let generatedBody = '';
+      let generatedClosing = "Je vous prie d'agréer, Madame, Monsieur, l'expression de mes salutations distinguées.";
+
+      if (method === 'ai') {
+        setGenerationStep(1); // Analyse du profil
+        const res = await fetch(`${API_BASE}/ai/generate-cover-letter`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${session.user.accessToken}`
+          },
+          body: JSON.stringify({ job_description: jobDescription || jobTitle || "Candidature spontanée" })
+        });
+        
+        setGenerationStep(2); // Analyse de l'offre
+        if (res.ok) {
+          const data = await res.json();
+          if (data.subject) generatedSubject = data.subject;
+          if (data.salutation) generatedSalutation = data.salutation;
+          if (data.body) generatedBody = data.body;
+          if (data.closing) generatedClosing = data.closing;
+          setGenerationStep(3); // Rédaction terminée
+        } else {
+          const errText = await res.text();
+          console.error("Erreur de l'API IA", errText);
+          setIsGenerating(false);
+          alert("Erreur lors de la génération IA : " + errText);
+          return; // On arrête la création si l'IA échoue
+        }
+      }
 
       const newLetter = await cvApi.createResume(session.user.accessToken, {
         title: jobTitle ? `Lettre - ${jobTitle}` : 'Nouvelle lettre de motivation',
-        template_id: 'classique',
+        template_id: 'classic',
         doc_type: 'cover_letter',
         content: {
           recipient: {
@@ -54,10 +73,10 @@ export default function CreateCoverLetterWizard() {
             company: companyName || '',
             address: ''
           },
-          subject: jobTitle ? `Candidature : ${jobTitle}` : 'Candidature',
-          salutation: 'Madame, Monsieur,',
+          subject: generatedSubject,
+          salutation: generatedSalutation,
           body: generatedBody,
-          closing: "Je vous prie d'agréer, Madame, Monsieur, l'expression de mes salutations distinguées."
+          closing: generatedClosing
         }
       });
       

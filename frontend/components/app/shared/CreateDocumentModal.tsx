@@ -35,7 +35,7 @@ export default function CreateDocumentModal() {
 
   const handleCreateProfile = () => {
     closeCreateModal();
-    router.push('/mes-documents?create=page');
+    router.push('/mes-documents/create/page-publique');
   };
 
   return (

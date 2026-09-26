@@ -12,7 +12,7 @@ import { useSession } from 'next-auth/react';
 import { cvApi } from '@/lib/cv-api';
 import { publicPagesApi } from '@/lib/public-pages-api';
 import { PublicPage } from '@/types/public-page';
-import { PageCard, PageEditor } from '@/components/app/shared/PublicPageComponents';
+import { PageCard } from '@/components/app/public-page/shared/PageCard';
 
 const TABS = [
   { id: 'all', label: 'Tous' },
@@ -34,18 +34,12 @@ export default function MesDocumentsPage() {
 
   // Pages state
   const [pages, setPages] = useState<PublicPage[]>([]);
-  const [showPageEditor, setShowPageEditor] = useState(false);
-  const [editingPage, setEditingPage] = useState<PublicPage | undefined>();
   const [confirmDeletePage, setConfirmDeletePage] = useState<PublicPage | null>(null);
 
   // Vérifier s'il faut ouvrir l'éditeur de page via URL
   useEffect(() => {
     if (searchParams?.get('create') === 'page') {
-      setActiveTab('pages');
-      setEditingPage(undefined);
-      setShowPageEditor(true);
-      // Clean up URL
-      router.replace('/mes-documents');
+      router.replace('/mes-documents/create/page-publique');
     }
   }, [searchParams, router]);
 
@@ -88,15 +82,6 @@ export default function MesDocumentsPage() {
   };
 
   // Pages Handlers
-  const handleSavedPage = (page: PublicPage) => {
-    setPages(prev => {
-      const idx = prev.findIndex(p => p.id === page.id);
-      if (idx >= 0) { const n = [...prev]; n[idx] = page; return n; }
-      return [page, ...prev];
-    });
-    setShowPageEditor(false);
-    setEditingPage(undefined);
-  };
 
   const doDeletePage = async () => {
     if (!session?.user?.accessToken || !confirmDeletePage) return;
@@ -109,11 +94,6 @@ export default function MesDocumentsPage() {
     if (!session?.user?.accessToken) return;
     const updated = await publicPagesApi.update(session.user.accessToken, page.id, { is_active: !page.is_active });
     setPages(prev => prev.map(p => p.id === updated.id ? updated : p));
-  };
-
-  const openEditPage = (page: PublicPage) => {
-    setEditingPage(page);
-    setShowPageEditor(true);
   };
 
   const actualCvs = cvs.filter(c => c.doc_type !== 'cover_letter');
@@ -204,7 +184,7 @@ export default function MesDocumentsPage() {
             <div
               key={cv.id}
               className="group bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-xl hover:shadow-black/5 hover:border-indigo-200 transition-all cursor-pointer flex flex-col"
-              onClick={() => router.push(`/mes-documents/${cv.id}`)}
+              onClick={() => router.push(`/mes-documents/cv/${cv.id}`)}
             >
               <div className="aspect-[1/1.4] bg-gray-100 border-b border-gray-100 relative overflow-hidden flex items-center justify-center p-4">
                 <div className="w-full h-full bg-white shadow-sm rounded-sm p-2 relative border border-gray-100 transition-transform group-hover:scale-[1.02]">
@@ -308,33 +288,12 @@ export default function MesDocumentsPage() {
             <PageCard
               key={page.id}
               page={page}
-              onEdit={() => openEditPage(page)}
+              onEdit={() => router.push(`/mes-documents/page-publique/${page.id}`)}
               onDelete={() => setConfirmDeletePage(page)}
               onToggle={() => handleTogglePage(page)}
             />
           ))}
 
-        </div>
-      )}
-
-      {/* Editor Drawer pour les Profils Publics */}
-      {showPageEditor && (
-        <div className="fixed inset-0 z-50 flex flex-col justify-end">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setShowPageEditor(false)} />
-          <div className="relative bg-white w-full sm:max-w-2xl sm:mx-auto sm:rounded-2xl rounded-t-3xl shadow-2xl z-10 max-h-[90vh] flex flex-col">
-            <div className="flex items-center justify-between p-5 border-b border-gray-100 flex-shrink-0">
-              <h2 className="text-lg font-black text-gray-900">{editingPage ? 'Modifier la page' : 'Nouvelle page publique'}</h2>
-              <button onClick={() => setShowPageEditor(false)} className="text-gray-400 hover:text-gray-600 text-xl font-bold">×</button>
-            </div>
-            <div className="p-5 overflow-y-auto">
-              <PageEditor
-                initialPage={editingPage}
-                token={session?.user?.accessToken as string}
-                onSave={handleSavedPage}
-                onClose={() => setShowPageEditor(false)}
-              />
-            </div>
-          </div>
         </div>
       )}
 

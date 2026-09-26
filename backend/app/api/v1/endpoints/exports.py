@@ -91,10 +91,12 @@ async def _get_or_create_export_user(req: ExportRequest, current_user: Optional[
     
     is_free = template and template.price == 0
     
-    # 2. Identifier l'utilisateur cible
     target_user_id = None
     is_new_user = False
     setup_token = None
+
+    print(f"DEBUG EXPORT: template_name={req.template_name}, template_id={req.template_id}")
+    print(f"DEBUG EXPORT: found template? {template is not None} (is_free={is_free})")
 
     if current_user:
         target_user_id = current_user.id
@@ -186,8 +188,10 @@ async def _get_or_create_export_user(req: ExportRequest, current_user: Optional[
                     expires_at = datetime.now() + timedelta(days=14) if req.plan == "trial" else None
                     TemplateAccessService.grant_access(db=db, user_id=target_user_id, template_id=template.id, expires_at=expires_at, payment_id=payment.id if payment else None)
                 else:
+                    print(f"DEBUG: 402 Error. payment_valid={payment_valid}, template={template is not None}, target_user_id={target_user_id}")
                     raise HTTPException(status_code=402, detail="Paiement requis ou non validé")
             else:
+                print("DEBUG: 402 Error. No payment_id.")
                 raise HTTPException(status_code=402, detail="Paiement requis pour ce modèle")
     elif is_free and target_user_id and template:
         TemplateAccessService.grant_access(db=db, user_id=target_user_id, template_id=template.id)
@@ -221,7 +225,12 @@ async def export_pdf(
         tmp_html = BASE_DIR / f"_tmp_render_{request_id}.html"
 
         frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5000")
-        print_url = f"{frontend_url}/print?id={request_id}"
+        
+        doc_type = req.data.get("doc_type", "cv")
+        if doc_type == "cover_letter":
+            print_url = f"{frontend_url}/print/lettre?id={request_id}"
+        else:
+            print_url = f"{frontend_url}/print?id={request_id}"
 
         def run_pdf_cmd():
             res = None

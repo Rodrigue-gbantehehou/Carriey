@@ -29,6 +29,9 @@ class PublicPage(Base):
     # Optional pin: specific IDs to show (null = show all enabled items)
     pinned_items = Column(JSON, nullable=True)
 
+    custom_bio = Column(Text, nullable=True)
+    seo_description = Column(String(500), nullable=True)
+
     # Expiry
     expires_at = Column(DateTime(timezone=True), nullable=True)
     is_active = Column(Boolean, default=True)

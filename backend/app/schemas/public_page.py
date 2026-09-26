@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional, Dict, List, Any
 from datetime import datetime
 import re
@@ -35,13 +35,17 @@ class PublicPageCreate(BaseModel):
     accent_color: str = "#6366f1"
     show_photo: bool = True
     show_contact: bool = True
+    custom_bio: Optional[str] = None
+    seo_description: Optional[str] = Field(None, max_length=500)
 
-    @validator("slug")
-    def slug_must_be_valid(cls, v):
+    @field_validator("slug")
+    @classmethod
+    def slug_must_be_valid(cls, v: str) -> str:
         return validate_slug(v)
 
-    @validator("theme")
-    def theme_must_be_valid(cls, v):
+    @field_validator("theme")
+    @classmethod
+    def theme_must_be_valid(cls, v: str) -> str:
         if v not in ("minimal", "modern", "bold", "elegant"):
             raise ValueError("Thème invalide")
         return v
@@ -58,15 +62,19 @@ class PublicPageUpdate(BaseModel):
     accent_color: Optional[str] = None
     show_photo: Optional[bool] = None
     show_contact: Optional[bool] = None
+    custom_bio: Optional[str] = None
+    seo_description: Optional[str] = Field(None, max_length=500)
 
-    @validator("slug", pre=True, always=False)
-    def slug_must_be_valid(cls, v):
+    @field_validator("slug", mode="before")
+    @classmethod
+    def slug_must_be_valid(cls, v: Optional[str]) -> Optional[str]:
         if v is None:
             return v
         return validate_slug(v)
 
-    @validator("theme", pre=True, always=False)
-    def theme_must_be_valid(cls, v):
+    @field_validator("theme", mode="before")
+    @classmethod
+    def theme_must_be_valid(cls, v: Optional[str]) -> Optional[str]:
         if v is None:
             return v
         if v not in ("minimal", "modern", "bold", "elegant"):
@@ -87,12 +95,13 @@ class PublicPageOut(BaseModel):
     accent_color: str
     show_photo: bool
     show_contact: bool
+    custom_bio: Optional[str] = None
+    seo_description: Optional[str] = None
     views: int
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}
 
 
 class SlugCheckOut(BaseModel):

@@ -4,11 +4,15 @@ import { useCvStore } from '@/store/cv';
 import { useProfileStore } from '@/store/profile';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, useRef } from 'react';
-import { ArrowLeft, Download, Save, Loader2, ZoomIn, ZoomOut, CheckCircle2, PenTool, LayoutTemplate, FileText, X, Palette, Settings2, Check } from 'lucide-react';
-import { PageFlow, PageNumberPlugin, mmToPx } from 'pageflow-js';
+import { useEffect, useState } from 'react';
+import { ArrowLeft, Download, Save, Loader2, ZoomIn, ZoomOut, CheckCircle2, PenTool, Palette, Settings2, Check, Sparkles, Briefcase, AlignLeft, FileText, X } from 'lucide-react';
 import { cvApi } from '@/lib/cv-api';
 import { API_BASE } from '@/lib/api';
+import { AIAssistant } from '@/components/app/shared/AIAssistant';
+import ExportModal from '@/components/app/shared/ExportModal';
+import { LetterTemplateRenderer } from '@/components/app/letter/LetterTemplateRenderer';
+import { LetterForm } from '@/components/app/letter/editor/LetterForm';
+import { AILetterGenerator } from '@/components/app/letter/editor/AILetterGenerator';
 
 const LETTER_THEMES = [
   { id: 'classic', label: 'Classique' },
@@ -28,13 +32,11 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [scale, setScale] = useState(0.5);
   const [isMobileFormOpen, setIsMobileFormOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'content' | 'design'>('content');
+  const [activeTab, setActiveTab] = useState<'content' | 'design' | 'ai'>('content');
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   
   const cv = cvs.find(c => c.id === params.id);
   const { data: session } = useSession();
-
-  const sourceRef = useRef<HTMLDivElement>(null);
-  const targetRef = useRef<HTMLDivElement>(null);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -141,39 +143,77 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
     }
   };
 
-  useEffect(() => {
-    if (!mounted || localLoading || !sourceRef.current || !targetRef.current) return;
-    let isCancelled = false;
-    let timeoutId: NodeJS.Timeout;
 
-    const runPageFlow = async () => {
-      if (isCancelled || !sourceRef.current || !targetRef.current) return;
+
+  const handleExportAction = async (format: string, quality: string) => {
+    if (!cv) return;
+    if (format === 'pdf') {
       try {
-        const pf = new PageFlow({
-          pageSize: 'A4',
-          margin: { top: mmToPx(20), right: mmToPx(20), bottom: mmToPx(20), left: mmToPx(20) },
-          pagination: { lookahead: 3, optimizeWhitespace: true },
-        });
-
-        targetRef.current.innerHTML = '';
-        await pf.flow(sourceRef.current, targetRef.current);
-      } catch (error) {
-        console.error("PageFlow error:", error);
+        const { exportPdf } = await import('@/lib/api');
+        
+        // Map frontend letter themes to backend template slugs for payment validation
+        const mappedTemplate = currentTemplate === 'classic' ? 'classique' : 
+                               currentTemplate === 'modern' ? 'moderne' : 
+                               'classique'; // fallback to free template for others
+        
+        const res = await exportPdf(
+          { templateName: mappedTemplate } as any,
+          { profile, formData, doc_type: 'cover_letter' } as any,
+          undefined,
+          undefined,
+          session?.user?.accessToken,
+          undefined,
+          'trial',
+          cv.template_id,
+          "sandbox-bypass-id"
+        );
+        if (res.url) {
+          const link = document.createElement('a');
+          link.href = res.url;
+          link.setAttribute('download', `${formData.title || 'Lettre'}.pdf`);
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+      } catch (err) {
+        console.error("Erreur lors de l'export PDF:", err);
+        alert("Une erreur est survenue lors de la génération du PDF.");
       }
-    };
-
-    timeoutId = setTimeout(() => {
-      runPageFlow();
-    }, 400);
-
-    return () => {
-      isCancelled = true;
-      clearTimeout(timeoutId);
-    };
-  }, [mounted, localLoading, formData, profile, cv?.template_id]); // Added template_id to trigger reflow
-
-  const handleExportPdf = () => {
-    window.print();
+      setIsExportModalOpen(false);
+    } else if (format === 'docx') {
+      try {
+        const { exportDocx } = await import('@/lib/api');
+        
+        // Map frontend letter themes to backend template slugs for payment validation
+        const mappedTemplate = currentTemplate === 'classic' ? 'classique' : 
+                               currentTemplate === 'modern' ? 'moderne' : 
+                               'classique';
+                               
+        const res = await exportDocx(
+          { templateName: mappedTemplate } as any,
+          { profile, formData, doc_type: 'cover_letter' } as any,
+          undefined,
+          undefined,
+          session?.user?.accessToken,
+          undefined,
+          'trial',
+          cv.template_id,
+          "sandbox-bypass-id"
+        );
+        if (res.url) {
+          const link = document.createElement('a');
+          link.href = res.url;
+          link.setAttribute('download', `${formData.title || 'Lettre'}.docx`);
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+      } catch (err) {
+        console.error("Erreur lors de l'export DOCX:", err);
+        alert("Une erreur est survenue lors de la génération du fichier Word.");
+      }
+      setIsExportModalOpen(false);
+    }
   };
 
   if (!mounted || localLoading) {
@@ -199,103 +239,17 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
     ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim()
     : profile?.username || 'Votre Nom';
 
-  const currentTemplate = cv.template_id || 'classic';
+  const rawTemplate = cv.template_id || 'classic';
+  const currentTemplate = rawTemplate === 'classique' ? 'classic' : rawTemplate;
 
   const FormContent = () => (
-    <div className="space-y-6">
-      <section>
-        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Destinataire</h3>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1.5">Entreprise</label>
-            <input
-              type="text"
-              className="w-full text-sm px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors placeholder:text-gray-400"
-              value={formData.companyName}
-              onChange={(e) => setFormData({...formData, companyName: e.target.value})}
-              placeholder="Ex: Google France"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1.5">Contact (Optionnel)</label>
-            <input
-              type="text"
-              className="w-full text-sm px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors placeholder:text-gray-400"
-              value={formData.recipientName}
-              onChange={(e) => setFormData({...formData, recipientName: e.target.value})}
-              placeholder="M. Jean Dupont"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1.5">Adresse</label>
-            <textarea
-              rows={2}
-              className="w-full text-sm px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 resize-none transition-colors placeholder:text-gray-400"
-              value={formData.recipientAddress}
-              onChange={(e) => setFormData({...formData, recipientAddress: e.target.value})}
-              placeholder="8 rue de Londres..."
-            />
-          </div>
-        </div>
-      </section>
-
-      <div className="h-px bg-gray-100" />
-
-      <section>
-        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Contenu</h3>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1.5">Objet</label>
-            <input
-              type="text"
-              className="w-full text-sm px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors font-medium"
-              value={formData.subject}
-              onChange={(e) => setFormData({...formData, subject: e.target.value})}
-              placeholder="Objet de la candidature"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1.5">Appel</label>
-            <input
-              type="text"
-              className="w-full text-sm px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
-              value={formData.salutation}
-              onChange={(e) => setFormData({...formData, salutation: e.target.value})}
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1.5">Corps de texte</label>
-            <textarea
-              rows={10}
-              className="w-full text-sm px-3 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 resize-none transition-colors leading-relaxed custom-scrollbar"
-              value={formData.body}
-              onChange={(e) => setFormData({...formData, body: e.target.value})}
-              placeholder="Commencez à rédiger votre lettre..."
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1.5">Politesse</label>
-            <textarea
-              rows={2}
-              className="w-full text-sm px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 resize-none transition-colors"
-              value={formData.closing}
-              onChange={(e) => setFormData({...formData, closing: e.target.value})}
-            />
-          </div>
-        </div>
-      </section>
-      
-      <div className="pt-4 lg:hidden">
-         <button
-          onClick={handleSave}
-          disabled={isSaving}
-          className="w-full flex items-center justify-center gap-2 py-3 bg-gray-900 text-white text-sm font-semibold rounded-xl active:scale-95 transition-transform disabled:opacity-50"
-        >
-          {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : savedSuccess ? <CheckCircle2 className="w-4 h-4 text-emerald-500" /> : <Save className="w-4 h-4" />}
-          {savedSuccess ? 'Sauvegardé' : 'Enregistrer'}
-        </button>
-      </div>
-    </div>
+    <LetterForm 
+      formData={formData} 
+      setFormData={setFormData} 
+      onSave={handleSave} 
+      isSaving={isSaving} 
+      savedSuccess={savedSuccess} 
+    />
   );
 
   const DesignContent = () => (
@@ -329,15 +283,34 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
     </div>
   );
 
+  const AIContent = () => (
+    <AILetterGenerator 
+      session={session}
+      cv={cv}
+      formData={formData}
+      setFormData={setFormData}
+      updateCv={updateCv}
+      setActiveTab={setActiveTab}
+    />
+  );
+
   return (
     <div className="py-6 sm:py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto font-sans min-h-screen selection:bg-indigo-100 selection:text-indigo-900">
       <style dangerouslySetInnerHTML={{__html: `
         @media print {
           body * { visibility: hidden; }
-          .pageflow-output, .pageflow-output * { visibility: visible; }
-          .pageflow-output { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; background: white; }
-          .pageflow-output .pf-page { box-shadow: none !important; margin: 0 !important; border-radius: 0 !important; }
-          @page { size: A4 portrait; margin: 0; }
+          .a4-print-container, .a4-print-container * { visibility: visible; }
+          .a4-print-container { 
+            position: absolute; 
+            left: 0; 
+            top: 0; 
+            width: 100%; 
+            margin: 0; 
+            padding: 0; 
+            box-shadow: none !important;
+            transform: none !important;
+          }
+          @page { size: A4 portrait; margin: 20mm; }
         }
         /* Custom scrollbar for webkit */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -381,11 +354,11 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
             {savedSuccess ? 'Sauvegardé' : 'Enregistrer'}
           </button>
           <button
-            onClick={handleExportPdf}
+            onClick={() => setIsExportModalOpen(true)}
             className="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white rounded-full font-semibold text-sm hover:bg-indigo-700 transition-all shadow-md shadow-indigo-600/20 active:scale-95"
           >
             <Download className="w-4 h-4" />
-            Télécharger PDF
+            Télécharger
           </button>
         </div>
       </div>
@@ -398,18 +371,26 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
             <div className="flex p-1 bg-gray-100/80 rounded-xl mb-6">
               <button
                 onClick={() => setActiveTab('design')}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium rounded-lg transition-all ${activeTab === 'design' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium rounded-lg transition-all ${activeTab === 'design' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
               >
-                <Palette className="w-4 h-4" /> Modèle
+                <Palette className="w-3.5 h-3.5" /> Modèle
               </button>
               <button
                 onClick={() => setActiveTab('content')}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium rounded-lg transition-all ${activeTab === 'content' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium rounded-lg transition-all ${activeTab === 'content' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
               >
-                <PenTool className="w-4 h-4" /> Contenu
+                <PenTool className="w-3.5 h-3.5" /> Éditer
+              </button>
+              <button
+                onClick={() => setActiveTab('ai')}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium rounded-lg transition-all ${activeTab === 'ai' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
+              >
+                <Sparkles className="w-3.5 h-3.5" /> IA
               </button>
             </div>
-            {activeTab === 'content' ? <FormContent /> : <DesignContent />}
+            {activeTab === 'content' && FormContent()}
+            {activeTab === 'design' && DesignContent()}
+            {activeTab === 'ai' && AIContent()}
           </div>
         </div>
 
@@ -438,196 +419,22 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
 
             {/* Document Container */}
             <div
-              className="relative mt-8 mb-8"
+              className="relative mt-8 mb-8 flex-shrink-0 transition-all duration-200"
               style={{
-                width: \`calc(210mm * \${scale})\`,
-                transformOrigin: 'top center',
+                width: `calc(210mm * ${scale})`,
+                height: `calc(297mm * ${scale})`,
               }}
             >
               <div
-                className="origin-top-left transition-transform duration-200"
+                className="a4-print-container origin-top-left transition-transform duration-200 bg-white shadow-xl border border-gray-200 absolute top-0 left-0 overflow-hidden"
                 style={{
                   width: '210mm',
-                  transform: \`scale(\${scale})\`,
+                  height: '297mm',
+                  transform: `scale(${scale})`,
+                  padding: '20mm',
                 }}
               >
-                {/* SOURCE: Hidden off-screen so PageFlow can measure it */}
-                <div style={{ position: 'absolute', left: '-9999px', top: 0, width: '210mm' }}>
-                  
-                  <div ref={sourceRef} className="bg-white">
-                    {currentTemplate === 'classic' && (
-                      <div className="font-sans text-gray-900 leading-relaxed text-[11pt]">
-                        {/* Header (Sender Info) */}
-                        <div className="mb-14 border-b border-gray-300 pb-6">
-                          <h1 className="text-3xl font-black text-gray-900 mb-2 uppercase tracking-tight">{displayName}</h1>
-                          <div className="text-gray-600 text-sm flex items-center gap-3 flex-wrap">
-                            {profile?.contact_phone && <span>{profile.contact_phone}</span>}
-                            {profile?.contact_phone && profile?.contact_email && <span>•</span>}
-                            {profile?.contact_email && <span>{profile.contact_email}</span>}
-                            {(profile?.contact_phone || profile?.contact_email) && profile?.location && <span>•</span>}
-                            {profile?.location && <span>{profile.location}</span>}
-                          </div>
-                        </div>
-
-                        {/* Recipient & Date */}
-                        <div className="flex justify-between items-start mb-12">
-                          <div className="w-1/2">
-                            <p className="text-gray-500 text-sm mb-1">Le</p>
-                            <p className="text-gray-900">{new Date().toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                          </div>
-                          <div className="w-1/2 text-left">
-                            <p className="font-bold text-gray-900 text-lg">{formData.companyName}</p>
-                            {formData.recipientName && <p className="text-gray-800 font-medium mt-1">{formData.recipientName}</p>}
-                            {formData.recipientAddress && (
-                              <p className="text-gray-600 whitespace-pre-wrap mt-1">{formData.recipientAddress}</p>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Subject */}
-                        {formData.subject && (
-                          <div className="mb-10 font-bold text-gray-900">
-                            Objet : {formData.subject}
-                          </div>
-                        )}
-
-                        {/* Body */}
-                        <div className="mb-6 font-medium text-gray-900">
-                          {formData.salutation}
-                        </div>
-                        
-                        <div className="whitespace-pre-wrap mb-10 text-justify text-gray-700 leading-[1.8]">
-                          {formData.body}
-                        </div>
-
-                        <div className="mb-16 text-gray-700">
-                          {formData.closing}
-                        </div>
-
-                        {/* Signature */}
-                        <div className="text-right">
-                          <p className="text-gray-500 text-sm mb-2">Cordialement,</p>
-                          <p className="font-bold text-gray-900 text-lg">{displayName}</p>
-                        </div>
-                      </div>
-                    )}
-
-                    {currentTemplate === 'modern' && (
-                      <div className="font-sans text-gray-900 leading-relaxed text-[11pt] pl-8 border-l-4 border-indigo-600">
-                        {/* Header (Sender Info) */}
-                        <div className="mb-12">
-                          <h1 className="text-3xl font-bold text-indigo-900 mb-2 tracking-tight">{displayName}</h1>
-                          <div className="text-gray-600 text-sm flex items-center gap-3 flex-wrap font-medium">
-                            {profile?.contact_phone && <span>{profile.contact_phone}</span>}
-                            {profile?.contact_phone && profile?.contact_email && <span className="w-1.5 h-1.5 rounded-full bg-indigo-200" />}
-                            {profile?.contact_email && <span>{profile.contact_email}</span>}
-                            {(profile?.contact_phone || profile?.contact_email) && profile?.location && <span className="w-1.5 h-1.5 rounded-full bg-indigo-200" />}
-                            {profile?.location && <span>{profile.location}</span>}
-                          </div>
-                        </div>
-
-                        {/* Recipient & Date */}
-                        <div className="flex flex-col gap-6 mb-12">
-                          <div className="text-gray-500 text-sm">
-                            Le {new Date().toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })}
-                          </div>
-                          <div className="bg-gray-50 p-6 rounded-lg self-end w-2/3 border border-gray-100">
-                            <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-2">À l'attention de</p>
-                            <p className="font-bold text-indigo-900 text-lg">{formData.companyName}</p>
-                            {formData.recipientName && <p className="text-gray-800 font-medium mt-1">{formData.recipientName}</p>}
-                            {formData.recipientAddress && (
-                              <p className="text-gray-600 whitespace-pre-wrap mt-2">{formData.recipientAddress}</p>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Subject */}
-                        {formData.subject && (
-                          <div className="mb-10 font-bold text-indigo-900 bg-indigo-50 py-3 px-4 rounded-lg inline-block">
-                            Objet : {formData.subject}
-                          </div>
-                        )}
-
-                        {/* Body */}
-                        <div className="mb-6 font-semibold text-gray-900">
-                          {formData.salutation}
-                        </div>
-                        
-                        <div className="whitespace-pre-wrap mb-10 text-gray-700 leading-loose">
-                          {formData.body}
-                        </div>
-
-                        <div className="mb-16 text-gray-700">
-                          {formData.closing}
-                        </div>
-
-                        {/* Signature */}
-                        <div className="text-left mt-8 pt-8 border-t border-gray-200 w-1/3">
-                          <p className="font-bold text-indigo-900 text-lg">{displayName}</p>
-                        </div>
-                      </div>
-                    )}
-
-                    {currentTemplate === 'minimal' && (
-                      <div className="font-serif text-gray-800 leading-relaxed text-[11pt] text-center">
-                        {/* Header (Sender Info) */}
-                        <div className="mb-16">
-                          <h1 className="text-2xl tracking-widest uppercase text-gray-900 mb-4">{displayName}</h1>
-                          <div className="text-gray-500 text-sm flex items-center justify-center gap-3 flex-wrap">
-                            {profile?.contact_phone && <span>{profile.contact_phone}</span>}
-                            {profile?.contact_email && <span>| {profile.contact_email}</span>}
-                            {profile?.location && <span>| {profile.location}</span>}
-                          </div>
-                        </div>
-
-                        {/* Date & Recipient */}
-                        <div className="flex flex-col items-center mb-16 text-sm">
-                          <div className="mb-8 italic text-gray-500">
-                            Fait le {new Date().toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })}
-                          </div>
-                          <div className="text-center">
-                            <p className="font-bold text-gray-900">{formData.companyName}</p>
-                            {formData.recipientName && <p className="text-gray-800">{formData.recipientName}</p>}
-                            {formData.recipientAddress && (
-                              <p className="text-gray-500 whitespace-pre-wrap mt-1">{formData.recipientAddress}</p>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Subject */}
-                        {formData.subject && (
-                          <div className="mb-12 font-bold text-gray-900 uppercase text-xs tracking-wider border-b border-gray-300 pb-2 inline-block">
-                            Objet : {formData.subject}
-                          </div>
-                        )}
-
-                        <div className="text-left">
-                          {/* Body */}
-                          <div className="mb-8 font-medium text-gray-900">
-                            {formData.salutation}
-                          </div>
-                          
-                          <div className="whitespace-pre-wrap mb-10 text-justify text-gray-700 leading-[2] font-sans font-light">
-                            {formData.body}
-                          </div>
-
-                          <div className="mb-16 text-gray-700 font-sans font-light">
-                            {formData.closing}
-                          </div>
-                        </div>
-
-                        {/* Signature */}
-                        <div className="text-right mt-16 font-serif">
-                          <p className="text-xl text-gray-900 italic">{displayName}</p>
-                        </div>
-                      </div>
-                    )}
-
-                  </div>
-                </div>
-
-                {/* TARGET: Where PageFlow injects the generated pages */}
-                <div ref={targetRef} className="pageflow-output" />
+                <LetterTemplateRenderer templateName={currentTemplate} data={{ profile, formData }} />
               </div>
             </div>
           </div>
@@ -650,22 +457,38 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
             <div className="flex p-1 bg-white border border-gray-200 rounded-xl mb-6 shadow-sm">
               <button
                 onClick={() => setActiveTab('design')}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium rounded-lg transition-all \${activeTab === 'design' ? 'bg-indigo-50 text-indigo-600' : 'text-gray-500 hover:text-gray-900'}`}
+                className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-medium rounded-lg transition-all ${activeTab === 'design' ? 'bg-indigo-50 text-indigo-600' : 'text-gray-500 hover:text-gray-900'}`}
               >
-                <Palette className="w-4 h-4" /> Modèle
+                <Palette className="w-3.5 h-3.5" /> Modèle
               </button>
               <button
                 onClick={() => setActiveTab('content')}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium rounded-lg transition-all \${activeTab === 'content' ? 'bg-indigo-50 text-indigo-600' : 'text-gray-500 hover:text-gray-900'}`}
+                className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-medium rounded-lg transition-all ${activeTab === 'content' ? 'bg-indigo-50 text-indigo-600' : 'text-gray-500 hover:text-gray-900'}`}
               >
-                <PenTool className="w-4 h-4" /> Contenu
+                <PenTool className="w-3.5 h-3.5" /> Éditer
+              </button>
+              <button
+                onClick={() => setActiveTab('ai')}
+                className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-medium rounded-lg transition-all ${activeTab === 'ai' ? 'bg-indigo-50 text-indigo-600' : 'text-gray-500 hover:text-gray-900'}`}
+              >
+                <Sparkles className="w-3.5 h-3.5" /> IA
               </button>
             </div>
-            {activeTab === 'content' ? <FormContent /> : <DesignContent />}
+            {activeTab === 'content' && FormContent()}
+            {activeTab === 'design' && DesignContent()}
+            {activeTab === 'ai' && AIContent()}
           </div>
         </div>
       )}
 
+      {cv && (
+        <ExportModal 
+          isOpen={isExportModalOpen}
+          onClose={() => setIsExportModalOpen(false)}
+          cv={cv}
+          onExport={handleExportAction}
+        />
+      )}
     </div>
   );
 }

@@ -46,70 +46,131 @@ def export_docx(data_or_path, out_docx_path: Path):
 
     doc = Document()
 
-    # En-tête
-    name = d_profile.get("name") or ""
-    if name:
+    # Check if this is a cover letter
+    is_cover_letter = "formData" in data or data.get("doc_type") == "cover_letter"
+    
+    if is_cover_letter:
+        form_data = data.get("formData", {})
+        
+        # En-tête de la lettre
+        name = d_profile.get("name") or d_profile.get("first_name", "") + " " + d_profile.get("last_name", "")
+        if not name.strip():
+            name = d_profile.get("username", "Votre Nom")
+            
         h = doc.add_heading(level=0)
         h_run = h.add_run(name)
         h_run.font.size = Pt(20)
         h.alignment = WD_ALIGN_PARAGRAPH.LEFT
-    title = d_profile.get("title")
-    if title:
-        p = doc.add_paragraph(title)
-        p.runs[0].font.size = Pt(12)
-
-    # Contacts (structure aplatie)
-    contacts_line = " | ".join(
-        x for x in [d_profile.get("email"), d_profile.get("phone"), d_profile.get("location"), d_profile.get("linkedin")] if x
-    )
-    if contacts_line:
-        p = doc.add_paragraph(contacts_line)
-        if p.runs:
+        
+        # Contacts
+        contacts_line = " | ".join(
+            x for x in [d_profile.get("email"), d_profile.get("phone"), d_profile.get("location")] if x
+        )
+        if contacts_line:
+            p = doc.add_paragraph(contacts_line)
             p.runs[0].font.size = Pt(10)
-
-    # Résumé
-    summary = data.get("summary")
-    if summary:
-        add_heading(doc, "Résumé", level=1)
-        doc.add_paragraph(summary)
-
-    # Compétences
-    skills = data.get("skills", {})
-    groups = skills.get("groups") if isinstance(skills, dict) else None
-    if groups:
-        add_heading(doc, "Compétences", level=1)
-        for grp in groups:
-            label = grp.get("label")
-            items = grp.get("items", [])
-            if label:
-                add_heading(doc, label, level=2)
-            add_bullets(doc, items)
-
-    # Expérience
-    xp = data.get("experience", [])
-    if xp:
-        add_heading(doc, "Expériences", level=1)
-        for item in xp:
-            title_line = " - ".join([x for x in [item.get("role"), item.get("company")] if x])
-            if title_line:
-                add_heading(doc, title_line, level=2)
-            date_line = " - ".join([x for x in [item.get("start"), item.get("end")] if x])
-            if date_line:
-                doc.add_paragraph(date_line)
-            bullets = item.get("bullets", [])
-            add_bullets(doc, bullets)
-
-    # Formation
-    edu = data.get("education", [])
-    if edu:
-        add_heading(doc, "Formation", level=1)
-        for e in edu:
-            title_line = " - ".join([x for x in [e.get("degree"), e.get("school")] if x])
-            if title_line:
-                add_heading(doc, title_line, level=2)
-            year = e.get("year")
-            if year:
-                doc.add_paragraph(str(year))
+            
+        doc.add_paragraph() # Spacer
+            
+        # Destinataire
+        if form_data.get("recipientName"):
+            doc.add_paragraph(f"À l'attention de {form_data.get('recipientName')}")
+        if form_data.get("companyName"):
+            p = doc.add_paragraph(form_data.get("companyName"))
+            p.runs[0].bold = True
+        if form_data.get("recipientAddress"):
+            doc.add_paragraph(form_data.get("recipientAddress"))
+            
+        doc.add_paragraph() # Spacer
+        
+        # Objet
+        if form_data.get("subject"):
+            p = doc.add_paragraph(f"Objet : {form_data.get('subject')}")
+            p.runs[0].bold = True
+            
+        doc.add_paragraph() # Spacer
+            
+        # Corps de la lettre
+        if form_data.get("salutation"):
+            doc.add_paragraph(form_data.get("salutation"))
+            
+        if form_data.get("body"):
+            for line in form_data.get("body").split('\n'):
+                doc.add_paragraph(line)
+                
+        doc.add_paragraph() # Spacer
+                
+        if form_data.get("closing"):
+            doc.add_paragraph(form_data.get("closing"))
+            
+        doc.add_paragraph() # Spacer
+        doc.add_paragraph(name)
+        
+    else:
+        # En-tête CV
+        name = d_profile.get("name") or ""
+        if name:
+            h = doc.add_heading(level=0)
+            h_run = h.add_run(name)
+            h_run.font.size = Pt(20)
+            h.alignment = WD_ALIGN_PARAGRAPH.LEFT
+        title = d_profile.get("title")
+        if title:
+            p = doc.add_paragraph(title)
+            p.runs[0].font.size = Pt(12)
+    
+        # Contacts (structure aplatie)
+        contacts_line = " | ".join(
+            x for x in [d_profile.get("email"), d_profile.get("phone"), d_profile.get("location"), d_profile.get("linkedin")] if x
+        )
+        if contacts_line:
+            p = doc.add_paragraph(contacts_line)
+            if p.runs:
+                p.runs[0].font.size = Pt(10)
+    
+        # Résumé
+        summary = data.get("summary")
+        if summary:
+            add_heading(doc, "Résumé", level=1)
+            doc.add_paragraph(summary)
+    
+        # Compétences
+        skills = data.get("skills", {})
+        groups = skills.get("groups") if isinstance(skills, dict) else None
+        if groups:
+            add_heading(doc, "Compétences", level=1)
+            for grp in groups:
+                label = grp.get("label")
+                items = grp.get("items", [])
+                if label:
+                    add_heading(doc, label, level=2)
+                add_bullets(doc, items)
+    
+        # Expérience
+        xp = data.get("experience", [])
+        if xp:
+            add_heading(doc, "Expériences", level=1)
+            for item in xp:
+                title_line = " - ".join([x for x in [item.get("role"), item.get("company")] if x])
+                if title_line:
+                    add_heading(doc, title_line, level=2)
+                date_line = " - ".join([x for x in [item.get("start"), item.get("end")] if x])
+                if date_line:
+                    doc.add_paragraph(date_line)
+                bullets = item.get("bullets", [])
+                add_bullets(doc, bullets)
+    
+        # Formation
+        edu = data.get("education", [])
+        if edu:
+            add_heading(doc, "Formation", level=1)
+            for e in edu:
+                title_line = " - ".join([x for x in [e.get("degree"), e.get("school")] if x])
+                if title_line:
+                    add_heading(doc, title_line, level=2)
+                year = e.get("year")
+                if year:
+                    doc.add_paragraph(str(year))
 
     doc.save(str(out_docx_path))
     return out_docx_path

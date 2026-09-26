@@ -135,7 +135,7 @@ export default function CreateCvWizard() {
       const newCv = await cvApi.createResume(session.user.accessToken, payload);
       
       addCv(newCv);
-      router.push(`/mes-documents/${newCv.id}`);
+      router.push(`/mes-documents/cv/${newCv.id}`);
     } catch (err) {
       console.error(err);
       alert("Erreur lors de la création du CV");

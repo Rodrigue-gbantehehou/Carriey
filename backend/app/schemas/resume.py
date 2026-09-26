@@ -17,6 +17,7 @@ class ResumeCreate(ResumeBase):
 
 class ResumeUpdate(BaseModel):
     title: Optional[str] = None
+    template_id: Optional[str] = None
     content: Optional[Dict[str, Any]] = None
     status: Optional[str] = None
     doc_type: Optional[str] = None

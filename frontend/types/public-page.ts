@@ -24,6 +24,8 @@ export interface PublicPage {
   accent_color: string;
   show_photo: boolean;
   show_contact: boolean;
+  custom_bio?: string | null;
+  seo_description?: string | null;
   views: number;
   created_at: string;
   updated_at: string;
@@ -40,6 +42,8 @@ export interface PublicPageCreate {
   accent_color?: string;
   show_photo?: boolean;
   show_contact?: boolean;
+  custom_bio?: string | null;
+  seo_description?: string | null;
 }
 
 export interface PublicPageUpdate extends Partial<PublicPageCreate> {}
@@ -60,6 +64,8 @@ export interface PublicPageData {
     show_photo: boolean;
     show_contact: boolean;
     sections: SectionsConfig;
+    custom_bio?: string | null;
+    seo_description?: string | null;
     views: number;
   };
   profile: {
