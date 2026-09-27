@@ -22,8 +22,24 @@ export function CVPreview({
   adapterData,
   templateConfig
 }: CVPreviewProps) {
+  const [contentHeight, setContentHeight] = React.useState(0);
+
+  React.useEffect(() => {
+    if (!targetRef.current) return;
+    
+    // We observe the targetRef to know exactly how tall the generated CV pages are
+    const observer = new ResizeObserver((entries) => {
+      if (entries[0]) {
+        setContentHeight(entries[0].contentRect.height);
+      }
+    });
+    
+    observer.observe(targetRef.current);
+    return () => observer.disconnect();
+  }, [targetRef]);
+
   return (
-    <div className="rounded-3xl p-4 sm:p-8 flex flex-col items-center min-h-[600px] border border-gray-200 relative overflow-auto custom-scrollbar" style={{ background: 'radial-gradient(circle, #d1d5db 1px, #f8f9fa 1px)', backgroundSize: '20px 20px' }}>
+    <div className="rounded-3xl p-4 sm:p-8 flex flex-col items-center h-full min-h-[600px] border border-gray-200 relative overflow-auto custom-scrollbar" style={{ background: 'radial-gradient(circle, #d1d5db 1px, #f8f9fa 1px)', backgroundSize: '20px 20px' }}>
 
       {/* Zoom Controls */}
       <div className="absolute top-4 right-4 z-10 bg-white/90 backdrop-blur-sm rounded-full shadow-sm border border-gray-200 flex items-center p-1">
@@ -46,9 +62,10 @@ export function CVPreview({
 
       {/* Document Container */}
       <div
-        className="relative mt-8 mb-8"
+        className="relative mt-8 mb-8 transition-all duration-200"
         style={{
           width: `calc(210mm * ${scale})`,
+          height: contentHeight > 0 ? contentHeight * scale : undefined,
           transformOrigin: 'top center',
         }}
       >

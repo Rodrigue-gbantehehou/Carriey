@@ -42,6 +42,8 @@ async def list_my_pages(
     return crud_public_page.get_by_user(db, user_id=current_user.id)
 
 
+from app.models.template import Template
+
 @router.post("/", response_model=PublicPageOut, status_code=201)
 async def create_page(
     obj_in: PublicPageCreate,
@@ -49,6 +51,27 @@ async def create_page(
     current_user: User = Depends(get_current_active_user)
 ):
     """Create a new public page."""
+    # Validate template
+    template = db.query(Template).filter(
+        Template.slug == obj_in.theme,
+        Template.is_active == True,
+        Template.template_type == "public_page"
+    ).first()
+
+    if not template:
+        # Fallback to the first active free public_page template
+        template = db.query(Template).filter(
+            Template.is_active == True,
+            Template.price == 0,
+            Template.template_type == "public_page"
+        ).first()
+        if not template:
+            # Hardcoded fallback if the DB is completely empty for public pages, 
+            # just to prevent crashing if the admin didn't create any yet.
+            pass
+        else:
+            obj_in.theme = template.slug
+
     if not crud_public_page.slug_available(db, obj_in.slug):
         suggestion = crud_public_page.suggest_slug(db, obj_in.slug)
         raise HTTPException(
@@ -78,6 +101,16 @@ async def update_page(
                 status_code=status.HTTP_409_CONFLICT,
                 detail=f"Le slug '{obj_in.slug}' est déjà utilisé."
             )
+
+    if obj_in.theme:
+        template = db.query(Template).filter(
+            Template.slug == obj_in.theme,
+            Template.is_active == True,
+            Template.template_type == "public_page"
+        ).first()
+        if not template:
+            raise HTTPException(status_code=400, detail="Le thème demandé n'est pas disponible ou est inactif.")
+        obj_in.theme = template.slug
 
     return crud_public_page.update(db, db_obj=page, obj_in=obj_in)
 

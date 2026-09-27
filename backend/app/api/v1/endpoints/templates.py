@@ -59,7 +59,15 @@ async def check_template_access(
     ).first()
     
     if not template:
-        raise HTTPException(status_code=404, detail="Template non trouvé")
+        # Template non trouvé dans la base = template legacy hardcodé (gratuit par défaut)
+        return {
+            "has_access": True,
+            "is_free": True,
+            "template_id": id_or_slug,
+            "template_name": id_or_slug,
+            "template_price": "0",
+            "template_currency": "XOF"
+        }
     
     is_free = template.price == 0
     has_access = is_free or TemplateAccessService.check_user_access(db, current_user.id, template.id)

@@ -38,7 +38,7 @@ export const cvApi = {
     return res.data;
   },
 
-  createResume: async (token: string, data: { title: string, template_id: string, doc_type: string, content?: Record<string, any>, config?: Record<string, any> }): Promise<CV> => {
+  createResume: async (token: string, data: { title: string, template_id?: string, doc_type: string, content?: Record<string, any>, config?: Record<string, any> }): Promise<CV> => {
     const res = await axios.post(`${API_BASE}/resumes/`, data, {
       headers: { Authorization: `Bearer ${token}` },
     });

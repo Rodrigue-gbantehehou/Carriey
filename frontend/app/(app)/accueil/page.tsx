@@ -6,7 +6,8 @@ import { useSession } from 'next-auth/react';
 import { useProfileStore } from '@/store/profile';
 import { useCvStore } from '@/store/cv';
 import { useUiStore } from '@/store/ui';
-import { FileText, Plus, Target, User, Briefcase, TrendingUp, ChevronRight, Award, Clock } from 'lucide-react';
+import { FileText, Plus, Target, User, Briefcase, TrendingUp, ChevronRight, Award, Clock, Sparkles, X } from 'lucide-react';
+import { AIAssistant } from '@/components/app/shared/AIAssistant';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useRouter } from 'next/navigation';
@@ -34,10 +35,49 @@ export default function AccueilPage() {
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
 
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+  const [isCreatingTailoredCv, setIsCreatingTailoredCv] = useState(false);
+
+  const handleAiSubmit = async (jobDescription: string) => {
+    if (!session?.user?.accessToken) return;
+    setIsAiModalOpen(false);
+    setIsCreatingTailoredCv(true);
+    
+    try {
+      const { aiApi } = await import('@/lib/ai-api');
+      const { cvApi } = await import('@/lib/cv-api');
+      const tailoredData = await aiApi.tailorCv(session.user.accessToken, jobDescription);
+      
+      const payload = {
+        title: `CV Ciblé - ${new Date().toLocaleDateString()}`,
+        template_id: 'classique',
+        doc_type: 'cv',
+        content: {
+          usage: 'spontanee',
+          disabledSections: tailoredData.disabledSections || [],
+          disabledItems: tailoredData.disabledItems || {},
+          overrides: {
+            summary: tailoredData.summary,
+            experiences: tailoredData.experiences
+          }
+        }
+      };
+      
+      const newCv = await cvApi.createResume(session.user.accessToken, payload);
+      useCvStore.getState().addCv(newCv);
+      router.push(`/mes-documents/cv/${newCv.id}`);
+    } catch (err) {
+      console.error(err);
+      alert("Erreur lors de la création du CV ciblé.");
+    } finally {
+      setIsCreatingTailoredCv(false);
+    }
+  };
+
   const firstName = profile?.first_name || session?.user?.name?.split(' ')[0] || profile?.username || 'vous';
   const completion = getCompletionPercent(profile, about);
   
-  const recentDocs = [...cvs].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()).slice(0, 3);
+  const recentDocs = [...cvs].sort((a, b) => new Date(b.updated_at || b.created_at || Date.now()).getTime() - new Date(a.updated_at || a.created_at || Date.now()).getTime()).slice(0, 3);
 
   useEffect(() => {
     setMounted(true);
@@ -120,11 +160,16 @@ export default function AccueilPage() {
           </button>
           
           <button 
-            onClick={() => alert('Bientôt disponible !')}
-            className="flex flex-col items-start gap-2 p-3.5 rounded-xl border border-gray-100 bg-white shadow-sm hover:border-emerald-300 hover:shadow-md transition-all active:scale-95"
+            onClick={() => setIsAiModalOpen(true)}
+            disabled={isCreatingTailoredCv}
+            className="flex flex-col items-start gap-2 p-3.5 rounded-xl border border-gray-100 bg-white shadow-sm hover:border-emerald-300 hover:shadow-md transition-all active:scale-95 disabled:opacity-70"
           >
             <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-              <Target className="w-4 h-4" />
+              {isCreatingTailoredCv ? (
+                <div className="w-4 h-4 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Target className="w-4 h-4" />
+              )}
             </div>
             <div className="text-left">
               <p className="font-bold text-gray-900 text-xs">Cibler offre</p>
@@ -179,7 +224,7 @@ export default function AccueilPage() {
                   <div className="flex items-center gap-1.5 mt-0.5">
                     <Clock className="w-3 h-3 text-gray-400" />
                     <p className="text-[11px] text-gray-500 truncate">
-                      Modifié il y a {formatDistanceToNow(new Date(doc.updated_at), { addSuffix: false, locale: fr })}
+                      Modifié il y a {formatDistanceToNow(new Date(doc.updated_at || doc.created_at || Date.now()), { addSuffix: false, locale: fr })}
                     </p>
                   </div>
                 </div>
@@ -194,6 +239,31 @@ export default function AccueilPage() {
         </div>
       </section>
       
+      {/* AIAssistant Modal */}
+      {isAiModalOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsAiModalOpen(false)} />
+          <div className="relative bg-white rounded-3xl p-6 w-full max-w-2xl shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-emerald-600" />
+                Créer un CV ciblé
+              </h3>
+              <button onClick={() => setIsAiModalOpen(false)} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <p className="text-sm text-gray-500 mb-6">
+              Collez l'annonce ou la description de l'offre d'emploi ci-dessous. L'IA va analyser votre Master Profile, générer une accroche et adapter vos expériences.
+            </p>
+            <AIAssistant
+              onGenerate={handleAiSubmit}
+              placeholder="Ex: Développeur React avec 5 ans d'expérience..."
+              buttonText="Générer mon CV sur-mesure"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

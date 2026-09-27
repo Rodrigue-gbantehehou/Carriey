@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import config from '@/lib/config'
 import { toast } from 'react-hot-toast'
+import { Users, Banknote, Download } from 'lucide-react'
 
 interface ReportStat {
     period: string
@@ -91,42 +92,42 @@ export default function AdminReportsPage() {
     }
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-6">
             <div>
-                <h1 className="text-3xl font-black text-gray-900 mb-2">Rapports et Exports</h1>
-                <p className="text-gray-500">Statistiques mensuelles et exports de données au format CSV.</p>
+                <h1 className="text-xl font-semibold text-gray-900 mb-1">Rapports et Exports</h1>
+                <p className="text-sm text-gray-500">Statistiques mensuelles et exports de données au format CSV.</p>
             </div>
 
             {/* Actions d'export */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Export Utilisateurs */}
-                <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm flex flex-col items-start">
-                    <div className="w-12 h-12 bg-sky-100 rounded-xl flex items-center justify-center text-2xl mb-4">
-                        👥
+                <div className="bg-white border border-gray-200 rounded-md p-5 shadow-sm flex flex-col items-start">
+                    <div className="w-10 h-10 bg-sky-50 rounded-md flex items-center justify-center text-sky-600 mb-4 border border-sky-100">
+                        <Users className="w-5 h-5" />
                     </div>
-                    <h2 className="text-lg font-black text-gray-900 mb-2">Export Utilisateurs</h2>
+                    <h2 className="text-lg font-semibold text-gray-900 mb-2">Export Utilisateurs</h2>
                     <p className="text-sm text-gray-500 mb-6 flex-1">
                         Exporte la liste complète de tous les utilisateurs inscrits avec leurs statistiques d'utilisation (nombre de CVs, lettres et paiements).
                     </p>
                     <button
                         onClick={handleExportUsers}
                         disabled={exportingUsers}
-                        className="w-full py-3 bg-gray-900 text-white font-bold rounded-xl hover:bg-black transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                        className="w-full py-2 bg-gray-900 text-white text-sm font-medium rounded-md hover:bg-gray-800 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                     >
                         {exportingUsers ? (
-                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
                         ) : (
-                            <>📥 Télécharger CSV</>
+                            <><Download className="w-4 h-4" /> Télécharger CSV</>
                         )}
                     </button>
                 </div>
 
                 {/* Export Paiements */}
-                <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm flex flex-col items-start">
-                    <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center text-2xl mb-4">
-                        💰
+                <div className="bg-white border border-gray-200 rounded-md p-5 shadow-sm flex flex-col items-start">
+                    <div className="w-10 h-10 bg-emerald-50 rounded-md flex items-center justify-center text-emerald-600 mb-4 border border-emerald-100">
+                        <Banknote className="w-5 h-5" />
                     </div>
-                    <h2 className="text-lg font-black text-gray-900 mb-2">Export Paiements</h2>
+                    <h2 className="text-lg font-semibold text-gray-900 mb-2">Export Paiements</h2>
                     <p className="text-sm text-gray-500 mb-4 flex-1">
                         Exporte l'historique des transactions financières sur une période donnée.
                     </p>
@@ -134,7 +135,7 @@ export default function AdminReportsPage() {
                         <select 
                             value={paymentDays}
                             onChange={(e) => setPaymentDays(e.target.value)}
-                            className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold focus:outline-none"
+                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-gray-200"
                         >
                             <option value="30">30 derniers jours</option>
                             <option value="90">90 derniers jours</option>
@@ -145,12 +146,12 @@ export default function AdminReportsPage() {
                         <button
                             onClick={handleExportPayments}
                             disabled={exportingPayments}
-                            className="w-full py-3 bg-emerald-50 text-emerald-600 font-bold rounded-xl border border-emerald-100 hover:bg-emerald-100 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                            className="w-full py-2 bg-emerald-50 text-emerald-700 text-sm font-medium rounded-md border border-emerald-200 hover:bg-emerald-100 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                         >
                             {exportingPayments ? (
-                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-emerald-600" />
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-emerald-600" />
                             ) : (
-                                <>📥 Télécharger CSV</>
+                                <><Download className="w-4 h-4" /> Télécharger CSV</>
                             )}
                         </button>
                     </div>
@@ -158,8 +159,8 @@ export default function AdminReportsPage() {
             </div>
 
             {/* Rapport Mensuel */}
-            <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
-                <h2 className="text-lg font-black text-gray-900 mb-6">Évolution mensuelle (6 derniers mois)</h2>
+            <div className="bg-white border border-gray-200 rounded-md p-5 shadow-sm">
+                <h2 className="text-base font-semibold text-gray-900 mb-5">Évolution mensuelle (6 derniers mois)</h2>
                 {loading ? (
                     <div className="flex justify-center py-12">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500" />
@@ -170,22 +171,22 @@ export default function AdminReportsPage() {
                     <div className="overflow-x-auto">
                         <table className="w-full text-left text-sm">
                             <thead>
-                                <tr className="border-b border-gray-100 text-gray-400">
-                                    <th className="pb-3 font-bold uppercase tracking-widest text-xs">Période</th>
-                                    <th className="pb-3 font-bold uppercase tracking-widest text-xs text-right">Inscriptions</th>
-                                    <th className="pb-3 font-bold uppercase tracking-widest text-xs text-right">Nouveaux CVs</th>
-                                    <th className="pb-3 font-bold uppercase tracking-widest text-xs text-right">Nouvelles Lettres</th>
-                                    <th className="pb-3 font-bold uppercase tracking-widest text-xs text-right text-emerald-600">Revenus générés</th>
+                                <tr className="border-b border-gray-200 text-gray-500">
+                                    <th className="pb-3 font-semibold uppercase tracking-wider text-xs">Période</th>
+                                    <th className="pb-3 font-semibold uppercase tracking-wider text-xs text-right">Inscriptions</th>
+                                    <th className="pb-3 font-semibold uppercase tracking-wider text-xs text-right">Nouveaux CVs</th>
+                                    <th className="pb-3 font-semibold uppercase tracking-wider text-xs text-right">Nouvelles Lettres</th>
+                                    <th className="pb-3 font-semibold uppercase tracking-wider text-xs text-right text-emerald-600">Revenus générés</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-50">
+                            <tbody className="divide-y divide-gray-100">
                                 {reports.map((report) => (
                                     <tr key={report.period} className="hover:bg-gray-50 transition-colors">
-                                        <td className="py-4 font-black text-gray-900 capitalize">{report.period}</td>
-                                        <td className="py-4 text-right font-semibold text-gray-600">+{report.new_users}</td>
-                                        <td className="py-4 text-right font-semibold text-sky-600">+{report.new_cv}</td>
-                                        <td className="py-4 text-right font-semibold text-purple-600">+{report.new_letters}</td>
-                                        <td className="py-4 text-right font-black text-emerald-600">
+                                        <td className="py-4 font-semibold text-gray-900 capitalize">{report.period}</td>
+                                        <td className="py-4 text-right font-medium text-gray-600">+{report.new_users}</td>
+                                        <td className="py-4 text-right font-medium text-sky-600">+{report.new_cv}</td>
+                                        <td className="py-4 text-right font-medium text-purple-600">+{report.new_letters}</td>
+                                        <td className="py-4 text-right font-semibold text-emerald-600">
                                             {report.revenue > 0 ? `${report.revenue.toLocaleString()} XOF` : '—'}
                                         </td>
                                     </tr>

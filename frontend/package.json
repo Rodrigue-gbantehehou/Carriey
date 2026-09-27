@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "sync-css": "node scripts/sync-template-css.js",
-    "predev": "node scripts/sync-template-css.js",
-    "prebuild": "node scripts/sync-template-css.js",
+    "generate-templates": "node scripts/generate-templates.js",
+    "predev": "npm run sync-css && npm run generate-templates",
+    "prebuild": "npm run sync-css && npm run generate-templates",
     "dev": "next dev -p 5000 -H 0.0.0.0",
     "build": "next build",
     "start": "next start -p 5000 -H 0.0.0.0",

@@ -3,8 +3,9 @@ import { Eye, Trash2, ToggleLeft, ToggleRight, Copy, Check, Globe, Settings2, Sh
 import { PublicPage } from '@/types/public-page';
 import { THEMES, daysLeft } from './constants';
 
-export function PageCard({ page, onEdit, onDelete, onToggle }: {
+export function PageCard({ page, previewImage, onEdit, onDelete, onToggle }: {
   page: PublicPage;
+  previewImage?: string;
   onEdit: () => void;
   onDelete: () => void;
   onToggle: () => void;
@@ -46,18 +47,28 @@ export function PageCard({ page, onEdit, onDelete, onToggle }: {
     >
       {/* Miniature area */}
       <div className="aspect-[1/1.4] bg-gray-100 border-b border-gray-100 relative overflow-hidden flex items-center justify-center p-4">
-        <div className={`w-full h-full shadow-sm rounded-lg relative border border-gray-100 transition-transform group-hover:scale-[1.02] flex flex-col overflow-hidden ${theme.preview}`}>
-          <div className="bg-white/90 backdrop-blur-sm mx-2 mt-2 p-2 rounded-md flex items-center justify-between shadow-sm">
-            <div className="w-6 h-6 rounded-full bg-gray-200" />
-            <div className="w-10 h-1.5 rounded-full bg-gray-200" />
-          </div>
-          <div className="flex-1 mx-2 mt-2 bg-white/70 backdrop-blur-sm rounded-md p-2 space-y-2.5 mb-2 shadow-sm">
-            <div className="w-3/4 h-2 rounded-full bg-gray-300" />
-            <div className="w-1/2 h-2 rounded-full bg-gray-300" />
-            <div className="w-full h-1.5 rounded-full bg-gray-200 mt-4" />
-            <div className="w-5/6 h-1.5 rounded-full bg-gray-200" />
-            <div className="w-4/6 h-1.5 rounded-full bg-gray-200" />
-          </div>
+        <div className={`w-full h-full shadow-sm rounded-lg relative border border-gray-100 transition-transform group-hover:scale-[1.02] flex flex-col overflow-hidden ${!previewImage ? theme.preview : 'bg-white p-0'}`}>
+          {previewImage ? (
+            <img 
+              src={previewImage.startsWith('http') ? previewImage : `${(process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/v1').replace('/api/v1', '')}/static/previews/${previewImage.split('/').pop()}`}
+              alt="Preview"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <>
+              <div className="bg-white/90 backdrop-blur-sm mx-2 mt-2 p-2 rounded-md flex items-center justify-between shadow-sm">
+                <div className="w-6 h-6 rounded-full bg-gray-200" />
+                <div className="w-10 h-1.5 rounded-full bg-gray-200" />
+              </div>
+              <div className="flex-1 mx-2 mt-2 bg-white/70 backdrop-blur-sm rounded-md p-2 space-y-2.5 mb-2 shadow-sm">
+                <div className="w-3/4 h-2 rounded-full bg-gray-300" />
+                <div className="w-1/2 h-2 rounded-full bg-gray-300" />
+                <div className="w-full h-1.5 rounded-full bg-gray-200 mt-4" />
+                <div className="w-5/6 h-1.5 rounded-full bg-gray-200" />
+                <div className="w-4/6 h-1.5 rounded-full bg-gray-200" />
+              </div>
+            </>
+          )}
         </div>
         
         {/* Overlay with config button */}
@@ -73,10 +84,12 @@ export function PageCard({ page, onEdit, onDelete, onToggle }: {
       <div className="p-4 flex flex-col flex-1">
         <div className="flex items-start justify-between gap-3 mb-2">
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-gray-900 line-clamp-1 flex items-center gap-2" title={page.title}>
-              {page.title}
-              {!page.is_active && <span className="text-[9px] font-bold bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full">INACTIF</span>}
-            </h3>
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold text-gray-900 truncate" title={page.title}>
+                {page.title}
+              </h3>
+              {!page.is_active && <span className="text-[9px] font-bold bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full shrink-0">INACTIF</span>}
+            </div>
             <p className="text-xs text-indigo-600 font-mono mt-0.5 truncate">/p/{page.slug}</p>
           </div>
           <div className="flex gap-0.5 -mr-1.5">
@@ -109,7 +122,7 @@ export function PageCard({ page, onEdit, onDelete, onToggle }: {
             {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
           </button>
           <a href={`/p/${page.slug}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-[10px] font-bold bg-indigo-50 text-indigo-700 px-2.5 py-1.5 rounded-md hover:bg-indigo-100 transition-all uppercase tracking-wider">
-            <Globe className="w-3 h-3" /> Ouvrir
+            <Globe className="w-3 h-3" /> 
           </a>
         </div>
       </div>

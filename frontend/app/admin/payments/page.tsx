@@ -83,19 +83,19 @@ export default function PaymentsAdmin() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Gestion des Paiements</h1>
-          <p className="text-gray-500">Suivez les transactions et gérez les validations manuelles.</p>
+          <h1 className="text-xl font-semibold text-gray-900 mb-1">Gestion des Paiements</h1>
+          <p className="text-sm text-gray-500">Suivez les transactions et gérez les validations manuelles.</p>
         </div>
         
         <div className="flex items-center gap-3">
-          <label className="text-sm font-bold text-gray-400 uppercase tracking-widest">Filtrer:</label>
+          <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Filtrer:</label>
           <select 
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm font-semibold outline-none focus:ring-2 focus:ring-emerald-500"
+            className="bg-white border border-gray-200 rounded-md px-3 py-1.5 text-sm font-medium outline-none focus:ring-2 focus:ring-gray-200"
           >
             <option value="">Tous les statuts</option>
             <option value="success">Réussis</option>
@@ -106,17 +106,17 @@ export default function PaymentsAdmin() {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-md shadow-sm border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="bg-gray-50 border-b border-gray-100">
-                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-widest">Client / Modèle</th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-widest">Montant</th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-widest">Méthode</th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-widest">Statut</th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-widest">Date</th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-widest text-right">Actions</th>
+              <tr className="bg-gray-50 border-b border-gray-200">
+                <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Client / Modèle</th>
+                <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Montant</th>
+                <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Méthode</th>
+                <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Statut</th>
+                <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
+                <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -134,19 +134,19 @@ export default function PaymentsAdmin() {
                       <div className="text-sm text-gray-400">{payment.template_name}</div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="font-bold text-gray-900">{payment.amount.toLocaleString()} {payment.currency}</div>
+                      <div className="font-semibold text-gray-900">{payment.amount.toLocaleString()} {payment.currency}</div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="inline-flex px-2 py-0.5 rounded bg-gray-100 text-gray-600 text-[10px] font-bold uppercase">
+                      <span className="inline-flex px-2 py-0.5 rounded text-gray-600 text-[10px] font-semibold uppercase border border-gray-200">
                         {payment.provider}
                       </span>
                       <div className="text-[10px] text-gray-400 mt-1 font-mono">{payment.provider_payment_id || 'N/A'}</div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`inline-flex px-2 py-1 rounded text-[10px] font-black uppercase tracking-widest ${
-                        payment.status === 'success' ? 'bg-green-100 text-green-700' : 
-                        payment.status === 'pending' ? 'bg-amber-100 text-amber-700' :
-                        'bg-red-100 text-red-700'
+                      <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium border ${
+                        payment.status === 'success' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 
+                        payment.status === 'pending' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                        'bg-red-50 text-red-700 border-red-200'
                       }`}>
                         {payment.status === 'success' ? 'Réussi' : 
                          payment.status === 'pending' ? 'En attente' : 
@@ -167,7 +167,7 @@ export default function PaymentsAdmin() {
                         <button 
                           onClick={() => handleConfirmPayment(payment.id)}
                           disabled={updatingId === payment.id}
-                          className="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-2 rounded-lg hover:bg-emerald-600 hover:text-white transition-all"
+                          className="text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-md hover:bg-emerald-100 transition-colors"
                         >
                           Valider
                         </button>

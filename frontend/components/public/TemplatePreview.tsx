@@ -235,7 +235,7 @@ export default function TemplatePreview({ template, data = DEFAULT_MOCK_DATA, se
   if (template?.preview_image) {
     const src = template.preview_image.startsWith('http')
       ? template.preview_image
-      : `${API_BASE}${template.preview_image}`;
+      : `${API_BASE.replace('/api/v1', '')}${template.preview_image}`;
     return (
       <div ref={containerRef} className="w-full h-full relative overflow-hidden bg-[#FBFBFB] flex items-center justify-center">
         {/* eslint-disable-next-line @next/next/no-img-element */}

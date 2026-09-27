@@ -5,7 +5,7 @@ import { useProfileStore } from '@/store/profile';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useRef, Suspense } from 'react';
-import { ArrowLeft, Download, LayoutTemplate, Palette, Check, Settings2, ZoomIn, ZoomOut, X, SlidersHorizontal } from 'lucide-react';
+import { ArrowLeft, Download, LayoutTemplate, Palette, Check, Settings2, ZoomIn, ZoomOut, X, SlidersHorizontal, ListOrdered } from 'lucide-react';
 import { PageFlow, PageNumberPlugin, mmToPx } from 'pageflow-js';
 import ExportModal from '@/components/app/shared/ExportModal';
 import { ThemeThumbnail } from '@/components/app/cv/shared/ThemeThumbnail';
@@ -18,6 +18,7 @@ import { API_BASE } from '@/lib/api';
 import { ThemeSelector } from '@/components/app/cv/editor/ThemeSelector';
 import { ColorPicker } from '@/components/app/cv/editor/ColorPicker';
 import { CVPreview } from '@/components/app/cv/editor/CVPreview';
+import { ContentSelectorModal } from '@/components/app/cv/editor/ContentSelectorModal';
 
 export default function CvEditorPage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -29,6 +30,7 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [showThemeSelector, setShowThemeSelector] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false); // Controls the floating sidebar
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
   const [scale, setScale] = useState(0.5); // Adjusted default zoom to 50%
 
 
@@ -90,7 +92,7 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
   const adapterData = cv ? {
     profile: {
       name: displayName,
-      title: profile?.title || '',
+      title: cv.content?.overrides?.title !== undefined ? cv.content.overrides.title : profile?.title || '',
       email: profile?.contact_email || '',
       phone: profile?.contact_phone || '',
       location: profile?.location || '',
@@ -105,7 +107,7 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
         location: exp.location,
         start: exp.start_date,
         end: exp.current ? 'Présent' : exp.end_date,
-        description: exp.description,
+        description: cv.content?.overrides?.experiences?.[exp.id]?.description || exp.description,
       })) || [],
     education: profile?.educations
       ?.filter(edu => !(cv.content?.disabledItems?.educations || []).includes(edu.id))
@@ -126,9 +128,9 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
         dates: proj.start_date ? `${proj.start_date} - ${proj.end_date || 'Présent'}` : undefined,
       })) || [],
     skills: {
-      groups: profile?.skills?.length ? [{ items: profile.skills.map(s => s.name) }] : []
+      groups: profile?.skills?.length ? [{ items: profile.skills.filter(s => !(cv.content?.disabledItems?.skills || []).includes(s.id)).map(s => s.name) }] : []
     },
-    summary: profile?.bio || '',
+    summary: cv.content?.overrides?.summary || profile?.bio || '',
     languages: profile?.languages
       ?.filter(lang => !(cv.content?.disabledItems?.languages || []).includes(lang.id))
       .map(lang => ({
@@ -143,7 +145,10 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
         date: cert.date,
         url: cert.url,
       })) || [],
-    custom_sections: profile?.custom_sections || [],
+    custom_sections: profile?.custom_sections?.map(cs => ({
+      ...cs,
+      items: cs.items?.filter(item => !(cv.content?.disabledItems?.[`custom_${cs.id}`] || []).includes(item.id)) || []
+    })) || [],
   } : null;
 
   const rawTemplateId = (cv?.template_id || 'classique').toLowerCase();
@@ -419,25 +424,50 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
               <div className="space-y-6">
                 {/* Ordre des Sections */}
                 <div>
-                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Ordre des Sections</h3>
-                  <p className="text-xs text-gray-500 mb-3">
-                    Glissez-déposez pour réorganiser. Certains templates à 2 colonnes séparent automatiquement les sections.
-                  </p>
-                  <DndList 
-                    sections={dndSections} 
-                    onMove={handleMoveSection} 
-                  />
+                  <button 
+                    onClick={() => setIsOrderModalOpen(true)}
+                    className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl transition-colors group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-white text-gray-700 shadow-sm border border-gray-200 flex items-center justify-center">
+                        <ListOrdered className="w-4 h-4" />
+                      </div>
+                      <div className="text-left">
+                        <p className="text-sm font-bold text-gray-900">Ordre des Sections</p>
+                        <p className="text-xs text-gray-500 font-medium group-hover:underline">Réorganiser les blocs</p>
+                      </div>
+                    </div>
+                  </button>
+
+                  {isOrderModalOpen && (
+                    <div className="fixed inset-0 z-[100] flex flex-col sm:items-center sm:justify-center p-0 sm:p-4">
+                      <div className="hidden sm:block absolute inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity" onClick={() => setIsOrderModalOpen(false)} />
+                      <div className="relative bg-white w-full h-[100dvh] sm:h-auto sm:max-w-md sm:max-h-[90vh] flex flex-col sm:rounded-2xl shadow-2xl z-10 overflow-hidden animate-in fade-in sm:zoom-in duration-200">
+                        
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-white flex-shrink-0">
+                          <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                            <ListOrdered className="w-5 h-5 text-indigo-600" />
+                            Réorganiser les sections
+                          </h3>
+                          <button onClick={() => setIsOrderModalOpen(false)} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
+                        <div className="p-6 overflow-y-auto bg-gray-50">
+                          <p className="text-sm text-gray-500 mb-6">
+                            Glissez-déposez pour réorganiser. L'ordre peut être ajusté différemment selon le modèle choisi.
+                          </p>
+                          <DndList 
+                            sections={dndSections} 
+                            onMove={handleMoveSection} 
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
-                <div className="pt-6 border-t border-gray-100">
-                  <h3 className="text-sm font-bold text-gray-900 mb-2">Sélection du contenu</h3>
-                  <p className="text-sm text-gray-500 mb-6">
-                    Dans la V2, vous pourrez gérer quelles expériences spécifiques s'affichent.
-                  </p>
-                  <button onClick={() => router.push('/profil')} className="text-sm font-semibold text-indigo-600 hover:underline">
-                    Aller modifier le Profil
-                  </button>
-                </div>
+                <ContentSelectorModal cvId={cv.id} />
               </div>
             )}
           </div>
@@ -487,8 +517,8 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Desktop Sidebar */}
-        <div className="hidden lg:block lg:col-span-4 space-y-6">
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 sticky top-6">
+        <div className="hidden lg:block lg:col-span-4 space-y-6 relative z-[60]">
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 sticky top-6 z-[60]">
             <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
               <Settings2 className="w-5 h-5 text-indigo-600" />
               Personnalisation
@@ -498,7 +528,7 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
         </div>
 
         {/* Canvas Area */}
-        <div className="lg:col-span-8">
+        <div className="lg:col-span-8 h-[calc(100vh-120px)] sticky top-6">
           <CVPreview
             scale={scale}
             setScale={setScale}
@@ -511,20 +541,11 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
         </div>
       </div>
 
-      {/* Mobile Settings Bottom Sheet */}
+      {/* Mobile Settings Modal (Personnalisation) */}
       {isSettingsOpen && (
-        <>
-          <div
-            onClick={() => setIsSettingsOpen(false)}
-            className="lg:hidden fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-40 transition-opacity"
-          />
-          <div
-            className={`lg:hidden fixed inset-x-0 bottom-0 max-h-[85vh] bg-white rounded-t-3xl shadow-2xl z-50 transform transition-transform duration-300 ease-out flex flex-col ${isSettingsOpen ? 'translate-y-0' : 'translate-y-full'}`}
-          >
-            <div className="flex justify-center py-3 bg-white rounded-t-3xl">
-              <div className="w-12 h-1.5 bg-gray-300 rounded-full" />
-            </div>
-            <div className="h-14 flex items-center justify-between px-6 border-b border-gray-100">
+        <div className="lg:hidden fixed inset-0 z-[100] flex flex-col p-0">
+          <div className="relative bg-white w-full h-[100dvh] flex flex-col z-10 overflow-hidden animate-in fade-in duration-200">
+            <div className="h-14 flex items-center justify-between px-6 border-b border-gray-100 flex-shrink-0">
               <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
                 <Settings2 className="w-5 h-5 text-indigo-600" /> Personnalisation
               </h2>
@@ -539,7 +560,7 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
               {renderSidebarContent()}
             </div>
           </div>
-        </>
+        </div>
       )}
 
       <ExportModal

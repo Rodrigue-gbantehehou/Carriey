@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { Settings2, Layout, Palette, Sparkles } from 'lucide-react';
+import { Settings2, Layout, Palette, Sparkles, Check } from 'lucide-react';
 import { publicPagesApi } from '@/lib/public-pages-api';
 import { PublicPage, PublicPageCreate, SectionsConfig, Theme } from '@/types/public-page';
 import { SlugInput } from '../shared/SlugInput';
 import { THEMES, SECTION_LABELS, EXPIRY_OPTIONS, getExpiresAt, inputClass } from '../shared/constants';
+import config from '@/lib/config';
+import { useEffect } from 'react';
 
 export function PageEditor({ initialPage, token, onSave, onClose }: {
   initialPage?: PublicPage;
@@ -30,6 +32,22 @@ export function PageEditor({ initialPage, token, onSave, onClose }: {
   const [seoDescription, setSeoDescription] = useState(initialPage?.seo_description || '');
   const [isGeneratingAi, setIsGeneratingAi] = useState(false);
   const [titleSuggestions, setTitleSuggestions] = useState<string[]>([]);
+
+  const [dbThemes, setDbThemes] = useState<any[]>([]);
+  useEffect(() => {
+    fetch(`${config.apiBaseUrl}/templates`)
+      .then(r => r.ok ? r.json() : [])
+      .then(data => {
+        const publicThemes = data.filter((t: any) => t.template_type === 'public_page');
+        if (publicThemes.length > 0) {
+            setDbThemes(publicThemes);
+            if (!initialPage && publicThemes[0]) {
+                setTheme(publicThemes[0].slug);
+            }
+        }
+      })
+      .catch(() => {});
+  }, [initialPage]);
 
   const [saveError, setSaveError] = useState<string | null>(null);
 
@@ -258,15 +276,44 @@ export function PageEditor({ initialPage, token, onSave, onClose }: {
         <div className="space-y-5">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-3">Thème</label>
-            <div className="grid grid-cols-2 gap-3">
-              {THEMES.map(t => (
-                <button key={t.id} onClick={() => setTheme(t.id)}
-                  className={`p-3 rounded-xl border-2 text-left transition-all ${theme === t.id ? 'border-indigo-500 shadow-md' : 'border-gray-200 hover:border-gray-300'}`}>
-                  <div className={`h-10 rounded-lg mb-2 ${t.preview}`} />
-                  <p className="text-sm font-bold text-gray-900">{t.label}</p>
-                  <p className="text-xs text-gray-400">{t.desc}</p>
+            <div className="grid grid-cols-2 gap-3 max-h-[400px] overflow-y-auto custom-scrollbar p-1">
+              {dbThemes.map(t => (
+                <button
+                  key={t.slug || t.id}
+                  onClick={() => setTheme(t.slug || t.id)}
+                  className={`relative aspect-[1/1.4] rounded-xl border-2 overflow-hidden flex flex-col transition-all bg-white group ${theme === (t.slug || t.id) ? 'border-indigo-600 shadow-md shadow-indigo-100' : 'border-gray-100 hover:border-indigo-300'}`}
+                >
+                  <div className="flex-1 p-2 flex items-center justify-center border-b border-gray-50 bg-gray-50/50 w-full relative">
+                    {t.preview_image ? (
+                      <img 
+                        src={t.preview_image.startsWith('http') ? t.preview_image : `${config.apiBaseUrl.replace('/api/v1', '')}/static/previews/${t.preview_image.split('/').pop()}`}
+                        alt={t.name || t.label}
+                        className="w-full h-full object-contain"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-100 rounded flex flex-col p-2 space-y-2">
+                        <div className="w-full h-2 bg-gray-200 rounded" />
+                        <div className="w-3/4 h-2 bg-gray-200 rounded" />
+                        <div className="w-1/2 h-2 bg-gray-200 rounded" />
+                      </div>
+                    )}
+                  </div>
+                  {theme === (t.slug || t.id) && (
+                    <div className="absolute top-2 right-2 w-5 h-5 bg-indigo-600 rounded-full flex items-center justify-center text-white shadow-sm z-10">
+                      <Check className="w-3 h-3" />
+                    </div>
+                  )}
+                  <div className="p-2 text-center bg-white flex flex-col w-full">
+                    <span className="text-xs font-semibold text-gray-900 truncate">{t.name || t.label}</span>
+                    <span className="text-[10px] text-gray-400 font-medium truncate mt-0.5">{t.description || t.desc || 'Template standard'}</span>
+                  </div>
                 </button>
               ))}
+              {dbThemes.length === 0 && (
+                <div className="col-span-2 p-4 text-center text-gray-500 text-sm border-2 border-dashed border-gray-200 rounded-xl">
+                  Aucun thème disponible pour le moment.
+                </div>
+              )}
             </div>
           </div>
           <div>

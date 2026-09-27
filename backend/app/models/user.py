@@ -23,6 +23,10 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
+    # Subscription & Premium
+    premium_until = Column(DateTime(timezone=True), nullable=True)
+    subscription_status = Column(String(50), default="free") # free, pass_active, expired
+
     # Relationships
     profile = relationship("MasterProfile", back_populates="user", uselist=False, cascade="all, delete-orphan")
     resumes = relationship("Resume", back_populates="user", cascade="all, delete-orphan")

@@ -3,7 +3,7 @@
 import { useCvStore } from '@/store/cv';
 import { useUiStore } from '@/store/ui';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Plus, FileText, Clock, Trash2, Edit2, Search } from 'lucide-react';
+import { Plus, FileText, Clock, Trash2, Edit2, Search, Sparkles, X } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useState, useEffect } from 'react';
@@ -13,6 +13,7 @@ import { cvApi } from '@/lib/cv-api';
 import { publicPagesApi } from '@/lib/public-pages-api';
 import { PublicPage } from '@/types/public-page';
 import { PageCard } from '@/components/app/public-page/shared/PageCard';
+import { AIAssistant } from '@/components/app/shared/AIAssistant';
 
 const TABS = [
   { id: 'all', label: 'Tous' },
@@ -32,9 +33,12 @@ export default function MesDocumentsPage() {
   const [activeTab, setActiveTab] = useState('all');
   const [mounted, setMounted] = useState(false);
 
-  // Pages state
   const [pages, setPages] = useState<PublicPage[]>([]);
+  const [dbThemes, setDbThemes] = useState<any[]>([]);
   const [confirmDeletePage, setConfirmDeletePage] = useState<PublicPage | null>(null);
+
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+  const [isCreatingTailoredCv, setIsCreatingTailoredCv] = useState(false);
 
   // Vérifier s'il faut ouvrir l'éditeur de page via URL
   useEffect(() => {
@@ -50,12 +54,14 @@ export default function MesDocumentsPage() {
       if (token) {
         setLoading(true);
         try {
-          const [cvData, pagesData] = await Promise.all([
+          const [cvData, pagesData, templatesData] = await Promise.all([
             cvApi.getResumes(token).catch(() => []),
-            publicPagesApi.list(token).catch(() => [])
+            publicPagesApi.list(token).catch(() => []),
+            fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/v1'}/templates`).then(r => r.ok ? r.json() : []).catch(() => [])
           ]);
           setCvs(cvData as any);
           setPages(pagesData as PublicPage[]);
+          setDbThemes(templatesData);
         } catch (err) {
           console.error("Erreur lors de la récupération des documents", err);
         } finally {
@@ -65,6 +71,41 @@ export default function MesDocumentsPage() {
     };
     fetchData();
   }, [session, setCvs, setLoading]);
+
+  const handleAiSubmit = async (jobDescription: string) => {
+    if (!session?.user?.accessToken) return;
+    setIsAiModalOpen(false);
+    setIsCreatingTailoredCv(true);
+    
+    try {
+      const { aiApi } = await import('@/lib/ai-api');
+      const tailoredData = await aiApi.tailorCv(session.user.accessToken, jobDescription);
+      
+      const payload = {
+        title: `CV Ciblé - ${new Date().toLocaleDateString()}`,
+        template_id: 'classique',
+        doc_type: 'cv',
+        content: {
+          usage: 'spontanee',
+          disabledSections: tailoredData.disabledSections || [],
+          disabledItems: tailoredData.disabledItems || {},
+          overrides: {
+            summary: tailoredData.summary,
+            experiences: tailoredData.experiences
+          }
+        }
+      };
+      
+      const newCv = await cvApi.createResume(session.user.accessToken, payload);
+      useCvStore.getState().addCv(newCv);
+      router.push(`/mes-documents/cv/${newCv.id}`);
+    } catch (err) {
+      console.error(err);
+      alert("Erreur lors de la création du CV ciblé.");
+    } finally {
+      setIsCreatingTailoredCv(false);
+    }
+  };
 
   // CV Handlers
   const handleDeleteCv = async (e: React.MouseEvent, id: string) => {
@@ -115,13 +156,27 @@ export default function MesDocumentsPage() {
             Gérez tous les documents générés à partir de votre profil.
           </p>
         </div>
-        <button
-          onClick={openCreateModal}
-          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20 hover:scale-[1.02] active:scale-[0.98]"
-        >
-          <Plus className="w-4 h-4" />
-          Créer un document
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={() => setIsAiModalOpen(true)}
+            disabled={isCreatingTailoredCv}
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-indigo-200 text-indigo-700 rounded-xl font-bold text-sm hover:bg-indigo-50 transition-all shadow-sm hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70"
+          >
+            {isCreatingTailoredCv ? (
+              <div className="w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Sparkles className="w-4 h-4" />
+            )}
+            CV ciblé (IA)
+          </button>
+          <button
+            onClick={openCreateModal}
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20 hover:scale-[1.02] active:scale-[0.98]"
+          >
+            <Plus className="w-4 h-4" />
+            Créer un document
+          </button>
+        </div>
       </div>
 
       {/* Toolbar & Tabs */}
@@ -187,8 +242,18 @@ export default function MesDocumentsPage() {
               onClick={() => router.push(`/mes-documents/cv/${cv.id}`)}
             >
               <div className="aspect-[1/1.4] bg-gray-100 border-b border-gray-100 relative overflow-hidden flex items-center justify-center p-4">
-                <div className="w-full h-full bg-white shadow-sm rounded-sm p-2 relative border border-gray-100 transition-transform group-hover:scale-[1.02]">
-                  <ThemeThumbnail templateId={cv.template_id || 'classique'} />
+                <div className="w-full h-full bg-white shadow-sm rounded-sm p-0 relative border border-gray-100 transition-transform group-hover:scale-[1.02] overflow-hidden">
+                  {dbThemes.find(t => t.slug === cv.template_id || t.id === cv.template_id)?.preview_image ? (
+                    <img 
+                      src={dbThemes.find(t => t.slug === cv.template_id || t.id === cv.template_id)?.preview_image.startsWith('http') 
+                        ? dbThemes.find(t => t.slug === cv.template_id || t.id === cv.template_id)?.preview_image 
+                        : `${(process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/v1').replace('/api/v1', '')}/static/previews/${dbThemes.find(t => t.slug === cv.template_id || t.id === cv.template_id)?.preview_image.split('/').pop()}`}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="p-2 w-full h-full"><ThemeThumbnail templateId={cv.template_id || 'classique'} /></div>
+                  )}
                 </div>
                 
                 {/* Overlay with edit button */}
@@ -235,16 +300,28 @@ export default function MesDocumentsPage() {
               onClick={() => router.push(`/mes-documents/lettre/${lettre.id}`)}
             >
               <div className="aspect-[1/1.4] bg-gray-100 border-b border-gray-100 relative overflow-hidden flex items-center justify-center p-4">
-                <div className="w-full h-full bg-white shadow-sm rounded-sm p-4 relative border border-gray-100 transition-transform group-hover:scale-[1.02] flex flex-col">
-                  {/* Miniature abstraite de lettre */}
-                  <div className="w-1/3 h-1.5 bg-gray-200 rounded-full mb-6 ml-auto" />
-                  <div className="w-1/4 h-1.5 bg-gray-200 rounded-full mb-8" />
-                  <div className="w-full h-1 bg-gray-100 rounded-full mb-2" />
-                  <div className="w-full h-1 bg-gray-100 rounded-full mb-2" />
-                  <div className="w-5/6 h-1 bg-gray-100 rounded-full mb-2" />
-                  <div className="w-4/6 h-1 bg-gray-100 rounded-full mb-6" />
-                  <div className="w-full h-1 bg-gray-100 rounded-full mb-2" />
-                  <div className="w-5/6 h-1 bg-gray-100 rounded-full mb-2" />
+                <div className="w-full h-full bg-white shadow-sm rounded-sm p-0 relative border border-gray-100 transition-transform group-hover:scale-[1.02] flex flex-col overflow-hidden">
+                  {dbThemes.find(t => t.slug === lettre.template_id || t.id === lettre.template_id)?.preview_image ? (
+                    <img 
+                      src={dbThemes.find(t => t.slug === lettre.template_id || t.id === lettre.template_id)?.preview_image.startsWith('http') 
+                        ? dbThemes.find(t => t.slug === lettre.template_id || t.id === lettre.template_id)?.preview_image 
+                        : `${(process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/v1').replace('/api/v1', '')}/static/previews/${dbThemes.find(t => t.slug === lettre.template_id || t.id === lettre.template_id)?.preview_image.split('/').pop()}`}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full p-4 flex flex-col">
+                      {/* Miniature abstraite de lettre */}
+                      <div className="w-1/3 h-1.5 bg-gray-200 rounded-full mb-6 ml-auto" />
+                      <div className="w-1/4 h-1.5 bg-gray-200 rounded-full mb-8" />
+                      <div className="w-full h-1 bg-gray-100 rounded-full mb-2" />
+                      <div className="w-full h-1 bg-gray-100 rounded-full mb-2" />
+                      <div className="w-5/6 h-1 bg-gray-100 rounded-full mb-2" />
+                      <div className="w-4/6 h-1 bg-gray-100 rounded-full mb-6" />
+                      <div className="w-full h-1 bg-gray-100 rounded-full mb-2" />
+                      <div className="w-5/6 h-1 bg-gray-100 rounded-full mb-2" />
+                    </div>
+                  )}
                 </div>
                 
                 {/* Overlay with edit button */}
@@ -288,6 +365,7 @@ export default function MesDocumentsPage() {
             <PageCard
               key={page.id}
               page={page}
+              previewImage={dbThemes.find(t => t.slug === page.theme || t.id === page.theme)?.preview_image}
               onEdit={() => router.push(`/mes-documents/page-publique/${page.id}`)}
               onDelete={() => setConfirmDeletePage(page)}
               onToggle={() => handleTogglePage(page)}
@@ -314,6 +392,32 @@ export default function MesDocumentsPage() {
                 Supprimer
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* AIAssistant Modal */}
+      {isAiModalOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsAiModalOpen(false)} />
+          <div className="relative bg-white rounded-3xl p-6 w-full max-w-2xl shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-indigo-600" />
+                Créer un CV ciblé
+              </h3>
+              <button onClick={() => setIsAiModalOpen(false)} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <p className="text-sm text-gray-500 mb-6">
+              Collez l'annonce ou la description de l'offre d'emploi ci-dessous. L'IA va analyser votre Master Profile, générer une accroche et adapter vos expériences.
+            </p>
+            <AIAssistant
+              onGenerate={handleAiSubmit}
+              placeholder="Ex: Développeur React avec 5 ans d'expérience..."
+              buttonText="Générer mon CV sur-mesure"
+            />
           </div>
         </div>
       )}

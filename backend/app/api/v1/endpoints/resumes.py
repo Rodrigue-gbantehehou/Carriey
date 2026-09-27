@@ -108,12 +108,31 @@ async def create_resume(
             print("Pydantic Validation Error on Request:", ve)
             raise HTTPException(status_code=422, detail=ve.errors())
         
-        # Résoudre le template
-        template = db.query(Template).filter(
-            (Template.id == resume_in.template_id) | (Template.slug == resume_in.template_id)
-        ).first()
+        # Résoudre le template : Il DOIT être actif
+        doc_type_val_str = resume_in.doc_type if resume_in.doc_type else "cv"
+        template = None
+        if resume_in.template_id:
+            template = db.query(Template).filter(
+                (Template.id == resume_in.template_id) | (Template.slug == resume_in.template_id),
+                Template.is_active == True,
+                Template.template_type == doc_type_val_str
+            ).first()
 
-        actual_template_id = template.slug if (template and template.slug) else (template.id if template else resume_in.template_id)
+        # Si le template demandé n'est pas valide ou n'existe pas, prendre le premier gratuit actif
+        if not template:
+            template = db.query(Template).filter(
+                Template.is_active == True,
+                Template.price == 0,
+                Template.template_type == doc_type_val_str
+            ).first()
+            if not template:
+                # Fallback ultime (ne devrait jamais arriver si la base est bien initialisée)
+                template = db.query(Template).filter(Template.is_active == True).first()
+            
+            if not template:
+                raise HTTPException(status_code=400, detail="Aucun template actif disponible sur le système.")
+
+        actual_template_id = template.slug if (template and template.slug) else template.id
 
         try:
             doc_type_val = DocTypeEnum(resume_in.doc_type) if resume_in.doc_type else DocTypeEnum.CV
@@ -175,14 +194,13 @@ async def update_resume(
     update_data = resume_in.model_dump(exclude_unset=True)
     if "template_id" in update_data and update_data["template_id"]:
         template = db.query(Template).filter(
-            (Template.id == update_data["template_id"]) | (Template.slug == update_data["template_id"])
+            (Template.id == update_data["template_id"]) | (Template.slug == update_data["template_id"]),
+            Template.is_active == True
         ).first()
-        if template and template.slug:
-            update_data["template_id"] = template.slug
-        elif template:
-            update_data["template_id"] = template.id
-        else:
-            update_data["template_id"] = update_data["template_id"]
+        if not template:
+            raise HTTPException(status_code=400, detail="Le template demandé n'est pas disponible ou est inactif.")
+            
+        update_data["template_id"] = template.slug if template.slug else template.id
 
     for field, value in update_data.items():
         setattr(resume, field, value)

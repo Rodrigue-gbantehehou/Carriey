@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { publicPagesApi } from '@/lib/public-pages-api';
 import { PublicPageData } from '@/types/public-page';
-import { MinimalTheme, ModernTheme, BoldTheme, ElegantTheme } from '@/components/themes/PublicThemes';
+import { PublicPageTemplateRenderer } from '@/components/app/public-page/templates';
 import Link from 'next/link';
 import { AlertTriangle, Clock, Eye } from 'lucide-react';
 
@@ -87,16 +87,9 @@ export default async function PublicProfilePage({ params }: Props) {
   }
   const accent = page.accent_color || '#6366f1';
 
-  const ThemeComponent = {
-    minimal: MinimalTheme,
-    modern: ModernTheme,
-    bold: BoldTheme,
-    elegant: ElegantTheme,
-  }[page.theme] ?? ModernTheme;
-
   return (
     <>
-      <ThemeComponent data={data} accent={accent} />
+      <PublicPageTemplateRenderer templateName={page.theme} data={data} accent={accent} />
       {/* Subtle branding footer */}
       <div className="fixed bottom-4 right-4 z-50">
         <Link

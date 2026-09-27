@@ -24,8 +24,11 @@ export default async function AdminAuditPage() {
     if (!session?.user?.accessToken) {
         return (
             <div className="space-y-6">
-                <h1 className="text-3xl font-bold text-gray-900">Logs Système</h1>
-                <p className="text-red-600">Session expirée. Veuillez vous reconnecter.</p>
+                <div>
+                    <h1 className="text-xl font-semibold text-gray-900 mb-1">Logs Système</h1>
+                    <p className="text-sm text-gray-500">Historique des actions importantes sur la plateforme.</p>
+                </div>
+                <p className="text-sm text-red-600">Session expirée. Veuillez vous reconnecter.</p>
             </div>
         )
     }
@@ -39,31 +42,35 @@ export default async function AdminAuditPage() {
 
     return (
         <div className="space-y-6">
-            <h1 className="text-3xl font-bold text-gray-900">Logs Système</h1>
+            <div>
+                <h1 className="text-xl font-semibold text-gray-900 mb-1">Logs Système</h1>
+                <p className="text-sm text-gray-500">Historique des actions importantes sur la plateforme.</p>
+            </div>
 
-            <div className="bg-white shadow overflow-hidden sm:rounded-md">
-                <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                        <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Entité</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID Entité</th>
-                        </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+            <div className="bg-white rounded-md shadow-sm border border-gray-200 overflow-hidden">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                        <thead>
+                            <tr className="bg-gray-50 border-b border-gray-200">
+                                <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
+                                <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Action</th>
+                                <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Entité</th>
+                                <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">ID Entité</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
                         {logs.map((log: any) => (
-                            <tr key={log.id}>
+                            <tr key={log.id} className="hover:bg-gray-50 transition-colors">
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {new Date(log.created_at).toLocaleString()}
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
                                     {log.action}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {log.entity}
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <td className="px-6 py-4 whitespace-nowrap text-xs font-mono text-gray-400">
                                     {log.entity_id}
                                 </td>
                             </tr>
@@ -71,6 +78,7 @@ export default async function AdminAuditPage() {
                     </tbody>
                 </table>
             </div>
+        </div>
         </div>
     )
 }

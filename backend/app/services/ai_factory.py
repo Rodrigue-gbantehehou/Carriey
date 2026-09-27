@@ -18,10 +18,12 @@ def get_ai_service() -> AIService:
             raise ValueError("GEMINI_API_KEY n'est pas configurée dans les variables d'environnement.")
         return GeminiAIService(api_key=api_key)
         
-    # elif provider == "openai":
-    #     api_key = os.getenv("OPENAI_API_KEY")
-    #     from app.services.openai_service import OpenAIAIService
-    #     return OpenAIAIService(api_key=api_key)
+    elif provider == "groq":
+        api_key = os.getenv("GROQ_API_KEY")
+        if not api_key:
+            raise ValueError("GROQ_API_KEY n'est pas configurée dans les variables d'environnement.")
+        from app.services.groq_service import GroqAIService
+        return GroqAIService(api_key=api_key)
         
     else:
         raise NotImplementedError(f"Le fournisseur d'IA '{provider}' n'est pas supporté.")

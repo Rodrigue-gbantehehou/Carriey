@@ -1,20 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, FileText, CheckCircle2, Lock } from 'lucide-react';
 import { CV } from '@/lib/cv-api';
-
-const THEME_PRICES: Record<string, number> = {
-  minimal: 0,
-  classique: 0,
-  moderne: 1000,
-  elegant: 1500,
-  tokyo: 1000,
-  dakar: 1000,
-  abidjan: 1500,
-  professional: 1000,
-  creatif: 1500,
-};
+import config from '@/lib/config';
+import { useSession } from 'next-auth/react';
 
 interface ExportModalProps {
   isOpen: boolean;
@@ -27,11 +17,37 @@ export default function ExportModal({ isOpen, onClose, cv, onExport }: ExportMod
   const [format, setFormat] = useState('pdf');
   const [quality, setQuality] = useState('standard');
   const [isProcessing, setIsProcessing] = useState(false);
+  const { data: session } = useSession();
 
-  // Compute price based on template
-  const price = cv ? (THEME_PRICES[cv.template_id] || 0) : 0;
+  const [price, setPrice] = useState(0);
+  const [isUnlocked, setIsUnlocked] = useState(true);
+  const [isLoadingAccess, setIsLoadingAccess] = useState(false);
   const isPremium = price > 0;
-  const [isUnlocked, setIsUnlocked] = useState(!isPremium);
+
+  // Check access when modal opens
+  useEffect(() => {
+    if (isOpen && cv?.template_id) {
+      const checkAccess = async () => {
+        if (!session?.user?.accessToken) return;
+        setIsLoadingAccess(true);
+        try {
+          const res = await fetch(`${config.apiBaseUrl}/templates/${cv.template_id}/check-access`, {
+            headers: { Authorization: `Bearer ${session.user.accessToken}` }
+          });
+          if (!res.ok) throw new Error('Network error');
+          const data = await res.json();
+          setPrice(Number(data.template_price || 0));
+          setIsUnlocked(data.has_access);
+        } catch (error) {
+          console.error("Erreur check-access:", error);
+          setIsUnlocked(false);
+        } finally {
+          setIsLoadingAccess(false);
+        }
+      };
+      checkAccess();
+    }
+  }, [isOpen, cv?.template_id]);
 
   if (!isOpen || !cv) return null;
 
@@ -57,7 +73,7 @@ export default function ExportModal({ isOpen, onClose, cv, onExport }: ExportMod
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col justify-end sm:items-center sm:justify-center">
+    <div className="fixed inset-0 z-[100] flex flex-col justify-end sm:items-center sm:justify-center">
       <div className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm transition-opacity" onClick={onClose} />
       
       <div className="relative bg-white w-full sm:max-w-[400px] max-h-[85vh] flex flex-col sm:rounded-2xl rounded-t-3xl shadow-2xl z-10 overflow-hidden animate-in slide-in-from-bottom-8 sm:slide-in-from-bottom-0 sm:zoom-in sm:fade-in duration-200 pb-safe">
@@ -139,7 +155,11 @@ export default function ExportModal({ isOpen, onClose, cv, onExport }: ExportMod
               <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide">Thème</p>
               <p className="text-sm font-bold text-gray-900 capitalize mt-0.5">{cv.template_id}</p>
             </div>
-            {isPremium && !isUnlocked ? (
+            {isLoadingAccess ? (
+              <div className="text-right">
+                <span className="text-xs font-semibold text-gray-400">Vérification...</span>
+              </div>
+            ) : isPremium && !isUnlocked ? (
               <div className="text-right">
                 <span className="text-xs font-black bg-amber-100 text-amber-800 px-2 py-1 rounded-md">{price} FCFA</span>
               </div>

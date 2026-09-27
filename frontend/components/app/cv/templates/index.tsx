@@ -1,18 +1,8 @@
 
 import React, { lazy, Suspense } from 'react';
 import { TemplateProps } from '@/types/cv';
-
-// Registry of available templates
-export const TEMPLATE_REGISTRY: Record<string, any> = {
-  classique: lazy(() => import('./classique/Template')),
-  moderne: lazy(() => import('./moderne/Template')),
-  creatif: lazy(() => import('./creatif/Template')),
-  abidjan: lazy(() => import('./abidjan/Template')),
-  dakar: lazy(() => import('./dakar/Template')),
-  professional: lazy(() => import('./professional/Template')),
-  rodrigue: lazy(() => import('./rodrigue/Template')),
-  tokyo: lazy(() => import('./tokyo/Template')),
-};
+import { CV_TEMPLATE_REGISTRY } from './registry';
+export { CV_TEMPLATE_REGISTRY as TEMPLATE_REGISTRY };
 
 interface TemplateRendererProps extends Omit<TemplateProps, 'apiBaseUrl'> {
   templateName: string;
@@ -21,7 +11,7 @@ interface TemplateRendererProps extends Omit<TemplateProps, 'apiBaseUrl'> {
 
 export const getDefaultSections = (templateName: string) => {
   const rawName = (templateName || 'classique').toLowerCase();
-  const resolvedSlug = TEMPLATE_REGISTRY[rawName] ? rawName : 'classique';
+  const resolvedSlug = rawName || 'classique';
   const isTwoColumn = ['abidjan', 'dakar', 'moderne', 'professional', 'tokyo', 'creatif', 'rodrigue'].includes(resolvedSlug);
   
   const defaultTwoColumnSections = [
@@ -61,9 +51,23 @@ export const getDefaultSections = (templateName: string) => {
  * Main renderer component that dynamically loads the selected template
  */
 export const CVTemplateRenderer: React.FC<TemplateRendererProps> = ({ templateName, data, config, apiBaseUrl }) => {
-  const rawName = (templateName || 'classique').toLowerCase();
-  const resolvedSlug = TEMPLATE_REGISTRY[rawName] ? rawName : 'classique';
-  const TemplateComponent = TEMPLATE_REGISTRY[resolvedSlug];
+  const rawName = (templateName || '').toLowerCase();
+  
+  // Utilisation de la registry générée
+  const TemplateComponent = CV_TEMPLATE_REGISTRY[rawName];
+
+  if (!TemplateComponent) {
+    return (
+      <div className="p-8 text-center bg-gray-50 border border-red-200 rounded-lg h-full flex flex-col items-center justify-center">
+        <div className="text-red-500 font-bold mb-2">Modèle non disponible</div>
+        <p className="text-sm text-gray-500">
+          Le modèle "{rawName}" n'existe pas dans le registre. (Avez-vous lancé npm run generate-templates ?)
+        </p>
+      </div>
+    );
+  }
+
+  const resolvedSlug = rawName;
 
   const isTwoColumn = ['abidjan', 'dakar', 'moderne', 'professional', 'tokyo', 'creatif', 'rodrigue'].includes(resolvedSlug);
   

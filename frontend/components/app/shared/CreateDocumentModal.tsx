@@ -3,6 +3,7 @@
 import { useUiStore } from '@/store/ui';
 import { useCvStore } from '@/store/cv';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { FileText, LayoutTemplate, X, BookOpen, Layers, Briefcase, FileBadge } from 'lucide-react';
 import { useState } from 'react';
 

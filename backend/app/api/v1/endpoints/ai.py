@@ -127,6 +127,51 @@ async def generate_slug_suggestions_endpoint(
         suggestions = res.get("suggestions", [])
         titles = res.get("titles", [])
         return SlugSuggestionsResponse(suggestions=suggestions, titles=titles)
+    except RuntimeError as e:
+        if "QUOTA_EXCEEDED" in str(e):
+            raise HTTPException(status_code=503, detail="Le quota IA est épuisé pour aujourd'hui. Réessayez demain ou passez à un plan payant.")
+        raise HTTPException(status_code=500, detail="La génération des slugs a échoué.")
     except Exception as e:
         logger.error(f"Erreur de génération IA : {str(e)}")
         raise HTTPException(status_code=500, detail="La génération des slugs a échoué.")
+
+class TailorCvRequest(BaseModel):
+    job_description: str
+
+@router.post("/tailor-cv")
+async def tailor_cv_endpoint(
+    request: TailorCvRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    profile = crud_profile.get_by_user(db, user_id=current_user.id)
+    if not profile:
+        raise HTTPException(status_code=400, detail="Profil introuvable.")
+
+    # Convert full profile to dict for the prompt
+    profile_data = {
+        "first_name": profile.first_name,
+        "last_name": profile.last_name,
+        "title": profile.title,
+        "bio": profile.bio,
+        "experiences": [
+            {
+                "id": exp.id,
+                "title": exp.title,
+                "company": exp.company,
+                "description": exp.description
+            } for exp in profile.experiences
+        ]
+    }
+
+    try:
+        ai_service = get_ai_service()
+        res = await ai_service.tailor_cv(profile_data, request.job_description)
+        return res
+    except RuntimeError as e:
+        if "QUOTA_EXCEEDED" in str(e):
+            raise HTTPException(status_code=503, detail="Le quota IA est épuisé pour aujourd'hui.")
+        raise HTTPException(status_code=500, detail="L'adaptation du CV a échoué.")
+    except Exception as e:
+        logger.error(f"Erreur de génération IA : {str(e)}")
+        raise HTTPException(status_code=500, detail="L'adaptation du CV a échoué.")

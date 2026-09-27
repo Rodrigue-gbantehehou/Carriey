@@ -5,6 +5,7 @@ import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
 import config from '@/lib/config'
 import { toast } from 'react-hot-toast'
+import { Users, FileText, LayoutTemplate, Coins, LineChart } from 'lucide-react'
 
 interface Stats {
   total_users: number
@@ -61,17 +62,17 @@ export default function AdminDashboard() {
     }
   }, [session])
 
-  const StatCard = ({ title, value, icon, color, subValue }: { title: string, value: string | number, icon: string, color: string, subValue?: string }) => (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-      <div className="flex items-center justify-between mb-4">
-        <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl ${color}`}>
-          {icon}
+  const StatCard = ({ title, value, icon: Icon, color, subValue }: { title: string, value: string | number, icon: React.ElementType, color: string, subValue?: string }) => (
+    <div className="bg-white rounded-md shadow-sm border border-gray-200 p-5">
+      <div className="flex items-center justify-between mb-3">
+        <div className={`w-10 h-10 rounded-md flex items-center justify-center ${color}`}>
+          <Icon className="w-5 h-5" />
         </div>
       </div>
       <div>
-        <h3 className="text-3xl font-black text-gray-900 mb-1">{value}</h3>
-        <p className="text-sm font-semibold text-gray-500">{title}</p>
-        {subValue && <p className="text-xs text-gray-400 mt-2">{subValue}</p>}
+        <h3 className="text-2xl font-semibold text-gray-900 mb-1">{value}</h3>
+        <p className="text-sm text-gray-500">{title}</p>
+        {subValue && <p className="text-xs text-gray-400 mt-1">{subValue}</p>}
       </div>
     </div>
   )
@@ -90,8 +91,8 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-black text-gray-900 mb-2">Tableau de bord</h1>
-        <p className="text-gray-500">Vue d'ensemble des performances de la plateforme CVtor.</p>
+        <h1 className="text-xl font-semibold text-gray-900 mb-1">Tableau de bord</h1>
+        <p className="text-sm text-gray-500">Vue d'ensemble des performances de la plateforme CVtor.</p>
       </div>
 
       {/* Stats Grid */}
@@ -100,37 +101,37 @@ export default function AdminDashboard() {
           title="Utilisateurs"
           value={stats?.total_users || 0}
           subValue={`${stats?.active_users || 0} comptes actifs`}
-          icon="👥"
-          color="bg-sky-100 text-sky-600"
+          icon={Users}
+          color="bg-sky-50 text-sky-600 border border-sky-100"
         />
         <StatCard
           title="Documents"
           value={stats?.total_resumes || 0}
           subValue="CVs et lettres générés"
-          icon="📄"
-          color="bg-emerald-100 text-emerald-600"
+          icon={FileText}
+          color="bg-emerald-50 text-emerald-600 border border-emerald-100"
         />
         <StatCard
           title="Templates"
           value={stats?.total_templates || 0}
           subValue={`${stats?.active_templates || 0} modèles publiés`}
-          icon="🎨"
-          color="bg-purple-100 text-purple-600"
+          icon={LayoutTemplate}
+          color="bg-purple-50 text-purple-600 border border-purple-100"
         />
         <StatCard
           title="Revenu Total"
           value={`${stats?.total_revenue?.toLocaleString() || 0} ${stats?.revenue_currency || 'XOF'}`}
           subValue={`${stats?.successful_payments || 0} paiements validés`}
-          icon="💰"
-          color="bg-amber-100 text-amber-600"
+          icon={Coins}
+          color="bg-amber-50 text-amber-600 border border-amber-100"
         />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Graphique des revenus (2/3 de l'espace) */}
-          <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-              <div className="mb-6">
-                  <h3 className="text-lg font-black text-gray-900">Revenus (30 derniers jours)</h3>
+          <div className="lg:col-span-2 bg-white rounded-md shadow-sm border border-gray-200 p-5">
+              <div className="mb-5">
+                  <h3 className="text-base font-semibold text-gray-900">Revenus (30 derniers jours)</h3>
                   <p className="text-sm text-gray-500">Évolution journalière du chiffre d'affaires</p>
               </div>
               
@@ -163,35 +164,43 @@ export default function AdminDashboard() {
           </div>
 
           {/* Raccourcis (1/3 de l'espace) */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-              <h3 className="text-lg font-black text-gray-900 mb-4">Accès rapides</h3>
-              <div className="space-y-3">
-                  <Link href="/admin/users" className="flex items-center p-3 rounded-xl hover:bg-gray-50 border border-transparent hover:border-gray-100 transition-all group">
-                      <div className="w-10 h-10 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center text-lg mr-3 group-hover:scale-110 transition-transform">👥</div>
+          <div className="bg-white rounded-md shadow-sm border border-gray-200 p-5">
+              <h3 className="text-base font-semibold text-gray-900 mb-4">Accès rapides</h3>
+              <div className="space-y-2">
+                  <Link href="/admin/users" className="flex items-center p-2.5 rounded-md hover:bg-gray-50 border border-transparent hover:border-gray-200 transition-colors group">
+                      <div className="w-8 h-8 rounded-md bg-sky-50 text-sky-600 border border-sky-100 flex items-center justify-center mr-3">
+                          <Users className="w-4 h-4" />
+                      </div>
                       <div>
-                          <div className="font-bold text-gray-900 text-sm">Gérer les utilisateurs</div>
-                          <div className="text-xs text-gray-500">Rôles, comptes, détails</div>
+                          <div className="font-medium text-gray-900 text-sm">Gérer les utilisateurs</div>
+                          <div className="text-xs text-gray-500 mt-0.5">Rôles, comptes, détails</div>
                       </div>
                   </Link>
-                  <Link href="/admin/resumes" className="flex items-center p-3 rounded-xl hover:bg-gray-50 border border-transparent hover:border-gray-100 transition-all group">
-                      <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg mr-3 group-hover:scale-110 transition-transform">📄</div>
+                  <Link href="/admin/resumes" className="flex items-center p-2.5 rounded-md hover:bg-gray-50 border border-transparent hover:border-gray-200 transition-colors group">
+                      <div className="w-8 h-8 rounded-md bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center mr-3">
+                          <FileText className="w-4 h-4" />
+                      </div>
                       <div>
-                          <div className="font-bold text-gray-900 text-sm">Documents générés</div>
-                          <div className="text-xs text-gray-500">Liste des CVs et lettres</div>
+                          <div className="font-medium text-gray-900 text-sm">Documents générés</div>
+                          <div className="text-xs text-gray-500 mt-0.5">Liste des CVs et lettres</div>
                       </div>
                   </Link>
-                  <Link href="/admin/templates" className="flex items-center p-3 rounded-xl hover:bg-gray-50 border border-transparent hover:border-gray-100 transition-all group">
-                      <div className="w-10 h-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center text-lg mr-3 group-hover:scale-110 transition-transform">🎨</div>
+                  <Link href="/admin/templates" className="flex items-center p-2.5 rounded-md hover:bg-gray-50 border border-transparent hover:border-gray-200 transition-colors group">
+                      <div className="w-8 h-8 rounded-md bg-purple-50 text-purple-600 border border-purple-100 flex items-center justify-center mr-3">
+                          <LayoutTemplate className="w-4 h-4" />
+                      </div>
                       <div>
-                          <div className="font-bold text-gray-900 text-sm">Catalogue Modèles</div>
-                          <div className="text-xs text-gray-500">Ajouter ou modifier</div>
+                          <div className="font-medium text-gray-900 text-sm">Catalogue Modèles</div>
+                          <div className="text-xs text-gray-500 mt-0.5">Ajouter ou modifier</div>
                       </div>
                   </Link>
-                  <Link href="/admin/reports" className="flex items-center p-3 rounded-xl hover:bg-gray-50 border border-transparent hover:border-gray-100 transition-all group">
-                      <div className="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-lg mr-3 group-hover:scale-110 transition-transform">📉</div>
+                  <Link href="/admin/reports" className="flex items-center p-2.5 rounded-md hover:bg-gray-50 border border-transparent hover:border-gray-200 transition-colors group">
+                      <div className="w-8 h-8 rounded-md bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center mr-3">
+                          <LineChart className="w-4 h-4" />
+                      </div>
                       <div>
-                          <div className="font-bold text-gray-900 text-sm">Rapports & Exports</div>
-                          <div className="text-xs text-gray-500">Télécharger les CSV</div>
+                          <div className="font-medium text-gray-900 text-sm">Rapports & Exports</div>
+                          <div className="text-xs text-gray-500 mt-0.5">Télécharger les CSV</div>
                       </div>
                   </Link>
               </div>

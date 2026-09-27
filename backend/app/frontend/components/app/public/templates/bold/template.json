@@ -1,0 +1,38 @@
+{
+  "templateName": "Bold",
+  "fonts": {
+    "heading": "Montserrat",
+    "body": "Open Sans"
+  },
+  "colors": {
+    "primary": "#2D3748",
+    "secondary": "#F7FAFC",
+    "accent": "#805AD5"
+  },
+  "layout": {
+    "twoColumn": true,
+    "sidebarWidth": "35%"
+  },
+  "sections": [
+    {
+      "type": "contact",
+      "label": "Contact"
+    },
+    {
+      "type": "summary",
+      "label": "Résumé"
+    },
+    {
+      "type": "experience",
+      "label": "Expériences"
+    },
+    {
+      "type": "education",
+      "label": "Formation"
+    },
+    {
+      "type": "skills",
+      "label": "Compétences"
+    }
+  ]
+}

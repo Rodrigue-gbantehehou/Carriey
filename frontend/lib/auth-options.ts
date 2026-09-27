@@ -26,6 +26,7 @@ export const authOptions: NextAuthOptions = {
 
           // 1. Login to get token
           const loginUrl = `${config.apiBaseUrl}/auth/login`;
+          console.log("[NextAuth] Fetching from:", loginUrl);
           const res = await fetch(loginUrl, {
             method: 'POST',
             body: new URLSearchParams({

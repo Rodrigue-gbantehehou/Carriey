@@ -14,11 +14,7 @@ import { LetterTemplateRenderer } from '@/components/app/letter/LetterTemplateRe
 import { LetterForm } from '@/components/app/letter/editor/LetterForm';
 import { AILetterGenerator } from '@/components/app/letter/editor/AILetterGenerator';
 
-const LETTER_THEMES = [
-  { id: 'classic', label: 'Classique' },
-  { id: 'modern', label: 'Moderne' },
-  { id: 'minimal', label: 'Épuré' }
-];
+
 
 export default function CoverLetterEditorPage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -34,6 +30,20 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
   const [isMobileFormOpen, setIsMobileFormOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'content' | 'design' | 'ai'>('content');
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  
+  const [dbThemes, setDbThemes] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch(`${API_BASE}/templates`)
+      .then(r => r.ok ? r.json() : [])
+      .then(data => {
+        const letterThemes = data.filter((t: any) => t.template_type === 'cover_letter');
+        if (letterThemes.length > 0) {
+            setDbThemes(letterThemes);
+        }
+      })
+      .catch(() => {});
+  }, []);
   
   const cv = cvs.find(c => c.id === params.id);
   const { data: session } = useSession();
@@ -151,10 +161,7 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
       try {
         const { exportPdf } = await import('@/lib/api');
         
-        // Map frontend letter themes to backend template slugs for payment validation
-        const mappedTemplate = currentTemplate === 'classic' ? 'classique' : 
-                               currentTemplate === 'modern' ? 'moderne' : 
-                               'classique'; // fallback to free template for others
+        const mappedTemplate = currentTemplate;
         
         const res = await exportPdf(
           { templateName: mappedTemplate } as any,
@@ -184,10 +191,7 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
       try {
         const { exportDocx } = await import('@/lib/api');
         
-        // Map frontend letter themes to backend template slugs for payment validation
-        const mappedTemplate = currentTemplate === 'classic' ? 'classique' : 
-                               currentTemplate === 'modern' ? 'moderne' : 
-                               'classique';
+        const mappedTemplate = currentTemplate;
                                
         const res = await exportDocx(
           { templateName: mappedTemplate } as any,
@@ -239,8 +243,11 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
     ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim()
     : profile?.username || 'Votre Nom';
 
-  const rawTemplate = cv.template_id || 'classic';
-  const currentTemplate = rawTemplate === 'classique' ? 'classic' : rawTemplate;
+  const rawTemplate = cv.template_id || 'classique';
+  const currentTemplate = rawTemplate;
+
+  const currentThemeObj = dbThemes.find(t => t.slug === currentTemplate || t.id === currentTemplate);
+  const resolvedFolder = currentThemeObj?.folder_name || undefined;
 
   const FormContent = () => (
     <LetterForm 
@@ -257,27 +264,43 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
       <div>
         <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Choix du modèle</h3>
         <div className="grid grid-cols-2 gap-3">
-          {LETTER_THEMES.map(t => (
+          {dbThemes.map(t => (
             <button
-              key={t.id}
-              onClick={() => handleSelectTheme(t.id)}
-              className={`relative aspect-[1/1.2] rounded-xl border-2 overflow-hidden flex flex-col transition-all bg-white group ${currentTemplate === t.id ? 'border-indigo-600 shadow-md shadow-indigo-100' : 'border-gray-100 hover:border-indigo-300'}`}
+              key={t.slug || t.id}
+              onClick={() => handleSelectTheme(t.slug || t.id)}
+              className={`relative aspect-[1/1.2] rounded-xl border-2 overflow-hidden flex flex-col transition-all bg-white group ${currentTemplate === (t.slug || t.id) ? 'border-indigo-600 shadow-md shadow-indigo-100' : 'border-gray-100 hover:border-indigo-300'}`}
             >
               <div className="flex-1 bg-gray-50/50 p-2 border-b border-gray-50 flex items-center justify-center">
-                {t.id === 'classic' && <div className="w-full h-full bg-white border border-gray-200 shadow-sm rounded flex flex-col p-1.5"><div className="w-1/2 h-1 bg-gray-300 mb-2"/><div className="w-1/3 h-1 bg-gray-300 ml-auto mb-2"/><div className="w-full h-1 bg-gray-200 mb-0.5"/><div className="w-full h-1 bg-gray-200 mb-0.5"/><div className="w-3/4 h-1 bg-gray-200"/></div>}
-                {t.id === 'modern' && <div className="w-full h-full bg-white border border-gray-200 shadow-sm rounded flex flex-col p-1.5 border-l-4 border-l-indigo-500"><div className="w-1/2 h-1 bg-gray-800 mb-2"/><div className="w-1/3 h-1 bg-gray-400 ml-auto mb-2"/><div className="w-full h-1 bg-gray-200 mb-0.5"/><div className="w-full h-1 bg-gray-200 mb-0.5"/><div className="w-3/4 h-1 bg-gray-200"/></div>}
-                {t.id === 'minimal' && <div className="w-full h-full bg-white border border-gray-200 shadow-sm rounded flex flex-col p-1.5 items-center justify-center"><div className="w-1/2 h-1 bg-gray-400 mb-3"/><div className="w-full h-1 bg-gray-100 mb-0.5"/><div className="w-full h-1 bg-gray-100 mb-0.5"/><div className="w-3/4 h-1 bg-gray-100"/></div>}
+                {t.preview_image ? (
+                  <img 
+                    src={t.preview_image.startsWith('http') ? t.preview_image : `${API_BASE.replace('/api/v1', '')}/static/previews/${t.preview_image.split('/').pop()}`}
+                    alt={t.name}
+                    className="w-full h-full object-contain"
+                  />
+                ) : (
+                  <>
+                    {(t.slug === 'classique' || t.slug === 'classic') && <div className="w-full h-full bg-white border border-gray-200 shadow-sm rounded flex flex-col p-1.5"><div className="w-1/2 h-1 bg-gray-300 mb-2"/><div className="w-1/3 h-1 bg-gray-300 ml-auto mb-2"/><div className="w-full h-1 bg-gray-200 mb-0.5"/><div className="w-full h-1 bg-gray-200 mb-0.5"/><div className="w-3/4 h-1 bg-gray-200"/></div>}
+                    {(t.slug === 'moderne' || t.slug === 'modern') && <div className="w-full h-full bg-white border border-gray-200 shadow-sm rounded flex flex-col p-1.5 border-l-4 border-l-indigo-500"><div className="w-1/2 h-1 bg-gray-800 mb-2"/><div className="w-1/3 h-1 bg-gray-400 ml-auto mb-2"/><div className="w-full h-1 bg-gray-200 mb-0.5"/><div className="w-full h-1 bg-gray-200 mb-0.5"/><div className="w-3/4 h-1 bg-gray-200"/></div>}
+                    {(t.slug === 'minimal') && <div className="w-full h-full bg-white border border-gray-200 shadow-sm rounded flex flex-col p-1.5 items-center justify-center"><div className="w-1/2 h-1 bg-gray-400 mb-3"/><div className="w-full h-1 bg-gray-100 mb-0.5"/><div className="w-full h-1 bg-gray-100 mb-0.5"/><div className="w-3/4 h-1 bg-gray-100"/></div>}
+                    {!['classique', 'classic', 'moderne', 'modern', 'minimal'].includes(t.slug) && <div className="w-full h-full bg-white border border-gray-200 shadow-sm rounded flex flex-col p-1.5"><div className="w-1/2 h-1 bg-gray-400 mb-2"/><div className="w-full h-1 bg-gray-200 mb-0.5"/><div className="w-full h-1 bg-gray-200 mb-0.5"/><div className="w-3/4 h-1 bg-gray-200"/></div>}
+                  </>
+                )}
               </div>
-              {currentTemplate === t.id && (
+              {currentTemplate === (t.slug || t.id) && (
                 <div className="absolute top-1.5 right-1.5 w-4 h-4 bg-indigo-600 rounded-full flex items-center justify-center text-white shadow-sm z-10">
                   <Check className="w-2.5 h-2.5" />
                 </div>
               )}
               <div className="p-2 text-center bg-white">
-                <span className="text-xs font-semibold text-gray-900">{t.label}</span>
+                <span className="text-xs font-semibold text-gray-900">{t.name || t.label}</span>
               </div>
             </button>
           ))}
+          {dbThemes.length === 0 && (
+            <div className="col-span-2 p-4 text-center text-gray-500 text-sm border-2 border-dashed border-gray-200 rounded-xl">
+              Aucun modèle disponible pour le moment.
+            </div>
+          )}
         </div>
       </div>
     </div>

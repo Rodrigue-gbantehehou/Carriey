@@ -17,9 +17,11 @@ class UserLogin(BaseModel):
 
 # Schéma pour la réponse de l'utilisateur (sans mot de passe)
 class UserResponse(UserBase):
-    id: int
+    id: str
     is_active: bool
     created_at: datetime
+    premium_until: Optional[datetime] = None
+    subscription_status: str
 
     class Config:
         from_attributes = True

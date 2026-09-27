@@ -11,7 +11,7 @@ class GeminiAIService(AIService):
     def __init__(self, api_key: str):
         # Le SDK lit normalement GEMINI_API_KEY depuis l'environnement
         self.client = genai.Client()
-        self.model = "gemini-3.8-flash"
+        self.model = "gemini-2.0-flash"
 
     async def _generate_json(self, prompt: str) -> Dict[str, Any]:
         """Méthode interne réutilisable pour appeler Gemini et extraire du JSON."""
@@ -33,7 +33,10 @@ class GeminiAIService(AIService):
             return json.loads(text.strip())
             
         except Exception as e:
-            logger.error(f"Erreur lors de la génération avec Gemini: {str(e)}")
+            err_str = str(e)
+            if "429" in err_str or "RESOURCE_EXHAUSTED" in err_str:
+                raise RuntimeError("QUOTA_EXCEEDED")
+            logger.error(f"Erreur lors de la génération avec Gemini: {err_str}")
             raise e
 
     async def generate_cover_letter(self, profile_data: Dict[str, Any], job_description: str) -> Dict[str, str]:
@@ -117,6 +120,42 @@ RÉPONSE ATTENDUE :
 {{
   "suggestions": ["slug-1", "slug-2", "slug-3"],
   "titles": ["Titre 1", "Titre 2", "Titre 3"]
+}}
+"""
+        return await self._generate_json(prompt)
+
+    async def tailor_cv(self, profile_data: Dict[str, Any], job_description: str) -> Dict[str, Any]:
+        prompt = f"""
+Tu es un expert en recrutement et en optimisation de CV.
+Ton but est d'analyser le profil du candidat et de l'adapter spécifiquement pour l'offre d'emploi fournie.
+
+PROFIL DU CANDIDAT :
+{json.dumps(profile_data, ensure_ascii=False, indent=2)}
+
+OFFRE D'EMPLOI :
+{job_description}
+
+INSTRUCTIONS :
+1. Rédige une phrase d'accroche (summary) très ciblée pour ce poste (2-3 phrases max).
+2. Reprends les expériences du candidat. Pour chaque expérience pertinente, adapte la "description" pour mettre en valeur les compétences et mots-clés pertinents pour l'offre.
+3. Conserve les "id" exacts des expériences.
+4. Identifie les sections complètes (ex: "projects", "certifications", "languages", "interests") qui sont HORS SUJET ou NON PERTINENTES pour cette offre et ajoute-les à "disabledSections". Note: ne désactive jamais "experience" ni "education".
+5. Identifie les items spécifiques (expériences passées n'ayant aucun rapport, etc.) qui sont HORS SUJET et ajoute leurs IDs dans "disabledItems" sous leur catégorie (ex: "experiences", "educations", "skills").
+6. Ne mens pas, n'invente pas de fausses compétences.
+
+RÉPONSE ATTENDUE (JSON strictement valide) :
+{{
+  "summary": "...",
+  "experiences": {{
+    "id_experience_1": {{
+      "description": "..."
+    }}
+  }},
+  "disabledSections": ["projects"],
+  "disabledItems": {{
+    "experiences": ["id_exp_hors_sujet_1", "id_exp_hors_sujet_2"],
+    "skills": ["id_skill_inutile"]
+  }}
 }}
 """
         return await self._generate_json(prompt)

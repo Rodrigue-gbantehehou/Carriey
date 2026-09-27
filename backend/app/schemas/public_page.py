@@ -43,13 +43,6 @@ class PublicPageCreate(BaseModel):
     def slug_must_be_valid(cls, v: str) -> str:
         return validate_slug(v)
 
-    @field_validator("theme")
-    @classmethod
-    def theme_must_be_valid(cls, v: str) -> str:
-        if v not in ("minimal", "modern", "bold", "elegant"):
-            raise ValueError("Thème invalide")
-        return v
-
 
 class PublicPageUpdate(BaseModel):
     title: Optional[str] = Field(None, min_length=1, max_length=255)
@@ -71,15 +64,6 @@ class PublicPageUpdate(BaseModel):
         if v is None:
             return v
         return validate_slug(v)
-
-    @field_validator("theme", mode="before")
-    @classmethod
-    def theme_must_be_valid(cls, v: Optional[str]) -> Optional[str]:
-        if v is None:
-            return v
-        if v not in ("minimal", "modern", "bold", "elegant"):
-            raise ValueError("Thème invalide")
-        return v
 
 
 class PublicPageOut(BaseModel):

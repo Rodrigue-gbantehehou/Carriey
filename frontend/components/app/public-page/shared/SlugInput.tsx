@@ -13,6 +13,7 @@ export function SlugInput({ value, onChange, token, excludeId }: {
   const [suggestion, setSuggestion] = useState<string | null>(null);
   const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
   const [isLoadingAi, setIsLoadingAi] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
 
   const check = useCallback(async (slug: string) => {
     if (slug.length < 3) { setStatus('idle'); return; }
@@ -32,12 +33,18 @@ export function SlugInput({ value, onChange, token, excludeId }: {
   const handleGenerateAi = async () => {
     setIsLoadingAi(true);
     setAiSuggestions([]);
+    setAiError(null);
     try {
       const { aiApi } = await import('@/lib/ai-api');
       const res = await aiApi.generateSlugSuggestions(token);
       setAiSuggestions(res.suggestions);
-    } catch {
-      // silently fail
+    } catch (err: any) {
+      const msg = err?.message || '';
+      if (msg.includes('503') || msg.toLowerCase().includes('quota')) {
+        setAiError('⏳ Quota IA épuisé pour aujourd\'hui. Réessayez demain.');
+      } else {
+        setAiError('Erreur de génération IA.');
+      }
     } finally {
       setIsLoadingAi(false);
     }
@@ -80,7 +87,7 @@ export function SlugInput({ value, onChange, token, excludeId }: {
         </span>
       </div>
 
-      {/* AI suggestions chips */}
+      {aiError && <p className="text-[11px] text-amber-600 mt-1.5">⚠ {aiError}</p>}
       {aiSuggestions.length > 0 && (
         <div className="flex flex-wrap gap-2 mt-2">
           <span className="text-[10px] text-gray-400 self-center">Suggestions IA :</span>

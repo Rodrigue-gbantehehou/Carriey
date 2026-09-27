@@ -89,7 +89,8 @@ async def _get_or_create_export_user(req: ExportRequest, current_user: Optional[
     if not template and req.template_id:
         template = db.query(Template).filter(Template.id == req.template_id).first()
     
-    is_free = template and template.price == 0
+    # Si le template n'existe pas en base, c'est un ancien template hardcodé (legacy)
+    is_free = (template and template.price == 0) or (template is None)
     
     target_user_id = None
     is_new_user = False
@@ -212,9 +213,14 @@ async def export_pdf(
         target_user_id, is_new_user, setup_token = await _get_or_create_export_user(req, current_user, db)
         request_id = str(uuid.uuid4())
         
+        # Récupérer le template depuis la BDD pour obtenir le folder_name
+        from app.models.template import Template
+        template = db.query(Template).filter(Template.slug == req.template_name).first()
+        
         # Mettre en cache pour la route d'impression React WYSIWYG
         _PRINT_CACHE[request_id] = {
             "template_name": req.template_name,
+            "folder_name": template.folder_name if template else None,
             "data": req.data,
             "config": req.config or {}
         }

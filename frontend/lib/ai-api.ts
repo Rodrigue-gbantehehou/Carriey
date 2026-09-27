@@ -45,10 +45,31 @@ export const aiApi = {
     });
 
     if (!response.ok) {
-      throw new Error('Erreur lors de la génération des slugs');
+      const err = await response.json().catch(() => ({}));
+      const detail = err?.detail || 'Erreur lors de la génération des slugs';
+      throw new Error(`${response.status}: ${detail}`);
     }
 
     const data = await response.json();
     return { suggestions: data.suggestions ?? [], titles: data.titles ?? [] };
+  },
+
+  tailorCv: async (token: string, jobDescription: string) => {
+    const response = await fetch(`${API_BASE}/ai/tailor-cv`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ job_description: jobDescription }),
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      const detail = err?.detail || 'Erreur lors de l\'adaptation du CV';
+      throw new Error(`${response.status}: ${detail}`);
+    }
+
+    return response.json();
   }
 };

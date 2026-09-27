@@ -8,6 +8,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
+from fastapi import UploadFile, File
+import shutil
 
 from app.db.session import get_db
 from app.models.user import User
@@ -22,8 +24,17 @@ from app.core.config import settings
 
 # Get the base templates directory from settings
 TEMPLATES_DIR = Path(settings.TEMPLATES_DIR)
-BASE_DIR = Path(settings.BASE_DIR)
+# Fix BASE_DIR to point to the backend root directory
+BASE_DIR = Path(__file__).resolve().parents[4]
 STATIC_DIR = BASE_DIR / "static"
+
+def get_template_folder_path(template_type: str, folder_name: str) -> Path:
+    """Retourne le chemin absolu du dossier du template selon son type."""
+    if template_type == "cover_letter":
+        return TEMPLATES_DIR.parent.parent / "letter" / "templates" / folder_name
+    elif template_type == "public_page":
+        return TEMPLATES_DIR.parent.parent / "public" / "templates" / folder_name
+    return TEMPLATES_DIR / folder_name
 
 # Dummy data for live preview
 PREVIEW_DUMMY_DATA = {
@@ -106,6 +117,37 @@ async def preview_template_live(
     return HTMLResponse(content=html)
 
 
+@router.post("/upload-preview")
+async def upload_template_preview(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_admin)
+):
+    """Upload une image de miniature pour un template. Renvoie l'URL de l'image."""
+    # Validation du type de fichier
+    if not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="Le fichier doit être une image")
+        
+    # Créer le dossier s'il n'existe pas
+    preview_dir = STATIC_DIR / "previews"
+    preview_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Nettoyer le nom de fichier pour éviter les collisions ou attaques
+    import uuid
+    ext = file.filename.split(".")[-1] if "." in file.filename else "png"
+    safe_filename = f"uploaded_{uuid.uuid4().hex[:8]}.{ext}"
+    
+    file_path = preview_dir / safe_filename
+    
+    try:
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+            
+        preview_url = f"/static/previews/{safe_filename}"
+        return {"preview_url": preview_url, "message": "Image uploadée avec succès"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur lors de l'upload: {str(e)}")
+
+
 @router.get("/", response_model=List[TemplateListOut])
 async def list_templates(
     skip: int = 0,
@@ -141,11 +183,15 @@ async def create_template(
     if existing:
         raise HTTPException(status_code=400, detail="Un template avec ce slug existe déjà")
     
-    # Créer le dossier pour le template
-    template_folder = TEMPLATES_DIR / template_in.slug
+    # Dossier physique
+    folder_name = template_in.folder_name if template_in.folder_name else template_in.slug
+    template_folder = get_template_folder_path(template_in.template_type, folder_name)
+    is_new_folder = not template_folder.exists()
     template_folder.mkdir(parents=True, exist_ok=True)
     
-    # Fichiers par défaut (Boilerplate)
+    # Fichiers par défaut (Boilerplate) - on ne les crée que si le dossier est nouveau 
+    # ou si on veut forcer (ici on vérifie juste json)
+    template_json_path = template_folder / "template.json"
     boilerplate = {
         "template.json": {
             "templateName": template_in.name,
@@ -160,8 +206,6 @@ async def create_template(
                 {"type": "skills", "label": "Compétences"}
             ]
         },
-        "style.css": "/* Style pour " + template_in.name + " */\n\nbody {\n  font-family: 'Open Sans', sans-serif;\n  color: #2D3748;\n  line-height: 1.5;\n}\n\nh1, h2, h3 {\n  font-family: 'Montserrat', sans-serif;\n  color: #1A202C;\n}\n",
-        "template.jinja2": "<div class=\"cv-container\">\n  <header>\n    <h1>{{ data.profile.name }}</h1>\n    <p>{{ data.profile.title }}</p>\n  </header>\n  \n  <div class=\"main-content\">\n    <section class=\"summary\">\n      <h2>Résumé</h2>\n      <p>{{ data.summary }}</p>\n    </section>\n    \n    <section class=\"experience\">\n      <h2>Expériences</h2>\n      {% for exp in data.experience %}\n        <div class=\"exp-item\">\n          <h3>{{ exp.title }} @ {{ exp.company }}</h3>\n          <p>{{ exp.period }}</p>\n          <p>{{ exp.description }}</p>\n        </div>\n      {% endfor %}\n    </section>\n  </div>\n</div>\n",
         "Template.tsx": """import React from 'react';
 import { TemplateProps } from '@/types/cv';
 import { TemplateStyles, RemoteStyles } from '../BaseComponents';
@@ -193,17 +237,35 @@ export default React.memo(Template);
 """
     }
     
-    # Écrire les fichiers boilerplate sur le disque
+    # Écrire les fichiers boilerplate sur le disque seulement s'ils n'existent pas
     file_paths = {}
+    definition_to_save = boilerplate["template.json"]
+    
     for filename, content in boilerplate.items():
         file_path = template_folder / filename
-        if filename.endswith(".json"):
-            # Use json.dumps to ensure we write a string
-            file_path.write_text(json.dumps(content, indent=2, ensure_ascii=False), encoding="utf-8")
+        
+        # Si le fichier existe déjà, on ne l'écrase pas, on l'utilise pour la DB
+        if file_path.exists():
+            if filename == "template.json":
+                try:
+                    definition_to_save = json.loads(file_path.read_text(encoding="utf-8"))
+                except:
+                    pass
         else:
-            # content is already a string for .css, .jinja2 and .tsx
-            file_path.write_text(str(content), encoding="utf-8")
-        file_paths[filename] = str(file_path.relative_to(BASE_DIR))
+            # Créer le fichier
+            if filename.endswith(".json"):
+                file_path.write_text(json.dumps(content, indent=2, ensure_ascii=False), encoding="utf-8")
+            else:
+                file_path.write_text(str(content), encoding="utf-8")
+                
+        # Save a relative path for the DB, relative to the frontend directory
+        try:
+            # Essayer de rendre le chemin relatif au dossier racine du frontend
+            frontend_dir = TEMPLATES_DIR.parent.parent.parent
+            file_paths[filename] = file_path.relative_to(frontend_dir).as_posix()
+        except ValueError:
+            # Si échoue, utiliser juste le nom du dossier et du fichier
+            file_paths[filename] = f"{template_folder.name}/{filename}"
 
     # Créer le template en base
     # On exclut folder_name et definition car on les définit explicitement
@@ -213,8 +275,8 @@ export default React.memo(Template);
         **template_data,
         created_by=current_user.id,
         is_system=False,
-        folder_name=template_in.slug,
-        definition=boilerplate["template.json"]
+        folder_name=folder_name,
+        definition=definition_to_save
     )
     
     db.add(new_template)
@@ -222,10 +284,8 @@ export default React.memo(Template);
     
     # Créer les assets (liens vers les fichiers)
     for filename, rel_path in file_paths.items():
-        asset_type = filename.split(".")[0] if "." in filename else "other"
-        if filename == "template.jinja2": asset_type = "jinja"
-        elif filename == "style.css": asset_type = "css"
-        elif filename == "template.json": asset_type = "json"
+        asset_type = "other"
+        if filename == "template.json": asset_type = "json"
         elif filename == "Template.tsx": asset_type = "react"
             
         asset = TemplateAsset(
@@ -349,7 +409,7 @@ async def generate_template_preview(
             with tempfile.NamedTemporaryFile(suffix=".html", delete=False, mode="w", encoding="utf-8") as f:
                 f.write(html_content)
                 temp_html_path = f.name
-            cmd = [sys.executable, str(BASE_DIR / "generate_pdf_from_html.py"), "--screenshot", "--html", str(temp_html_path), "--out", str(out_png)]
+            cmd = [sys.executable, str(BASE_DIR / "generate_pdf_from_html.py"), "--screenshot", "--html", temp_html_path, "--out", str(out_png)]
             res = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
             if res.returncode == 0 and out_png.exists() and out_png.stat().st_size > 500:
                 screenshot_ok = True
@@ -393,7 +453,15 @@ async def get_template_assets(
     if not template:
         raise HTTPException(status_code=404, detail="Template non trouvé")
     
-    return template.assets
+    return [
+        {
+            "id": asset.id,
+            "type": asset.type,
+            "file_path": asset.file_path,
+            "created_at": asset.created_at.isoformat() if asset.created_at else None
+        }
+        for asset in template.assets
+    ]
 
 @router.get("/{template_id}/files", response_model=TemplateFiles)
 async def get_template_files(
@@ -406,7 +474,7 @@ async def get_template_files(
     if not template:
         raise HTTPException(status_code=404, detail="Template non trouvé")
     
-    template_folder = TEMPLATES_DIR / template.folder_name
+    template_folder = get_template_folder_path(template.template_type, template.folder_name)
     
     def read_file(name):
         f = template_folder / name
@@ -430,7 +498,7 @@ async def update_template_files(
     if not template:
         raise HTTPException(status_code=404, detail="Template non trouvé")
     
-    template_folder = TEMPLATES_DIR / template.folder_name
+    template_folder = get_template_folder_path(template.template_type, template.folder_name)
     template_folder.mkdir(parents=True, exist_ok=True)
     
     try:

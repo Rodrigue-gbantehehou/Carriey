@@ -65,7 +65,6 @@ export default function CreateCoverLetterWizard() {
 
       const newLetter = await cvApi.createResume(session.user.accessToken, {
         title: jobTitle ? `Lettre - ${jobTitle}` : 'Nouvelle lettre de motivation',
-        template_id: 'classic',
         doc_type: 'cover_letter',
         content: {
           recipient: {

@@ -99,21 +99,21 @@ export default function UsersAdmin() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Gestion des Utilisateurs</h1>
-        <p className="text-gray-500">Gérez les accès, les rôles et le statut des utilisateurs de la plateforme.</p>
+        <h1 className="text-xl font-semibold text-gray-900 mb-1">Gestion des Utilisateurs</h1>
+        <p className="text-sm text-gray-500">Gérez les accès, les rôles et le statut des utilisateurs de la plateforme.</p>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-md shadow-sm border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="bg-gray-50 border-b border-gray-100">
-                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-widest">Utilisateur</th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-widest">Rôle</th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-widest">Statut</th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-widest text-right">Actions</th>
+              <tr className="bg-gray-50 border-b border-gray-200">
+                <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Utilisateur</th>
+                <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Rôle</th>
+                <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Statut</th>
+                <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -128,7 +128,7 @@ export default function UsersAdmin() {
                       value={user.role} 
                       onChange={(e) => handleUpdateRole(user.id, e.target.value)}
                       disabled={updatingId === user.id}
-                      className="text-xs font-bold py-1 px-2 rounded bg-gray-100 border-none outline-none focus:ring-2 focus:ring-blue-500"
+                      className="text-xs font-medium py-1 px-2 rounded-md bg-gray-50 border border-gray-200 outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
                     >
                       <option value="user">USER</option>
                       <option value="admin">ADMIN</option>
@@ -136,8 +136,8 @@ export default function UsersAdmin() {
                     </select>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`inline-flex px-2 py-1 rounded text-[10px] font-black uppercase tracking-widest ${
-                      user.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                    <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
+                      user.is_active ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'
                     }`}>
                       {user.is_active ? 'Actif' : 'Désactivé'}
                     </span>
@@ -146,17 +146,17 @@ export default function UsersAdmin() {
                     <div className="flex items-center justify-end gap-2">
                         <a 
                             href={`/admin/users/${user.id}`}
-                            className="text-xs font-bold px-3 py-1.5 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition-all border border-gray-200 inline-block"
+                            className="text-xs font-medium px-3 py-1.5 bg-gray-50 text-gray-700 rounded-md hover:bg-gray-100 transition-all border border-gray-200 inline-block"
                         >
                             Profil
                         </a>
                         <button 
                         onClick={() => handleToggleActive(user)}
                         disabled={updatingId === user.id}
-                        className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-all ${
+                        className={`text-xs font-medium px-3 py-1.5 rounded-md transition-all border ${
                             user.is_active 
-                            ? 'text-red-600 bg-red-50 hover:bg-red-600 hover:text-white' 
-                            : 'text-green-600 bg-green-50 hover:bg-green-600 hover:text-white'
+                            ? 'text-red-700 bg-red-50 border-red-200 hover:bg-red-100' 
+                            : 'text-emerald-700 bg-emerald-50 border-emerald-200 hover:bg-emerald-100'
                         }`}
                         >
                         {user.is_active ? 'Désactiver' : 'Activer'}

@@ -38,3 +38,11 @@ class AIService(ABC):
         - suggestions: Liste de 3 slugs valides (lettres minuscules, chiffres, tirets)
         """
         pass
+
+    @abstractmethod
+    async def tailor_cv(self, profile_data: Dict[str, Any], job_description: str) -> Dict[str, Any]:
+        """
+        Adapte un CV en fonction d'une offre d'emploi.
+        Retourne un objet contenant 'summary' et 'experiences' (avec les ids modifiés).
+        """
+        pass
