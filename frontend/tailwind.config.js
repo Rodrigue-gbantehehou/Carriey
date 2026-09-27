@@ -17,7 +17,21 @@ module.exports = {
           muted: 'var(--text-muted)',
           cta: 'var(--color-cta)',
           'cta-hover': 'var(--color-cta-hover)',
-        }
+        },
+        // Surcharge globale de la couleur indigo pour adopter la couleur du logo (Bleu dominant #0771ea) partout
+        indigo: {
+          50: '#f0f7ff',
+          100: '#e0effe',
+          200: '#b9deff',
+          300: '#7cc2fe',
+          400: '#36a3fa',
+          500: '#0c87f2',
+          600: '#0771ea',
+          700: '#0055bd',
+          800: '#054898',
+          900: '#0b3e79',
+          950: '#072753',
+        },
       },
       animation: {
         'fade-in': 'fadeIn 0.8s ease-out forwards',

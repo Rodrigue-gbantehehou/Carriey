@@ -1,7 +1,9 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
+import config from '@/lib/config';
 import { useSession, signOut } from 'next-auth/react';
 import { useState } from 'react';
 
@@ -19,10 +21,10 @@ export default function Navbar() {
   }
 
   const navLinks = [
-    { name: 'Concept', href: '/#concept' },
-    { name: 'Tarifs', href: '/tarifs' },
-    { name: 'Modèles', href: '/modeles' },
-    { name: 'FAQ', href: '/faq' },
+    { name: 'Fonctionnement', href: '/#fonctionnement' },
+    { name: 'Modèles', href: '/#modeles' },
+    { name: 'Tarifs', href: '/pricing' },
+    { name: 'FAQ', href: '/#faq' },
   ];
 
   return (
@@ -32,10 +34,8 @@ export default function Navbar() {
         {/* Left: Logo */}
         <div className="flex flex-1 items-center justify-start">
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-black text-xl shadow-sm transition-transform group-hover:scale-105">
-              C
-            </div>
-            <span className="text-xl font-bold text-gray-900 tracking-tight">CARIEY</span>
+            <Image src={config.appLogo} alt={config.appName} width={36} height={36} className="object-contain transition-transform group-hover:scale-105" priority />
+            <span className="text-xl font-bold text-gray-900 tracking-tight">{config.appName}</span>
           </Link>
         </div>
 
@@ -69,7 +69,7 @@ export default function Navbar() {
               <div className="flex flex-col items-end">
                 <span className="text-sm font-semibold text-gray-900">{user.name || user.email?.split('@')[0]}</span>
                 <div className="flex items-center gap-2 mt-0.5">
-                  <Link href="/profil" className="text-xs font-medium text-indigo-600 hover:text-indigo-700 transition-colors">
+                  <Link href="/accueil" className="text-xs font-medium text-indigo-600 hover:text-indigo-700 transition-colors">
                     Mon Profil
                   </Link>
                   <span className="text-gray-300 text-xs">•</span>
@@ -79,7 +79,7 @@ export default function Navbar() {
                 </div>
               </div>
               <Link
-                href="/dashboard"
+                href="/accueil"
                 className="px-5 py-2.5 bg-gray-900 text-white font-semibold rounded-xl hover:bg-gray-800 transition-all text-sm"
               >
                 Mon Espace
@@ -89,15 +89,15 @@ export default function Navbar() {
             <div className="flex items-center gap-3">
               <Link
                 href="/login"
-                className="px-5 py-2.5 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-all text-sm"
+                className="px-5 py-2.5 text-gray-600 font-semibold rounded-xl hover:bg-gray-50 hover:text-gray-900 transition-all text-sm"
               >
-                Connexion
+                Se connecter
               </Link>
               <Link
-                href="/start"
+                href="/register"
                 className="px-5 py-2.5 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 shadow-sm transition-all text-sm"
               >
-                Commencer
+                Commencer gratuitement
               </Link>
             </div>
           )}

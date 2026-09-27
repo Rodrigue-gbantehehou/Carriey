@@ -1,7 +1,9 @@
 "use client";
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
+import config from '@/lib/config';
 import {
   Home, User, FileText, Briefcase, Palette, Settings, LogOut, Globe,
 } from 'lucide-react';
@@ -35,8 +37,9 @@ export default function AppSidebar() {
     <aside className="hidden lg:flex flex-col w-60 flex-shrink-0 bg-white border-r border-gray-200 h-screen sticky top-0">
       {/* Logo */}
       <div className="px-6 py-5 border-b border-gray-100">
-        <Link href="/accueil" className="text-xl font-black tracking-tight text-indigo-600 select-none">
-          CARIEY
+        <Link href="/accueil" className="flex items-center gap-2.5 group select-none">
+          <Image src={config.appLogo} alt={config.appName} width={32} height={32} className="object-contain" priority />
+          <span className="text-xl font-black tracking-tight text-indigo-600">{config.appName}</span>
         </Link>
       </div>
 
