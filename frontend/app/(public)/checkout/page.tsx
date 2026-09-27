@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import Script from 'next/script';
 
 import { CreditCard, Lock, ShieldCheck, ArrowRight, Loader2 } from 'lucide-react';
 import config from '@/lib/config';
@@ -98,7 +99,7 @@ export default function CheckoutPage() {
     try {
       // On utilise le code récupéré dynamiquement, ou on fallback
       const targetCode = dynamicPlan?.code || (type === 'pro' ? 'pro_14' : 'single');
-      const templateId = searchParams.get('templateId');
+      const templateIdToSend = dynamicPlan?.template_id || searchParams.get('templateId');
 
       const payload: any = {
         amount: parseFloat(plan.price),
@@ -110,7 +111,7 @@ export default function CheckoutPage() {
         payload.plan_code = targetCode;
       } else {
         payload.plan_code = targetCode;
-        if (templateId) payload.template_id = templateId;
+        if (templateIdToSend) payload.template_id = templateIdToSend;
       }
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'}/payments/create`, {
@@ -128,46 +129,52 @@ export default function CheckoutPage() {
         throw new Error(data.detail || "Erreur lors de l'initialisation du paiement.");
       }
 
+      if (data.status === 'already_paid') {
+        alert("Vous avez déjà débloqué ce modèle !");
+        router.push('/mes-documents');
+        return;
+      }
+
       // Kkiapay utilise un widget. On récupère la config du backend.
       const config = data.provider_config;
       const transactionId = data.transaction_id;
 
-      if (config && typeof (window as any).openKkiapayWidget !== 'undefined') {
-        (window as any).openKkiapayWidget({
-          amount: config.amount,
-          position: "center",
-          callback: config.callback, // webhook fallback url or success url
-          data: transactionId,
-          theme: config.theme,
-          key: config.public_key,
-          sandbox: config.sandbox
-        });
-        
-        // Ajouter le listener pour quand c'est validé avec succès
-        (window as any).addKkiapayListener('success', (response: any) => {
-          console.log("Kkiapay success:", response);
-          router.push('/mes-documents?payment_success=true');
-        });
-      } else {
-        throw new Error("Widget Kkiapay non chargé ou configuration manquante.");
+      if (!config) {
+        throw new Error("Configuration de paiement manquante depuis le serveur.");
       }
+
+      if (typeof (window as any).openKkiapayWidget === 'undefined') {
+        throw new Error("Le module de paiement sécurisé est encore en cours de chargement. Veuillez patienter quelques secondes et réessayer.");
+      }
+
+      (window as any).openKkiapayWidget({
+        amount: config.amount,
+        position: "center",
+        callback: config.callback, // webhook fallback url or success url
+        data: transactionId,
+        theme: config.theme,
+        key: config.public_key,
+        sandbox: config.sandbox
+      });
+
+      // On arrête le spinner immédiatement car le widget modal Kkiapay prend le relais
+      // (Cela évite que le bouton tourne à l'infini si l'utilisateur ferme le widget)
+      setIsProcessing(false);
+      
+      // Ajouter le listener pour quand c'est validé avec succès
+      (window as any).addKkiapayListener('success', (response: any) => {
+        console.log("Kkiapay success:", response);
+        router.push('/mes-documents?payment_success=true');
+      });
     } catch (error: any) {
-      console.error(error);
+      console.error("Payment error:", error);
       alert(error.message || "Une erreur est survenue lors de l'initialisation du paiement.");
       setIsProcessing(false);
     }
   };
 
-  useEffect(() => {
-    // Charger le script Kkiapay dynamiquement
-    if (typeof window !== 'undefined' && !document.getElementById('kkiapay-script')) {
-      const script = document.createElement('script');
-      script.id = 'kkiapay-script';
-      script.src = 'https://cdn.kkiapay.me/k.js';
-      script.async = true;
-      document.body.appendChild(script);
-    }
-  }, []);
+  // Supprimé le chargement manuel du script via useEffect
+  // On utilise next/script dans le JSX à la place
 
   if (status === 'loading' || loading) {
     return <div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-indigo-600" /></div>;
@@ -175,6 +182,7 @@ export default function CheckoutPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
+      <Script src="https://cdn.kkiapay.me/k.js" strategy="lazyOnload" />
 
       <main className="flex-1 py-12 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto">

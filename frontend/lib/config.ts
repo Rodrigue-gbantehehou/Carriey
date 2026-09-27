@@ -1,5 +1,9 @@
 // Configuration de l'application
 export const config = {
+  // Informations de base de l'application
+  appName: process.env.NEXT_PUBLIC_APP_NAME || 'Carriey',
+  appLogo: process.env.NEXT_PUBLIC_APP_LOGO || '/logo.png',
+
   // URL de base de l'API
   apiBaseUrl: process.env.NEXT_PUBLIC_API_URL || '/api/v1',
   

@@ -26,15 +26,20 @@ async def create_payment(
     """
     # 1. Vérifications initiales
     if payment_in.template_id:
-        template = db.query(Template).filter(Template.id == payment_in.template_id).first()
+        template = db.query(Template).filter(
+            (Template.id == payment_in.template_id) | (Template.slug == payment_in.template_id)
+        ).first()
         if not template:
             raise HTTPException(status_code=404, detail="Template non trouvé")
         if template.price == 0:
             raise HTTPException(status_code=400, detail="Ce template est gratuit")
             
+        # Normaliser pour utiliser l'ID réel (UUID) plutôt que le slug pour la suite
+        payment_in.template_id = template.id
+            
         existing_payment = db.query(Payment).filter(
             Payment.user_id == current_user.id,
-            Payment.template_id == payment_in.template_id,
+            Payment.template_id.in_([template.id, template.slug]),
             Payment.status == PaymentStatus.SUCCESS
         ).first()
         
