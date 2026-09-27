@@ -46,10 +46,13 @@ async def list_active_templates(
     templates = db.query(Template).filter(Template.is_active == True).all()
     return templates
 
+from app.models.user import User
+from datetime import datetime, timezone
+
 @router.get("/{id_or_slug}/check-access")
 async def check_template_access(
     id_or_slug: str,
-    current_user: UserOut = Depends(get_current_active_user),
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
     """Vérifie si l'utilisateur connecté a accès à un template"""
@@ -70,7 +73,8 @@ async def check_template_access(
         }
     
     is_free = template.price == 0
-    has_access = is_free or TemplateAccessService.check_user_access(db, current_user.id, template.id)
+    is_premium = current_user.premium_until and current_user.premium_until.replace(tzinfo=timezone.utc) > datetime.now(timezone.utc)
+    has_access = is_free or is_premium or TemplateAccessService.check_user_access(db, current_user.id, template.id)
     
     return {
         "has_access": has_access,

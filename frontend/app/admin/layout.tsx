@@ -37,6 +37,7 @@ const navSections = [
         items: [
             { label: 'Utilisateurs', href: '/admin/users', icon: Users },
             { label: 'Paiements', href: '/admin/payments', icon: CreditCard },
+            { label: 'Tarifs & Plans', href: '/admin/plans', icon: CreditCard },
         ]
     },
     {

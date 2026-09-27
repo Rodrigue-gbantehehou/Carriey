@@ -4,10 +4,11 @@ from datetime import datetime
 from decimal import Decimal
 
 class PaymentCreate(BaseModel):
-    template_id: str
+    template_id: Optional[str] = None
+    plan_code: Optional[str] = None
     amount: Decimal
     currency: str = "XOF"
-    provider: Optional[str] = "kkiapay" # kkiapay ou fedapay
+    provider: Optional[str] = "kkiapay" # kkiapay, fedapay ou stripe
 
 
 class PaymentOut(BaseModel):

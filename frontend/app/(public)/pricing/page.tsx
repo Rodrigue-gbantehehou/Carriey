@@ -1,61 +1,45 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Navbar from '@/components/public/Navbar';
-import Footer from '@/components/public/Footer';
-
-const plans = [
-  {
-    name: 'CARIEY Gratuit',
-    price: '0',
-    currency: 'F CFA',
-    period: '/modèle',
-    description: 'Accès aux modèles classiques sans frais.',
-    features: [
-      { text: 'Modèles Classiques', included: true },
-      { text: 'Téléchargements illimités', included: true },
-      { text: 'Aperçu haute définition', included: true },
-      { text: 'Tous les modèles premium', included: false },
-      { text: 'Accès permanent (à vie)', included: true },
-    ],
-    cta: 'Utiliser maintenant',
-    popular: false,
-  },
-  {
-    name: 'Pass Elite 14J',
-    price: '300',
-    currency: 'F CFA',
-    period: '/14 jours',
-    description: 'Accès complet temporaire au modèle choisi.',
-    features: [
-      { text: 'Tous les modèles Premium', included: true },
-      { text: 'Téléchargements illimités', included: true },
-      { text: 'Export PDF haute définition', included: true },
-      { text: 'Accès limité à 14 jours', included: true },
-      { text: 'IA de rédaction incluse', included: true },
-    ],
-    cta: 'Débloquer un modèle',
-    popular: true,
-  },
-  {
-    name: 'Achat Unique',
-    price: '2 000',
-    currency: 'F CFA',
-    period: '/CV',
-    description: 'Propriété à vie du modèle sélectionné.',
-    features: [
-      { text: 'Tous les modèles Premium', included: true },
-      { text: 'Accès permanent à vie', included: true },
-      { text: 'IA de rédaction illimitée', included: true },
-      { text: 'Export PDF haute définition', included: true },
-      { text: 'Support prioritaire', included: true },
-    ],
-    cta: 'Acheter à vie',
-    popular: false,
-  },
-];
+import { API_BASE } from '@/lib/api';
 
 export default function TarifsPage() {
+  const [dbPlans, setDbPlans] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`${API_BASE}/plans`)
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          // Transformer les données de l'API pour le front
+          const formattedPlans = data.map(dbPlan => {
+            const featuresData = dbPlan.features || {};
+            return {
+              name: dbPlan.name,
+              code: dbPlan.code,
+              price: dbPlan.price,
+              currency: dbPlan.currency,
+              period: dbPlan.duration_days > 0 ? `/${dbPlan.duration_days} jours` : (dbPlan.code === 'single' ? '/modèle' : '/toujours'),
+              description: featuresData.description || '',
+              features: featuresData.items || [],
+              cta: featuresData.cta || 'Choisir',
+              popular: featuresData.popular || false
+            };
+          });
+          setDbPlans(formattedPlans);
+        }
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, []);
+
+  const displayPlans = dbPlans;
+
   return (
     <div className="min-h-screen bg-[#F5F5F5]">
 
@@ -72,9 +56,13 @@ export default function TarifsPage() {
             </p>
           </div>
 
-          {/* Grille de tarifs */}
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {plans.map((plan) => (
+          {loading ? (
+            <div className="flex justify-center items-center py-20">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-cta"></div>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+              {displayPlans.map((plan) => (
               <div
                 key={plan.name}
                 className={`relative bg-white rounded-3xl border transition-all duration-300 p-8 flex flex-col ${
@@ -97,14 +85,19 @@ export default function TarifsPage() {
                 </div>
 
                 <div className="mb-8">
-                  <div className="flex items-baseline gap-1">
+                  <div className="flex items-baseline gap-1 flex-wrap">
+                    {plan.code === 'single' && <span className="text-sm font-bold text-brand-muted mr-1">Dès</span>}
                     <span className="text-4xl font-black text-brand-text">{plan.price}</span>
                     <span className="text-brand-muted font-bold text-sm uppercase">{plan.currency}{plan.period}</span>
                   </div>
                 </div>
 
                 <Link
-                  href="/editor"
+                  href={
+                    plan.name.includes('PRO') ? '/checkout?type=pro' :
+                    plan.name.includes('Unique') ? '/modeles' :
+                    '/mes-documents'
+                  }
                   className={`block w-full py-4 rounded-xl font-bold text-center transition-all mb-8 ${
                     plan.popular
                       ? 'bg-brand-cta text-white hover:bg-indigo-700 shadow-lg shadow-indigo-500/20'
@@ -115,7 +108,7 @@ export default function TarifsPage() {
                 </Link>
 
                 <ul className="space-y-4 flex-1">
-                  {plan.features.map((feature, index) => (
+                  {plan.features.map((feature: any, index: number) => (
                     <li key={index} className="flex items-center gap-3">
                       <div className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center ${
                         feature.included ? 'bg-indigo-100' : 'bg-gray-100 text-gray-400'
@@ -139,6 +132,7 @@ export default function TarifsPage() {
               </div>
             ))}
           </div>
+          )}
 
           {/* Section Paiement Local */}
           <div className="mt-24 text-center bg-white rounded-3xl p-12 border border-gray-100 shadow-sm max-w-4xl mx-auto">

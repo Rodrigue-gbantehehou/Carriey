@@ -138,12 +138,18 @@ async def generate_slug_suggestions_endpoint(
 class TailorCvRequest(BaseModel):
     job_description: str
 
+from datetime import datetime, timezone
+
 @router.post("/tailor-cv")
 async def tailor_cv_endpoint(
     request: TailorCvRequest,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    # Vérification Premium
+    if not current_user.premium_until or current_user.premium_until.replace(tzinfo=timezone.utc) < datetime.now(timezone.utc):
+        raise HTTPException(status_code=403, detail="L'adaptation de CV par l'IA est une fonctionnalité PRO.")
+        
     profile = crud_profile.get_by_user(db, user_id=current_user.id)
     if not profile:
         raise HTTPException(status_code=400, detail="Profil introuvable.")

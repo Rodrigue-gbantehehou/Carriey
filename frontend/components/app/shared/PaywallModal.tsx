@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Lock, Crown, ArrowRight, X } from 'lucide-react';
+import { API_BASE } from '@/lib/api';
 
 interface PaywallModalProps {
   isOpen: boolean;
@@ -7,6 +8,10 @@ interface PaywallModalProps {
   title?: string;
   description?: string;
   onSubscribe?: () => void;
+  singleItemPrice?: number | string;
+  singleItemTitle?: string;
+  singleItemId?: string;
+  onBuySingleItem?: () => void;
 }
 
 export function PaywallModal({ 
@@ -14,12 +19,38 @@ export function PaywallModal({
   onClose, 
   title = "Passez à Cariey PRO", 
   description = "Cette fonctionnalité est réservée aux abonnés PRO. Débloquez tous les modèles, l'IA et bien plus.",
-  onSubscribe
+  onSubscribe,
+  singleItemPrice,
+  singleItemTitle = "ce contenu",
+  singleItemId,
+  onBuySingleItem
 }: PaywallModalProps) {
+  const [proPrice, setProPrice] = useState<string>("...");
+  const [proCurrency, setProCurrency] = useState<string>("");
+
+  useEffect(() => {
+    if (isOpen) {
+      fetch(`${API_BASE}/plans`)
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) {
+            // Trouver le premier plan qui est un abonnement (durée > 0)
+            // S'il y a plusieurs abonnements, on pourrait trier par prix, mais prenons le premier par défaut.
+            const proPlan = data.find(p => p.duration_days > 0) || data[0];
+            if (proPlan) {
+              setProPrice(proPlan.price.toString());
+              setProCurrency(proPlan.currency);
+            }
+          }
+        })
+        .catch(err => console.error(err));
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden relative animate-in fade-in zoom-in duration-200">
         
         <button 
@@ -54,19 +85,49 @@ export function PaywallModal({
             ))}
           </ul>
 
-          <button 
-            onClick={() => {
-              if (onSubscribe) onSubscribe();
-              else window.location.href = '/pricing';
-            }}
-            className="w-full py-3 px-4 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-600/20 flex items-center justify-center gap-2"
-          >
-            Découvrir Cariey PRO <ArrowRight className="w-4 h-4" />
-          </button>
+          <div className="space-y-3">
+            <button 
+              onClick={() => {
+                if (onSubscribe) onSubscribe();
+                else window.location.href = '/pricing';
+              }}
+              className="w-full py-3 px-4 bg-gradient-to-r from-indigo-600 to-indigo-500 text-white font-bold rounded-xl hover:from-indigo-700 hover:to-indigo-600 transition-all shadow-md shadow-indigo-600/20 flex items-center justify-center gap-2"
+            >
+              Pass Cariey PRO (Dès {proPrice} {proCurrency}) <Crown className="w-4 h-4" />
+            </button>
+            
+            {singleItemPrice && (
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-200"></div>
+                </div>
+                <div className="relative flex justify-center text-xs">
+                  <span className="bg-gray-50 px-2 text-gray-500">ou</span>
+                </div>
+              </div>
+            )}
+
+            {singleItemPrice && (
+              <button 
+                onClick={() => {
+                  if (onBuySingleItem) onBuySingleItem();
+                  else {
+                    const url = singleItemId ? `/checkout?type=single&templateId=${singleItemId}` : `/checkout?type=single`;
+                    window.location.href = url;
+                  }
+                }}
+                className="w-full py-3 px-4 bg-white text-gray-700 font-bold rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+              >
+                Acheter {singleItemTitle} ({singleItemPrice} {proCurrency})
+              </button>
+            )}
+          </div>
           
-          <p className="text-center text-xs text-gray-400 mt-4">
-            Pass à partir de 1500 FCFA / 2.99€
-          </p>
+          {!singleItemPrice && (
+            <p className="text-center text-xs text-gray-400 mt-4">
+              Pass à partir de {proPrice} {proCurrency}
+            </p>
+          )}
         </div>
       </div>
     </div>

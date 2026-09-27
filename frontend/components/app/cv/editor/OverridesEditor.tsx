@@ -4,6 +4,7 @@ import { useProfileStore } from '@/store/profile';
 import { useSession } from 'next-auth/react';
 import { cvApi } from '@/lib/cv-api';
 import { Save, Loader2, Sparkles, AlertTriangle, EyeOff, X } from 'lucide-react';
+import { AITailorPrompt } from '@/components/app/cv/editor/AITailorPrompt';
 
 interface OverridesEditorProps {
   cvId: string;
@@ -22,9 +23,14 @@ export function OverridesEditor({ cvId }: OverridesEditorProps) {
   const [experiences, setExperiences] = useState<Record<string, { description: string }>>(
     overrides.experiences || {}
   );
-  
   const [isSaving, setIsSaving] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+
+  // Sync state when CV is updated from outside or AI
+  React.useEffect(() => {
+    setSummary(overrides.summary || '');
+    setExperiences(overrides.experiences || {});
+  }, [overrides.summary, overrides.experiences]);
 
   const disabledSections = cv?.content?.disabledSections || [];
   const disabledItems = cv?.content?.disabledItems || {};
@@ -66,6 +72,17 @@ export function OverridesEditor({ cvId }: OverridesEditorProps) {
     }
   };
 
+  const handleAIGenerated = (newOverrides: any, disabledSections?: string[], disabledItems?: any) => {
+    updateCv(cv.id, { 
+      content: { 
+        ...cv.content, 
+        overrides: newOverrides,
+        disabledSections: disabledSections || cv.content?.disabledSections,
+        disabledItems: disabledItems || cv.content?.disabledItems
+      }
+    });
+  };
+
   return (
     <div className="pt-6 border-t border-gray-100 mt-6">
       <button 
@@ -77,7 +94,7 @@ export function OverridesEditor({ cvId }: OverridesEditorProps) {
             <Sparkles className="w-4 h-4" />
           </div>
           <div className="text-left">
-            <p className="text-sm font-bold text-indigo-900">Adaptation IA active</p>
+            <p className="text-sm font-bold text-indigo-900">Adaptation IA (Cariey PRO)</p>
             <p className="text-xs text-indigo-600 font-medium group-hover:underline">Voir et retoucher le contenu</p>
           </div>
         </div>
@@ -111,16 +128,23 @@ export function OverridesEditor({ cvId }: OverridesEditorProps) {
 
             {/* Scrollable Content */}
             <div className="p-6 overflow-y-auto bg-gray-50/50">
+              
+              <AITailorPrompt 
+                cvId={cv.id} 
+                currentOverrides={overrides} 
+                onOverridesGenerated={handleAIGenerated} 
+              />
+
               <p className="text-sm text-indigo-900 mb-6 bg-indigo-50 border border-indigo-100 p-4 rounded-xl flex gap-3 items-start shadow-sm">
                 <AlertTriangle className="w-5 h-5 mt-0.5 flex-shrink-0 text-indigo-600" />
-                <span>Ce CV utilise un contenu adapté par IA. Vous pouvez retoucher librement l'accroche et les expériences modifiées ici, <strong>sans impacter votre Master Profile !</strong></span>
+                <span>Ce CV utilise un contenu adapté par IA. Vous pouvez retoucher librement l&apos;accroche et les expériences modifiées ici, <strong>sans impacter votre Master Profile !</strong></span>
               </p>
 
               {hasDisabledContent && (
                 <div className="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-xl shadow-sm">
                   <h4 className="text-sm font-bold text-orange-900 flex items-center gap-2 mb-3">
                     <EyeOff className="w-4 h-4 text-orange-600" />
-                    Éléments masqués par l'IA
+                    Éléments masqués par l&apos;IA
                   </h4>
                   <ul className="text-xs text-orange-800 list-disc list-inside space-y-1.5 ml-1">
                     {disabledSections.map((s: string) => (

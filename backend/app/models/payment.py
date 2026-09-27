@@ -24,6 +24,7 @@ class Payment(Base):
     user_id = Column(String(36), ForeignKey("users.id"), nullable=False)
     template_id = Column(String(36), ForeignKey("templates.id"), nullable=True)
     resume_id = Column(String(36), ForeignKey("resumes.id"), nullable=True)
+    plan_code = Column(String(50), nullable=True) # pour les abonnements (ex: pro_14)
     
     provider = Column(Enum(PaymentProvider), nullable=False)
     provider_payment_id = Column(String(255), nullable=True)

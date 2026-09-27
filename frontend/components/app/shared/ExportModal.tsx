@@ -5,6 +5,7 @@ import { X, FileText, CheckCircle2, Lock } from 'lucide-react';
 import { CV } from '@/lib/cv-api';
 import config from '@/lib/config';
 import { useSession } from 'next-auth/react';
+import { PaywallModal } from '@/components/app/shared/PaywallModal';
 
 interface ExportModalProps {
   isOpen: boolean;
@@ -20,8 +21,10 @@ export default function ExportModal({ isOpen, onClose, cv, onExport }: ExportMod
   const { data: session } = useSession();
 
   const [price, setPrice] = useState(0);
+  const [currency, setCurrency] = useState("F CFA");
   const [isUnlocked, setIsUnlocked] = useState(true);
   const [isLoadingAccess, setIsLoadingAccess] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
   const isPremium = price > 0;
 
   // Check access when modal opens
@@ -37,6 +40,7 @@ export default function ExportModal({ isOpen, onClose, cv, onExport }: ExportMod
           if (!res.ok) throw new Error('Network error');
           const data = await res.json();
           setPrice(Number(data.template_price || 0));
+          setCurrency(data.template_currency || "F CFA");
           setIsUnlocked(data.has_access);
         } catch (error) {
           console.error("Erreur check-access:", error);
@@ -53,16 +57,7 @@ export default function ExportModal({ isOpen, onClose, cv, onExport }: ExportMod
 
   const handleExport = async () => {
     if (!isUnlocked) {
-      setIsProcessing(true);
-      setTimeout(async () => {
-        setIsUnlocked(true);
-        setIsProcessing(false);
-        // Lancer le téléchargement automatiquement après le "paiement"
-        setIsProcessing(true);
-        await onExport(format, quality);
-        setIsProcessing(false);
-        onClose();
-      }, 1500);
+      setShowPaywall(true);
       return;
     }
 
@@ -73,8 +68,9 @@ export default function ExportModal({ isOpen, onClose, cv, onExport }: ExportMod
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col justify-end sm:items-center sm:justify-center">
-      <div className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm transition-opacity" onClick={onClose} />
+    <>
+      <div className="fixed inset-0 z-[100] flex flex-col justify-end sm:items-center sm:justify-center">
+        <div className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm transition-opacity" onClick={onClose} />
       
       <div className="relative bg-white w-full sm:max-w-[400px] max-h-[85vh] flex flex-col sm:rounded-2xl rounded-t-3xl shadow-2xl z-10 overflow-hidden animate-in slide-in-from-bottom-8 sm:slide-in-from-bottom-0 sm:zoom-in sm:fade-in duration-200 pb-safe">
         
@@ -161,7 +157,7 @@ export default function ExportModal({ isOpen, onClose, cv, onExport }: ExportMod
               </div>
             ) : isPremium && !isUnlocked ? (
               <div className="text-right">
-                <span className="text-xs font-black bg-amber-100 text-amber-800 px-2 py-1 rounded-md">{price} FCFA</span>
+                <span className="text-xs font-black bg-amber-100 text-amber-800 px-2 py-1 rounded-md">{price} {currency}</span>
               </div>
             ) : (
               <div className="flex items-center gap-1.5 text-green-600 text-xs font-bold bg-green-50 px-2 py-1 rounded-md">
@@ -188,7 +184,7 @@ export default function ExportModal({ isOpen, onClose, cv, onExport }: ExportMod
             ) : !isUnlocked ? (
               <>
                 <Lock className="w-4 h-4" />
-                Débloquer - {price} F
+                Débloquer - {price} {currency}
               </>
             ) : (
               <>
@@ -199,6 +195,18 @@ export default function ExportModal({ isOpen, onClose, cv, onExport }: ExportMod
           </button>
         </div>
       </div>
-    </div>
+      </div>
+      
+      {/* Import de PaywallModal (assurez-vous de l'importer en haut) */}
+      <PaywallModal 
+        isOpen={showPaywall} 
+        onClose={() => setShowPaywall(false)} 
+        title="Modèle de CV Premium"
+        description="Passez à Cariey PRO pour débloquer le téléchargement de ce modèle ainsi que tous les autres modèles premium sans limite."
+        singleItemPrice={price}
+        singleItemTitle="ce modèle"
+        singleItemId={cv.template_id}
+      />
+    </>
   );
 }

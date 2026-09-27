@@ -12,7 +12,7 @@ class KkiaPayService:
         self.public_key = settings.KKIAPAY_PUBLIC_KEY
         self.private_key = settings.KKIAPAY_PRIVATE_KEY
         self.secret = settings.KKIAPAY_SECRET
-        self.api_url = settings.KKIAPAY_API_URL
+        self.api_url = "https://api.kkiapay.me/api/v1"
         self.sandbox = settings.KKIAPAY_SANDBOX
         
         # KkiaPay utilise généralement la même URL, la distinction se fait via les clés (pk_live vs pk_test)
