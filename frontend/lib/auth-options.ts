@@ -70,6 +70,8 @@ export const authOptions: NextAuthOptions = {
             name: userData.full_name,
             role: userData.role?.toUpperCase(), // Normalize to 'ADMIN', 'SUPER_ADMIN', 'USER'
             accessToken: token,
+            premium_until: userData.premium_until,
+            subscription_status: userData.subscription_status,
           };
 
         } catch (e) {
@@ -85,13 +87,17 @@ export const authOptions: NextAuthOptions = {
         token.accessToken = user.accessToken;
         token.role = user.role;
         token.id = user.id;
+        token.premium_until = user.premium_until;
+        token.subscription_status = user.subscription_status;
       }
       return token;
     },
     async session({ session, token }) {
-      session.user.accessToken = token.accessToken;
-      session.user.role = token.role;
-      session.user.id = token.id;
+      session.user.accessToken = token.accessToken as string;
+      session.user.role = token.role as string;
+      session.user.id = token.id as string;
+      session.user.premium_until = token.premium_until as string | null | undefined;
+      session.user.subscription_status = token.subscription_status as string | undefined;
       return session;
     }
   },

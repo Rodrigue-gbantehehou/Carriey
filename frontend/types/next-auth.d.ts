@@ -7,6 +7,8 @@ declare module "next-auth" {
             id: string
             role: string
             accessToken: string
+            premium_until?: string | null
+            subscription_status?: string
         } & DefaultSession["user"]
     }
 
@@ -15,6 +17,8 @@ declare module "next-auth" {
         role: string
         accessToken: string
         full_name?: string
+        premium_until?: string | null
+        subscription_status?: string
     }
 }
 
