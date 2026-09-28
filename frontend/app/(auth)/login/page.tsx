@@ -2,8 +2,8 @@ import { Suspense } from 'react';
 import LoginForm from '@/components/auth/LoginForm';
 
 export const metadata = {
-  title: 'Connexion - CARIEY',
-  description: 'Connectez-vous à votre compte CARIEY pour accéder à votre profil master',
+  title: 'Connexion - carriey',
+  description: 'Connectez-vous à votre compte carriey pour accéder à votre profil master',
 };
 
 export default function LoginPage() {

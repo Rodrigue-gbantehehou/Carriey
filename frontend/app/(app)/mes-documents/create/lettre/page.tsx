@@ -7,6 +7,7 @@ import { useCvStore } from '@/store/cv';
 import { cvApi } from '@/lib/cv-api';
 import { API_BASE } from '@/lib/api';
 import { Sparkles, FileText, ChevronRight, ChevronLeft, Briefcase, Link as LinkIcon, AlignLeft, Building2 } from 'lucide-react';
+import { candidaturesApi } from '@/lib/candidature-api';
 
 export default function CreateCoverLetterWizard() {
   const router = useRouter();
@@ -24,6 +25,7 @@ export default function CreateCoverLetterWizard() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationStep, setGenerationStep] = useState(0);
 
+
   const handleGenerate = async () => {
     if (!session?.user?.accessToken) return;
     
@@ -34,28 +36,47 @@ export default function CreateCoverLetterWizard() {
       let generatedSalutation = 'Madame, Monsieur,';
       let generatedBody = '';
       let generatedClosing = "Je vous prie d'agréer, Madame, Monsieur, l'expression de mes salutations distinguées.";
+      let extractedCompany = companyName;
+      let extractedTitle = jobTitle;
+      let extractedLocation = '';
 
       if (method === 'ai') {
         setGenerationStep(1); // Analyse du profil
-        const res = await fetch(`${API_BASE}/ai/generate-cover-letter`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${session.user.accessToken}`
-          },
-          body: JSON.stringify({ job_description: jobDescription || jobTitle || "Candidature spontanée" })
-        });
+        
+        const textToAnalyze = jobDescription || jobTitle || "Candidature spontanée";
+        
+        // Execute the letter generation and the job extraction in parallel
+        const [letterRes, extractRes] = await Promise.all([
+          fetch(`${API_BASE}/ai/generate-cover-letter`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.user.accessToken}` },
+            body: JSON.stringify({ job_description: textToAnalyze })
+          }),
+          fetch(`${API_BASE}/ai/extract-job`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.user.accessToken}` },
+            body: JSON.stringify({ job_text: textToAnalyze })
+          }).catch(() => null) // Ignore extract errors so it doesn't block the letter
+        ]);
         
         setGenerationStep(2); // Analyse de l'offre
-        if (res.ok) {
-          const data = await res.json();
+        if (letterRes.ok) {
+          const data = await letterRes.json();
           if (data.subject) generatedSubject = data.subject;
           if (data.salutation) generatedSalutation = data.salutation;
           if (data.body) generatedBody = data.body;
           if (data.closing) generatedClosing = data.closing;
+          
+          if (extractRes && extractRes.ok) {
+            const extractData = await extractRes.json();
+            if (extractData.companyName && extractData.companyName !== "Non précisé") extractedCompany = extractData.companyName;
+            if (extractData.jobTitle && extractData.jobTitle !== "Non précisé") extractedTitle = extractData.jobTitle;
+            if (extractData.location && extractData.location !== "Non précisé") extractedLocation = extractData.location;
+          }
+          
           setGenerationStep(3); // Rédaction terminée
         } else {
-          const errText = await res.text();
+          const errText = await letterRes.text();
           console.error("Erreur de l'API IA", errText);
           setIsGenerating(false);
           alert("Erreur lors de la génération IA : " + errText);
@@ -64,12 +85,12 @@ export default function CreateCoverLetterWizard() {
       }
 
       const newLetter = await cvApi.createResume(session.user.accessToken, {
-        title: jobTitle ? `Lettre - ${jobTitle}` : 'Nouvelle lettre de motivation',
+        title: extractedTitle ? `Lettre - ${extractedTitle}` : 'Nouvelle lettre de motivation',
         doc_type: 'cover_letter',
         content: {
           recipient: {
             name: '',
-            company: companyName || '',
+            company: extractedCompany || '',
             address: ''
           },
           subject: generatedSubject,
@@ -78,6 +99,21 @@ export default function CreateCoverLetterWizard() {
           closing: generatedClosing
         }
       });
+      
+      // Bonus: Create Candidature automatically
+      try {
+        if (extractedCompany || extractedTitle) {
+          await candidaturesApi.create({
+            company: extractedCompany || 'Entreprise Inconnue',
+            role: extractedTitle || 'Candidature',
+            location: extractedLocation || '',
+            status: 'envoyee',
+            applied_date: new Date().toISOString().split('T')[0]
+          });
+        }
+      } catch (err) {
+        console.error("Erreur création candidature auto:", err);
+      }
       
       addCv(newLetter);
       router.replace(`/mes-documents/lettre/${newLetter.id}`);

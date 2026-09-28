@@ -35,6 +35,7 @@ import app.models.resume
 import app.models.template
 import app.models.audit
 import app.models.public_page
+import app.models.candidature
 
 # Create tables (simple auto-migration at startup for now)
 Base.metadata.create_all(bind=engine)

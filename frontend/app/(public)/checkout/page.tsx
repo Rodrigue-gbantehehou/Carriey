@@ -12,18 +12,18 @@ export default function CheckoutPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { data: session, status } = useSession();
-  
+
   const type = searchParams.get('type') || 'pro'; // 'pro' or 'single'
-  
+
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('card'); // 'card' or 'mobile'
 
   const [dynamicPlan, setDynamicPlan] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  
+
   useEffect(() => {
     const templateId = searchParams.get('templateId');
-    
+
     if (type === 'pro') {
       // Pour l'abonnement
       fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'}/plans`)
@@ -77,8 +77,8 @@ export default function CheckoutPage() {
     }
   }, [type, searchParams]);
 
-  const plan = dynamicPlan || (type === 'pro' 
-    ? { name: 'Pass Cariey PRO', price: 1500, currency: 'F CFA', desc: 'Accès illimité à tous les modèles et à l\'IA.' }
+  const plan = dynamicPlan || (type === 'pro'
+    ? { name: 'Pass carriey PRO', price: 1500, currency: 'F CFA', desc: 'Accès illimité à tous les modèles et à l\'IA.' }
     : { name: 'Achat Unique', price: 2000, currency: 'F CFA', desc: 'Débloquez votre modèle de CV à vie.' });
 
   useEffect(() => {
@@ -95,7 +95,7 @@ export default function CheckoutPage() {
     }
 
     setIsProcessing(true);
-    
+
     try {
       // On utilise le code récupéré dynamiquement, ou on fallback
       const targetCode = dynamicPlan?.code || (type === 'pro' ? 'pro_14' : 'single');
@@ -124,7 +124,7 @@ export default function CheckoutPage() {
       });
 
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.detail || "Erreur lors de l'initialisation du paiement.");
       }
@@ -160,7 +160,7 @@ export default function CheckoutPage() {
       // On arrête le spinner immédiatement car le widget modal Kkiapay prend le relais
       // (Cela évite que le bouton tourne à l'infini si l'utilisateur ferme le widget)
       setIsProcessing(false);
-      
+
       // Ajouter le listener pour quand c'est validé avec succès
       (window as any).addKkiapayListener('success', (response: any) => {
         console.log("Kkiapay success:", response);
@@ -186,7 +186,7 @@ export default function CheckoutPage() {
 
       <main className="flex-1 py-12 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto">
-          
+
           <div className="text-center mb-10">
             <h1 className="text-3xl font-black text-gray-900 mb-4">Finaliser votre commande</h1>
             <p className="text-gray-500 flex items-center justify-center gap-2">
@@ -196,11 +196,11 @@ export default function CheckoutPage() {
           </div>
 
           <div className="grid md:grid-cols-2 gap-8">
-            
+
             {/* Récapitulatif de la commande */}
             <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 h-fit">
               <h2 className="text-xl font-bold text-gray-900 mb-6">Récapitulatif</h2>
-              
+
               <div className="flex justify-between items-start mb-6 pb-6 border-b border-gray-100">
                 <div>
                   <h3 className="font-bold text-gray-800">{plan.name}</h3>
@@ -222,7 +222,7 @@ export default function CheckoutPage() {
             <div className="space-y-6">
               <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
                 <h2 className="text-xl font-bold text-gray-900 mb-6">Moyen de paiement</h2>
-                
+
                 {/* Options de paiement temporairement masquées 
                 <div className="space-y-4 mb-8">
                   <label className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${paymentMethod === 'card' ? 'border-indigo-600 bg-indigo-50/50' : 'border-gray-100 hover:border-gray-200'}`}>
@@ -259,7 +259,7 @@ export default function CheckoutPage() {
                   </label>
                 </div>
                 */}
-                
+
 
 
                 <button

@@ -46,3 +46,11 @@ class AIService(ABC):
         Retourne un objet contenant 'summary' et 'experiences' (avec les ids modifiés).
         """
         pass
+
+    @abstractmethod
+    async def extract_job_details(self, job_text: str) -> Dict[str, str]:
+        """
+        Extrait les informations d'une offre d'emploi brute.
+        Retourne un dict avec companyName, jobTitle, location.
+        """
+        pass

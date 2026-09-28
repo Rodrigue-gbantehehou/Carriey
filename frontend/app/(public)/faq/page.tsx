@@ -1,8 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import Navbar from '@/components/public/Navbar';
-import Footer from '@/components/public/Footer';
 
 const faqs = [
   {
@@ -22,54 +20,63 @@ const faqs = [
     answer: "Notre IA analyse votre secteur d'activité et vos expériences pour vous suggérer les meilleurs mots-clés et descriptions de postes afin de maximiser vos chances face aux recruteurs."
   },
   {
-    question: "Puis-je utiliser CVTor sur mon téléphone ?",
-    answer: "Oui, CVTor est entièrement 'responsive'. Vous pouvez créer, éditer et télécharger votre CV directement depuis votre smartphone."
+    question: "Puis-je utiliser l'application sur mon téléphone ?",
+    answer: "Oui, la plateforme est entièrement 'responsive'. Vous pouvez créer, éditer et télécharger vos documents directement depuis votre smartphone."
   }
 ];
 
 export default function FAQPage() {
   return (
-    <div className="min-h-screen bg-[#F5F5F5]">
-
+    <div className="w-full bg-white">
       
-      <main className="py-20 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
-        <div className="text-center mb-16">
-          <h1 className="text-4xl sm:text-5xl font-black text-brand-text mb-4">
-            Questions <span className="text-brand-cta">Fréquentes</span>
+      {/* Decorative Header Background */}
+      <div className="relative overflow-hidden bg-gray-50/50 border-b border-gray-100 pt-16 pb-24">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-indigo-50 rounded-[100%] blur-3xl opacity-50 -z-10"></div>
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 text-center relative z-10">
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 tracking-tight mb-4">
+            Questions <span className="text-indigo-600">Fréquentes</span>
           </h1>
-          <p className="text-lg text-brand-muted max-w-xl mx-auto font-medium">
-            Tout ce que vous devez savoir pour booster votre carrière avec CVTor.
+          <p className="text-lg text-gray-500 max-w-xl mx-auto">
+            Tout ce que vous devez savoir pour exploiter pleinement le potentiel de la plateforme.
           </p>
         </div>
+      </div>
 
-        <div className="space-y-6">
-          {faqs.map((faq, idx) => (
-            <div 
-              key={idx} 
-              className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+      <main className="pb-24 -mt-12 relative z-20">
+        <div className="max-w-4xl mx-auto px-6 lg:px-8">
+          
+          <div className="space-y-4">
+            {faqs.map((faq, idx) => (
+              <div 
+                key={idx} 
+                className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-200/60 hover:shadow-md transition-shadow"
+              >
+                <h3 className="text-lg font-bold text-gray-900 mb-2">
+                  {faq.question}
+                </h3>
+                <p className="text-gray-500 leading-relaxed text-sm">
+                  {faq.answer}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-20 bg-gray-900 rounded-3xl p-10 sm:p-12 text-center text-white relative overflow-hidden shadow-2xl shadow-gray-900/10">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500 opacity-20 blur-3xl rounded-full -mr-20 -mt-20"></div>
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500 opacity-10 blur-3xl rounded-full -ml-20 -mb-20"></div>
+            
+            <h2 className="text-2xl sm:text-3xl font-extrabold mb-4 relative z-10 tracking-tight">Vous avez d&apos;autres questions ?</h2>
+            <p className="text-gray-400 mb-8 relative z-10 max-w-lg mx-auto text-lg">
+              Notre équipe est là pour vous accompagner dans votre recherche d&apos;emploi.
+            </p>
+            <Link 
+              href="/contact"
+              className="inline-block px-8 py-3.5 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-500 transition-all relative z-10 shadow-lg shadow-indigo-600/20 hover:-translate-y-0.5"
             >
-              <h3 className="text-xl font-bold text-brand-text mb-3">
-                {faq.question}
-              </h3>
-              <p className="text-brand-muted leading-relaxed font-medium">
-                {faq.answer}
-              </p>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-20 bg-brand-text rounded-3xl p-8 sm:p-12 text-center text-white relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-brand-cta opacity-10 blur-3xl rounded-full -mr-20 -mt-20"></div>
-          <h2 className="text-3xl font-bold mb-4 relative z-10">Vous avez d&apos;autres questions ?</h2>
-          <p className="text-white/70 mb-8 relative z-10 max-w-lg mx-auto">
-            Notre équipe est là pour vous accompagner dans votre recherche d&apos;emploi.
-          </p>
-          <Link 
-            href="/contact"
-            className="inline-block px-8 py-4 bg-brand-cta text-white font-bold rounded-full hover:bg-emerald-600 transition-all relative z-10 shadow-lg shadow-emerald-500/20"
-          >
-            Nous contacter
-          </Link>
+              Nous contacter
+            </Link>
+          </div>
+          
         </div>
       </main>
 

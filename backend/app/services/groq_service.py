@@ -165,3 +165,26 @@ RÉPONSE ATTENDUE (JSON strictement valide) :
 }}
 """
         return await self._generate_json(prompt)
+
+    async def extract_job_details(self, job_text: str) -> Dict[str, str]:
+        prompt = f"""
+Tu es un assistant IA spécialisé dans l'analyse d'offres d'emploi.
+Ta mission est d'extraire les informations clés à partir du texte brut ou de l'annonce collée par l'utilisateur.
+
+TEXTE DE L'OFFRE :
+{job_text}
+
+INSTRUCTIONS :
+1. Identifie le "companyName" (nom de l'entreprise). Si introuvable, mets "".
+2. Identifie le "jobTitle" (intitulé du poste). Si introuvable, mets "".
+3. Identifie la "location" (ville, pays, ou "Télétravail"). Si introuvable, mets "".
+4. Fournis UNIQUEMENT une réponse au format JSON strict et valide.
+
+RÉPONSE ATTENDUE :
+{{
+  "companyName": "...",
+  "jobTitle": "...",
+  "location": "..."
+}}
+"""
+        return await self._generate_json(prompt)

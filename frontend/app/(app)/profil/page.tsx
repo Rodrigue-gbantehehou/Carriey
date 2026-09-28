@@ -145,9 +145,9 @@ export default function ProfilPage() {
   };
 
   return (
-    <div className="px-4 py-5 space-y-6 pb-24">
+    <div className="max-w-5xl mx-auto px-6 py-8 space-y-10 pb-24 animate-fade-in">
       
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between animate-slide-up" style={{ animationDelay: '0.1s' }}>
         <h1 className="text-xl font-bold text-gray-900 tracking-tight">Mon Profil</h1>
         <Link href={profile.username ? `/${profile.username}` : '/apercu'} target="_blank"
           className="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 text-sm font-semibold px-4 py-2 rounded-xl hover:bg-indigo-100 transition-colors">
@@ -157,8 +157,8 @@ export default function ProfilPage() {
       </div>
 
       {/* 1. Personal Info Card */}
-      <section>
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 relative group overflow-hidden">
+      <section className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
+        <div className="bg-white/60 backdrop-blur-md rounded-3xl border border-gray-200/60 shadow-sm p-6 relative group overflow-hidden hover:border-indigo-200 hover:shadow-xl hover:shadow-indigo-600/10 transition-all duration-300">
           <button 
             onClick={openPersonalEdit}
             className="absolute top-4 right-4 p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-colors z-10"
@@ -218,10 +218,10 @@ export default function ProfilPage() {
       </section>
 
       {/* 2. About Card */}
-      <section>
+      <section className="animate-slide-up" style={{ animationDelay: '0.3s' }}>
         <SectionTitle icon={<FileText className="w-4 h-4" />} title="À propos" />
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 relative group cursor-pointer hover:border-gray-200 transition-colors" onClick={openAboutEdit}>
-          <button className="absolute top-4 right-4 p-2 text-gray-400 opacity-0 group-hover:opacity-100 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-all">
+        <div className="bg-white/60 backdrop-blur-md rounded-3xl border border-gray-200/60 shadow-sm p-6 relative group cursor-pointer hover:border-indigo-200 hover:shadow-xl hover:shadow-indigo-600/10 hover:-translate-y-1 transition-all duration-300" onClick={openAboutEdit}>
+          <button className="absolute top-5 right-5 p-2 text-gray-400 opacity-0 group-hover:opacity-100 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-all">
             <Pencil className="w-4 h-4" />
           </button>
           {profile.bio ? (

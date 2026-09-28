@@ -2,8 +2,8 @@ import { Suspense } from 'react';
 import RegisterForm from '@/components/auth/RegisterForm';
 
 export const metadata = {
-  title: 'Inscription - CARIEY',
-  description: 'Créez votre compte CARIEY pour commencer à centraliser votre parcours',
+  title: 'Inscription - carriey',
+  description: 'Créez votre compte carriey pour commencer à centraliser votre parcours',
 };
 
 export default function RegisterPage() {

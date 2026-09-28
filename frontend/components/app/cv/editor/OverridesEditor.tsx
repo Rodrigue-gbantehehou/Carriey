@@ -34,7 +34,7 @@ export function OverridesEditor({ cvId }: OverridesEditorProps) {
 
   const disabledSections = cv?.content?.disabledSections || [];
   const disabledItems = cv?.content?.disabledItems || {};
-  
+
   const hasDisabledContent = disabledSections.length > 0 || Object.values(disabledItems).some((arr: any) => arr.length > 0);
 
   if (!cv || !profile) return null;
@@ -57,11 +57,11 @@ export function OverridesEditor({ cvId }: OverridesEditorProps) {
           experiences
         }
       };
-      
+
       const updated = await cvApi.updateResume(session.user.accessToken, cv.id, {
         content: newContent
       });
-      
+
       updateCv(cv.id, updated);
       alert("Contenu ciblé sauvegardé !");
     } catch (err) {
@@ -73,9 +73,9 @@ export function OverridesEditor({ cvId }: OverridesEditorProps) {
   };
 
   const handleAIGenerated = (newOverrides: any, disabledSections?: string[], disabledItems?: any) => {
-    updateCv(cv.id, { 
-      content: { 
-        ...cv.content, 
+    updateCv(cv.id, {
+      content: {
+        ...cv.content,
         overrides: newOverrides,
         disabledSections: disabledSections || cv.content?.disabledSections,
         disabledItems: disabledItems || cv.content?.disabledItems
@@ -85,7 +85,7 @@ export function OverridesEditor({ cvId }: OverridesEditorProps) {
 
   return (
     <div className="pt-6 border-t border-gray-100 mt-6">
-      <button 
+      <button
         onClick={() => setIsOpen(true)}
         className="w-full flex items-center justify-between p-4 bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 rounded-xl transition-colors group"
       >
@@ -94,7 +94,7 @@ export function OverridesEditor({ cvId }: OverridesEditorProps) {
             <Sparkles className="w-4 h-4" />
           </div>
           <div className="text-left">
-            <p className="text-sm font-bold text-indigo-900">Adaptation IA (Cariey PRO)</p>
+            <p className="text-sm font-bold text-indigo-900">Adaptation IA (carriey PRO)</p>
             <p className="text-xs text-indigo-600 font-medium group-hover:underline">Voir et retoucher le contenu</p>
           </div>
         </div>
@@ -104,7 +104,7 @@ export function OverridesEditor({ cvId }: OverridesEditorProps) {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={() => setIsOpen(false)} />
           <div className="relative bg-white w-full max-w-3xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
-            
+
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-white">
               <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
@@ -128,11 +128,11 @@ export function OverridesEditor({ cvId }: OverridesEditorProps) {
 
             {/* Scrollable Content */}
             <div className="p-6 overflow-y-auto bg-gray-50/50">
-              
-              <AITailorPrompt 
-                cvId={cv.id} 
-                currentOverrides={overrides} 
-                onOverridesGenerated={handleAIGenerated} 
+
+              <AITailorPrompt
+                cvId={cv.id}
+                currentOverrides={overrides}
+                onOverridesGenerated={handleAIGenerated}
               />
 
               <p className="text-sm text-indigo-900 mb-6 bg-indigo-50 border border-indigo-100 p-4 rounded-xl flex gap-3 items-start shadow-sm">
@@ -150,7 +150,7 @@ export function OverridesEditor({ cvId }: OverridesEditorProps) {
                     {disabledSections.map((s: string) => (
                       <li key={s}>Section entière : <span className="font-bold">{s}</span></li>
                     ))}
-                    {Object.entries(disabledItems).map(([type, ids]: [string, any]) => 
+                    {Object.entries(disabledItems).map(([type, ids]: [string, any]) =>
                       ids.map((id: string) => (
                         <li key={`${type}-${id}`}>Élément masqué dans : <span className="font-bold">{type}</span></li>
                       ))

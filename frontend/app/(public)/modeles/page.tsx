@@ -100,12 +100,12 @@ function TemplateCard({ template, onSelect, selectedSector, previewData }: { tem
 
   return (
     <div 
-      className={`group bg-white border ${isRecommended ? 'border-brand-cta ring-4 ring-brand-cta/5' : 'border-gray-100 hover:border-brand-cta/30'} rounded-2xl overflow-hidden hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-500 flex flex-col h-full relative cursor-pointer`}
+      className={`group bg-white border ${isRecommended ? 'border-indigo-500 ring-4 ring-indigo-500/10' : 'border-gray-200/60 hover:border-indigo-500/30'} rounded-2xl overflow-hidden hover:shadow-[0_20px_50px_rgba(8,_112,_184,_0.07)] hover:-translate-y-1.5 transition-all duration-500 flex flex-col h-full relative cursor-pointer`}
       onClick={() => onSelect(template)}
     >
       {/* Badge Recommandé */}
       {isRecommended && (
-        <div className="absolute top-4 right-4 z-20 bg-brand-cta text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg animate-bounce">
+        <div className="absolute top-4 right-4 z-20 bg-indigo-600 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg shadow-indigo-600/20 animate-bounce">
           RECOMMANDÉ
         </div>
       )}
@@ -132,9 +132,9 @@ function TemplateCard({ template, onSelect, selectedSector, previewData }: { tem
         />
 
         {/* Overlay Hover */}
-        <div className="absolute inset-0 bg-brand-text/60 backdrop-blur-[3px] opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col items-center justify-center z-10">
+        <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col items-center justify-center z-10">
           <div
-            className="px-8 py-3.5 bg-brand-cta text-white text-sm font-black rounded-full shadow-2xl transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 hover:scale-105 active:scale-95"
+            className="px-8 py-3.5 bg-white text-gray-900 text-sm font-bold rounded-xl shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 hover:scale-105 active:scale-95"
           >
             Utiliser ce modèle
           </div>
@@ -145,16 +145,16 @@ function TemplateCard({ template, onSelect, selectedSector, previewData }: { tem
       <div className="p-4 bg-white border-t border-gray-100 flex flex-col justify-between flex-grow">
         <div>
           <div className="flex items-center justify-between gap-2 mb-1">
-            <h3 className="font-bold text-base text-brand-text group-hover:text-brand-cta transition-colors">
+            <h3 className="font-bold text-base text-gray-900 group-hover:text-indigo-600 transition-colors">
               {displayName}
             </h3>
             <span className={`text-xs font-black px-2.5 py-0.5 rounded-full ${
-              isFree ? 'bg-emerald-50 text-emerald-700' : 'bg-orange-50 text-orange-700'
+              isFree ? 'bg-emerald-50 text-emerald-700' : 'bg-indigo-50 text-indigo-700'
             }`}>
               {formattedPrice}
             </span>
           </div>
-          <p className="text-xs text-brand-muted line-clamp-2 leading-relaxed mb-3">
+          <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed mb-3">
             {meta.description}
           </p>
         </div>
@@ -286,20 +286,20 @@ function ModelesPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-brand-bg flex flex-col">
+    <div className="w-full bg-white flex flex-col">
 
 
       {/* ── Entête Responsive ── */}
-      <header className="bg-white border-b border-gray-100 py-12 sm:py-20 relative overflow-hidden">
+      <header className="bg-gray-50/50 border-b border-gray-100 py-12 sm:py-20 relative overflow-hidden">
         {/* Background Decorative patterns */}
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-brand-cta/5 skew-x-12 translate-x-1/2 pointer-events-none" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-indigo-50 rounded-[100%] blur-3xl opacity-50 -z-10" />
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
           <div className="max-w-3xl">
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-brand-text tracking-tight leading-[1.1]">
-              Choisissez votre <span className="text-brand-cta">modèle</span> idéal
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 tracking-tight leading-[1.1]">
+              Choisissez votre <span className="text-indigo-600">modèle</span> idéal
             </h1>
-            <p className="mt-6 text-lg sm:text-xl text-brand-muted font-medium max-w-2xl">
+            <p className="mt-6 text-lg sm:text-xl text-gray-500 font-medium max-w-2xl">
               Des CV conçus par des experts en recrutement avec des designs haute performance pour propulser votre carrière.
             </p>
           </div>
@@ -312,7 +312,7 @@ function ModelesPageContent() {
                 placeholder="ex: Jean Dupont"
                 value={namePreview}
                 onChange={e => setNamePreview(e.target.value)}
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all text-sm font-medium"
+                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 outline-none transition-all text-sm font-medium shadow-sm"
               />
             </div>
             <div className="flex-1">
@@ -321,7 +321,7 @@ function ModelesPageContent() {
                 <select
                   value={selectedSector}
                   onChange={e => setSelectedSector(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all text-sm font-medium appearance-none cursor-pointer"
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 outline-none transition-all text-sm font-medium appearance-none cursor-pointer shadow-sm"
                 >
                   {sectors.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
@@ -350,7 +350,7 @@ function ModelesPageContent() {
                 <button
                   key={f.id}
                   onClick={() => setFilter(f.id as any)}
-                  className={`px-5 py-2.5 text-[10px] sm:text-xs font-bold rounded-xl transition-all whitespace-nowrap border ${filter === f.id ? 'bg-orange-600 text-white border-orange-600 shadow-md scale-105' : 'bg-white text-gray-500 border-gray-200 hover:border-orange-300'}`}
+                  className={`px-5 py-2.5 text-[10px] sm:text-xs font-bold rounded-xl transition-all whitespace-nowrap border ${filter === f.id ? 'bg-indigo-600 text-white border-indigo-600 shadow-md scale-105' : 'bg-white text-gray-500 border-gray-200 hover:border-indigo-300'}`}
                 >
                   {f.label}
                 </button>
@@ -391,12 +391,6 @@ function ModelesPageContent() {
           </div>
         )}
       </main>
-
-      <footer className="bg-white border-t border-gray-200 py-8 px-4">
-        <div className="max-w-7xl mx-auto text-center">
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">CVtor — Performance Architect</p>
-        </div>
-      </footer>
     </div>
   )
 }

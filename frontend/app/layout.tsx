@@ -7,7 +7,7 @@ import { Toaster } from 'react-hot-toast';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'CARIEY - Your professional profile, everywhere.',
+  title: 'carriey - Your professional profile, everywhere.',
   description: 'Votre parcours professionnel, simplement.',
 };
 

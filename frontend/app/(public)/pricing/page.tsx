@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { API_BASE } from '@/lib/api';
+import { CheckCircle2, XCircle } from 'lucide-react';
 
 export default function TarifsPage() {
   const [dbPlans, setDbPlans] = useState<any[]>([]);
@@ -41,128 +42,123 @@ export default function TarifsPage() {
   const displayPlans = dbPlans;
 
   return (
-    <div className="min-h-screen bg-[#F5F5F5]">
+    <div className="w-full bg-white">
+      {/* Decorative Header Background */}
+      <div className="relative overflow-hidden bg-gray-50/50 border-b border-gray-100 pt-16 pb-24">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-indigo-50 rounded-[100%] blur-3xl opacity-50 -z-10"></div>
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 text-center relative z-10">
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 tracking-tight mb-4">
+            Des tarifs <span className="text-indigo-600">simples et transparents</span>
+          </h1>
+          <p className="text-lg text-gray-500 max-w-xl mx-auto">
+            Boostez votre carrière avec nos outils premium accessibles à tous. 
+            Aucun frais caché, annulez quand vous voulez.
+          </p>
+        </div>
+      </div>
 
-
-      <main className="py-20 pb-32">
-        <div className="container mx-auto px-4 sm:px-6">
-          {/* En-tête */}
-          <div className="text-center mb-16">
-            <h1 className="text-4xl sm:text-5xl font-black text-brand-text mb-4">
-              Tarifs <span className="text-brand-cta">Transparents</span>
-            </h1>
-            <p className="text-lg text-brand-muted max-w-xl mx-auto font-medium">
-              Boostez votre carrière avec nos outils premium accessibles à tous.
-            </p>
-          </div>
-
+      <main className="pb-24 -mt-12 relative z-20">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
           {loading ? (
-            <div className="flex justify-center items-center py-20">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-cta"></div>
+            <div className="flex justify-center items-center py-20 bg-white rounded-3xl shadow-sm border border-gray-100 max-w-5xl mx-auto">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
             </div>
           ) : (
-            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
               {displayPlans.map((plan) => (
-              <div
-                key={plan.name}
-                className={`relative bg-white rounded-3xl border transition-all duration-300 p-8 flex flex-col ${
-                  plan.popular
-                    ? 'border-brand-cta shadow-2xl shadow-indigo-500/10 scale-105 z-10'
-                    : 'border-gray-100 shadow-sm hover:shadow-md'
-                }`}
-              >
-                {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                    <span className="px-4 py-1 bg-brand-cta text-white text-[10px] font-bold uppercase tracking-widest rounded-full">
-                      Recommandé
-                    </span>
-                  </div>
-                )}
-
-                <div className="mb-8">
-                  <h3 className="text-xl font-bold text-brand-text mb-2">{plan.name}</h3>
-                  <p className="text-brand-muted text-sm font-medium">{plan.description}</p>
-                </div>
-
-                <div className="mb-8">
-                  <div className="flex items-baseline gap-1 flex-wrap">
-                    {plan.code === 'single' && <span className="text-sm font-bold text-brand-muted mr-1">Dès</span>}
-                    <span className="text-4xl font-black text-brand-text">{plan.price}</span>
-                    <span className="text-brand-muted font-bold text-sm uppercase">{plan.currency}{plan.period}</span>
-                  </div>
-                </div>
-
-                <Link
-                  href={
-                    plan.name.includes('PRO') ? '/checkout?type=pro' :
-                    plan.name.includes('Unique') ? '/modeles' :
-                    '/mes-documents'
-                  }
-                  className={`block w-full py-4 rounded-xl font-bold text-center transition-all mb-8 ${
+                <div
+                  key={plan.name}
+                  className={`p-8 rounded-3xl flex flex-col relative ${
                     plan.popular
-                      ? 'bg-brand-cta text-white hover:bg-indigo-700 shadow-lg shadow-indigo-500/20'
-                      : 'bg-brand-text text-white hover:bg-black'
+                      ? 'bg-indigo-600 shadow-xl shadow-indigo-600/20 border border-indigo-500 transform md:-translate-y-4 z-10'
+                      : 'bg-white shadow-sm border border-gray-200'
                   }`}
                 >
-                  {plan.cta}
-                </Link>
+                  {plan.popular && (
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-indigo-200 text-indigo-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                      Populaire
+                    </div>
+                  )}
 
-                <ul className="space-y-4 flex-1">
-                  {plan.features.map((feature: any, index: number) => (
-                    <li key={index} className="flex items-center gap-3">
-                      <div className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center ${
-                        feature.included ? 'bg-indigo-100' : 'bg-gray-100 text-gray-400'
+                  <h3 className={`text-lg font-bold mb-2 ${plan.popular ? 'text-white' : 'text-gray-900'}`}>
+                    {plan.name}
+                  </h3>
+                  
+                  <div className={`text-3xl font-black mb-6 ${plan.popular ? 'text-white' : 'text-gray-900'}`}>
+                    {plan.price !== '0.00' && plan.price !== '0' && plan.code === 'single' ? 'Dès ' : ''}
+                    {plan.price !== '0.00' && plan.price !== '0' ? plan.price : '0'} {plan.currency}
+                    <span className={`text-base font-normal ml-1 ${plan.popular ? 'text-indigo-200' : 'text-gray-500'}`}>
+                      {plan.period}
+                    </span>
+                  </div>
+
+                  <p className={`text-sm mb-6 ${plan.popular ? 'text-indigo-100' : 'text-gray-500'}`}>
+                    {plan.description}
+                  </p>
+
+                  <ul className="space-y-3 mb-8 flex-1">
+                    {plan.features.map((feature: any, index: number) => (
+                      <li key={index} className={`flex items-center gap-2 text-sm ${
+                        !feature.included && !plan.popular ? 'text-gray-400 line-through' :
+                        !feature.included && plan.popular ? 'text-indigo-300/50 line-through' :
+                        plan.popular ? 'text-indigo-100' : 'text-gray-600'
                       }`}>
                         {feature.included ? (
-                          <svg className="w-3 h-3 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                          </svg>
+                           <CheckCircle2 className={`w-4 h-4 flex-shrink-0 ${plan.popular ? 'text-indigo-300' : 'text-emerald-500'}`} />
                         ) : (
-                          <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
+                           <XCircle className={`w-4 h-4 flex-shrink-0 ${plan.popular ? 'text-indigo-400/50' : 'text-gray-300'}`} />
                         )}
-                      </div>
-                      <span className={`text-sm font-medium ${feature.included ? 'text-brand-text' : 'text-gray-400 line-through'}`}>
                         {feature.text}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Link
+                    href={
+                      plan.name.includes('PRO') ? '/checkout?type=pro' :
+                      plan.name.includes('Unique') ? '/modeles' :
+                      '/mes-documents'
+                    }
+                    className={`block w-full py-3 px-4 font-bold rounded-xl text-center transition-colors ${
+                      plan.popular
+                        ? 'bg-white text-indigo-600 hover:bg-gray-50'
+                        : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
+                    }`}
+                  >
+                    {plan.cta}
+                  </Link>
+                </div>
+              ))}
+            </div>
           )}
 
           {/* Section Paiement Local */}
-          <div className="mt-24 text-center bg-white rounded-3xl p-12 border border-gray-100 shadow-sm max-w-4xl mx-auto">
-            <h2 className="text-2xl font-bold text-brand-text mb-8">Paiements 100% sécurisés</h2>
-            <div className="flex justify-center items-center gap-12 flex-wrap opacity-60 grayscale hover:grayscale-0 hover:opacity-100 transition-all">
+          <div className="mt-20 text-center bg-gray-50 rounded-3xl p-10 border border-gray-100 max-w-4xl mx-auto">
+            <h2 className="text-xl font-bold text-gray-900 mb-8">Paiements 100% sécurisés</h2>
+            <div className="flex justify-center items-center gap-10 flex-wrap opacity-75 grayscale hover:grayscale-0 hover:opacity-100 transition-all">
               <div className="flex flex-col items-center gap-2">
-                <div className="w-12 h-12 bg-[#FF6600] rounded-xl flex items-center justify-center text-white font-black text-[10px]">OM</div>
-                <span className="text-[10px] font-bold text-brand-text uppercase tracking-widest">Orange Money</span>
+                <div className="w-12 h-12 bg-[#FF6600] rounded-xl flex items-center justify-center text-white font-black text-[10px] shadow-sm">OM</div>
+                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Orange</span>
               </div>
               <div className="flex flex-col items-center gap-2">
-                <div className="w-12 h-12 bg-[#FFCC00] rounded-xl flex items-center justify-center text-black font-black text-[10px]">MTN</div>
-                <span className="text-[10px] font-bold text-brand-text uppercase tracking-widest">MTN Mobile</span>
+                <div className="w-12 h-12 bg-[#FFCC00] rounded-xl flex items-center justify-center text-black font-black text-[10px] shadow-sm">MTN</div>
+                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">MTN</span>
               </div>
               <div className="flex flex-col items-center gap-2">
-                <div className="w-12 h-12 bg-[#1BADE4] rounded-xl flex items-center justify-center text-white font-black text-[10px]">W</div>
-                <span className="text-[10px] font-bold text-brand-text uppercase tracking-widest">Wave</span>
+                <div className="w-12 h-12 bg-[#1BADE4] rounded-xl flex items-center justify-center text-white font-black text-[10px] shadow-sm">W</div>
+                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Wave</span>
               </div>
               <div className="flex flex-col items-center gap-2">
-                <div className="w-12 h-12 bg-[#00AEEF] rounded-xl flex items-center justify-center text-white font-black text-[10px]">Moov</div>
-                <span className="text-[10px] font-bold text-brand-text uppercase tracking-widest">Moov Money</span>
+                <div className="w-12 h-12 bg-[#00AEEF] rounded-xl flex items-center justify-center text-white font-black text-[10px] shadow-sm">Moov</div>
+                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Moov</span>
               </div>
             </div>
-            <p className="mt-8 text-sm text-brand-muted font-medium">
-              Accès immédiat dès la confirmation du paiement. Sans carte bancaire.
+            <p className="mt-6 text-sm text-gray-500">
+              Accès immédiat dès la confirmation du paiement. Sans carte bancaire requise.
             </p>
           </div>
         </div>
       </main>
-
-
     </div>
   );
 }

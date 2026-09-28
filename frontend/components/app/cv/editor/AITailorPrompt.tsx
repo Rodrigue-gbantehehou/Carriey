@@ -19,7 +19,7 @@ export function AITailorPrompt({ cvId, currentOverrides, onOverridesGenerated }:
 
   const handleGenerateAI = async () => {
     const isPremium = session?.user?.premium_until && new Date(session.user.premium_until) > new Date();
-    
+
     if (!isPremium) {
       setShowPaywall(true);
       return;
@@ -41,7 +41,7 @@ export function AITailorPrompt({ cvId, currentOverrides, onOverridesGenerated }:
 
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json();
-      
+
       const newOverrides = {
         ...currentOverrides,
         summary: data.summary || currentOverrides?.summary,
@@ -49,7 +49,7 @@ export function AITailorPrompt({ cvId, currentOverrides, onOverridesGenerated }:
       };
 
       onOverridesGenerated(newOverrides, data.disabledSections, data.disabledItems);
-      
+
       setAiSuccess(true);
       setPrompt('');
       setTimeout(() => setAiSuccess(false), 3000);
@@ -63,11 +63,11 @@ export function AITailorPrompt({ cvId, currentOverrides, onOverridesGenerated }:
 
   return (
     <>
-      <PaywallModal 
-        isOpen={showPaywall} 
-        onClose={() => setShowPaywall(false)} 
+      <PaywallModal
+        isOpen={showPaywall}
+        onClose={() => setShowPaywall(false)}
         title="L'Adaptation Avancée est PRO"
-        description="Passez à Cariey PRO pour générer un CV parfaitement ciblé sur l'offre d'emploi en 1 clic."
+        description="Passez à carriey PRO pour générer un CV parfaitement ciblé sur l'offre d'emploi en 1 clic."
       />
 
       <div className="bg-white p-5 rounded-xl border border-indigo-100 shadow-sm mb-8">
@@ -91,7 +91,7 @@ export function AITailorPrompt({ cvId, currentOverrides, onOverridesGenerated }:
           ) : aiSuccess ? (
             <><CheckCircle2 className="w-4 h-4" /> CV Adapté avec succès !</>
           ) : (
-            <><Sparkles className="w-4 h-4" /> Lancer l&apos;IA Cariey PRO</>
+            <><Sparkles className="w-4 h-4" /> Lancer l&apos;IA carriey PRO</>
           )}
         </button>
       </div>

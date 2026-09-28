@@ -106,25 +106,25 @@ export default function AccueilPage() {
   if (!mounted) return null;
 
   return (
-    <div className="px-4 py-5 space-y-6">
+    <div className="px-6 py-8 space-y-10 max-w-5xl mx-auto animate-fade-in">
       
       {/* Header compact */}
-      <div>
-        <h1 className="text-xl font-bold text-gray-900 tracking-tight">Bonjour {firstName} 👋</h1>
-        <p className="text-sm text-gray-500 mt-0.5">
-          Voici votre tableau de bord.
+      <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
+        <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">Bonjour {firstName} 👋</h1>
+        <p className="text-base text-gray-500 mt-1">
+          Voici votre tableau de bord personnel.
         </p>
       </div>
 
       {/* Completion Card (Dense) */}
-      <div className="bg-gradient-to-br from-indigo-600 to-indigo-800 rounded-2xl p-4 shadow-lg shadow-indigo-600/20 text-white relative overflow-hidden">
+      <div className="bg-gradient-to-br from-indigo-600 to-indigo-800 rounded-3xl p-6 shadow-xl shadow-indigo-600/20 text-white relative overflow-hidden animate-slide-up hover:-translate-y-1 hover:shadow-2xl hover:shadow-indigo-600/30 transition-all duration-500" style={{ animationDelay: '0.2s' }}>
         <div className="relative z-10">
-          <div className="flex justify-between items-end mb-3">
+          <div className="flex justify-between items-end mb-4">
             <div>
-              <p className="text-indigo-100 text-xs font-medium mb-1">PROFIL PROFESSIONNEL</p>
-              <p className="text-lg font-bold">Complété à {completion}%</p>
+              <p className="text-indigo-200 text-xs font-bold tracking-widest mb-1.5 uppercase">Profil professionnel</p>
+              <p className="text-2xl font-black">Complété à {completion}%</p>
             </div>
-            <Link href="/profil" className="bg-white/20 hover:bg-white/30 transition-colors backdrop-blur-md rounded-full p-2">
+            <Link href="/profil" className="bg-white/20 hover:bg-white/30 transition-colors backdrop-blur-md rounded-2xl p-3 shadow-sm">
               <ChevronRight className="w-5 h-5 text-white" />
             </Link>
           </div>
@@ -142,92 +142,93 @@ export default function AccueilPage() {
       </div>
 
       {/* Quick Actions (Grid 2x2) */}
-      <section>
-        <h2 className="text-sm font-bold text-gray-900 mb-3 px-1 uppercase tracking-wider">Actions rapides</h2>
+      <section className="animate-slide-up" style={{ animationDelay: '0.3s' }}>
+        <h2 className="text-xs font-bold text-gray-400 mb-4 px-1 uppercase tracking-widest">Actions rapides</h2>
         
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <button 
             onClick={openCreateModal}
-            className="flex flex-col items-start gap-2 p-3.5 rounded-xl border border-gray-100 bg-white shadow-sm hover:border-indigo-300 hover:shadow-md transition-all active:scale-95"
+            className="flex flex-col items-start gap-3 p-5 rounded-2xl border border-gray-200/60 bg-white/60 backdrop-blur-md shadow-sm hover:border-indigo-300 hover:shadow-xl hover:shadow-indigo-600/10 hover:-translate-y-1 transition-all duration-300 active:scale-95 group"
           >
-            <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
-              <Plus className="w-4 h-4" />
+            <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <Plus className="w-5 h-5" />
             </div>
             <div className="text-left">
-              <p className="font-bold text-gray-900 text-xs">Créer CV</p>
-              <p className="text-[10px] text-gray-500 mt-0.5 leading-tight">Générer un document</p>
+              <p className="font-bold text-gray-900 text-sm">Créer CV</p>
+              <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">Générer un document</p>
             </div>
           </button>
           
           <button 
             onClick={() => setIsAiModalOpen(true)}
             disabled={isCreatingTailoredCv}
-            className="flex flex-col items-start gap-2 p-3.5 rounded-xl border border-gray-100 bg-white shadow-sm hover:border-emerald-300 hover:shadow-md transition-all active:scale-95 disabled:opacity-70"
+            className="flex flex-col items-start gap-3 p-5 rounded-2xl border border-gray-200/60 bg-white/60 backdrop-blur-md shadow-sm hover:border-emerald-300 hover:shadow-xl hover:shadow-emerald-600/10 hover:-translate-y-1 transition-all duration-300 active:scale-95 group disabled:opacity-70 disabled:hover:translate-y-0 disabled:hover:shadow-sm"
           >
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
               {isCreatingTailoredCv ? (
-                <div className="w-4 h-4 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+                <div className="w-5 h-5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
               ) : (
-                <Target className="w-4 h-4" />
+                <Target className="w-5 h-5" />
               )}
             </div>
             <div className="text-left">
-              <p className="font-bold text-gray-900 text-xs">Cibler offre</p>
-              <p className="text-[10px] text-gray-500 mt-0.5 leading-tight">Adapter par IA</p>
+              <p className="font-bold text-gray-900 text-sm">Cibler offre</p>
+              <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">Adapter par IA</p>
             </div>
           </button>
           
           <Link 
             href="/candidatures"
-            className="flex flex-col items-start gap-2 p-3.5 rounded-xl border border-gray-100 bg-white shadow-sm hover:border-blue-300 hover:shadow-md transition-all active:scale-95"
+            className="flex flex-col items-start gap-3 p-5 rounded-2xl border border-gray-200/60 bg-white/60 backdrop-blur-md shadow-sm hover:border-blue-300 hover:shadow-xl hover:shadow-blue-600/10 hover:-translate-y-1 transition-all duration-300 active:scale-95 group"
           >
-            <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
-              <Briefcase className="w-4 h-4" />
+            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <Briefcase className="w-5 h-5" />
             </div>
             <div className="text-left">
-              <p className="font-bold text-gray-900 text-xs">Candidatures</p>
-              <p className="text-[10px] text-gray-500 mt-0.5 leading-tight">Suivre l'avancement</p>
+              <p className="font-bold text-gray-900 text-sm">Candidatures</p>
+              <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">Suivre l'avancement</p>
             </div>
           </Link>
           
           <Link 
-            href="/stats"
-            className="flex flex-col items-start gap-2 p-3.5 rounded-xl border border-gray-100 bg-white shadow-sm hover:border-orange-300 hover:shadow-md transition-all active:scale-95"
+            href="/statistiques"
+            className="flex flex-col items-start gap-3 p-5 rounded-2xl border border-gray-200/60 bg-white/60 backdrop-blur-md shadow-sm hover:border-orange-300 hover:shadow-xl hover:shadow-orange-600/10 hover:-translate-y-1 transition-all duration-300 active:scale-95 group"
           >
-            <div className="w-8 h-8 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center">
-              <TrendingUp className="w-4 h-4" />
+            <div className="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <TrendingUp className="w-5 h-5" />
             </div>
             <div className="text-left">
-              <p className="font-bold text-gray-900 text-xs">Statistiques</p>
-              <p className="text-[10px] text-gray-500 mt-0.5 leading-tight">Voir les métriques</p>
+              <p className="font-bold text-gray-900 text-sm">Statistiques</p>
+              <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">Voir les métriques</p>
             </div>
           </Link>
         </div>
       </section>
 
       {/* Recent Activity / Docs */}
-      <section>
-        <div className="flex items-center justify-between mb-3 px-1">
-          <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Récemment</h2>
-          <Link href="/mes-documents" className="text-xs font-semibold text-indigo-600 hover:text-indigo-700">Voir tout</Link>
+      <section className="animate-slide-up" style={{ animationDelay: '0.4s' }}>
+        <div className="flex items-center justify-between mb-4 px-1">
+          <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Récemment modifiés</h2>
+          <Link href="/mes-documents" className="text-sm font-bold text-indigo-600 hover:text-indigo-700 transition-colors">Voir tout</Link>
         </div>
         
-        <div className="space-y-2.5">
+        <div className="space-y-3">
           {recentDocs.length > 0 ? (
             recentDocs.map((doc) => (
-              <div key={doc.id} className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100 shadow-sm active:bg-gray-50 transition-colors">
-                <div className="w-10 h-10 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center flex-shrink-0">
-                  <FileText className="w-5 h-5 text-gray-400" />
+              <div key={doc.id} className="group flex items-center gap-4 p-4 bg-white/60 backdrop-blur-md rounded-2xl border border-gray-200/60 shadow-sm hover:shadow-lg hover:border-indigo-100 hover:-translate-y-0.5 transition-all duration-300 cursor-pointer">
+                <div className="w-12 h-12 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center flex-shrink-0 group-hover:bg-indigo-50 transition-colors">
+                  <FileText className="w-5 h-5 text-gray-400 group-hover:text-indigo-500 transition-colors" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-gray-900 text-sm truncate">{doc.title}</p>
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    <Clock className="w-3 h-3 text-gray-400" />
-                    <p className="text-[11px] text-gray-500 truncate">
+                  <p className="font-bold text-gray-900 text-base truncate">{doc.title}</p>
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <Clock className="w-3.5 h-3.5 text-gray-400" />
+                    <p className="text-xs text-gray-500 truncate font-medium">
                       Modifié il y a {formatDistanceToNow(new Date(doc.updated_at || doc.created_at || Date.now()), { addSuffix: false, locale: fr })}
                     </p>
                   </div>
                 </div>
+                <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-indigo-500 transition-colors mr-1" />
               </div>
             ))
           ) : (

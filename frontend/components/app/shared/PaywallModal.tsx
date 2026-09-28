@@ -14,10 +14,10 @@ interface PaywallModalProps {
   onBuySingleItem?: () => void;
 }
 
-export function PaywallModal({ 
-  isOpen, 
-  onClose, 
-  title = "Passez à Cariey PRO", 
+export function PaywallModal({
+  isOpen,
+  onClose,
+  title = "Passez à carriey PRO",
   description = "Cette fonctionnalité est réservée aux abonnés PRO. Débloquez tous les modèles, l'IA et bien plus.",
   onSubscribe,
   singleItemPrice,
@@ -52,8 +52,8 @@ export function PaywallModal({
   return (
     <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden relative animate-in fade-in zoom-in duration-200">
-        
-        <button 
+
+        <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full p-1 transition-colors"
         >
@@ -86,16 +86,16 @@ export function PaywallModal({
           </ul>
 
           <div className="space-y-3">
-            <button 
+            <button
               onClick={() => {
                 if (onSubscribe) onSubscribe();
                 else window.location.href = '/pricing';
               }}
               className="w-full py-3 px-4 bg-gradient-to-r from-indigo-600 to-indigo-500 text-white font-bold rounded-xl hover:from-indigo-700 hover:to-indigo-600 transition-all shadow-md shadow-indigo-600/20 flex items-center justify-center gap-2"
             >
-              Pass Cariey PRO (Dès {proPrice} {proCurrency}) <Crown className="w-4 h-4" />
+              Pass carriey PRO (Dès {proPrice} {proCurrency}) <Crown className="w-4 h-4" />
             </button>
-            
+
             {singleItemPrice && (
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
@@ -108,7 +108,7 @@ export function PaywallModal({
             )}
 
             {singleItemPrice && (
-              <button 
+              <button
                 onClick={() => {
                   if (onBuySingleItem) onBuySingleItem();
                   else {
@@ -122,7 +122,7 @@ export function PaywallModal({
               </button>
             )}
           </div>
-          
+
           {!singleItemPrice && (
             <p className="text-center text-xs text-gray-400 mt-4">
               Pass à partir de {proPrice} {proCurrency}

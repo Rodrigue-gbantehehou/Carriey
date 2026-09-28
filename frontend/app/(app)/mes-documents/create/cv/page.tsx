@@ -31,13 +31,13 @@ export default function CreateCvWizard() {
   const router = useRouter();
   const { profile } = useProfileStore();
   const { addCv } = useCvStore();
-  
+
   const { data: session } = useSession();
-  
+
   const [step, setStep] = useState(1);
   const [usage, setUsage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   // Sections toggle
   const [enabledSections, setEnabledSections] = useState<string[]>(
     SECTIONS.filter(s => s.defaultEnabled).map(s => s.id)
@@ -80,7 +80,7 @@ export default function CreateCvWizard() {
 
   const toggleSection = (id: string, locked?: boolean) => {
     if (locked) return;
-    setEnabledSections(prev => 
+    setEnabledSections(prev =>
       prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
     );
   };
@@ -98,11 +98,11 @@ export default function CreateCvWizard() {
   const handleFinish = async (themeId: string) => {
     if (isSubmitting) return;
     setIsSubmitting(true);
-    
+
     try {
       // Determine disabled sections
       const disabledSections = SECTIONS.map(s => s.id).filter(id => !enabledSections.includes(id));
-      
+
       // Determine disabled items
       const disabledItems: Record<string, string[]> = {};
       if (profile?.experiences) {
@@ -114,13 +114,13 @@ export default function CreateCvWizard() {
       if (profile?.projects) {
         disabledItems.projects = profile.projects.filter(e => !includedItems.projects?.includes(e.id)).map(e => e.id);
       }
-      
+
       const { cvApi } = await import('@/lib/cv-api');
-      
+
       if (!session?.user?.accessToken) {
         throw new Error("Non authentifié");
       }
-      
+
       const payload = {
         title: `CV - ${usage || 'Général'}`,
         template_id: themeId,
@@ -131,9 +131,9 @@ export default function CreateCvWizard() {
           disabledItems,
         }
       };
-      
+
       const newCv = await cvApi.createResume(session.user.accessToken, payload);
-      
+
       addCv(newCv);
       router.push(`/mes-documents/cv/${newCv.id}`);
     } catch (err) {
@@ -240,11 +240,10 @@ export default function CreateCvWizard() {
                       <button
                         key={u.id}
                         onClick={() => setUsage(u.label)}
-                        className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all text-left ${
-                          usage === u.label
+                        className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all text-left ${usage === u.label
                             ? 'border-indigo-600 bg-indigo-50/50 shadow-sm'
                             : 'border-gray-100 hover:border-gray-200 hover:bg-gray-50'
-                        }`}
+                          }`}
                       >
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${usage === u.label ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-500'}`}>
                           <u.icon className="w-5 h-5" />
@@ -271,7 +270,7 @@ export default function CreateCvWizard() {
               {step === 2 && (
                 <div className="p-8">
                   <h2 className="text-xl font-bold text-gray-900 mb-1">Que voulez-vous inclure ?</h2>
-                  <p className="text-sm text-gray-500 mb-6">Cariey a pré-sélectionné les sections recommandées. Décochez ce qui ne vous sert pas.</p>
+                  <p className="text-sm text-gray-500 mb-6">carriey a pré-sélectionné les sections recommandées. Décochez ce qui ne vous sert pas.</p>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {SECTIONS.map((s: any) => {
@@ -280,13 +279,11 @@ export default function CreateCvWizard() {
                         <button
                           key={s.id}
                           onClick={() => toggleSection(s.id, s.locked)}
-                          className={`flex items-center gap-3 p-4 rounded-2xl border-2 transition-all text-left ${
-                            isEnabled ? 'border-indigo-600 bg-indigo-50/50' : 'border-gray-100 bg-gray-50 opacity-60'
-                          }`}
+                          className={`flex items-center gap-3 p-4 rounded-2xl border-2 transition-all text-left ${isEnabled ? 'border-indigo-600 bg-indigo-50/50' : 'border-gray-100 bg-gray-50 opacity-60'
+                            }`}
                         >
-                          <div className={`w-5 h-5 rounded-md flex items-center justify-center border transition-colors flex-shrink-0 ${
-                            isEnabled ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-gray-300 bg-white'
-                          }`}>
+                          <div className={`w-5 h-5 rounded-md flex items-center justify-center border transition-colors flex-shrink-0 ${isEnabled ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-gray-300 bg-white'
+                            }`}>
                             {isEnabled && <CheckCircle2 className="w-3.5 h-3.5" />}
                           </div>
                           <span className="text-sm font-semibold text-gray-900 flex-1">{s.label}</span>
@@ -322,13 +319,11 @@ export default function CreateCvWizard() {
                             <button
                               key={exp.id}
                               onClick={() => toggleItem('experiences', exp.id)}
-                              className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
-                                includedItems.experiences?.includes(exp.id) ? 'border-indigo-600 bg-indigo-50/50' : 'border-gray-100 bg-gray-50 opacity-60'
-                              }`}
+                              className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${includedItems.experiences?.includes(exp.id) ? 'border-indigo-600 bg-indigo-50/50' : 'border-gray-100 bg-gray-50 opacity-60'
+                                }`}
                             >
-                              <div className={`w-5 h-5 rounded-md flex items-center justify-center border transition-colors flex-shrink-0 ${
-                                includedItems.experiences?.includes(exp.id) ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-gray-300 bg-white'
-                              }`}>
+                              <div className={`w-5 h-5 rounded-md flex items-center justify-center border transition-colors flex-shrink-0 ${includedItems.experiences?.includes(exp.id) ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-gray-300 bg-white'
+                                }`}>
                                 {includedItems.experiences?.includes(exp.id) && <CheckCircle2 className="w-3.5 h-3.5" />}
                               </div>
                               <div className="flex-1 min-w-0">
@@ -349,13 +344,11 @@ export default function CreateCvWizard() {
                             <button
                               key={proj.id}
                               onClick={() => toggleItem('projects', proj.id)}
-                              className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
-                                includedItems.projects?.includes(proj.id) ? 'border-indigo-600 bg-indigo-50/50' : 'border-gray-100 bg-gray-50 opacity-60'
-                              }`}
+                              className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${includedItems.projects?.includes(proj.id) ? 'border-indigo-600 bg-indigo-50/50' : 'border-gray-100 bg-gray-50 opacity-60'
+                                }`}
                             >
-                              <div className={`w-5 h-5 rounded-md flex items-center justify-center border transition-colors flex-shrink-0 ${
-                                includedItems.projects?.includes(proj.id) ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-gray-300 bg-white'
-                              }`}>
+                              <div className={`w-5 h-5 rounded-md flex items-center justify-center border transition-colors flex-shrink-0 ${includedItems.projects?.includes(proj.id) ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-gray-300 bg-white'
+                                }`}>
                                 {includedItems.projects?.includes(proj.id) && <CheckCircle2 className="w-3.5 h-3.5" />}
                               </div>
                               <div className="flex-1 min-w-0">
@@ -375,13 +368,11 @@ export default function CreateCvWizard() {
                             <button
                               key={edu.id}
                               onClick={() => toggleItem('educations', edu.id)}
-                              className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
-                                includedItems.educations?.includes(edu.id) ? 'border-indigo-600 bg-indigo-50/50' : 'border-gray-100 bg-gray-50 opacity-60'
-                              }`}
+                              className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${includedItems.educations?.includes(edu.id) ? 'border-indigo-600 bg-indigo-50/50' : 'border-gray-100 bg-gray-50 opacity-60'
+                                }`}
                             >
-                              <div className={`w-5 h-5 rounded-md flex items-center justify-center border transition-colors flex-shrink-0 ${
-                                includedItems.educations?.includes(edu.id) ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-gray-300 bg-white'
-                              }`}>
+                              <div className={`w-5 h-5 rounded-md flex items-center justify-center border transition-colors flex-shrink-0 ${includedItems.educations?.includes(edu.id) ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-gray-300 bg-white'
+                                }`}>
                                 {includedItems.educations?.includes(edu.id) && <CheckCircle2 className="w-3.5 h-3.5" />}
                               </div>
                               <div className="flex-1 min-w-0">

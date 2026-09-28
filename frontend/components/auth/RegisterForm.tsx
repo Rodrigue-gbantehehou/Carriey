@@ -92,7 +92,7 @@ export default function RegisterForm() {
           <div className="mb-8">
             <Link href="/" className="inline-flex items-center gap-2.5">
               <Image src={config.appLogo} alt={config.appName} width={32} height={32} className="object-contain" priority />
-              <span className="text-2xl font-black tracking-tighter text-indigo-600">{config.appName}</span>
+              <span className="text-2xl font-bold text-black-600">{config.appName}</span>
             </Link>
             <h2 className="mt-8 text-2xl font-bold tracking-tight text-gray-900">
               Créer un compte

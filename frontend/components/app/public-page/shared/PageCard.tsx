@@ -29,7 +29,7 @@ export function PageCard({ page, previewImage, onEdit, onDelete, onToggle }: {
       try {
         await navigator.share({
           title: page.title,
-          text: `Découvrez mon profil public sur Cariey : ${page.title}`,
+          text: `Découvrez mon profil public sur carriey : ${page.title}`,
           url,
         });
       } catch (err) {
@@ -49,7 +49,7 @@ export function PageCard({ page, previewImage, onEdit, onDelete, onToggle }: {
       <div className="aspect-[1/1.4] bg-gray-100 border-b border-gray-100 relative overflow-hidden flex items-center justify-center p-4">
         <div className={`w-full h-full shadow-sm rounded-lg relative border border-gray-100 transition-transform group-hover:scale-[1.02] flex flex-col overflow-hidden ${!previewImage ? theme.preview : 'bg-white p-0'}`}>
           {previewImage ? (
-            <img 
+            <img
               src={previewImage.startsWith('http') ? previewImage : `${(process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/v1').replace('/api/v1', '')}/static/previews/${previewImage.split('/').pop()}`}
               alt="Preview"
               className="w-full h-full object-cover"
@@ -70,7 +70,7 @@ export function PageCard({ page, previewImage, onEdit, onDelete, onToggle }: {
             </>
           )}
         </div>
-        
+
         {/* Overlay with config button */}
         <div className="absolute inset-0 bg-gray-900/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[1px]">
           <span className="px-4 py-2 bg-white text-gray-900 rounded-full text-sm font-semibold shadow-lg flex items-center gap-2 transform translate-y-4 group-hover:translate-y-0 transition-all">
@@ -79,7 +79,7 @@ export function PageCard({ page, previewImage, onEdit, onDelete, onToggle }: {
           </span>
         </div>
       </div>
-      
+
       {/* Bottom info section */}
       <div className="p-4 flex flex-col flex-1">
         <div className="flex items-start justify-between gap-3 mb-2">
@@ -109,7 +109,7 @@ export function PageCard({ page, previewImage, onEdit, onDelete, onToggle }: {
             </button>
           </div>
         </div>
-        
+
         {/* Actions row */}
         <div className="flex items-center gap-2 mt-auto pt-2 border-t border-gray-50" onClick={(e) => e.stopPropagation()}>
           <span className="flex items-center gap-1 text-xs text-gray-400 mr-auto" title="Nombre de vues">
@@ -122,7 +122,7 @@ export function PageCard({ page, previewImage, onEdit, onDelete, onToggle }: {
             {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
           </button>
           <a href={`/p/${page.slug}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-[10px] font-bold bg-indigo-50 text-indigo-700 px-2.5 py-1.5 rounded-md hover:bg-indigo-100 transition-all uppercase tracking-wider">
-            <Globe className="w-3 h-3" /> 
+            <Globe className="w-3 h-3" />
           </a>
         </div>
       </div>

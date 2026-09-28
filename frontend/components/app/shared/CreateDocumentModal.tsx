@@ -43,12 +43,12 @@ export default function CreateDocumentModal() {
     <div className="fixed inset-0 z-50 flex flex-col justify-end sm:items-center sm:justify-center">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm"
+        className="absolute inset-0 bg-gray-900/40 backdrop-blur-md transition-opacity"
         onClick={closeCreateModal}
       />
 
       {/* Modal — bottom sheet on mobile, centered card on sm+ */}
-      <div className="relative bg-white w-full sm:max-w-2xl sm:rounded-2xl rounded-t-3xl shadow-2xl z-10 overflow-hidden">
+      <div className="relative bg-white/95 backdrop-blur-2xl border border-white/20 w-full sm:max-w-2xl sm:rounded-3xl rounded-t-3xl shadow-2xl z-10 overflow-hidden animate-slide-up">
 
         {/* Drag handle (mobile only) */}
         <div className="flex justify-center pt-3 pb-1 sm:hidden">
@@ -84,10 +84,10 @@ export default function CreateDocumentModal() {
                     doc.id === 'cover_letter' ? handleCreateCoverLetter : undefined
                   }
                   className={`
-                    flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all text-center group relative
+                    flex flex-col items-center justify-center p-5 rounded-2xl border transition-all text-center group relative
                     ${doc.active
-                      ? 'border-gray-200 hover:border-indigo-600 hover:shadow-md hover:shadow-indigo-600/10 bg-white cursor-pointer'
-                      : 'border-gray-100 bg-gray-50/50 opacity-50 cursor-not-allowed'
+                      ? 'border-gray-200/60 hover:border-indigo-300 hover:shadow-xl hover:shadow-indigo-600/10 hover:-translate-y-1 bg-white/50 backdrop-blur-sm cursor-pointer'
+                      : 'border-gray-100 bg-gray-50/30 opacity-50 cursor-not-allowed'
                     }
                   `}
                 >

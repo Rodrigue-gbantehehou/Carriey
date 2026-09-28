@@ -43,12 +43,12 @@ export default function ForgotPasswordForm() {
       <div className="relative hidden w-0 flex-1 lg:block bg-gray-50 border-r border-gray-100 overflow-hidden">
         {/* Subtle grid pattern for premium tech feel */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-        
+
         <div className="absolute inset-0 flex flex-col items-center justify-center p-12 text-center">
           <div className="bg-white/60 backdrop-blur-md rounded-2xl border border-gray-200 p-12 max-w-lg shadow-xl shadow-gray-200/50">
-             <div className="w-16 h-16 bg-indigo-600 text-white rounded-xl flex items-center justify-center font-black text-2xl mb-6 mx-auto">C</div>
-             <h3 className="text-2xl font-bold text-gray-900 mb-4">Ne perdez pas le fil.</h3>
-             <p className="text-gray-500">Récupérez l'accès à votre Master Profile et retrouvez toutes vos données professionnelles intactes.</p>
+            <div className="w-16 h-16 bg-indigo-600 text-white rounded-xl flex items-center justify-center font-black text-2xl mb-6 mx-auto">C</div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">Ne perdez pas le fil.</h3>
+            <p className="text-gray-500">Récupérez l'accès à votre Master Profile et retrouvez toutes vos données professionnelles intactes.</p>
           </div>
         </div>
       </div>
@@ -58,7 +58,7 @@ export default function ForgotPasswordForm() {
         <div className="mx-auto w-full max-w-sm lg:w-96">
           <div className="mb-8">
             <Link href="/" className="inline-block">
-              <span className="text-2xl font-black tracking-tighter text-indigo-600">CARIEY</span>
+              <span className="text-2xl font-black tracking-tighter text-indigo-600">carriey</span>
             </Link>
             {!isSuccess && (
               <>

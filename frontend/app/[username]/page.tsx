@@ -38,7 +38,7 @@ export default function PublicProfilePage() {
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    const raw = localStorage.getItem('cariey_draft_profile');
+    const raw = localStorage.getItem('carriey_draft_profile');
     const draft = raw ? JSON.parse(raw) : null;
 
     setTimeout(() => {
@@ -68,7 +68,7 @@ export default function PublicProfilePage() {
       <div className="flex h-screen flex-col items-center justify-center text-center px-4">
         <p className="text-4xl mb-4">👤</p>
         <h1 className="text-xl font-bold text-gray-900">Profil introuvable</h1>
-        <p className="text-sm text-gray-500 mt-2">L'adresse <strong>cariey.com/{username}</strong> n'existe pas encore.</p>
+        <p className="text-sm text-gray-500 mt-2">L'adresse <strong>carriey.com/{username}</strong> n'existe pas encore.</p>
         <Link href="/start" className="mt-6 inline-flex items-center gap-2 bg-indigo-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-indigo-700 transition-colors">
           Créer mon profil
         </Link>
@@ -84,7 +84,7 @@ export default function PublicProfilePage() {
 
       {/* Minimal header */}
       <header className="bg-white border-b border-gray-100 px-5 h-12 flex items-center justify-between">
-        <Link href="/" className="text-base font-black tracking-tight text-indigo-600">CARIEY</Link>
+        <Link href="/" className="text-base font-black tracking-tight text-indigo-600">carriey</Link>
         <Link href="/profil" className="flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-gray-900 transition-colors">
           <ArrowLeft className="w-3.5 h-3.5" />
           Modifier mon profil
@@ -217,7 +217,7 @@ export default function PublicProfilePage() {
 
         {/* Footer */}
         <p className="text-center text-xs text-gray-300 mt-10">
-          Profil créé avec <span className="font-bold text-indigo-400">CARIEY</span>
+          Profil créé avec <span className="font-bold text-indigo-400">carriey</span>
         </p>
 
       </div>

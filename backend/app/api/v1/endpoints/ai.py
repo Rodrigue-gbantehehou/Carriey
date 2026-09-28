@@ -181,3 +181,33 @@ async def tailor_cv_endpoint(
     except Exception as e:
         logger.error(f"Erreur de génération IA : {str(e)}")
         raise HTTPException(status_code=500, detail="L'adaptation du CV a échoué.")
+
+class ExtractJobRequest(BaseModel):
+    job_text: str
+
+class ExtractJobResponse(BaseModel):
+    companyName: str
+    jobTitle: str
+    location: str
+
+@router.post("/extract-job", response_model=ExtractJobResponse)
+async def extract_job_endpoint(
+    request: ExtractJobRequest,
+    current_user: User = Depends(get_current_user)
+):
+    try:
+        ai_service = get_ai_service()
+        res = await ai_service.extract_job_details(request.job_text)
+        return ExtractJobResponse(
+            companyName=res.get("companyName", ""),
+            jobTitle=res.get("jobTitle", ""),
+            location=res.get("location", "")
+        )
+    except RuntimeError as e:
+        if "QUOTA_EXCEEDED" in str(e):
+            raise HTTPException(status_code=503, detail="Le quota IA est épuisé pour aujourd'hui.")
+        raise HTTPException(status_code=500, detail="L'extraction des détails a échoué.")
+    except Exception as e:
+        logger.error(f"Erreur de génération IA : {str(e)}")
+        raise HTTPException(status_code=500, detail="L'extraction des détails a échoué.")
+

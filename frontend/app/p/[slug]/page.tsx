@@ -15,11 +15,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const name = [data.profile.first_name, data.profile.last_name].filter(Boolean).join(' ') || data.profile.username || 'Profil';
     const title = `${name} — ${data.page.title}`;
     const description = data.page.seo_description || data.profile.bio?.substring(0, 160) || `Découvrez le profil professionnel et les réalisations de ${name}.`;
-    
+
     // Fallback to a default generic image if the user doesn't have a photo or hides it
-    const imageUrl = (data.page.show_photo && data.profile.photo_url) 
+    const imageUrl = (data.page.show_photo && data.profile.photo_url)
       ? `${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '')}${data.profile.photo_url}`
-      : `${process.env.NEXT_PUBLIC_APP_URL || 'https://cariey.com'}/og-default.jpg`; 
+      : `${process.env.NEXT_PUBLIC_APP_URL || 'https://carriey.com'}/og-default.jpg`;
 
     return {
       title,
@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         title,
         description,
         type: 'profile',
-        url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://cariey.com'}/p/${data.page.slug}`,
+        url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://carriey.com'}/p/${data.page.slug}`,
         images: [
           {
             url: imageUrl,
