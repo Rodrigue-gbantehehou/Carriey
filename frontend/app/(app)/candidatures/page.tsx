@@ -192,31 +192,31 @@ export default function CandidaturesPage() {
         key={app.id}
         draggable
         onDragStart={(e) => handleDragStart(e, app.id)}
-        className="bg-white border border-gray-200/80 rounded-xl p-3 shadow-sm hover:shadow-md hover:border-indigo-300 transition-all duration-200 group flex flex-col cursor-grab active:cursor-grabbing relative"
+        className="bg-white border border-gray-200/80 rounded-lg md:rounded-xl p-1.5 md:p-2.5 shadow-sm hover:shadow-md hover:border-indigo-300 transition-all duration-200 group flex flex-col cursor-grab active:cursor-grabbing relative"
       >
         {/* Actions (on hover) */}
-        <div className="absolute top-2 right-2 flex items-center opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 backdrop-blur-md rounded-md shadow-sm border border-gray-100 z-10">
-          <button onClick={() => openEditModal(app)} className="p-1.5 text-gray-500 hover:text-indigo-600 transition-colors" title="Modifier">
-            <Edit2 className="w-3 h-3" />
+        <div className="absolute top-1 right-1 flex items-center opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 backdrop-blur-md rounded shadow-sm border border-gray-100 z-10">
+          <button onClick={() => openEditModal(app)} className="p-1 text-gray-500 hover:text-indigo-600 transition-colors" title="Modifier">
+            <Edit2 className="w-2.5 h-2.5 md:w-3 md:h-3" />
           </button>
-          <button onClick={() => handleDelete(app.id)} className="p-1.5 text-gray-500 hover:text-red-600 transition-colors" title="Supprimer">
-            <Trash2 className="w-3 h-3" />
+          <button onClick={() => handleDelete(app.id)} className="p-1 text-gray-500 hover:text-red-600 transition-colors" title="Supprimer">
+            <Trash2 className="w-2.5 h-2.5 md:w-3 md:h-3" />
           </button>
         </div>
 
         {/* Small color indicator for Grid View */}
         {viewMode === 'grid' && (
-          <div className="mb-2">
-            <span className={`inline-block px-1.5 py-0.5 rounded text-[9px] uppercase tracking-wider font-bold border ${statusConfig.className}`}>
+          <div className="mb-1 md:mb-2">
+            <span className={`inline-block w-6 md:w-auto h-1 md:h-auto md:px-1.5 md:py-0.5 rounded text-[0px] md:text-[9px] uppercase tracking-wider font-bold border ${statusConfig.className}`}>
               {statusConfig.label}
             </span>
           </div>
         )}
 
-        <h3 className="font-bold text-gray-900 text-sm leading-tight pr-10 mb-1">{app.company}</h3>
-        <p className="text-xs text-gray-600 font-medium line-clamp-2 mb-3">{app.role}</p>
+        <h3 className="font-bold text-gray-900 text-[10px] md:text-sm truncate pr-4 md:pr-10 mb-0 md:mb-1">{app.company}</h3>
+        <p className="text-[9px] md:text-xs text-gray-600 font-medium truncate md:line-clamp-2 mb-0 md:mb-3 hidden md:block">{app.role}</p>
 
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-auto">
+        <div className="hidden md:flex flex-wrap items-center gap-x-3 gap-y-1 mt-auto">
           {app.location && (
             <div className="flex items-center gap-1 text-gray-400">
               <MapPin className="w-3 h-3" />
