@@ -72,7 +72,7 @@ const TokyoTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBase
                   <div className="languages-list">
                     {profile.age && <div className="language-item"><span className="lang-name">Âge</span><span className="lang-level">{profile.age}</span></div>}
                     {profile.nationality && <div className="language-item"><span className="lang-name">Nationalité</span><span className="lang-level">{profile.nationality}</span></div>}
-                    {(profile as any).marital_status && <div className="language-item"><span className="lang-name">Situation</span><span className="lang-level">{(profile as any).marital_status}</span></div>}
+                    {profile.marital_status && <div className="language-item"><span className="lang-name">Situation</span><span className="lang-level">{profile.marital_status}</span></div>}
                   </div>
                 </CVSection>
               );

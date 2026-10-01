@@ -145,23 +145,27 @@ async def send_email_to_user(
         raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
 
     try:
+        import html
         from app.services.mailer_service import mailer_service
-        html = f"""<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">
+        safe_subject = html.escape(req.subject)
+        safe_message = html.escape(req.message)
+        
+        html_body = f"""<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">
 <style>body{{font-family:Arial,sans-serif;color:#1c1c1c;margin:0}}
 .w{{max-width:600px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden}}
 .h{{background:#1c1c1c;padding:32px;text-align:center;color:#fff}}
 .h h1{{margin:0;font-size:20px}}.b{{padding:32px}}
 .f{{padding:16px;background:#f9fafb;text-align:center;color:#9ca3af;font-size:12px}}</style></head>
 <body><div class="w">
-<div class="h"><h1>{req.subject}</h1></div>
-<div class="b"><p style="white-space:pre-wrap;line-height:1.6">{req.message}</p></div>
+<div class="h"><h1>{safe_subject}</h1></div>
+<div class="b"><p style="white-space:pre-wrap;line-height:1.6">{safe_message}</p></div>
 <div class="f"><p>CVtor - Message de l'equipe support</p></div>
 </div></body></html>"""
 
         msg = mailer_service._build_msg(
             to=user.email,
             subject=req.subject,
-            html_body=html,
+            html_body=html_body,
             text_body=req.message
         )
         sent = mailer_service._send(msg, user.email)

@@ -1,74 +1,230 @@
-# Carriey - Éditeur de CV en Temps Réel
+﻿# Carriey
 
-**Carriey** est une application moderne pour créer, éditer et exporter des CV professionnels. L'application utilise une architecture hybride pour offrir une expérience d'édition fluide tout en garantissant une génération de fichiers (PDF/DOCX) de haute qualité.
+**Carriey** est une plateforme qui permet à chacun de créer et de gérer son profil professionnel afin de l'utiliser pour générer différents documents professionnels.
 
-## 🚀 Architecture de Rendu
+L'idée centrale est simple :
 
-L'application utilise un double système de rendu :
-1.  **Rendu React (Frontend)** : Utilisé pour la prévisualisation en temps réel dans l'éditeur. Les modifications apparaissent instantanément sans appel API (Type Canva).
-2.  **Rendu Jinja2 (Backend)** : Utilisé pour la génération finale des fichiers PDF et DOCX, assurant une fidélité parfaite grâce à un moteur de rendu serveur stable.
+> L'utilisateur renseigne son parcours une fois. Carriey lui permet ensuite de le réutiliser pour créer, adapter et présenter ses documents professionnels.
 
-## 📁 Structure du Projet
+---
 
-- `/frontend` : Application Next.js 14 (React, Tailwind CSS, Zustand).
-- `/backend` : API FastAPI (Python, Jinja2, Playwright pour le PDF).
+## Le problème
 
-## 🛠️ Installation et Démarrage
+Aujourd'hui, lorsqu'une personne cherche un emploi, un stage, une mission ou une nouvelle opportunité, elle doit souvent :
 
-### 1. Prérequis
-- Node.js 18+
-- Python 3.10+
+- refaire son CV ;
+- modifier son CV pour chaque offre ;
+- rédiger une nouvelle lettre de motivation ;
+- recopier plusieurs fois les mêmes informations ;
+- adapter son parcours à différentes situations ;
+- gérer plusieurs versions de ses documents.
 
-### 2. Backend (FastAPI)
-Le backend gère la persistence des données et l'exportation des fichiers.
+Les outils existants se concentrent souvent uniquement sur la création d'un CV.
 
-```bash
-cd backend
-# Créer et activer un environnement virtuel
-python -m venv venv
-source venv/bin/activate  # Sur Windows: venv\Scripts\activate
+**Carriey veut aller plus loin.**
 
-.\venv\Scripts\activate
+---
 
+## La solution
 
-# Installer les dépendances
-pip install -r requirements.txt
-python -m playwright install chromium
+Carriey repose sur un **profil professionnel central**.
 
-# Lancer le serveur
-uvicorn api:app --reload --port 8000
+L'utilisateur renseigne une fois :
+
+- informations personnelles ;
+- présentation ;
+- expériences professionnelles ;
+- formations ;
+- compétences ;
+- projets ;
+- certifications ;
+- langues ;
+- réalisations ;
+- liens et autres informations utiles.
+
+Ces informations deviennent la source principale de Carriey.
+
+À partir de ce profil, l'utilisateur peut créer différents documents sans devoir tout recommencer.
+
 ```
-L'API sera disponible sur `http://localhost:8000/api`.
-
-### 3. Frontend (Next.js)
-Le frontend est l'interface utilisateur interactive.
-
-```bash
-cd frontend
-# Installer les dépendances
-npm install
-
-# Lancer en mode développement
-npm run dev
+                 PROFIL PROFESSIONNEL
+                          │
+         ┌────────────────┼────────────────┐
+         │                │                │
+         ↓                ↓                ↓
+        CV             Lettre          Profil web
+         │            motivation
+         │
+         ↓
+  Adaptation à une offre
 ```
-L'application sera disponible sur `http://localhost:5000`.
 
-## 🎨 Templates
+---
 
-Les templates sont stockés dans le backend (`/backend/templates`) pour le rendu Jinja2 et ont été migrés vers des composants React dans `/frontend/components/cv-templates` pour l'édition en direct.
+## Adaptation à une offre
 
-Templates supportés en React :
-- **Classique** : Design standard et épuré.
-- **Moderne** : Design à deux colonnes avec sidebar.
-- *Autres templates en cours de migration (utilisation du fallback Classique).*
+L'une des fonctionnalités importantes de Carriey est **l'adaptation à une offre d'emploi**.
 
-## ⚙️ Configuration (.env)
+L'utilisateur peut simplement :
 
-L'application utilise des variables d'environnement pour la communication entre le frontend et le backend. Un fichier `.env` à la racine permet de centraliser la configuration.
+1. copier une offre d'emploi ;
+2. la coller dans Carriey ;
+3. demander son analyse.
 
-- **`DATABASE_URL`** : URL de la base de données (PostgreSQL/Supabase).
-- **`SECRET_KEY`** : Clé secrète pour les tokens JWT du backend.
-- **`NEXT_PUBLIC_API_URL`** : URL du backend (ex: `http://localhost:8000/api`) pour les appels frontend.
-- **`NEXTAUTH_URL`** : URL de base du frontend (ex: `http://localhost:5000`).
+Carriey identifie notamment :
 
-Assurez-vous que les ports configurés correspondent à ceux utilisés pour lancer les serveurs (`5000` pour le frontend par défaut).
+- les compétences recherchées ;
+- les expériences pertinentes ;
+- les technologies demandées ;
+- les qualifications ;
+- les éléments importants de l'offre.
+
+L'application peut ensuite utiliser ces informations avec le profil de l'utilisateur pour proposer :
+
+- un CV adapté ;
+- une lettre de motivation adaptée ;
+- une analyse de l'offre ;
+- des recommandations sur les éléments à mettre en avant.
+
+> L'objectif n'est pas d'inventer des informations, mais de mettre en avant ce qui existe réellement dans le profil de l'utilisateur.
+
+---
+
+## Une application accessible à tous
+
+Carriey est conçu pour être utilisé aussi bien par une personne qui maîtrise peu l'informatique que par un utilisateur expérimenté.
+
+L'interface doit donc être :
+
+- simple ;
+- claire ;
+- guidée lorsque nécessaire ;
+- flexible ;
+- personnalisable ;
+- rapide à comprendre.
+
+Un **débutant** peut suivre les étapes proposées sans avoir besoin de connaître les outils de création de CV.
+
+Un **utilisateur avancé** peut, lui, modifier directement son contenu et contrôler davantage la présentation de ses documents.
+
+---
+
+## Les documents
+
+Carriey commence principalement autour de trois types de contenus :
+
+### CV
+
+Création de CV à partir du profil professionnel.
+
+### Lettre de motivation
+
+Création d'une lettre à partir du profil, avec possibilité de l'adapter à une offre.
+
+### Profil professionnel
+
+Une page professionnelle partageable permettant de présenter son parcours en ligne.
+
+L'architecture est volontairement extensible afin de pouvoir ajouter plus tard d'autres documents :
+
+- portfolio ;
+- présentation professionnelle ;
+- message de candidature ;
+- dossier professionnel ;
+- autres documents personnalisés.
+
+---
+
+## Thèmes et export
+
+Le contenu appartient à l'utilisateur.
+
+Carriey sépare donc :
+
+- le **contenu** → le profil professionnel
+- de la **présentation** → le thème du document.
+
+L'utilisateur peut ainsi conserver les mêmes informations et changer simplement la présentation de son CV ou de ses documents.
+
+Les fonctionnalités essentielles de création et d'adaptation peuvent rester accessibles gratuitement, tandis que certains thèmes premium et formats d'export peuvent être proposés dans les offres payantes.
+
+---
+
+## Intelligence artificielle
+
+L'IA n'est pas le cœur du produit.
+
+**Le cœur de Carriey est le profil professionnel.**
+
+L'IA vient comme une couche supplémentaire permettant notamment :
+
+- d'analyser une offre ;
+- d'identifier les éléments importants ;
+- d'adapter un CV ;
+- de rédiger une lettre ;
+- de suggérer des formulations ;
+- d'aider l'utilisateur à présenter son parcours.
+
+Cela permet de garder une application utile même lorsque l'utilisateur ne souhaite pas utiliser l'IA.
+
+---
+
+## Philosophie du produit
+
+Carriey suit quelques principes :
+
+| Principe | Description |
+|---|---|
+| **1. Un seul profil** | L'utilisateur ne doit pas avoir à recopier constamment son parcours. |
+| **2. Simplicité** | Une personne débutante doit pouvoir comprendre quoi faire sans formation particulière. |
+| **3. Liberté** | L'utilisateur garde le contrôle de son contenu et peut modifier ses documents. |
+| **4. Réutilisabilité** | Les informations du profil peuvent être utilisées dans plusieurs documents. |
+| **5. Adaptabilité** | Un même parcours peut être présenté différemment selon l'objectif. |
+| **6. Progressivité** | L'utilisateur peut commencer simplement puis utiliser des fonctionnalités plus avancées lorsqu'il en a besoin. |
+
+---
+
+## Modèle économique
+
+Carriey suit un modèle **freemium**.
+
+Le principe est de laisser l'utilisateur construire gratuitement son profil et utiliser les fonctionnalités essentielles.
+
+Les revenus peuvent principalement venir de :
+
+- thèmes premium ;
+- exports premium ;
+- fonctionnalités avancées ;
+- abonnements **Carriey Plus** ;
+- abonnements **Carriey Pro**.
+
+> L'objectif est de ne pas faire payer l'utilisateur simplement pour renseigner son propre parcours.
+
+---
+
+## Vision
+
+Carriey ne veut pas être simplement un autre générateur de CV.
+
+L'objectif est de créer un **espace professionnel personnel** dans lequel une personne peut conserver son parcours et l'utiliser pour différentes opportunités et différents formats.
+
+À terme :
+
+```
+             MON PARCOURS
+                  │
+                  ↓
+          PROFIL CARRIEY
+                  │
+   ┌──────────────┼──────────────┐
+   ↓              ↓              ↓
+  CV           Candidature     Profil web
+   │              │              │
+   ↓              ↓              ↓
+Thèmes          IA / offre     Partage
+Export          Lettre
+```
+
+---
+
+*Carriey — Ton parcours. Tous tes documents.*

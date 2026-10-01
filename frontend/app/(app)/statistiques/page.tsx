@@ -62,7 +62,7 @@ export default function StatistiquesPage() {
           sent: candidatures.filter((c: any) => c.status === 'envoyee').length,
           totalResumes: cvs.length,
           totalLetters: letters.length,
-          publicViews: Math.floor(Math.random() * 150) + 12, // Fake stats for public page views
+          publicViews: 0, // En attente d'implémentation backend
         });
       } catch (error) {
         console.error("Erreur de chargement des statistiques", error);

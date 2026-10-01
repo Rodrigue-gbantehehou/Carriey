@@ -7,8 +7,11 @@ from email.mime.application import MIMEApplication
 from typing import Optional
 from pathlib import Path
 from datetime import datetime
+import logging
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+
+logger = logging.getLogger(__name__)
 
 BASE_DIR = Path(__file__).parent.parent.resolve()
 MAIL_TEMPLATES_DIR = BASE_DIR / "mail_templates"
@@ -37,22 +40,22 @@ class MailerService:
             template = self.template_env.get_template(template_name)
             return template.render(**context)
         except Exception as e:
-            print(f"[Mailer] Template rendering failed for {template_name}: {e}")
+            logger.error(f"[Mailer] Template rendering failed for {template_name}: {e}")
             return ""
 
     def _send(self, msg: MIMEMultipart, recipient: str) -> bool:
         if not self._is_configured():
-            print("[Mailer] No credentials configured, skipping email.")
+            logger.warning("[Mailer] No credentials configured, skipping email.")
             return False
         try:
             context_ssl = ssl.create_default_context()
             with smtplib.SMTP_SSL(self.smtp_server, self.smtp_port, context=context_ssl) as server:
                 server.login(self.smtp_user, self.smtp_password)
                 server.send_message(msg)
-            print(f"[Mailer] Email sent to {recipient}")
+            logger.info(f"[Mailer] Email sent to {recipient}")
             return True
         except Exception as e:
-            print(f"[Mailer] Failed to send email to {recipient}: {e}")
+            logger.error(f"[Mailer] Failed to send email to {recipient}: {e}")
             return False
 
     def _build_msg(

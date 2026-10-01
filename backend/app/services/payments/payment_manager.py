@@ -28,3 +28,9 @@ try:
 except Exception as e:
     # Handle missing configuration or import errors gracefully
     print(f"Warning: Failed to load KkiapayProvider: {e}")
+
+try:
+    from app.services.payments.providers.fedapay_provider import FedaPayProvider
+    payment_manager.register_provider("fedapay", FedaPayProvider())
+except Exception as e:
+    print(f"Warning: Failed to load FedaPayProvider: {e}")

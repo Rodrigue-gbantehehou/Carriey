@@ -93,9 +93,10 @@ async def upload_profile_photo(
     if file.content_type not in ALLOWED:
         raise HTTPException(status_code=400, detail="Format non supporté. Utilisez JPEG, PNG ou WebP.")
     
-    contents = await file.read()
-    if len(contents) > 5 * 1024 * 1024:  # 5MB max
+    if getattr(file, "size", 0) > 5 * 1024 * 1024:
         raise HTTPException(status_code=400, detail="La photo ne doit pas dépasser 5 Mo.")
+    
+    contents = await file.read()
     
     # Save file to /static/photos/
     ext = file.filename.rsplit('.', 1)[-1].lower() if file.filename and '.' in file.filename else 'jpg'

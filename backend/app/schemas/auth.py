@@ -13,8 +13,19 @@ class UserBase(BaseModel):
     email: EmailStr
     full_name: Optional[str] = None
 
+from pydantic import BaseModel, EmailStr, Field, field_validator
+
 class UserCreate(UserBase):
-    password: str
+    password: str = Field(..., min_length=8)
+
+    @field_validator('password')
+    @classmethod
+    def password_complexity(cls, v):
+        if not any(char.isdigit() for char in v):
+            raise ValueError("Le mot de passe doit contenir au moins un chiffre.")
+        if not any(char.isupper() for char in v):
+            raise ValueError("Le mot de passe doit contenir au moins une lettre majuscule.")
+        return v
 
 class UserInDB(UserBase):
     id: str  # UUID

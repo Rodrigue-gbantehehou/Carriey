@@ -16,7 +16,7 @@ export default function MasterProfileSelector({ type }: { type: 'experience' | '
   if (!items || items.length === 0) return null;
 
   const handleImport = (item: any) => {
-    const currentList = data[type] || [];
+    const currentList = data?.[type] || [];
     
     // Convert MasterProfile item to Resume format
     let newItem: any = {};

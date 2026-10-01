@@ -22,7 +22,7 @@ COPY backend/ .
 
 # Copier les templates du frontend (nécessaires pour le rendu PDF/DOCX côté serveur)
 # On les place dans un dossier /app/templates
-COPY frontend/components/cv-templates/ ./templates/
+COPY frontend/components/app/cv/templates/ ./templates/
 
 # Définir le chemin des templates pour l'application
 ENV TEMPLATES_DIR=/app/templates
@@ -35,4 +35,4 @@ RUN mkdir -p static data templates
 EXPOSE 10000
 
 # Lancer l'application
-CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "10000", "--forwarded-allow-ips='*'"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "10000", "--forwarded-allow-ips='*'"]

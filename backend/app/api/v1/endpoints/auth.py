@@ -1,9 +1,11 @@
 from datetime import timedelta
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, field_validator
 from typing import Any, Optional
+import logging
+import os
 
 from app.schemas import auth as schemas
 from app.core import security as utils
@@ -13,23 +15,48 @@ from app.db.session import get_db
 from app.utils.audit import log_audit
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 # --- Schemas locaux ---
 class ForgotPasswordRequest(BaseModel):
     email: EmailStr
 
+def validate_password_complexity(v: str) -> str:
+    if len(v) < 8:
+        raise ValueError("Le mot de passe doit faire au moins 8 caractères.")
+    if not any(char.isdigit() for char in v):
+        raise ValueError("Le mot de passe doit contenir au moins un chiffre.")
+    if not any(char.isupper() for char in v):
+        raise ValueError("Le mot de passe doit contenir au moins une lettre majuscule.")
+    return v
+
 class ResetPasswordRequest(BaseModel):
     token: str
     new_password: str
+
+    @field_validator('new_password')
+    @classmethod
+    def validate_password(cls, v):
+        return validate_password_complexity(v)
 
 class ChangePasswordRequest(BaseModel):
     current_password: str
     new_password: str
 
+    @field_validator('new_password')
+    @classmethod
+    def validate_password(cls, v):
+        return validate_password_complexity(v)
+
+
+from app.core.limiter import limiter
+from fastapi import Request
 
 @router.post("/login", response_model=schemas.Token)
+@limiter.limit("10/minute")
 async def login_for_access_token(
+    request: Request,
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
 ) -> Any:
@@ -76,7 +103,8 @@ async def read_users_me(current_user: User = Depends(get_current_active_user)):
     return current_user
 
 @router.post("/register", response_model=schemas.UserOut)
-async def register_user(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
+@limiter.limit("5/minute")
+async def register_user(request: Request, user_in: schemas.UserCreate, db: Session = Depends(get_db)):
     """Endpoint pour enregistrer un nouvel utilisateur"""
     # Vérifier que l'email n'est pas déjà utilisé
     existing_user = db.query(User).filter(User.email == user_in.email).first()
@@ -113,13 +141,22 @@ async def register_user(user_in: schemas.UserCreate, db: Session = Depends(get_d
             full_name=new_user.full_name or new_user.email
         )
     except Exception as e:
-        print(f"[Register] Email de bienvenue échoué: {e}")
+        logger.error(f"[Register] Email de bienvenue échoué: {e}")
     
     return new_user
 
 
+def _send_reset_email_task(email: str, name: str, link: str):
+    try:
+        from app.services.mailer_service import mailer_service
+        mailer_service.send_password_reset(recipient_email=email, full_name=name, reset_link=link)
+        logger.info(f"[Auth] Email envoyé à {email}")
+    except Exception as e:
+        logger.error(f"[Auth] Erreur email: {e}")
+
 @router.post("/forgot-password")
-async def forgot_password(req: ForgotPasswordRequest, db: Session = Depends(get_db)):
+@limiter.limit("3/minute")
+async def forgot_password(request: Request, req: ForgotPasswordRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     """Envoie un email de réinitialisation de mot de passe"""
     # Réponse identique qu'il existe ou non pour éviter l'enumération
     user = db.query(User).filter(User.email == req.email).first()
@@ -129,24 +166,52 @@ async def forgot_password(req: ForgotPasswordRequest, db: Session = Depends(get_
             data={"sub": user.email, "purpose": "reset_password"},
             expires_delta=timedelta(hours=1)
         )
-        import os
-        frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5000")
+        frontend_url = os.getenv("FRONTEND_URL")
+        if not frontend_url and os.getenv("ENVIRONMENT", "development").lower() == "production":
+            raise HTTPException(status_code=500, detail="Configuration serveur invalide (FRONTEND_URL manquant en production)")
+        frontend_url = frontend_url or "http://localhost:5000"
         reset_link = f"{frontend_url}/set-password?token={reset_token}"
         
-        try:
-            from app.services.mailer_service import mailer_service
-            mailer_service.send_password_reset(
-                recipient_email=user.email,
-                full_name=user.full_name or user.email,
-                reset_link=reset_link
-            )
-            print(f"[ForgotPassword] Email envoyé à {user.email}")
-        except Exception as e:
-            print(f"[ForgotPassword] Erreur email: {e}")
-
+        # Audit log s'exécute vite, l'envoi de mail est mis en file d'attente (évite l'énumération par attaque temporelle)
         log_audit(db, user.id, "forgot_password", "user", user.id, {"email": user.email})
 
+        background_tasks.add_task(
+            _send_reset_email_task,
+            email=user.email,
+            name=user.full_name or user.email,
+            link=reset_link
+        )
+
     return {"message": "Si cet email existe, un lien de réinitialisation a été envoyé."}
+
+@router.post("/magic-link")
+@limiter.limit("3/minute")
+async def magic_link(request: Request, req: ForgotPasswordRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    """Envoie un lien de connexion magique"""
+    user = db.query(User).filter(User.email == req.email).first()
+    
+    if user:
+        reset_token = utils.create_access_token(
+            data={"sub": user.email, "purpose": "reset_password"},
+            expires_delta=timedelta(hours=24)
+        )
+        frontend_url = os.getenv("FRONTEND_URL")
+        if not frontend_url and os.getenv("ENVIRONMENT", "development").lower() == "production":
+            raise HTTPException(status_code=500, detail="FRONTEND_URL manquant en production")
+        frontend_url = frontend_url or "http://localhost:5000"
+        reset_link = f"{frontend_url}/set-password?token={reset_token}"
+        
+        log_audit(db, user.id, "magic_link", "user", user.id, {"email": user.email})
+
+        background_tasks.add_task(
+            _send_reset_email_task,
+            email=user.email,
+            name=user.full_name or user.email,
+            link=reset_link
+        )
+
+    # L'envoi de mail étant asynchrone, la réponse est toujours immédiate (protège contre les attaques temporelles)
+    return {"message": "Si cet email existe, un lien magique a été envoyé."}
 
 
 @router.post("/reset-password")
@@ -160,9 +225,6 @@ async def reset_password(req: ResetPasswordRequest, db: Session = Depends(get_db
         
         if not email or purpose not in ("reset_password", "setup_password"):
             raise HTTPException(status_code=400, detail="Token invalide ou expiré")
-        
-        if len(req.new_password) < 6:
-            raise HTTPException(status_code=400, detail="Le mot de passe doit faire au moins 6 caractères")
             
         user = db.query(User).filter(User.email == email).first()
         if not user:
@@ -188,9 +250,6 @@ async def change_password(
     """Change le mot de passe d'un utilisateur connecté"""
     if not utils.verify_password(req.current_password, current_user.hashed_password):
         raise HTTPException(status_code=400, detail="Mot de passe actuel incorrect")
-    
-    if len(req.new_password) < 6:
-        raise HTTPException(status_code=400, detail="Le nouveau mot de passe doit faire au moins 6 caractères")
     
     current_user.hashed_password = utils.get_password_hash(req.new_password)
     db.commit()

@@ -53,12 +53,12 @@ const ProfessionalTemplate: React.FC<TemplateProps> = ({ data: rawData, config, 
                   </CVSection>
                 );
               case 'identity':
-                return (profile.age || profile.nationality || (profile as any).marital_status) && (
+                return (profile.age || profile.nationality || profile.marital_status) && (
                   <CVSection key="identity" title={getSectionLabel(config, 'identity', 'État Civil')} className="sidebar-section">
                     <div className="contact-list">
                       {profile.age && <div className="contact-item"><i className="fas fa-calendar-check"></i><span>{profile.age}</span></div>}
                       {profile.nationality && <div className="contact-item"><i className="fas fa-flag"></i><span>{profile.nationality}</span></div>}
-                      {(profile as any).marital_status && <div className="contact-item"><i className="fas fa-users"></i><span>{(profile as any).marital_status}</span></div>}
+                      {profile.marital_status && <div className="contact-item"><i className="fas fa-users"></i><span>{profile.marital_status}</span></div>}
                     </div>
                   </CVSection>
                 );

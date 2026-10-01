@@ -4,31 +4,15 @@ import config from './config';
 const API_BASE = config.apiBaseUrl;
 export { API_BASE };
 
-// Stockage du token en mémoire
-let authToken: string | null = null;
+// Source unique de vérité : NextAuth → session.user.accessToken
+// Le token est toujours passé explicitement en paramètre (accessToken)
+// Pas de stockage localStorage ni de token global en mémoire.
 
-// Définir le token d'authentification
-export const setAuthToken = (token: string | null) => {
-  authToken = token;
-  if (token) {
-    localStorage.setItem(config.auth.tokenKey, token);
-  } else {
-    localStorage.removeItem(config.auth.tokenKey);
-  }
-};
 
-// Récupérer le token depuis le stockage local au chargement
-if (typeof window !== 'undefined') {
-  const token = localStorage.getItem(config.auth.tokenKey);
-  if (token) {
-    authToken = token;
-  }
-}
 
 // En-têtes par défaut pour les requêtes
 const getDefaultHeaders = (customHeaders: Record<string, string> = {}, accessToken?: string): HeadersInit => {
-  const token = accessToken || authToken || null
-  const authHeader = token ? { 'Authorization': `Bearer ${token}` } : {}
+  const authHeader = accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {}
   return {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
@@ -38,16 +22,42 @@ const getDefaultHeaders = (customHeaders: Record<string, string> = {}, accessTok
 }
 
 
+import { MasterProfile } from '@/types/profile';
+
 // Types
+export interface TemplateFonts {
+  body?: string;
+  heading?: string;
+  [key: string]: any;
+}
+
+export interface TemplateColors {
+  primary?: string;
+  secondary?: string;
+  accent?: string;
+  text?: string;
+  background?: string;
+  [key: string]: any;
+}
+
+export interface TemplateLayout {
+  variant?: string;
+  spacing?: 'compact' | 'normal' | 'relaxed';
+  [key: string]: any;
+}
+
 export type Template = {
   templateName: string;
-  sections: any[];
-  fonts?: any;
-  colors?: any;
-  layout?: any;
+  sections?: string[];
+  fonts?: TemplateFonts;
+  colors?: TemplateColors;
+  layout?: TemplateLayout;
 };
 
-export type ResumeData = any;
+export type ResumeData = Partial<MasterProfile> & {
+  doc_type?: string;
+  [key: string]: any;
+};
 
 interface PreviewResponse {
   html: string;
@@ -119,7 +129,6 @@ export async function login(credentials: LoginRequest): Promise<AuthResponse> {
   });
 
   const data = await handleResponse<AuthResponse>(response);
-  setAuthToken(data.access_token);
   return data;
 }
 
@@ -134,13 +143,11 @@ export async function register(credentials: LoginRequest): Promise<AuthResponse>
   });
 
   const data = await handleResponse<AuthResponse>(response);
-  setAuthToken(data.access_token);
   return data;
 }
 
 // Déconnexion
 export function logout(): void {
-  setAuthToken(null);
   if (typeof window !== 'undefined') {
     window.location.href = '/login';
   }
@@ -348,7 +355,12 @@ export async function checkServerStatus(): Promise<boolean> {
 }
 
 // Ré-exporter les fonctions d'authentification depuis la configuration
-export const { isAuthenticated } = config;
+export const isAuthenticated = () => {
+  if (typeof document !== 'undefined') {
+    return document.cookie.includes('next-auth.session-token') || document.cookie.includes('__Secure-next-auth.session-token');
+  }
+  return false;
+};
 
 // Rediriger vers la page de connexion si non authentifié
 export function requireAuth(): void {

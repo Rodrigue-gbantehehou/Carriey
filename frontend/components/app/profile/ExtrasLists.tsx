@@ -20,7 +20,7 @@ export function LanguagesList() {
 
   const handleAdd = () => {
     if (!form.name || !form.level) return;
-    addLanguage({ name: form.name, level: form.level } as any);
+    addLanguage({ name: form.name, level: form.level });
     setForm({});
     setIsAdding(false);
   };
@@ -93,7 +93,7 @@ export function CertificationsList() {
   const handleAdd = () => {
     if (!form.name || !form.issuer) return;
     const fmtDate = (d?: string) => (d && d.length === 7) ? `${d}-01` : (d || undefined);
-    addCertification({ name: form.name, issuer: form.issuer, date: fmtDate(form.date), url: form.url } as any);
+    addCertification({ name: form.name, issuer: form.issuer, date: fmtDate(form.date), url: form.url });
     setForm({});
     setIsAdding(false);
   };

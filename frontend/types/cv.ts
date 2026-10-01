@@ -11,6 +11,8 @@ export interface CVProfile {
   age?: string | number;
   nationality?: string;
   marital_status?: string;
+  linkedin?: string;
+  github?: string;
 }
 
 export interface CVExperience {

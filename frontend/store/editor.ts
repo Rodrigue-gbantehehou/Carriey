@@ -1,5 +1,6 @@
 "use client"
 import { create } from 'zustand'
+import type { CVData, TemplateConfig } from '@/types/cv'
 
 export type Section = {
   type: string;
@@ -66,10 +67,12 @@ export type OnboardingData = {
   namePreview: string;
 }
 
-export type ResumeData = any & {
+// CVData avec champ doc_type et custom_sections éditor
+export type ResumeData = CVData & {
   doc_type?: 'cv' | 'cover_letter';
   custom_sections?: CustomSection[];
 }
+
 
 type State = {
   template: Template | null

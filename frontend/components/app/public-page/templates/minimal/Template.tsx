@@ -158,7 +158,14 @@ export default function MinimalTheme({ data, accent }: { data: PublicPageData; a
                 ))}
               </div>
             ) : (
-              <div className="text-sm text-gray-700 leading-relaxed" dangerouslySetInnerHTML={{ __html: (cs.content || '').replace(/\n/g, '<br>') }} />
+              <div className="text-sm text-gray-700 leading-relaxed">
+                {(cs.content || '').split('\n').map((line: string, idx: number) => (
+                  <React.Fragment key={idx}>
+                    {line}
+                    {idx < (cs.content || '').split('\n').length - 1 && <br />}
+                  </React.Fragment>
+                ))}
+              </div>
             )}
           </section>
         ))}

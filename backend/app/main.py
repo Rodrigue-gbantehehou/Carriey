@@ -36,42 +36,15 @@ import app.models.template
 import app.models.audit
 import app.models.public_page
 import app.models.candidature
+import app.models.subscription_plan
 
-# Create tables (simple auto-migration at startup for now)
-Base.metadata.create_all(bind=engine)
+# Les migrations de base de données sont gérées par Alembic.
+# Lancez `alembic upgrade head` pour appliquer les migrations.
 
-# Add columns manually if they don't exist
-try:
-    with engine.connect() as conn:
-        try:
-            conn.execute(text("ALTER TABLE master_profiles ADD COLUMN first_name VARCHAR(100) DEFAULT NULL"))
-            conn.commit()
-        except Exception:
-            pass # Column already exists
-        try:
-            conn.execute(text("ALTER TABLE master_profiles ADD COLUMN last_name VARCHAR(100) DEFAULT NULL"))
-            conn.commit()
-        except Exception:
-            pass # Column already exists
-        try:
-            conn.execute(text("ALTER TABLE master_profiles ADD COLUMN photo_url TEXT DEFAULT NULL"))
-            conn.commit()
-        except Exception:
-            pass # Column already exists
-            
-        # Resumes table migrations
-        try:
-            conn.execute(text("ALTER TABLE resumes ADD COLUMN doc_type VARCHAR(20) DEFAULT 'cv'"))
-            conn.commit()
-        except Exception:
-            pass
-        try:
-            conn.execute(text("ALTER TABLE resumes ADD COLUMN linked_doc_id VARCHAR(36) DEFAULT NULL"))
-            conn.commit()
-        except Exception:
-            pass
-except Exception as e:
-    print(f"Migration error: {e}")
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from fastapi import Request
+from app.core.limiter import limiter
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -80,6 +53,9 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc"
 )
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # CORS
 app.add_middleware(

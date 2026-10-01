@@ -19,8 +19,13 @@ export default function SavePage() {
     setError('');
 
     try {
-      // TODO: connect to backend magic link endpoint
-      await new Promise(r => setTimeout(r, 1200)); // simulate
+      const { default: config } = await import('@/lib/config');
+      const res = await fetch(`${config.apiBaseUrl}/auth/magic-link`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+      if (!res.ok) throw new Error('Failed to send magic link');
       setSent(true);
     } catch {
       setError('Une erreur est survenue. Réessayez.');

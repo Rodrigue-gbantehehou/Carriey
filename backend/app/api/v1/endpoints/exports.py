@@ -3,6 +3,7 @@ import sys
 import uuid
 import asyncio
 import subprocess
+import logging
 from pathlib import Path
 from typing import Optional, Dict, Any, Union
 from datetime import datetime, timedelta
@@ -23,6 +24,10 @@ from app.services.template_access_service import TemplateAccessService
 from app.services.rendering_service import render_html_by_name
 from export_docx import export_docx
 from app.core.config import settings
+from app.core.limiter import limiter
+from fastapi import Request
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -68,7 +73,8 @@ async def get_print_data(print_id: str):
     return payload
 
 @router.post("/preview")
-async def preview_html(req: PreviewRequest):
+@limiter.limit("15/minute")
+async def preview_html(request: Request, req: PreviewRequest):
     """Génère un aperçu HTML du CV (accès public)"""
     try:
         cfg = req.config or {}
@@ -77,7 +83,7 @@ async def preview_html(req: PreviewRequest):
         return {"html": html_content}
     except Exception as e:
         import traceback
-        print(f"Preview error: {traceback.format_exc()}")
+        logger.error(f"Preview error: {traceback.format_exc()}")
         raise HTTPException(status_code=400, detail=str(e))
 
 async def _get_or_create_export_user(req: ExportRequest, current_user: Optional[UserOut], db: Session):
@@ -96,8 +102,8 @@ async def _get_or_create_export_user(req: ExportRequest, current_user: Optional[
     is_new_user = False
     setup_token = None
 
-    print(f"DEBUG EXPORT: template_name={req.template_name}, template_id={req.template_id}")
-    print(f"DEBUG EXPORT: found template? {template is not None} (is_free={is_free})")
+    logger.debug(f"DEBUG EXPORT: template_name={req.template_name}, template_id={req.template_id}")
+    logger.debug(f"DEBUG EXPORT: found template? {template is not None} (is_free={is_free})")
 
     if current_user:
         target_user_id = current_user.id
@@ -107,7 +113,7 @@ async def _get_or_create_export_user(req: ExportRequest, current_user: Optional[
             random_pass = secrets.token_urlsafe(16)
             user = User(
                 email=req.guest_email,
-                full_name=req.guest_name or "Client CVTor",
+                full_name=req.guest_name or "Client Carriey",
                 hashed_password=get_password_hash(random_pass),
                 role=UserRole.USER,
                 is_active=True
@@ -123,7 +129,7 @@ async def _get_or_create_export_user(req: ExportRequest, current_user: Optional[
         target_user_id = user.id
 
     # 3. Vérification de l'accès / Paiement (Sauf pour les ADMINS)
-    is_admin = current_user and current_user.role in ["ADMIN", "SUPER_ADMIN"]
+    is_admin = current_user and current_user.role in [UserRole.ADMIN, UserRole.SUPER_ADMIN]
     
     if not is_free and not is_admin:
         has_access = target_user_id and template and TemplateAccessService.check_user_access(db, target_user_id, template.id)
@@ -135,6 +141,7 @@ async def _get_or_create_export_user(req: ExportRequest, current_user: Optional[
                 ).first()
                 
                 is_sandbox = os.getenv("KKIAPAY_SANDBOX") == "true" or os.getenv("PAYMENT_SANDBOX") == "true"
+                is_prod = os.getenv("ENVIRONMENT", "development").lower() == "production"
                 payment_valid = False
                 
                 if payment and payment.status == PaymentStatus.SUCCESS:
@@ -165,9 +172,10 @@ async def _get_or_create_export_user(req: ExportRequest, current_user: Optional[
                                 payment.status = PaymentStatus.SUCCESS
                                 db.commit()
                     except Exception as e:
-                        print(f"Erreur vérification dynamique FedaPay: {e}")
+                        logger.error(f"Erreur vérification dynamique FedaPay: {e}")
                 
-                if not payment_valid and is_sandbox:
+                # Le bypass sandbox ne doit jamais fonctionner en production
+                if not payment_valid and is_sandbox and not is_prod:
                     payment_valid = True
                     if not payment and template:
                         from app.models.payment import PaymentProvider
@@ -189,10 +197,10 @@ async def _get_or_create_export_user(req: ExportRequest, current_user: Optional[
                     expires_at = datetime.now() + timedelta(days=14) if req.plan == "trial" else None
                     TemplateAccessService.grant_access(db=db, user_id=target_user_id, template_id=template.id, expires_at=expires_at, payment_id=payment.id if payment else None)
                 else:
-                    print(f"DEBUG: 402 Error. payment_valid={payment_valid}, template={template is not None}, target_user_id={target_user_id}")
+                    logger.warning(f"DEBUG: 402 Error. payment_valid={payment_valid}, template={template is not None}, target_user_id={target_user_id}")
                     raise HTTPException(status_code=402, detail="Paiement requis ou non validé")
             else:
-                print("DEBUG: 402 Error. No payment_id.")
+                logger.warning("DEBUG: 402 Error. No payment_id.")
                 raise HTTPException(status_code=402, detail="Paiement requis pour ce modèle")
     elif is_free and target_user_id and template:
         TemplateAccessService.grant_access(db=db, user_id=target_user_id, template_id=template.id)
@@ -200,7 +208,9 @@ async def _get_or_create_export_user(req: ExportRequest, current_user: Optional[
     return target_user_id, is_new_user, setup_token
 
 @router.post("/export/pdf")
+@limiter.limit("5/minute")
 async def export_pdf(
+    request: Request,
     req: ExportRequest,
     current_user: Optional[UserOut] = Depends(get_optional_user),
     db: Session = Depends(get_db)
@@ -230,7 +240,10 @@ async def export_pdf(
         out_pdf = STATIC_DIR / safe_filename
         tmp_html = BASE_DIR / f"_tmp_render_{request_id}.html"
 
-        frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5000")
+        frontend_url = os.getenv("FRONTEND_URL")
+        if not frontend_url and os.getenv("ENVIRONMENT", "development").lower() == "production":
+            raise HTTPException(status_code=500, detail="Configuration serveur invalide (FRONTEND_URL manquant en production)")
+        frontend_url = frontend_url or "http://localhost:5000"
         
         doc_type = req.data.get("doc_type", "cv")
         if doc_type == "cover_letter":
@@ -242,15 +255,15 @@ async def export_pdf(
             res = None
             # 1. Rendu React unifié (100% WYSIWYG)
             try:
-                print(f"[PDF Export] Tentative de rendu React WYSIWYG via {print_url}")
+                logger.info(f"[PDF Export] Tentative de rendu React WYSIWYG via {print_url}")
                 cmd = [sys.executable, str(BASE_DIR / "generate_pdf_from_html.py"), "--url", print_url, "--out", str(out_pdf)]
                 res = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
                 if res.returncode == 0 and out_pdf.exists() and out_pdf.stat().st_size > 1000:
-                    print("[PDF Export] ✅ Rendu React réussi avec fidélité absolue !")
+                    logger.info("[PDF Export] ✅ Rendu React réussi avec fidélité absolue !")
                     return res
-                print(f"[PDF Export] Rendu React code {res.returncode}, repli sur Jinja2 (qui échouera si templates supprimés).")
+                logger.warning(f"[PDF Export] Rendu React code {res.returncode}, repli sur Jinja2.")
             except Exception as react_err:
-                print(f"[PDF Export] Exception rendu React: {react_err}. Repli sur Jinja2...")
+                logger.warning(f"[PDF Export] Exception rendu React: {react_err}. Repli sur Jinja2...")
 
             # 2. Repli de secours : Rendu Jinja2 (Sera en échec car les fichiers ont été supprimés)
             try:
@@ -259,14 +272,14 @@ async def export_pdf(
                 cmd = [sys.executable, str(BASE_DIR / "generate_pdf_from_html.py"), "--html", str(tmp_html), "--out", str(out_pdf)]
                 return subprocess.run(cmd, capture_output=True, text=True, timeout=30)
             except Exception as e:
-                print(f"Jinja2 Render Error: {e}")
+                logger.error(f"Jinja2 Render Error: {e}")
                 # We return the original failed res from React if Jinja2 fails
                 if res is not None: return res
                 raise e
             
         result = await asyncio.to_thread(run_pdf_cmd)
         if result and result.returncode != 0 and (not out_pdf.exists() or out_pdf.stat().st_size == 0):
-            print(f"PDF Generator Error: {result.stderr}")
+            logger.error(f"PDF Generator Error: {result.stderr}")
             raise RuntimeError(f"Erreur lors de la génération du PDF: {result.stderr}")
 
         url = f"/static/{out_pdf.name}" if out_pdf.exists() else None
@@ -290,7 +303,7 @@ async def export_pdf(
         raise
     except Exception as e:
         import traceback
-        print(f"PDF export error: {traceback.format_exc()}")
+        logger.error(f"PDF export error: {traceback.format_exc()}")
         raise HTTPException(status_code=400, detail=str(e))
     finally:
         if tmp_html is not None:
@@ -300,7 +313,9 @@ async def export_pdf(
                 pass
 
 @router.post("/export/docx")
+@limiter.limit("5/minute")
 async def export_docx_endpoint(
+    request: Request,
     req: ExportRequest,
     current_user: Optional[UserOut] = Depends(get_optional_user),
     db: Session = Depends(get_db)
@@ -334,7 +349,7 @@ async def export_docx_endpoint(
         raise
     except Exception as e:
         import traceback
-        print(f"DOCX export error: {traceback.format_exc()}")
+        logger.error(f"DOCX export error: {traceback.format_exc()}")
         raise HTTPException(status_code=400, detail=str(e))
 
 @router.post("/auth/set-password")

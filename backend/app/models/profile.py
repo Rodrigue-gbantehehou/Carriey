@@ -23,6 +23,7 @@ class MasterProfile(Base):
     location = Column(String(255), nullable=True)
     contact_email = Column(String(255), nullable=True)
     contact_phone = Column(String(50), nullable=True)
+    marital_status = Column(String(100), nullable=True)
     website = Column(String(255), nullable=True)
     linkedin_url = Column(String(255), nullable=True)
     github_url = Column(String(255), nullable=True)

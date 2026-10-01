@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Plus, FileText, Clock, Trash2, Edit2, Search, Sparkles, X } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { ThemeThumbnail } from '@/components/app/cv/shared/ThemeThumbnail';
 import { useSession } from 'next-auth/react';
 import { cvApi } from '@/lib/cv-api';
@@ -24,7 +24,8 @@ const TABS = [
   { id: 'autres', label: 'Autres' },
 ];
 
-export default function MesDocumentsPage() {
+
+function MesDocumentsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session } = useSession();
@@ -421,5 +422,13 @@ export default function MesDocumentsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function MesDocumentsPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-gray-500">Chargement de vos documents...</div>}>
+      <MesDocumentsContent />
+    </Suspense>
   );
 }

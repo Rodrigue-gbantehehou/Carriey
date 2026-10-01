@@ -101,5 +101,12 @@ export const authOptions: NextAuthOptions = {
       return session;
     }
   },
-  secret: process.env.NEXTAUTH_SECRET || 'carriey_super_secret_jwt_key_development_2026',
+  secret: (() => {
+    const s = process.env.NEXTAUTH_SECRET;
+    if (!s && process.env.NODE_ENV === 'production') {
+      throw new Error('[Carriey] NEXTAUTH_SECRET est requis en production. Définissez cette variable d\'environnement.');
+    }
+    // En développement : fallback local uniquement (jamais exposé en prod)
+    return s ?? 'carriey_dev_only_secret_not_for_production';
+  })(),
 };

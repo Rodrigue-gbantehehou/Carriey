@@ -2,8 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   eslint: {
-    // Prevent ESLint from failing production builds (we have many unescaped entities)
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false, // Attention: il faudra corriger les erreurs ESLint avant le prochain build de prod
   },
   images: {
     remotePatterns: [
@@ -34,6 +33,20 @@ const nextConfig = {
         // Legacy backend proxy
         source: '/backend/:path*',
         destination: 'http://localhost:8000/:path*',
+      },
+    ];
+  },
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'X-XSS-Protection', value: '1; mode=block' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+        ],
       },
     ];
   },

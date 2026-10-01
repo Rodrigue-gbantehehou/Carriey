@@ -97,7 +97,7 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
       phone: profile?.contact_phone || '',
       location: profile?.location || '',
       website: profile?.website || '',
-      photo: (profile as any)?.photo_url ? require('@/lib/photo-url').getPhotoUrl((profile as any).photo_url) : '',
+      photo: profile?.photo_url ? require('@/lib/photo-url').getPhotoUrl(profile.photo_url) : '',
     },
     experience: profile?.experiences
       ?.filter(exp => !(cv.content?.disabledItems?.experiences || []).includes(exp.id))

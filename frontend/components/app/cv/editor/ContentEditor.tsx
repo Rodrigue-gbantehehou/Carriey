@@ -125,7 +125,7 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
   const handleEnhanceExperience = async (index: number) => {
     const exp = data.experience?.[index]
     if (!exp) return
-    const role = exp.role || exp.position || 'Poste'
+    const role = exp.position || 'Poste'
     const company = exp.company || 'Entreprise'
     setGeneratingExpIndex(index)
     toast.loading(`Optimisation des réalisations (${role})...`, { id: `ai-exp-${index}` })
@@ -149,7 +149,7 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
       ...data,
       experience: [
         ...(data.experience || []),
-        { company: 'Nouvelle entreprise', role: 'Poste', start: '2024', end: 'Présent', bullets: ['Réalisation'] }
+        { company: 'Nouvelle entreprise', position: 'Poste', start: '2024', end: 'Présent', bullets: ['Réalisation'] }
       ]
     })
   }
@@ -158,8 +158,8 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
     const experiences = [...(data.experience || [])]
     const updated = { ...experiences[index], [field]: value }
     if (field === 'start' || field === 'end') {
-      delete (updated as any).dates
-      delete (updated as any).year
+      delete (updated as Record<string, unknown>).dates
+      delete (updated as Record<string, unknown>).year
     }
     experiences[index] = updated
     setData({ ...data, experience: experiences })
@@ -185,8 +185,8 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
     const education = [...(data.education || [])]
     const updated = { ...education[index], [field]: value }
     if (field === 'start' || field === 'end') {
-      delete (updated as any).dates
-      delete (updated as any).year
+      delete (updated as Record<string, unknown>).dates
+      delete (updated as Record<string, unknown>).year
     }
     education[index] = updated
     setData({ ...data, education })
@@ -308,7 +308,7 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
               <button
                 key={idx}
                 onClick={() => {
-                  if (wizardStep === undefined) setActiveTab(tab as any)
+                  if (wizardStep === undefined) setActiveTab(tab as typeof activeTab)
                 }}
                 disabled={wizardStep !== undefined}
                 className={`flex flex-col items-center gap-1.5 p-2 rounded-xl text-[10px] font-bold transition-all border min-w-[70px] ${
@@ -328,7 +328,7 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
               <button
                 key={idx}
                 onClick={() => {
-                  if (wizardStep === undefined) setActiveTab(tab as any)
+                  if (wizardStep === undefined) setActiveTab(tab as typeof activeTab)
                 }}
                 disabled={wizardStep !== undefined}
                 className={`flex flex-col items-center gap-1.5 p-2 rounded-xl text-[10px] font-bold transition-all border min-w-[70px] ${
@@ -777,7 +777,7 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
                   <span className="text-[10px] font-black text-[#00C896] uppercase">Projet #{idx + 1}</span>
                   <button
                     onClick={() => {
-                      const projects = [...data.projects]; projects.splice(idx, 1); setData({ ...data, projects });
+                      const projects = [...(data.projects || [])]; projects.splice(idx, 1); setData({ ...data, projects });
                     }}
                     className="text-red-400 hover:text-red-500 transition-colors p-1"
                   >
@@ -791,7 +791,7 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
                     type="text"
                     value={p.name || ''}
                     onChange={(e) => {
-                      const projects = [...data.projects]; projects[idx].name = e.target.value; setData({ ...data, projects });
+                      const projects = [...(data.projects || [])]; projects[idx].name = e.target.value; setData({ ...data, projects });
                     }}
                     placeholder="Nom du projet"
                     className="w-full bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-[#1c1c1c] text-sm focus:ring-1 focus:ring-[#00C896] outline-none"
@@ -800,7 +800,7 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
                     type="text"
                     value={p.link || ''}
                     onChange={(e) => {
-                      const projects = [...data.projects]; projects[idx].link = e.target.value; setData({ ...data, projects });
+                      const projects = [...(data.projects || [])]; projects[idx].link = e.target.value; setData({ ...data, projects });
                     }}
                     placeholder="Lien (optionnel)"
                     className="w-full bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-[#1c1c1c] text-xs focus:ring-1 focus:ring-[#00C896] outline-none"
@@ -808,7 +808,7 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
                   <textarea
                     value={p.description || ''}
                     onChange={(e) => {
-                      const projects = [...data.projects]; projects[idx].description = e.target.value; setData({ ...data, projects });
+                      const projects = [...(data.projects || [])]; projects[idx].description = e.target.value; setData({ ...data, projects });
                     }}
                     placeholder="Description du projet..."
                     rows={3}
@@ -918,18 +918,18 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
             {(data.custom_sections || []).length > 0 && (
               <div className="space-y-4 pt-4 border-t border-gray-200">
                 <h4 className="text-[10px] font-black text-[#777777] uppercase">Contenu des Sections Personnalisées</h4>
-                {data.custom_sections.map((cs: any, idx: number) => (
+                {data.custom_sections?.map((cs: any, idx: number) => (
                   <div key={cs.id} className="bg-gray-50 p-4 rounded-xl border border-gray-200">
                     <div className="flex justify-between items-center mb-2">
                        <span className="text-xs font-bold text-[#1c1c1c]">{cs.title}</span>
                        <button onClick={() => {
-                         const cs_list = [...data.custom_sections]; cs_list.splice(idx,1); setData({...data, custom_sections: cs_list});
+                         const cs_list = [...(data.custom_sections || [])]; cs_list.splice(idx,1); setData({...data, custom_sections: cs_list});
                        }} className="text-red-500 hover:scale-110 transition-transform"><i className="fas fa-trash"></i></button>
                     </div>
                     <textarea
                       value={cs.content}
                       onChange={(e) => {
-                        const cs_list = [...data.custom_sections]; cs_list[idx].content = e.target.value; setData({...data, custom_sections: cs_list});
+                        const cs_list = [...(data.custom_sections || [])]; cs_list[idx].content = e.target.value; setData({...data, custom_sections: cs_list});
                       }}
                       rows={4}
                       className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-[#1c1c1c] text-sm outline-none resize-none focus:ring-1 focus:ring-[#00C896]"

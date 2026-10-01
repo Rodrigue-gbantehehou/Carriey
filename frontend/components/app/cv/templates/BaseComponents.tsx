@@ -131,7 +131,16 @@ export const CustomSectionContent = ({ custom }: { custom: any }) => {
     );
   }
 
-  return <div dangerouslySetInnerHTML={{ __html: content.replace(/\n/g, '<br>') }} />;
+  return (
+    <div>
+      {content.split('\n').map((line: string, i: number) => (
+        <React.Fragment key={i}>
+          {line}
+          {i < content.split('\n').length - 1 && <br />}
+        </React.Fragment>
+      ))}
+    </div>
+  );
 };
 
 

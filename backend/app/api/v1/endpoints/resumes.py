@@ -47,16 +47,22 @@ async def list_resumes(
         
     resumes = query.order_by(Resume.created_at.desc()).offset(skip).limit(limit).all()
     
-    # Resolve any UUID template_ids to slugs
+    # Resolve any UUID template_ids to slugs in batch to avoid N+1 queries
     needs_commit = False
-    for resume in resumes:
-        if resume.template_id:
-            template = db.query(Template).filter(
-                (Template.id == resume.template_id) | (Template.slug == resume.template_id)
-            ).first()
-            if template and template.slug and template.slug != resume.template_id:
-                resume.template_id = template.slug
-                needs_commit = True
+    template_ids = list({r.template_id for r in resumes if r.template_id})
+    if template_ids:
+        templates = db.query(Template).filter(
+            (Template.id.in_(template_ids)) | (Template.slug.in_(template_ids))
+        ).all()
+        template_map = {t.id: t for t in templates}
+        template_map.update({t.slug: t for t in templates if t.slug})
+
+        for resume in resumes:
+            if resume.template_id:
+                template = template_map.get(resume.template_id)
+                if template and template.slug and template.slug != resume.template_id:
+                    resume.template_id = template.slug
+                    needs_commit = True
     if needs_commit:
         db.commit()
     

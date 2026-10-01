@@ -75,10 +75,10 @@ const ClassiqueTemplate: React.FC<TemplateProps> = ({ data: rawData, config, api
                   <span>{profile.nationality}</span>
                 </div>
               )}
-              {(profile as any).marital_status && (
+              {profile.marital_status && (
                 <div className="meta-item">
                   <span className="meta-label">Situation:</span>
-                  <span>{(profile as any).marital_status}</span>
+                  <span>{profile.marital_status}</span>
                 </div>
               )}
             </>

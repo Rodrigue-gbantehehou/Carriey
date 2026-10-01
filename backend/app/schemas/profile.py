@@ -202,18 +202,19 @@ class CustomSectionOut(CustomSectionBase):
         from_attributes = True
 
 class MasterProfileBase(BaseModel):
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
-    username: Optional[str] = None
-    title: Optional[str] = None
-    bio: Optional[str] = None
-    location: Optional[str] = None
-    contact_email: Optional[str] = None
-    contact_phone: Optional[str] = None
-    website: Optional[str] = None
-    linkedin_url: Optional[str] = None
-    github_url: Optional[str] = None
-    photo_url: Optional[str] = None
+    first_name: Optional[str] = Field(None, max_length=100)
+    last_name: Optional[str] = Field(None, max_length=100)
+    username: Optional[str] = Field(None, max_length=191)
+    title: Optional[str] = Field(None, max_length=255)
+    bio: Optional[str] = Field(None, max_length=10000)
+    location: Optional[str] = Field(None, max_length=255)
+    contact_email: Optional[str] = Field(None, max_length=255)
+    contact_phone: Optional[str] = Field(None, max_length=50)
+    marital_status: Optional[str] = Field(None, max_length=100)
+    website: Optional[str] = Field(None, max_length=255)
+    linkedin_url: Optional[str] = Field(None, max_length=255)
+    github_url: Optional[str] = Field(None, max_length=255)
+    photo_url: Optional[str] = Field(None, max_length=1024) # Empêche les gros Base64
     visibility: Visibility = Visibility.PRIVATE
 
 class MasterProfileCreate(MasterProfileBase):

@@ -53,13 +53,13 @@ const CreatifTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBa
                 );
 
               case 'identity':
-                return (profile.age || profile.nationality || (profile as any).marital_status) && (
+                return (profile.age || profile.nationality || profile.marital_status) && (
                   <div key="identity" className="creatif-sidebar-section" data-pf-splittable="true">
                     <h3 className="creatif-sidebar-heading">{getSectionLabel(config, 'identity', 'Identité')}</h3>
                     <div className="creatif-contact-list">
                       {profile.age         && <div className="creatif-contact-item"><i className="fas fa-user" /><span>Âge : {profile.age}</span></div>}
                       {profile.nationality && <div className="creatif-contact-item"><i className="fas fa-flag" /><span>{profile.nationality}</span></div>}
-                      {(profile as any).marital_status && <div className="creatif-contact-item"><i className="fas fa-heart" /><span>{(profile as any).marital_status}</span></div>}
+                      {profile.marital_status && <div className="creatif-contact-item"><i className="fas fa-heart" /><span>{profile.marital_status}</span></div>}
                     </div>
                   </div>
                 );

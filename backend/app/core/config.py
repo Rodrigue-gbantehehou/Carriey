@@ -33,8 +33,16 @@ class Settings(BaseSettings):
     # Database
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./cvtor.db")
     
-    # JWT
+    ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
     SECRET_KEY: str = os.getenv("JWT_SECRET_KEY") or os.getenv("SECRET_KEY") or "your-secret-key-here-change-in-production"
+
+    @field_validator("SECRET_KEY", mode="after")
+    @classmethod
+    def enforce_secret_key(cls, v: str, info) -> str:
+        env = info.data.get("ENVIRONMENT", "development")
+        if env == "production" and v == "your-secret-key-here-change-in-production":
+            raise ValueError("SECRET_KEY or JWT_SECRET_KEY must be set in production environment")
+        return v
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 24 hours
     

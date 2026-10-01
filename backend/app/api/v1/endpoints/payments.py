@@ -12,6 +12,9 @@ from app.models.template import Template
 from app.schemas.payment import PaymentCreate, PaymentOut, PaymentWebhook, PaymentVerification
 from app.api.dependencies import get_current_active_user
 from app.services.payments.payment_manager import payment_manager
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -147,10 +150,10 @@ async def handle_webhook(
         raise HTTPException(status_code=404, detail="Provider introuvable")
 
     # Extraire une potentielle signature depuis les headers
-    signature = request.headers.get("x-kkiapay-signature") or request.headers.get("stripe-signature") or ""
+    signature = request.headers.get("x-kkiapay-signature") or request.headers.get("stripe-signature") or request.headers.get("x-fedapay-signature") or ""
 
-    # TODO: Pour des providers nécessitant des headers de signature (comme Stripe), on pourrait passer les headers.
-    # Pour simplifier, on passe le payload brut (dict) à l'implémentation du provider.
+    # NOTE SÉCURITÉ: La vérification de la signature ou de la transaction est déléguée au provider.
+    # Kkiapay revérifie la transaction via son API, Stripe nécessite une signature, etc.
     result = await provider.handle_webhook(payload=data, signature=signature)
     
     if result.get("status") != "success":
@@ -192,7 +195,7 @@ async def handle_webhook(
                 user.premium_until = base_time + timedelta(days=plan.duration_days)
                 user.subscription_status = "pass_active"
                 db.commit()
-                print(f"[Webhook] ✅ Pass PRO ({plan.duration_days}j) activé pour {user.email}")
+                logger.info(f"[Webhook] ✅ Pass PRO ({plan.duration_days}j) activé pour {user.email}")
                 
         # B) Achat d'un modèle unique (Template)
         if payment.template_id:
@@ -205,9 +208,9 @@ async def handle_webhook(
                     expires_at=None,
                     payment_id=payment.id
                 )
-                print(f"[Webhook] ✅ Accès au modèle {payment.template_id} accordé à {user.email}")
+                logger.info(f"[Webhook] ✅ Accès au modèle {payment.template_id} accordé à {user.email}")
             except Exception as e:
-                print(f"[Webhook] Erreur grant_access: {e}")
+                logger.error(f"[Webhook] Erreur grant_access: {e}")
 
     return {"status": "ok", "payment_id": payment.id}
 

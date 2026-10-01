@@ -4,6 +4,7 @@ import subprocess
 import json
 from pathlib import Path
 from typing import List, Dict, Any, Optional
+import logging
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
@@ -101,6 +102,7 @@ class LivePreviewRequest(BaseModel):
     template_jinja2: str = ""
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 @router.post("/preview-live", response_class=HTMLResponse)
 async def preview_template_live(
@@ -385,7 +387,10 @@ async def generate_template_preview(
         "template_name": template.slug
     }
 
-    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5000")
+    frontend_url = os.getenv("FRONTEND_URL")
+    if not frontend_url and os.getenv("ENVIRONMENT", "development").lower() == "production":
+        raise HTTPException(status_code=500, detail="FRONTEND_URL manquant en production")
+    frontend_url = frontend_url or "http://localhost:5000"
     target_url = f"{frontend_url}/print?id={preview_token}"
     screenshot_ok = False
 
@@ -396,9 +401,9 @@ async def generate_template_preview(
         if res.returncode == 0 and out_png.exists() and out_png.stat().st_size > 500:
             screenshot_ok = True
         else:
-            print(f"[Generate Preview] Notice: React print screenshot code {res.returncode}, stderr: {res.stderr}")
+            logger.warning(f"[Generate Preview] Notice: React print screenshot code {res.returncode}, stderr: {res.stderr}")
     except Exception as err:
-        print(f"[Generate Preview] Exception: {err}, falling back to Jinja2")
+        logger.warning(f"[Generate Preview] Exception: {err}, falling back to Jinja2")
 
     # 2. Repli Jinja2 si le rendu React n'a pas pu être capturé
     if not screenshot_ok:
@@ -414,9 +419,9 @@ async def generate_template_preview(
             if res.returncode == 0 and out_png.exists() and out_png.stat().st_size > 500:
                 screenshot_ok = True
             else:
-                print(f"[Generate Preview] Jinja2 fallback stderr: {res.stderr}")
+                logger.warning(f"[Generate Preview] Jinja2 fallback stderr: {res.stderr}")
         except Exception as jinja_err:
-            print(f"[Generate Preview] Jinja2 fallback failed: {jinja_err}")
+            logger.error(f"[Generate Preview] Jinja2 fallback failed: {jinja_err}")
         finally:
             if temp_html_path and os.path.exists(temp_html_path):
                 try:

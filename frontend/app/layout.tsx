@@ -6,10 +6,8 @@ import { Toaster } from 'react-hot-toast';
 
 const inter = Inter({ subsets: ['latin'] });
 
-export const metadata: Metadata = {
-  title: 'carriey - Your professional profile, everywhere.',
-  description: 'Votre parcours professionnel, simplement.',
-};
+import siteMetadata from './metadata';
+export const metadata: Metadata = siteMetadata;
 
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

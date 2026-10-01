@@ -43,7 +43,12 @@ export default function TemplateActions({ template, token }: { template: any, to
                 {template.is_active ? 'Désactiver' : 'Activer'}
             </button>
 
-            {/* TODO: Implement Edit/Delete */}
+            <a
+                href={`/admin/templates/${template.id}/edit`}
+                className="px-4 py-2 border border-gray-300 rounded shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+                Modifier
+            </a>
         </div>
     )
 }

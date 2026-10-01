@@ -97,6 +97,7 @@ export interface MasterProfile {
   location?: string;
   contact_email?: string;
   contact_phone?: string;
+  marital_status?: string;
   website?: string;
   linkedin_url?: string;
   github_url?: string;

@@ -86,8 +86,8 @@ export function CVPreview({
             <Suspense fallback={<div className="h-full w-full flex items-center justify-center text-gray-500 font-semibold bg-white">Chargement du modèle...</div>}>
               <CVTemplateRenderer
                 templateName={templateId}
-                data={adapterData as any}
-                config={templateConfig as any}
+                data={adapterData}
+                config={templateConfig}
                 apiBaseUrl={API_BASE}
               />
             </Suspense>

@@ -41,13 +41,13 @@ const DakarTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBase
           {getLeftColumnSections(config).map((section: any) => {
             switch (section.type) {
               case 'identity':
-                return (profile.age || profile.nationality || (profile as any).marital_status) && (
+                return (profile.age || profile.nationality || profile.marital_status) && (
                   <div key="identity" data-pf-splittable="true">
                     <CVSection title={getSectionLabel(config, 'identity', 'Identité')} className="sidebar-section">
                       <div className="identity-list">
                         {profile.age         && <div className="identity-item"><span className="identity-label">Âge</span><span className="identity-value">{profile.age}</span></div>}
                         {profile.nationality && <div className="identity-item"><span className="identity-label">Nationalité</span><span className="identity-value">{profile.nationality}</span></div>}
-                        {(profile as any).marital_status && <div className="identity-item"><span className="identity-label">Situation</span><span className="identity-value">{(profile as any).marital_status}</span></div>}
+                        {profile.marital_status && <div className="identity-item"><span className="identity-label">Situation</span><span className="identity-value">{profile.marital_status}</span></div>}
                       </div>
                     </CVSection>
                   </div>

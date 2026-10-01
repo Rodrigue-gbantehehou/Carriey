@@ -112,7 +112,7 @@ const ModerneTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBa
                   </div>
                 );
               case 'identity':
-                return (profile.age || profile.nationality || (profile as any).marital_status) && (
+                return (profile.age || profile.nationality || profile.marital_status) && (
                   <div key="identity" className="sidebar-section">
                     <h3 className="sidebar-title">{getSectionLabel(config, 'identity', 'Identité')}</h3>
                     {profile.age && (
@@ -127,10 +127,10 @@ const ModerneTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBa
                         <span className="lang-level">{profile.nationality}</span>
                       </div>
                     )}
-                    {(profile as any).marital_status && (
+                    {profile.marital_status && (
                       <div className="lang-item">
                         <span className="lang-name">Statut</span>
-                        <span className="lang-level">{(profile as any).marital_status}</span>
+                        <span className="lang-level">{profile.marital_status}</span>
                       </div>
                     )}
                   </div>

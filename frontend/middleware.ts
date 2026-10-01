@@ -3,39 +3,68 @@ import { NextResponse } from "next/server";
 
 export default withAuth(
   function middleware(req) {
-    // Return NextResponse.next() to continue
     return NextResponse.next();
   },
   {
     callbacks: {
       authorized: ({ req, token }) => {
-        // If the path starts with /accueil, /profil, /cv, /lettre, etc.
-        // the user must be authenticated.
         const path = req.nextUrl.pathname;
-        const protectedPaths = ['/accueil', '/profil', '/cv', '/lettre', '/dashboard'];
-        
-        const isProtected = protectedPaths.some(p => path === p || path.startsWith(`${p}/`));
-        
-        if (isProtected) {
-          return !!token; // Returns true if token exists, false otherwise (redirects to login)
+
+        // Toutes les routes privées de l'espace connecté (groupe app)
+        const protectedPaths = [
+          '/accueil',
+          '/profil',
+          '/mes-documents',
+          '/candidatures',
+          '/themes',
+          '/parametres',
+          '/statistiques',
+          '/paiement',
+          '/apercu',
+          // Ancien routing (au cas où)
+          '/cv',
+          '/lettre',
+          '/dashboard',
+        ];
+
+        const isProtected = protectedPaths.some(
+          (p) => path === p || path.startsWith(`${p}/`)
+        );
+
+        if (path.startsWith('/admin')) {
+          return !!token && (token.role === 'ADMIN' || token.role === 'SUPER_ADMIN');
         }
-        
-        return true; // Allow access to non-protected routes (like /, /login, /register)
-      }
+
+        if (isProtected) {
+          return !!token;
+        }
+
+        return true;
+      },
     },
     pages: {
-      signIn: '/login', // Redirect to this page if not authenticated
-    }
+      signIn: '/login',
+    },
   }
 );
 
-// Apply middleware to these routes
+// Appliquer le middleware à toutes les routes privées
 export const config = {
   matcher: [
     '/accueil/:path*',
     '/profil/:path*',
+    '/mes-documents/:path*',
+    '/candidatures/:path*',
+    '/themes/:path*',
+    '/parametres/:path*',
+    '/statistiques/:path*',
+    '/paiement/:path*',
+    '/apercu/:path*',
+    // Ancien routing
     '/cv/:path*',
     '/lettre/:path*',
-    '/dashboard/:path*'
+    '/dashboard/:path*',
+    '/admin/:path*'
   ],
 };
+

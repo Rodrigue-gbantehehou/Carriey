@@ -53,13 +53,13 @@ const AbidjanTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiBa
           {leftSections.map((section: any) => {
             switch (section.type) {
               case 'identity':
-                return (profile.age || profile.nationality || (profile as any).marital_status) && (
+                return (profile.age || profile.nationality || profile.marital_status) && (
                   <div key="identity" data-pf-splittable="true">
                     <CVSection title={getSectionLabel(config, 'identity', 'Identité')} icon="fas fa-id-card">
                       <div className="abidjan-identity">
                         {profile.age         && <div className="abidjan-id-row"><span className="abidjan-id-label">Âge</span><span>{profile.age}</span></div>}
                         {profile.nationality && <div className="abidjan-id-row"><span className="abidjan-id-label">Nationalité</span><span>{profile.nationality}</span></div>}
-                        {(profile as any).marital_status && <div className="abidjan-id-row"><span className="abidjan-id-label">Situation</span><span>{(profile as any).marital_status}</span></div>}
+                        {profile.marital_status && <div className="abidjan-id-row"><span className="abidjan-id-label">Situation</span><span>{profile.marital_status}</span></div>}
                       </div>
                     </CVSection>
                   </div>

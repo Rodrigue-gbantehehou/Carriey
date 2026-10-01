@@ -5,6 +5,8 @@ from app.models.user import User
 from app.crud.crud_profile import profile as crud_profile
 from app.services.ai_factory import get_ai_service
 from pydantic import BaseModel
+from app.core.limiter import limiter
+from fastapi import Request
 import logging
 
 logger = logging.getLogger(__name__)
@@ -28,15 +30,17 @@ class PublicBioResponse(BaseModel):
     seo_description: str
 
 @router.post("/generate-cover-letter", response_model=CoverLetterResponse)
+@limiter.limit("5/minute")
 async def generate_cover_letter_endpoint(
-    request: CoverLetterRequest,
+    request: Request,
+    req: CoverLetterRequest,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """
     Génère une lettre de motivation à partir du profil de l'utilisateur et d'une description d'offre.
     """
-    if not request.job_description.strip():
+    if not req.job_description.strip():
         raise HTTPException(status_code=400, detail="La description de l'offre est requise.")
 
     # 1. Récupérer le profil de l'utilisateur
@@ -62,7 +66,7 @@ async def generate_cover_letter_endpoint(
     # 2. Appeler le service d'IA
     try:
         ai_service = get_ai_service()
-        letter_dict = await ai_service.generate_cover_letter(profile_data, request.job_description)
+        letter_dict = await ai_service.generate_cover_letter(profile_data, req.job_description)
         
         return CoverLetterResponse(
             subject=letter_dict.get("subject", ""),
@@ -75,8 +79,10 @@ async def generate_cover_letter_endpoint(
         raise HTTPException(status_code=500, detail="La génération de la lettre a échoué.")
 
 @router.post("/generate-public-bio", response_model=PublicBioResponse)
+@limiter.limit("5/minute")
 async def generate_public_bio_endpoint(
-    request: PublicBioRequest,
+    request: Request,
+    req: PublicBioRequest,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -93,7 +99,7 @@ async def generate_public_bio_endpoint(
 
     try:
         ai_service = get_ai_service()
-        res = await ai_service.generate_public_bio(profile_data, request.target_audience)
+        res = await ai_service.generate_public_bio(profile_data, req.target_audience)
         return PublicBioResponse(
             custom_bio=res.get("custom_bio", ""),
             seo_description=res.get("seo_description", "")
@@ -107,7 +113,9 @@ class SlugSuggestionsResponse(BaseModel):
     titles: list[str] = []
 
 @router.post("/generate-slug-suggestions", response_model=SlugSuggestionsResponse)
+@limiter.limit("10/minute")
 async def generate_slug_suggestions_endpoint(
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -141,8 +149,10 @@ class TailorCvRequest(BaseModel):
 from datetime import datetime, timezone
 
 @router.post("/tailor-cv")
+@limiter.limit("5/minute")
 async def tailor_cv_endpoint(
-    request: TailorCvRequest,
+    request: Request,
+    req: TailorCvRequest,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -172,7 +182,7 @@ async def tailor_cv_endpoint(
 
     try:
         ai_service = get_ai_service()
-        res = await ai_service.tailor_cv(profile_data, request.job_description)
+        res = await ai_service.tailor_cv(profile_data, req.job_description)
         return res
     except RuntimeError as e:
         if "QUOTA_EXCEEDED" in str(e):
@@ -191,13 +201,15 @@ class ExtractJobResponse(BaseModel):
     location: str
 
 @router.post("/extract-job", response_model=ExtractJobResponse)
+@limiter.limit("10/minute")
 async def extract_job_endpoint(
-    request: ExtractJobRequest,
+    request: Request,
+    req: ExtractJobRequest,
     current_user: User = Depends(get_current_user)
 ):
     try:
         ai_service = get_ai_service()
-        res = await ai_service.extract_job_details(request.job_text)
+        res = await ai_service.extract_job_details(req.job_text)
         return ExtractJobResponse(
             companyName=res.get("companyName", ""),
             jobTitle=res.get("jobTitle", ""),

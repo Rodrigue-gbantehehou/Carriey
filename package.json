@@ -1,0 +1,8 @@
+{
+  "name": "carriey",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "pageflow"
+  ]
+}

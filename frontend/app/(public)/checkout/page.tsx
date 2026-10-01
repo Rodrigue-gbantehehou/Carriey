@@ -8,7 +8,9 @@ import Script from 'next/script';
 import { CreditCard, Lock, ShieldCheck, ArrowRight, Loader2 } from 'lucide-react';
 import config from '@/lib/config';
 
-export default function CheckoutPage() {
+import { Suspense } from 'react';
+
+function CheckoutContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { data: session, status } = useSession();
@@ -288,5 +290,13 @@ export default function CheckoutPage() {
       </main>
 
     </div>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin text-[#00C896] w-8 h-8" /></div>}>
+      <CheckoutContent />
+    </Suspense>
   );
 }

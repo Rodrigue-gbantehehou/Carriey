@@ -44,12 +44,12 @@ const RodrigueTemplate: React.FC<TemplateProps> = ({ data: rawData, config, apiB
                 </CVSection>
               );
             case 'identity':
-              return (profile.age || profile.nationality || (profile as any).marital_status) && (
+              return (profile.age || profile.nationality || profile.marital_status) && (
                 <CVSection key="identity" title={getSectionLabel(config, 'identity', 'Perso')} className="sidebar-section">
                   <div className="identity-list">
                     {profile.age && <div className="identity-item"><span className="identity-label">Âge</span><span>{profile.age}</span></div>}
                     {profile.nationality && <div className="identity-item"><span className="identity-label">Origine</span><span>{profile.nationality}</span></div>}
-                    {(profile as any).marital_status && <div className="identity-item"><span className="identity-label">Statut</span><span>{(profile as any).marital_status}</span></div>}
+                    {profile.marital_status && <div className="identity-item"><span className="identity-label">Statut</span><span>{profile.marital_status}</span></div>}
                   </div>
                 </CVSection>
               );

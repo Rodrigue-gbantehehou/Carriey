@@ -4,7 +4,7 @@ import { useEffect, useState, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { getPrintData } from '@/lib/api';
 import { CVTemplateRenderer } from '@/components/app/cv/templates';
-import { PageFlow, PageNumberPlugin, mmToPx } from 'pageflow-js';
+// Dynamic import used inside runPageFlow instead
 // Removed ResumeData import to fix TS error
 
 // We augment the window interface directly here to avoid global type issues
@@ -56,6 +56,7 @@ function PrintContent() {
       if (isCancelled || !sourceRef.current || !targetRef.current) return;
 
       try {
+        const { PageFlow, PageNumberPlugin, mmToPx } = await import('pageflow-js');
         const pf = new PageFlow({
           pageSize: 'A4',
           margin: { top: 0, right: 0, bottom: mmToPx(1), left: 0 },
