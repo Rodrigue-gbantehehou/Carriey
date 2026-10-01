@@ -28,7 +28,7 @@ function CheckoutContent() {
 
     if (type === 'pro') {
       // Pour l'abonnement
-      fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'}/plans`)
+      fetch(`${config.apiBaseUrl}/plans`)
         .then(res => res.json())
         .then(data => {
           if (Array.isArray(data)) {
@@ -51,7 +51,7 @@ function CheckoutContent() {
         });
     } else if (type === 'single' && templateId) {
       // Pour l'achat unique d'un modèle
-      fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'}/templates`)
+      fetch(`${config.apiBaseUrl}/templates`)
         .then(res => res.json())
         .then(data => {
           if (Array.isArray(data)) {
@@ -116,7 +116,7 @@ function CheckoutContent() {
         if (templateIdToSend) payload.template_id = templateIdToSend;
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'}/payments/create`, {
+      const response = await fetch(`${config.apiBaseUrl}/payments/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

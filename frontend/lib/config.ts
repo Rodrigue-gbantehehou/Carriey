@@ -4,8 +4,14 @@ export const config = {
   appName: process.env.NEXT_PUBLIC_APP_NAME || 'Carriey',
   appLogo: process.env.NEXT_PUBLIC_APP_LOGO || '/logo.png',
 
-  // URL de base de l'API
-  apiBaseUrl: process.env.NEXT_PUBLIC_API_URL || '/api/v1',
+  // Configuration de l'API
+  backendUrl: process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000',
+  
+  // URL de base de l'API (ex: http://localhost:8000/api ou /api)
+  apiBaseUrl: process.env.NEXT_PUBLIC_API_URL || '/api',
+  
+  // URL pour les fichiers statiques du backend (ex: http://localhost:8000/static)
+  staticBaseUrl: (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000') + '/static',
 
   // Configuration de l'authentification
   auth: {

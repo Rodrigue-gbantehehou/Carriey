@@ -51,7 +51,7 @@ class Experience(Base):
     __tablename__ = "experiences"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    profile_id = Column(String(36), ForeignKey("master_profiles.id", ondelete="CASCADE"), nullable=False)
+    profile_id = Column(String(36), ForeignKey("master_profiles.id", ondelete="CASCADE"), nullable=False, index=True)
     
     title = Column(String(255), nullable=False)
     company = Column(String(255), nullable=False)
@@ -67,7 +67,7 @@ class Education(Base):
     __tablename__ = "educations"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    profile_id = Column(String(36), ForeignKey("master_profiles.id", ondelete="CASCADE"), nullable=False)
+    profile_id = Column(String(36), ForeignKey("master_profiles.id", ondelete="CASCADE"), nullable=False, index=True)
     
     degree = Column(String(255), nullable=False)
     school = Column(String(255), nullable=False)
@@ -82,7 +82,7 @@ class Skill(Base):
     __tablename__ = "skills"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    profile_id = Column(String(36), ForeignKey("master_profiles.id", ondelete="CASCADE"), nullable=False)
+    profile_id = Column(String(36), ForeignKey("master_profiles.id", ondelete="CASCADE"), nullable=False, index=True)
     
     name = Column(String(255), nullable=False)
     category = Column(String(100), nullable=True) # e.g. "Languages", "Tools", "Soft Skills"
@@ -94,7 +94,7 @@ class Project(Base):
     __tablename__ = "projects"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    profile_id = Column(String(36), ForeignKey("master_profiles.id", ondelete="CASCADE"), nullable=False)
+    profile_id = Column(String(36), ForeignKey("master_profiles.id", ondelete="CASCADE"), nullable=False, index=True)
     
     name = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
@@ -109,7 +109,7 @@ class Certification(Base):
     __tablename__ = "certifications"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    profile_id = Column(String(36), ForeignKey("master_profiles.id", ondelete="CASCADE"), nullable=False)
+    profile_id = Column(String(36), ForeignKey("master_profiles.id", ondelete="CASCADE"), nullable=False, index=True)
     
     name = Column(String(255), nullable=False)
     issuer = Column(String(255), nullable=False)
@@ -122,7 +122,7 @@ class Language(Base):
     __tablename__ = "languages"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    profile_id = Column(String(36), ForeignKey("master_profiles.id", ondelete="CASCADE"), nullable=False)
+    profile_id = Column(String(36), ForeignKey("master_profiles.id", ondelete="CASCADE"), nullable=False, index=True)
     
     name = Column(String(255), nullable=False)
     level = Column(String(50), nullable=True) # e.g. "Bilingue", "Courant", "Intermédiaire"
@@ -133,7 +133,7 @@ class Achievement(Base):
     __tablename__ = "achievements"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    profile_id = Column(String(36), ForeignKey("master_profiles.id", ondelete="CASCADE"), nullable=False)
+    profile_id = Column(String(36), ForeignKey("master_profiles.id", ondelete="CASCADE"), nullable=False, index=True)
     
     title = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
@@ -145,7 +145,7 @@ class Link(Base):
     __tablename__ = "links"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    profile_id = Column(String(36), ForeignKey("master_profiles.id", ondelete="CASCADE"), nullable=False)
+    profile_id = Column(String(36), ForeignKey("master_profiles.id", ondelete="CASCADE"), nullable=False, index=True)
     
     label = Column(String(100), nullable=False) # e.g. "LinkedIn", "Portfolio", "GitHub"
     url = Column(String(255), nullable=False)
@@ -156,7 +156,7 @@ class Document(Base):
     __tablename__ = "documents"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    profile_id = Column(String(36), ForeignKey("master_profiles.id", ondelete="CASCADE"), nullable=False)
+    profile_id = Column(String(36), ForeignKey("master_profiles.id", ondelete="CASCADE"), nullable=False, index=True)
     
     title = Column(String(255), nullable=False)
     type = Column(String(50), nullable=True) # e.g. "CV", "Lettre de motivation", "Portfolio"
@@ -171,7 +171,7 @@ class CustomSection(Base):
     __tablename__ = "custom_sections"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    profile_id = Column(String(36), ForeignKey("master_profiles.id", ondelete="CASCADE"), nullable=False)
+    profile_id = Column(String(36), ForeignKey("master_profiles.id", ondelete="CASCADE"), nullable=False, index=True)
 
     title = Column(String(255), nullable=False)          # Displayed section title
     icon = Column(String(100), nullable=True)            # FontAwesome class e.g. "fas fa-trophy"
@@ -186,7 +186,7 @@ class CustomSectionItem(Base):
     __tablename__ = "custom_section_items"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    section_id = Column(String(36), ForeignKey("custom_sections.id", ondelete="CASCADE"), nullable=False)
+    section_id = Column(String(36), ForeignKey("custom_sections.id", ondelete="CASCADE"), nullable=False, index=True)
 
     title = Column(String(255), nullable=False)
     subtitle = Column(String(255), nullable=True)

@@ -20,9 +20,9 @@ const nextConfig = {
   async rewrites() {
     return [
       {
-        // Proxy all /api/v1/* requests to the FastAPI backend (avoids CORS)
-        source: '/api/v1/:path*',
-        destination: 'http://localhost:8000/api/v1/:path*',
+        // Proxy all /api/* requests EXCEPT /api/auth/* to the FastAPI backend
+        source: '/api/:path((?!auth).*)',
+        destination: 'http://localhost:8000/api/:path*',
       },
       {
         // Proxy static backend files (photos, exports, etc.) through Next.js

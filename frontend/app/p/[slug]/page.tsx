@@ -4,6 +4,7 @@ import { PublicPageData } from '@/types/public-page';
 import { PublicPageTemplateRenderer } from '@/components/app/public-page/templates';
 import Link from 'next/link';
 import { AlertTriangle, Clock, Eye } from 'lucide-react';
+import config from '@/lib/config';
 
 interface Props {
   params: { slug: string };
@@ -18,7 +19,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     // Fallback to a default generic image if the user doesn't have a photo or hides it
     const imageUrl = (data.page.show_photo && data.profile.photo_url)
-      ? `${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '')}${data.profile.photo_url}`
+      ? `${config.staticBaseUrl}${data.profile.photo_url.replace('/static', '')}`
       : `${process.env.NEXT_PUBLIC_APP_URL || 'https://carriey.com'}/og-default.jpg`;
 
     return {

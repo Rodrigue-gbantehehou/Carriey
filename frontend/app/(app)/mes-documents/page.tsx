@@ -1,4 +1,5 @@
 'use client';
+import config from '@/lib/config';
 
 import { useCvStore } from '@/store/cv';
 import { useUiStore } from '@/store/ui';
@@ -58,7 +59,7 @@ function MesDocumentsContent() {
           const [cvData, pagesData, templatesData] = await Promise.all([
             cvApi.getResumes(token).catch(() => []),
             publicPagesApi.list(token).catch(() => []),
-            fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/v1'}/templates`).then(r => r.ok ? r.json() : []).catch(() => [])
+            fetch(`${config.apiBaseUrl}/templates`).then(r => r.ok ? r.json() : []).catch(() => [])
           ]);
           setCvs(cvData as any);
           setPages(pagesData as PublicPage[]);
@@ -247,7 +248,7 @@ function MesDocumentsContent() {
                     <img
                       src={dbThemes.find(t => t.slug === cv.template_id || t.id === cv.template_id)?.preview_image.startsWith('http')
                         ? dbThemes.find(t => t.slug === cv.template_id || t.id === cv.template_id)?.preview_image
-                        : `${(process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/v1').replace('/api/v1', '')}/static/previews/${dbThemes.find(t => t.slug === cv.template_id || t.id === cv.template_id)?.preview_image.split('/').pop()}`}
+                        : `${config.staticBaseUrl}/previews/${dbThemes.find(t => t.slug === cv.template_id || t.id === cv.template_id)?.preview_image.split('/').pop()}`}
                       alt="Preview"
                       className="w-full h-full object-cover"
                     />
@@ -305,7 +306,7 @@ function MesDocumentsContent() {
                     <img
                       src={dbThemes.find(t => t.slug === lettre.template_id || t.id === lettre.template_id)?.preview_image.startsWith('http')
                         ? dbThemes.find(t => t.slug === lettre.template_id || t.id === lettre.template_id)?.preview_image
-                        : `${(process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/v1').replace('/api/v1', '')}/static/previews/${dbThemes.find(t => t.slug === lettre.template_id || t.id === lettre.template_id)?.preview_image.split('/').pop()}`}
+                        : `${config.staticBaseUrl}/previews/${dbThemes.find(t => t.slug === lettre.template_id || t.id === lettre.template_id)?.preview_image.split('/').pop()}`}
                       alt="Preview"
                       className="w-full h-full object-cover"
                     />

@@ -1,4 +1,5 @@
 "use client";
+import config from '@/lib/config';
 
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
@@ -96,7 +97,7 @@ export default function ProfilPage() {
     try {
       const formData = new FormData();
       formData.append('file', file);
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || '/api/v1'}/profile/me/photo`, {
+      const res = await fetch(`${config.apiBaseUrl}/profile/me/photo`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${session.user.accessToken}` },
         body: formData,

@@ -1,3 +1,4 @@
+import config from '@/lib/config';
 import { useState } from 'react';
 import { Eye, Trash2, ToggleLeft, ToggleRight, Copy, Check, Globe, Settings2, Share2 } from 'lucide-react';
 import { PublicPage } from '@/types/public-page';
@@ -50,7 +51,7 @@ export function PageCard({ page, previewImage, onEdit, onDelete, onToggle }: {
         <div className={`w-full h-full shadow-sm rounded-lg relative border border-gray-100 transition-transform group-hover:scale-[1.02] flex flex-col overflow-hidden ${!previewImage ? theme.preview : 'bg-white p-0'}`}>
           {previewImage ? (
             <img
-              src={previewImage.startsWith('http') ? previewImage : `${(process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/v1').replace('/api/v1', '')}/static/previews/${previewImage.split('/').pop()}`}
+              src={previewImage.startsWith('http') ? previewImage : `${config.staticBaseUrl}/previews/${previewImage.split('/').pop()}`}
               alt="Preview"
               className="w-full h-full object-cover"
             />

@@ -1,6 +1,7 @@
+import config from '@/lib/config';
 import { PublicPage, PublicPageCreate, PublicPageUpdate, SlugCheck, PublicPageData } from '@/types/public-page';
 
-const BASE = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
+const BASE = config.apiBaseUrl;
 
 function authHeaders(token: string): HeadersInit {
   return {

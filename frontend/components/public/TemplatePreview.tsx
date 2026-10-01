@@ -4,6 +4,7 @@ import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { CVTemplateRenderer } from '@/components/app/cv/templates';
 import { API_BASE } from '@/lib/api';
+import config from '@/lib/config';
 import { CVData, TemplateConfig } from '@/types/cv';
 
 interface TemplatePreviewProps {
@@ -233,9 +234,10 @@ export default function TemplatePreview({ template, data = DEFAULT_MOCK_DATA, se
   if (!isVisible) return <div ref={containerRef} className="w-full h-full bg-gray-50/50" />;
 
   if (template?.preview_image) {
+    // If the path starts with /static, replace it to use the centralized static base url
     const src = template.preview_image.startsWith('http')
       ? template.preview_image
-      : `${API_BASE.replace('/api/v1', '')}${template.preview_image}`;
+      : `${config.staticBaseUrl}${template.preview_image.replace('/static', '')}`;
     return (
       <div ref={containerRef} className="w-full h-full relative overflow-hidden bg-[#FBFBFB] flex items-center justify-center">
         {/* eslint-disable-next-line @next/next/no-img-element */}

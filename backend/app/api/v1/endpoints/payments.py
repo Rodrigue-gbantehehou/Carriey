@@ -264,3 +264,32 @@ async def verify_template_access(
         )
     
     return PaymentVerification(has_access=False)
+
+@router.get("/history", response_model=Dict[str, Any])
+async def get_payment_history(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Récupère l'historique des paiements de l'utilisateur
+    """
+    payments = db.query(Payment).filter(
+        Payment.user_id == current_user.id
+    ).order_by(Payment.created_at.desc()).all()
+    
+    return {
+        "payments": [
+            {
+                "id": p.id,
+                "amount": p.amount,
+                "currency": p.currency,
+                "status": p.status.value,
+                "date": p.created_at,
+                "plan_code": p.plan_code,
+                "template_id": p.template_id,
+                "provider": p.provider.value if p.provider else None,
+                "transaction_id": p.provider_payment_id
+            }
+            for p in payments
+        ]
+    }

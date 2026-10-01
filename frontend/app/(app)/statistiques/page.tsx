@@ -136,7 +136,6 @@ export default function StatistiquesPage() {
               title="Candidatures envoyées" 
               value={stats.totalCandidatures} 
               icon={Send} 
-              trend="+12%" 
               colorClass="bg-blue-50 text-blue-600 border border-blue-100"
               delay={0.1}
             />
@@ -144,7 +143,6 @@ export default function StatistiquesPage() {
               title="Entretiens obtenus" 
               value={stats.interview} 
               icon={Target} 
-              trend="+2" 
               colorClass="bg-orange-50 text-orange-600 border border-orange-100"
               delay={0.2}
             />
@@ -152,7 +150,6 @@ export default function StatistiquesPage() {
               title="Vues du profil public" 
               value={stats.publicViews} 
               icon={Eye} 
-              trend="+24%" 
               colorClass="bg-purple-50 text-purple-600 border border-purple-100"
               delay={0.3}
             />
@@ -237,7 +234,6 @@ export default function StatistiquesPage() {
                     </div>
                     <div>
                       <p className="font-bold text-sm text-gray-900">CV générés</p>
-                      <p className="text-[10px] text-gray-500">Formats PDF & Web</p>
                     </div>
                   </div>
                   <span className="text-lg font-black text-indigo-600">{stats.totalResumes}</span>
@@ -250,7 +246,6 @@ export default function StatistiquesPage() {
                     </div>
                     <div>
                       <p className="font-bold text-gray-900">Lettres de motiv.</p>
-                      <p className="text-xs text-gray-500">Générées par l'IA</p>
                     </div>
                   </div>
                   <span className="text-xl font-black text-blue-600">{stats.totalLetters}</span>

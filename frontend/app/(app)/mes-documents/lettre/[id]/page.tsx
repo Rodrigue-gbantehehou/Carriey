@@ -1,4 +1,5 @@
 'use client';
+import config from '@/lib/config';
 
 import { useCvStore } from '@/store/cv';
 import { useProfileStore } from '@/store/profile';
@@ -273,7 +274,7 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
               <div className="flex-1 bg-gray-50/50 p-2 border-b border-gray-50 flex items-center justify-center">
                 {t.preview_image ? (
                   <img 
-                    src={t.preview_image.startsWith('http') ? t.preview_image : `${API_BASE.replace('/api/v1', '')}/static/previews/${t.preview_image.split('/').pop()}`}
+                    src={t.preview_image.startsWith('http') ? t.preview_image : `${config.staticBaseUrl}/previews/${t.preview_image.split('/').pop()}`}
                     alt={t.name}
                     className="w-full h-full object-contain"
                   />

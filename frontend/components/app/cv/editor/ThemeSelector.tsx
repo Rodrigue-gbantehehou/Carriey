@@ -76,7 +76,7 @@ export function ThemeSelector({
               <div className="flex-1 p-2 flex items-center justify-center border-b border-gray-50 bg-gray-50/50">
                 {t.preview_image ? (
                   <img 
-                    src={t.preview_image.startsWith('http') ? t.preview_image : `${config.apiBaseUrl.replace('/api/v1', '')}/static/previews/${t.preview_image.split('/').pop()}`}
+                    src={t.preview_image.startsWith('http') ? t.preview_image : `${config.staticBaseUrl}/previews/${t.preview_image.split('/').pop()}`}
                     alt={t.name}
                     className="w-full h-full object-contain"
                   />

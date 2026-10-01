@@ -202,7 +202,7 @@ export default function EditTemplatePage() {
 
   const isFree = parseFloat(formData.price) === 0
   const previewSrc = formData.preview_image
-    ? (formData.preview_image.startsWith('http') ? formData.preview_image : `${config.apiBaseUrl.replace('/api/v1', '')}${formData.preview_image}`)
+    ? (formData.preview_image.startsWith('http') ? formData.preview_image : `${config.staticBaseUrl}${formData.preview_image.replace('/static', '')}`)
     : null
 
   return (

@@ -1,4 +1,5 @@
 'use client';
+import config from '@/lib/config';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -37,7 +38,7 @@ export default function ThemesPage() {
     let isMounted = true;
     const fetchThemes = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/v1'}/templates`);
+        const res = await fetch(`${config.apiBaseUrl}/templates`);
         if (res.ok) {
           const data = await res.json();
           if (isMounted) setDbThemes(data);
@@ -142,7 +143,7 @@ export default function ThemesPage() {
                   <div className="w-full h-full bg-white shadow-sm rounded-sm p-0 relative border border-gray-100 transition-transform group-hover:scale-[1.02] overflow-hidden">
                     {theme.preview_image ? (
                       <img 
-                        src={theme.preview_image.startsWith('http') ? theme.preview_image : `${(process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/v1').replace('/api/v1', '')}/static/previews/${theme.preview_image.split('/').pop()}`} 
+                        src={theme.preview_image.startsWith('http') ? theme.preview_image : `${config.staticBaseUrl}/previews/${theme.preview_image.split('/').pop()}`} 
                         alt={theme.name} 
                         className="w-full h-full object-cover object-top"
                       />

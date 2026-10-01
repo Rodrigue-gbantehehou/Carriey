@@ -1,15 +1,34 @@
 'use client';
+import config from '@/lib/config';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useProfileStore } from '@/store/profile';
-import { User, Lock, Trash2, Download, CreditCard, Bell, ChevronRight, CheckCircle2, X, Loader2 } from 'lucide-react';
+import { User, Lock, Trash2, Download, CreditCard, Bell, ChevronRight, CheckCircle2, X, Loader2, ExternalLink } from 'lucide-react';
 
 export default function ParametresPage() {
   const { data: session } = useSession();
   const { profile } = useProfileStore();
 
   const isPro = session?.user?.subscription_status === 'active' || session?.user?.role === 'ADMIN' || session?.user?.role === 'SUPER_ADMIN';
+
+  const [payments, setPayments] = useState<any[]>([]);
+  const [loadingPayments, setLoadingPayments] = useState(true);
+
+  useEffect(() => {
+    if (session?.user?.accessToken) {
+      const apiBase = (process.env.NEXT_PUBLIC_API_URL ?? '/api/v1').replace(/\/$/, '');
+      fetch(`${apiBase}/payments/history`, {
+        headers: { Authorization: `Bearer ${session.user.accessToken}` }
+      })
+      .then(r => r.ok ? r.json() : { payments: [] })
+      .then(data => {
+        setPayments(data.payments || []);
+        setLoadingPayments(false);
+      })
+      .catch(() => setLoadingPayments(false));
+    }
+  }, [session?.user?.accessToken]);
 
   // Password state
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
@@ -66,7 +85,7 @@ export default function ParametresPage() {
     if (!session?.user?.accessToken) return;
     
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/v1'}/exports/data`, {
+      const res = await fetch(`${config.apiBaseUrl}/exports/data`, {
         headers: {
           'Authorization': `Bearer ${session.user.accessToken}`
         }
@@ -160,22 +179,94 @@ export default function ParametresPage() {
                 {isPro ? "Forfait PRO" : "Forfait Gratuit"}
               </h3>
               <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${isPro ? 'bg-indigo-100 text-indigo-700' : 'bg-green-100 text-green-700'}`}>
-                Actif
+                {isPro ? 'Actif' : 'Gratuit'}
               </span>
             </div>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 mb-2">
               {isPro 
                 ? "Accès illimité à tous les modèles premium et à l'IA." 
                 : "Accès aux fonctionnalités de base pour créer vos documents."}
             </p>
+            {isPro && session?.user?.premium_until && (
+              <p className="text-xs font-semibold text-indigo-600 bg-indigo-50 inline-block px-2 py-1 rounded-md">
+                Valable jusqu'au {new Date(session.user.premium_until).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+              </p>
+            )}
           </div>
-          {!isPro && (
-            <button 
-              onClick={() => window.location.href = '/checkout'}
-              className="px-5 py-2.5 bg-indigo-600 text-white font-bold text-sm rounded-xl hover:bg-indigo-700 shadow-md shadow-indigo-600/20 hover:-translate-y-0.5 transition-all w-full sm:w-auto text-center whitespace-nowrap"
-            >
-              Passer Premium
-            </button>
+          <div className="w-full sm:w-auto flex flex-col gap-2">
+            {!isPro ? (
+              <button 
+                onClick={() => window.location.href = '/checkout'}
+                className="px-5 py-2.5 bg-indigo-600 text-white font-bold text-sm rounded-xl hover:bg-indigo-700 shadow-md shadow-indigo-600/20 hover:-translate-y-0.5 transition-all text-center whitespace-nowrap"
+              >
+                Passer Premium
+              </button>
+            ) : (
+              <button 
+                onClick={() => window.location.href = '/checkout'}
+                className="px-5 py-2.5 bg-white border border-gray-200 text-gray-700 font-bold text-sm rounded-xl hover:bg-gray-50 shadow-sm transition-all text-center whitespace-nowrap"
+              >
+                Prolonger / Gérer
+              </button>
+            )}
+          </div>
+        </div>
+      </Section>
+
+      <Section 
+        title="Historique de paiement" 
+        description="Retrouvez toutes vos transactions."
+      >
+        <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm">
+          {loadingPayments ? (
+            <div className="p-8 flex justify-center items-center">
+              <Loader2 className="w-6 h-6 animate-spin text-indigo-600" />
+            </div>
+          ) : payments.length === 0 ? (
+            <div className="p-8 text-center text-gray-500 text-sm">
+              Aucun paiement enregistré pour le moment.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm whitespace-nowrap">
+                <thead className="bg-gray-50 text-gray-500 font-semibold border-b border-gray-100">
+                  <tr>
+                    <th className="px-6 py-4">Date</th>
+                    <th className="px-6 py-4">Description</th>
+                    <th className="px-6 py-4">Montant</th>
+                    <th className="px-6 py-4">Statut</th>
+                    <th className="px-6 py-4 text-right">Facture</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {payments.map((p) => (
+                    <tr key={p.id} className="hover:bg-gray-50/50 transition-colors">
+                      <td className="px-6 py-4 text-gray-600">
+                        {new Date(p.date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
+                      </td>
+                      <td className="px-6 py-4 font-medium text-gray-900">
+                        {p.plan_code ? `Abonnement ${p.plan_code}` : p.template_id ? `Modèle CV` : 'Paiement'}
+                      </td>
+                      <td className="px-6 py-4 text-gray-600">
+                        {p.amount} {p.currency}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${p.status === 'success' ? 'bg-green-100 text-green-700' : p.status === 'pending' ? 'bg-orange-100 text-orange-700' : 'bg-red-100 text-red-700'}`}>
+                          {p.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        {p.status === 'success' && (
+                          <button className="text-indigo-600 hover:text-indigo-800 font-semibold text-xs inline-flex items-center gap-1">
+                            <Download className="w-3.5 h-3.5" /> PDF
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       </Section>

@@ -1,6 +1,7 @@
+import config from '@/lib/config';
 import axios from 'axios';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
+const API_BASE = config.apiBaseUrl;
 
 export interface CV {
   id: string;

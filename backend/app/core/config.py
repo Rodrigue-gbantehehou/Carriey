@@ -12,7 +12,7 @@ load_dotenv(env_path)
 class Settings(BaseSettings):
     PROJECT_NAME: str = os.getenv("APP_NAME", "Carriey")
     VERSION: str = "1.0.0"
-    API_V1_STR: str = "/api/v1"
+    API_STR: str = "/api"
     
     # Payment Keys
     KKIAPAY_PUBLIC_KEY: Optional[str] = None

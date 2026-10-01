@@ -186,7 +186,7 @@ export default function TemplatePreview({ template }: TemplatePreviewProps) {
                     <div className="border-2 border-dashed border-gray-300 rounded-lg p-2 flex justify-center bg-gray-50 overflow-hidden">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img 
-                            src={template.preview_image.startsWith('http') ? template.preview_image : `${config.apiBaseUrl.replace('/api/v1', '')}${template.preview_image}`} 
+                            src={template.preview_image.startsWith('http') ? template.preview_image : `${config.staticBaseUrl}${template.preview_image.replace('/static', '')}`} 
                             alt="Miniature uploadée" 
                             className="max-h-[600px] w-auto object-contain shadow-sm rounded-md"
                         />
