@@ -1,9 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  compiler: {
-    removeConsole: process.env.NODE_ENV === 'production',
-  },
   eslint: {
     ignoreDuringBuilds: true, // Désactivé temporairement pour permettre le build avec les apostrophes non échappées
   },
