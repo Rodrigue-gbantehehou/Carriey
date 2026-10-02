@@ -28,7 +28,7 @@ export default function EducationList() {
       updateEducation(editingId, { ...form, start_date: fmtDate(form.start_date), end_date: fmtDate(form.end_date) });
     } else {
       addEducation({
-        id: crypto.randomUUID(),
+        // id removed
         degree: form.degree,
         school: form.school,
         location: form.location,

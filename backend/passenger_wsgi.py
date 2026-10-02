@@ -1,0 +1,19 @@
+import os
+import sys
+
+# Ajouter le chemin du projet au PYTHONPATH
+sys.path.insert(0, os.path.dirname(__file__))
+
+# Charger les variables d'environnement depuis le .env si nécessaire
+from dotenv import load_dotenv
+load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
+
+# Importer l'application FastAPI
+from app.main import app as fastapi_app
+
+# Convertir l'application ASGI (FastAPI) en WSGI pour Passenger (cPanel/O2Switch)
+try:
+    from a2wsgi import ASGIMiddleware
+    application = ASGIMiddleware(fastapi_app)
+except ImportError:
+    raise ImportError("Le module 'a2wsgi' est requis pour lancer FastAPI sur O2Switch. Ajoutez 'a2wsgi' à vos dépendances.")

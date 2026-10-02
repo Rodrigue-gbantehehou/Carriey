@@ -21,3 +21,5 @@ services:
         sync: false  # À remplir avec l'URL Vercel
       - key: HF_TOKEN
         sync: false  # Optionnel pour l'IA
+      - key: ENVIRONMENT
+        value: production

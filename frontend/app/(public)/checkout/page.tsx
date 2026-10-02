@@ -116,7 +116,7 @@ function CheckoutContent() {
         if (templateIdToSend) payload.template_id = templateIdToSend;
       }
 
-      const response = await fetch(`${config.apiBaseUrl}/payments/create`, {
+      const res = await fetch(`${config.apiBaseUrl}/payments/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -125,23 +125,23 @@ function CheckoutContent() {
         body: JSON.stringify(payload)
       });
 
-      const data = await response.json();
+      const resData = await res.json();
 
-      if (!response.ok) {
-        throw new Error(data.detail || "Erreur lors de l'initialisation du paiement.");
+      if (!res.ok) {
+        throw new Error(resData.detail || "Erreur lors de l'initialisation du paiement.");
       }
 
-      if (data.status === 'already_paid') {
+      if (resData.status === 'already_paid') {
         alert("Vous avez déjà débloqué ce modèle !");
         router.push('/mes-documents');
         return;
       }
 
       // Kkiapay utilise un widget. On récupère la config du backend.
-      const config = data.provider_config;
-      const transactionId = data.transaction_id;
+      const providerConfig = resData.provider_config;
+      const transactionId = resData.transaction_id;
 
-      if (!config) {
+      if (!providerConfig) {
         throw new Error("Configuration de paiement manquante depuis le serveur.");
       }
 
@@ -150,13 +150,13 @@ function CheckoutContent() {
       }
 
       (window as any).openKkiapayWidget({
-        amount: config.amount,
+        amount: providerConfig.amount,
         position: "center",
-        callback: config.callback, // webhook fallback url or success url
+        callback: providerConfig.callback, // webhook fallback url or success url
         data: transactionId,
-        theme: config.theme,
-        key: config.public_key,
-        sandbox: config.sandbox
+        theme: providerConfig.theme,
+        key: providerConfig.public_key,
+        sandbox: providerConfig.sandbox
       });
 
       // On arrête le spinner immédiatement car le widget modal Kkiapay prend le relais
@@ -164,8 +164,8 @@ function CheckoutContent() {
       setIsProcessing(false);
 
       // Ajouter le listener pour quand c'est validé avec succès
-      (window as any).addKkiapayListener('success', (response: any) => {
-        console.log("Kkiapay success:", response);
+      (window as any).addKkiapayListener('success', (cbResponse: any) => {
+        console.log("Kkiapay success:", cbResponse);
         router.push('/mes-documents?payment_success=true');
       });
     } catch (error: any) {

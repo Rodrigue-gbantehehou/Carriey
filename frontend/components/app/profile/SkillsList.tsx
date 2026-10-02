@@ -25,7 +25,7 @@ export default function SkillsList() {
   const handleAdd = () => {
     if (!form.name?.trim()) return;
     addSkill({
-      id: crypto.randomUUID(),
+      // id removed
       name: form.name.trim(),
       level: form.level,
     });

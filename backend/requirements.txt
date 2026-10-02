@@ -20,7 +20,7 @@ cryptography==42.0.5
 email-validator
 slowapi==0.1.10
 limits==5.8.0
-
+a2wsgi==1.10.4
 # Optional ML extras (require Rust/Cargo to build tokenizers on Windows, and may lack wheels for Python 3.13):
 # transformers==4.44.2
 # accelerate==0.34.2

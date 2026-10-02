@@ -27,7 +27,7 @@ export default function ProjectsList() {
       updateProject(editingId, { ...form, start_date: fmtDate(form.start_date), end_date: fmtDate(form.end_date) });
     } else {
       addProject({
-        id: crypto.randomUUID(),
+        // id removed
         name: form.name,
         description: form.description,
         url: form.url,

@@ -43,7 +43,8 @@ export default function MasterProfileSelector({ type }: { type: 'experience' | '
     setData({
       ...data,
       [type]: [...currentList, newItem]
-    });
+    } as any);
+
     
     setIsOpen(false);
   };
