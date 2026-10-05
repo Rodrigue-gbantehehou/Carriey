@@ -1,6 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  experimental: {
+    workerThreads: false,
+    cpus: 1,
+    staticGenerationMaxConcurrency: 1,
+  },
   eslint: {
     ignoreDuringBuilds: true, // Désactivé temporairement pour permettre le build avec les apostrophes non échappées
   },
