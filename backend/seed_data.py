@@ -18,7 +18,7 @@ from app.models.persona import Persona
 from app.core.security import get_password_hash
 
 BASE_DIR = Path(__file__).parent.resolve()
-TEMPLATES_DIR = BASE_DIR.parent / "frontend" / "components" / "cv-templates"
+TEMPLATES_DIR = BASE_DIR.parent / "frontend" / "components" / "app" / "cv" / "templates"
 
 def seed_admin_user(db: Session):
     """Créer un utilisateur super admin par défaut"""
@@ -48,7 +48,7 @@ def seed_admin_user(db: Session):
 
 def seed_templates(db: Session, admin_user: User):
     """Créer les templates depuis les dossiers existants"""
-    template_folders = ["professional", "moderne", "classique", "tokyo", "letter_classique", "letter_moderne", "letter_professional"]
+    template_folders = ["professional", "moderne", "classique", "tokyo", "abidjan", "creatif", "dakar", "rodrigue"]
     
     for folder_name in template_folders:
         template_dir = TEMPLATES_DIR / folder_name
