@@ -26,8 +26,16 @@ export default function RegisterForm() {
       return;
     }
 
-    if (password.length < 6) {
-      setError('Le mot de passe doit contenir au moins 6 caractères');
+    if (password.length < 8) {
+      setError('Le mot de passe doit contenir au moins 8 caractères');
+      return;
+    }
+    if (!/\d/.test(password)) {
+      setError('Le mot de passe doit contenir au moins un chiffre');
+      return;
+    }
+    if (!/[A-Z]/.test(password)) {
+      setError('Le mot de passe doit contenir au moins une lettre majuscule');
       return;
     }
 
