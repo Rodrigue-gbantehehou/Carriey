@@ -38,8 +38,11 @@ import app.models.public_page
 import app.models.candidature
 import app.models.subscription_plan
 
-# Les migrations de base de données sont gérées par Alembic.
-# Lancez `alembic upgrade head` pour appliquer les migrations.
+# Créer les tables manquantes au démarrage (idempotent)
+try:
+    Base.metadata.create_all(bind=engine)
+except Exception as e:
+    print(f"[WARNING] create_all failed: {e}")
 
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
