@@ -4,9 +4,18 @@ import sys
 # Ajouter le chemin du projet au PYTHONPATH
 sys.path.insert(0, os.path.dirname(__file__))
 
-# Charger les variables d'environnement depuis le .env si nécessaire
+# Charger les variables d'environnement
+# Priorité : .env.production > .env (selon ENVIRONMENT)
 from dotenv import load_dotenv
-load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
+
+_base = os.path.dirname(__file__)
+_env_prod = os.path.join(_base, ".env.production")
+_env_default = os.path.join(_base, ".env")
+
+if os.path.exists(_env_prod):
+    load_dotenv(_env_prod, override=True)
+elif os.path.exists(_env_default):
+    load_dotenv(_env_default)
 
 # Importer l'application FastAPI
 from app.main import app as fastapi_app

@@ -12,7 +12,7 @@ python-multipart==0.0.9
 python-dotenv==1.0.1
 sqlalchemy==2.0.36
 alembic==1.13.1
-psycopg2-binary==2.9.9
+# psycopg2-binary==2.9.9  # PostgreSQL uniquement — retiré car O2Switch utilise MySQL
 pydantic-settings==2.2.1
 python-multipart==0.0.9
 pymysql==1.1.0
