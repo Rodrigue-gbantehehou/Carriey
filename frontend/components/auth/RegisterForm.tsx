@@ -186,36 +186,7 @@ export default function RegisterForm() {
             <p className="mt-2 text-sm text-gray-500">Commencez à centraliser votre parcours en quelques secondes.</p>
           </div>
 
-          {/* Step indicator */}
-          <div className="flex items-center gap-2 mb-8">
-            {STEPS.map((step, i) => {
-              const Icon = step.icon;
-              const isDone = currentStep > step.id;
-              const isActive = currentStep === step.id;
-              return (
-                <div key={step.id} className="flex items-center gap-2 flex-1">
-                  <div className={`flex items-center gap-2 transition-all duration-300 ${i > 0 ? '' : ''}`}>
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300 ${
-                      isDone ? 'bg-green-500' : isActive ? 'bg-indigo-600' : 'bg-gray-100'
-                    }`}>
-                      {isDone
-                        ? <Check className="w-4 h-4 text-white stroke-[2.5]" />
-                        : <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-gray-400'}`} />
-                      }
-                    </div>
-                    <span className={`text-xs font-medium whitespace-nowrap ${
-                      isActive ? 'text-indigo-600' : isDone ? 'text-green-600' : 'text-gray-400'
-                    }`}>
-                      {step.label}
-                    </span>
-                  </div>
-                  {i < STEPS.length - 1 && (
-                    <div className={`h-px flex-1 transition-all duration-500 ${isDone ? 'bg-green-400' : 'bg-gray-200'}`} />
-                  )}
-                </div>
-              );
-            })}
-          </div>
+
 
           {/* Error */}
           {error && (

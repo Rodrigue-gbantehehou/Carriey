@@ -3,6 +3,7 @@ import config from '@/lib/config';
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 export default function ForgotPasswordForm() {
@@ -47,7 +48,7 @@ export default function ForgotPasswordForm() {
 
         <div className="absolute inset-0 flex flex-col items-center justify-center p-12 text-center">
           <div className="bg-white/60 backdrop-blur-md rounded-2xl border border-gray-200 p-12 max-w-lg shadow-xl shadow-gray-200/50">
-            <div className="w-16 h-16 bg-indigo-600 text-white rounded-xl flex items-center justify-center font-black text-2xl mb-6 mx-auto">C</div>
+            <Image src={config.appLogo} alt={config.appName} width={64} height={64} className="object-contain mb-6 mx-auto drop-shadow-md" />
             <h3 className="text-2xl font-bold text-gray-900 mb-4">Ne perdez pas le fil.</h3>
             <p className="text-gray-500">Récupérez l'accès à votre Master Profile et retrouvez toutes vos données professionnelles intactes.</p>
           </div>
@@ -58,8 +59,9 @@ export default function ForgotPasswordForm() {
       <div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
         <div className="mx-auto w-full max-w-sm lg:w-96">
           <div className="mb-8">
-            <Link href="/" className="inline-block">
-              <span className="text-2xl font-black tracking-tighter text-indigo-600">carriey</span>
+            <Link href="/" className="inline-flex items-center gap-2.5">
+              <Image src={config.appLogo} alt={config.appName} width={32} height={32} className="object-contain" priority />
+              <span className="text-2xl font-bold text-black-600">{config.appName}</span>
             </Link>
             {!isSuccess && (
               <>
