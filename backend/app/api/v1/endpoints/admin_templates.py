@@ -34,7 +34,7 @@ def get_template_folder_path(template_type: str, folder_name: str) -> Path:
     if template_type == "cover_letter":
         return TEMPLATES_DIR.parent.parent / "letter" / "templates" / folder_name
     elif template_type == "public_page":
-        return TEMPLATES_DIR.parent.parent / "public" / "templates" / folder_name
+        return TEMPLATES_DIR.parent.parent / "public-page" / "templates" / folder_name
     return TEMPLATES_DIR / folder_name
 
 # Dummy data for live preview
