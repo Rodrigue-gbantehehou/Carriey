@@ -57,7 +57,17 @@ export default function RegisterForm() {
         } catch (e) {
           errorData = { detail: "Erreur serveur inconnue" };
         }
-        throw new Error(errorData.detail || 'Erreur lors de l\'inscription');
+        
+        let errorMessage = 'Erreur lors de l\'inscription';
+        if (Array.isArray(errorData.detail)) {
+          // FastAPI validation error (422)
+          errorMessage = errorData.detail.map((err: any) => err.msg).join(', ');
+        } else if (errorData.detail) {
+          // Normal error string
+          errorMessage = errorData.detail;
+        }
+        
+        throw new Error(errorMessage);
       }
 
       const result = await signIn('credentials', {
