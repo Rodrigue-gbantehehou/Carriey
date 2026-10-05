@@ -7,10 +7,10 @@
     "generate-templates": "node scripts/generate-templates.js",
     "predev": "npm run sync-css && npm run generate-templates",
     "prebuild": "npm run sync-css && npm run generate-templates",
-    "dev": "next dev -p 5000 -H 0.0.0.0",
-    "build": "next build",
-    "start": "next start -p 5000 -H 0.0.0.0",
-    "lint": "eslint ."
+    "dev": "next dev",
+    "build": "next build --webpack",
+    "start": "next start",
+    "lint": "eslint"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
