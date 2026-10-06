@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
@@ -276,13 +276,14 @@ export default function TemplatePreview({ template, data = DEFAULT_MOCK_DATA, se
     const src = template.preview_image.startsWith('http')
       ? template.preview_image
       : `${config.staticBaseUrl}${template.preview_image.replace('/static', '')}`;
+    const isPublicPage = template?.template_type === 'public_page';
     return (
       <div ref={containerRef} className="w-full h-full relative overflow-hidden bg-[#FBFBFB] flex items-center justify-center">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={src}
           alt={template.name || template.slug}
-          className="w-full h-full object-cover object-top"
+          className={`w-full h-full ${isPublicPage ? 'object-cover object-center' : 'object-cover object-top'}`}
           loading="lazy"
         />
       </div>

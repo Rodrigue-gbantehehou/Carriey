@@ -69,6 +69,25 @@ function TemplateCard({ template, onSelect, selectedSector, previewData, index }
   const meta = TEMPLATE_META[template.slug] || { tags: [] }
   const isRecommended = selectedSector && meta.tags?.includes(selectedSector)
   const isFree = !template.price || parseFloat(template.price) === 0
+  const ttype = template.template_type || 'cv'
+
+  // Aspect ratio: pages publiques sont en 16/9 (landscape), CV et lettres en A4 portrait
+  const aspectClass = ttype === 'public_page' ? 'aspect-[16/10]' : 'aspect-[1/1.414]'
+
+  // Label et badge de type
+  const typeLabel = ttype === 'cover_letter' ? 'Lettre de motivation'
+    : ttype === 'public_page' ? 'Page publique'
+    : 'CV'
+  const typeBgClass = ttype === 'cover_letter' ? 'bg-violet-100 text-violet-700'
+    : ttype === 'public_page' ? 'bg-sky-100 text-sky-700'
+    : 'bg-indigo-100 text-indigo-700'
+
+  const ctaText = ttype === 'cover_letter' ? 'Créer cette lettre'
+    : ttype === 'public_page' ? 'Créer cette page'
+    : 'Utiliser ce modèle'
+  const ctaSub = ttype === 'cover_letter' ? 'Générée par IA en 30 secondes'
+    : ttype === 'public_page' ? 'Publiez votre profil en ligne'
+    : 'CV prêt en 2 minutes'
 
   return (
     <div
@@ -76,18 +95,22 @@ function TemplateCard({ template, onSelect, selectedSector, previewData, index }
       onClick={() => onSelect(template)}
       style={{ animationDelay: `${index * 0.07}s` }}
     >
+      {/* Badge type */}
+      <div className="absolute top-2 left-2 z-20">
+        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${typeBgClass}`}>{typeLabel}</span>
+      </div>
 
-      {/* Aperçu pleine hauteur — pas de footer texte */}
-      <div className="relative aspect-[1/1.414] overflow-hidden bg-gray-50/50">
+      {/* Aperçu pleine hauteur */}
+      <div className={`relative ${aspectClass} overflow-hidden bg-gray-50/50`}>
         <TemplatePreview template={template} data={previewData} sector={selectedSector} />
 
         {/* Overlay au survol */}
         <div className="absolute inset-0 bg-gray-900/50 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center z-10 gap-3">
           <div className="px-7 py-3 bg-white text-gray-900 text-sm font-extrabold rounded-xl shadow-2xl transform translate-y-3 group-hover:translate-y-0 transition-all duration-300">
-            Utiliser ce modèle
+            {ctaText}
           </div>
           <p className="text-white/75 text-xs font-medium translate-y-3 group-hover:translate-y-0 transition-all duration-400 delay-75">
-            CV prêt en 2 minutes
+            {ctaSub}
           </p>
         </div>
       </div>
