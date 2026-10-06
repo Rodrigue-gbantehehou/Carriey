@@ -1,73 +1,63 @@
-'use client';
-
-import { useEffect, useState, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { getPrintData, API_BASE } from '@/lib/api';
+import fs from 'fs';
+import path from 'path';
 import { CVTemplateRenderer } from '@/components/app/cv/templates';
 
-// We augment the window interface directly here to avoid global type issues
-declare global {
-  interface Window {
-    __CV_PRINT_READY__?: boolean;
+interface PrintPageProps {
+  searchParams: { id?: string };
+}
+
+async function getPrintDataServer(id: string) {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://carapi.nomiks.net/api';
+  try {
+    const res = await fetch(`${apiUrl}/exports/print-data/${id}`, {
+      cache: 'no-store',
+      headers: { 'Accept': 'application/json' }
+    });
+    if (!res.ok) {
+      console.error(`Erreur fetch print-data: HTTP ${res.status}`);
+      return null;
+    }
+    return await res.json();
+  } catch (err) {
+    console.error("Erreur récupération données CV SSR:", err);
+    return null;
   }
 }
 
-function PrintContent() {
-  const searchParams = useSearchParams();
-  const id = searchParams.get('id');
-  const [data, setData] = useState<{
-    template_name: string;
-    data: any;
-    config: any;
-  } | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!id) {
-      setError("Aucun identifiant d'impression fourni.");
-      window.__CV_PRINT_READY__ = true;
-      return;
+function getTemplateCss(slug: string): string {
+  try {
+    const cssPath = path.join(process.cwd(), 'public', 'template-assets', slug, 'style.css');
+    if (fs.existsSync(cssPath)) {
+      return fs.readFileSync(cssPath, 'utf-8');
     }
+  } catch (e) {
+    console.warn("Impossible de lire style.css:", e);
+  }
+  return '';
+}
 
-    const fetchData = async () => {
-      try {
-        const result = await getPrintData(id);
-        setData(result);
-        
-        // Attendre que les polices web soient chargées
-        if (typeof document !== 'undefined' && document.fonts) {
-          try { await document.fonts.ready; } catch (_) {}
-        }
-        
-        // Laisser 800ms pour que les composants React et styles soient peints
-        setTimeout(() => {
-          window.__CV_PRINT_READY__ = true;
-        }, 800);
-      } catch (err) {
-        console.error("Erreur lors de la récupération des données:", err);
-        setError("Impossible de charger les données du CV.");
-        window.__CV_PRINT_READY__ = true;
-      }
-    };
+export default async function PrintPage({ searchParams }: PrintPageProps) {
+  const id = searchParams?.id;
+  if (!id) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-white text-black p-4">
+        <h1>Aucun identifiant d'impression fourni.</h1>
+      </div>
+    );
+  }
 
-    fetchData();
-  }, [id]);
-
-  if (error) {
+  const printData = await getPrintDataServer(id);
+  if (!printData) {
     return (
       <div className="flex items-center justify-center h-screen bg-white text-red-600 p-4">
-        <h1>{error}</h1>
+        <h1>Impossible de charger les données du CV (document introuvable ou expiré).</h1>
       </div>
     );
   }
 
-  if (!data) {
-    return (
-      <div className="print-hide-loader flex items-center justify-center h-screen bg-white text-black p-4 fixed inset-0 z-50">
-        <h1 className="text-lg font-semibold">Chargement du document...</h1>
-      </div>
-    );
-  }
+  const slug = (printData.template_name || 'classique').toLowerCase().replace(/[^a-z0-9_-]/g, '');
+  const templateCss = getTemplateCss(slug);
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://carapi.nomiks.net/api';
 
   return (
     <>
@@ -85,13 +75,11 @@ function PrintContent() {
           size: A4 portrait;
           margin: 0;
         }
-        /* Masquer la scrollbar */
         ::-webkit-scrollbar {
           display: none;
         }
-        
         @media print {
-          .no-print, .print-hide-loader {
+          .no-print {
             display: none !important;
           }
           html, body, div, main {
@@ -102,28 +90,26 @@ function PrintContent() {
             display: block !important;
           }
         }
+        ${templateCss}
       `}} />
 
-      {/* Rendu direct du template A4 (Chromium gère nativement le rendu et la pagination @media print) */}
+      {/* Rendu SSR immédiat du template A4 (HTML statique complet envoyé au navigateur) */}
       <div 
         className="a4-print-container" 
         style={{ width: '210mm', minHeight: '297mm', background: 'white', margin: '0 auto' }} 
       >
         <CVTemplateRenderer 
-          templateName={data.template_name}
-          data={data.data}
-          config={data.config}
-          apiBaseUrl={API_BASE}
+          templateName={printData.template_name}
+          data={printData.data}
+          config={printData.config}
+          apiBaseUrl={apiBaseUrl}
         />
       </div>
-    </>
-  );
-}
 
-export default function PrintPage() {
-  return (
-    <Suspense fallback={<div className="p-4">Chargement...</div>}>
-      <PrintContent />
-    </Suspense>
+      {/* Signal pour Playwright : actif dès que le HTML est analysé */}
+      <script dangerouslySetInnerHTML={{__html: `
+        window.__CV_PRINT_READY__ = true;
+      `}} />
+    </>
   );
 }
