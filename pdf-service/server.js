@@ -29,16 +29,14 @@ app.get('/health', (req, res) => {
 // Body: { url: "https://...", wait_for: "__CV_PRINT_READY__", filename: "mon-cv.pdf" }
 // Renvoie: fichier PDF binaire
 app.post('/generate-pdf', async (req, res) => {
-  const { url, wait_for, filename } = req.body;
+  const { url, html, wait_for, filename } = req.body;
 
-  if (!url) {
-    return res.status(400).json({ error: 'Le paramètre "url" est obligatoire.' });
+  if (!url && !html) {
+    return res.status(400).json({ error: 'Le paramètre "url" ou "html" est obligatoire.' });
   }
 
   let browser;
   try {
-    console.log(`[PDF Service] Generating PDF for: ${url}`);
-
     // Identique aux args utilisés dans generate_pdf_from_html.py
     const launchArgs = [
       '--disable-dev-shm-usage',
@@ -66,13 +64,17 @@ app.post('/generate-pdf', async (req, res) => {
     // Émuler le média d'impression (identique à Python : page.emulate_media(media="print"))
     await page.emulateMedia({ media: 'print' });
 
-    console.log(`[PDF Service] Loading page: ${url}`);
-
-    // Charger la page avec domcontentloaded (rapide, ne bloque pas sur les requêtes résiduelles)
-    try {
-      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    } catch (e) {
-      console.warn(`[PDF Service] Warning: page.goto domcontentloaded timed out: ${e.message}. Attempting anyway.`);
+    if (html) {
+      console.log(`[PDF Service] Loading direct HTML (${html.length} chars)`);
+      await page.setContent(html, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    } else if (url) {
+      console.log(`[PDF Service] Loading page: ${url}`);
+      // Charger la page avec domcontentloaded (rapide, ne bloque pas sur les requêtes résiduelles)
+      try {
+        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 });
+      } catch (e) {
+        console.warn(`[PDF Service] Warning: page.goto domcontentloaded timed out: ${e.message}. Attempting anyway.`);
+      }
     }
 
     // Attendre que le composant React signale être prêt via le signal __CV_PRINT_READY__
@@ -81,11 +83,12 @@ app.post('/generate-pdf', async (req, res) => {
         await page.waitForFunction(
           (signal) => window[signal] === true,
           wait_for,
-          { timeout: 30000 }
+          { timeout: 75000 } // 75s pour laisser à React le temps de s'hydrater sur le CPU partagé de Render
         );
         console.log(`[PDF Service] Signal "${wait_for}" reçu, génération du PDF.`);
       } catch (e) {
-        console.warn(`[PDF Service] Notice: "${wait_for}" wait skipped after timeout: ${e.message}`);
+        console.error(`[PDF Service] ❌ Le signal "${wait_for}" n'a pas été reçu après 75s: ${e.message}`);
+        throw new Error(`Le document n'a pas pu terminer son chargement (signal "${wait_for}" non reçu).`);
       }
     }
 
