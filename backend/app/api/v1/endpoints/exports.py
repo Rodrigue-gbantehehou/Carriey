@@ -248,7 +248,13 @@ async def export_pdf(
             "config": req.config or {}
         }
         cache_file = CACHE_DIR / f"{request_id}.json"
-        cache_file.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+        try:
+            CACHE_DIR.mkdir(parents=True, exist_ok=True)
+            cache_file.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+            logger.info(f"Cache écrit: {cache_file}")
+        except Exception as _cache_err:
+            logger.error(f"ERREUR écriture cache {cache_file}: {_cache_err}")
+            raise HTTPException(status_code=500, detail=f"Impossible d'écrire le cache PDF: {_cache_err}")
         asyncio.create_task(_cleanup_print_cache(request_id))
 
         safe_filename = f"CV_{request_id}.pdf"
