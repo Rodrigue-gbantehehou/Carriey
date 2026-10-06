@@ -50,10 +50,11 @@ const generateRegistry = (type, templatesDirRelativePath) => {
 
   const registryContent = `// Fichier généré automatiquement. NE PAS MODIFIER !
 // Pour mettre à jour ce fichier, lancez: npm run generate-templates
-import { lazy } from 'react';
+
+${templateFolders.map(folder => `import ${folder}Template from './${folder}/Template';`).join('\n')}
 
 export const ${type}_TEMPLATE_REGISTRY: Record<string, any> = {
-${templateFolders.map(folder => `  "${folder}": lazy(() => import('./${folder}/Template'))`).join(',\n')}
+${templateFolders.map(folder => `  "${folder}": ${folder}Template`).join(',\n')}
 };
 `;
 

@@ -1,9 +1,12 @@
 // Fichier généré automatiquement. NE PAS MODIFIER !
 // Pour mettre à jour ce fichier, lancez: npm run generate-templates
-import { lazy } from 'react';
+
+import classiqueTemplate from './classique/Template';
+import minimalTemplate from './minimal/Template';
+import moderneTemplate from './moderne/Template';
 
 export const LETTER_TEMPLATE_REGISTRY: Record<string, any> = {
-  "classique": lazy(() => import('./classique/Template')),
-  "minimal": lazy(() => import('./minimal/Template')),
-  "moderne": lazy(() => import('./moderne/Template'))
+  "classique": classiqueTemplate,
+  "minimal": minimalTemplate,
+  "moderne": moderneTemplate
 };
