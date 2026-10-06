@@ -356,8 +356,13 @@ async def export_pdf(
         raise
     except Exception as e:
         import traceback
-        logger.error(f"PDF export error: {traceback.format_exc()}")
-        raise HTTPException(status_code=400, detail=str(e))
+        tb = traceback.format_exc()
+        logger.error(f"PDF export error: {tb}")
+        try:
+            (STATIC_DIR / "error.txt").write_text(tb, encoding="utf-8")
+        except:
+            pass
+        raise HTTPException(status_code=400, detail=repr(e))
     finally:
         if tmp_html is not None:
             try:
