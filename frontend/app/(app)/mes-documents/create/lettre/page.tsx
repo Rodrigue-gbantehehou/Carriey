@@ -13,10 +13,13 @@ function CreateCoverLetterWizardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session } = useSession();
-  const { addCv } = useCvStore();
+  const { addCv, cvs } = useCvStore();
 
-  // Template slug passed from /modeles (e.g. ?template=classique_lettre)
-  const templateSlug = searchParams.get('template') || 'classique';
+  // Logic pour le template par défaut : URL -> Dernière lettre modifiée -> 'classique'
+  const recentLetters = cvs.filter(c => c.doc_type === 'cover_letter')
+    .sort((a, b) => new Date(b.updated_at || b.created_at).getTime() - new Date(a.updated_at || a.created_at).getTime());
+  const defaultTemplate = recentLetters.length > 0 ? recentLetters[0].template_id : 'classique';
+  const templateSlug = searchParams.get('template') || defaultTemplate;
 
   const [step, setStep] = useState(1);
   const [method, setMethod] = useState<'ai' | 'manual' | null>(null);

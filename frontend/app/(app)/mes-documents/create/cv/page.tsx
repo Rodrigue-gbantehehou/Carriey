@@ -30,10 +30,15 @@ const SECTIONS = [
 function CreateCvWizardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const templateSlug = searchParams.get('template');
-
+  
   const { profile } = useProfileStore();
-  const { addCv } = useCvStore();
+  const { addCv, cvs } = useCvStore();
+  
+  // Logic pour le template par défaut : URL -> Dernier CV modifié -> 'classique'
+  const recentCvs = cvs.filter(c => c.doc_type === 'cv')
+    .sort((a, b) => new Date(b.updated_at || b.created_at).getTime() - new Date(a.updated_at || a.created_at).getTime());
+  const defaultTemplate = recentCvs.length > 0 ? recentCvs[0].template_id : 'classique';
+  const templateSlug = searchParams.get('template') || defaultTemplate;
 
   const { data: session } = useSession();
   const { templates, loading: templatesLoading } = useTemplates('cv');

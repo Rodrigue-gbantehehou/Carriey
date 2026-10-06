@@ -39,14 +39,24 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
   const sourceRef = useRef<HTMLDivElement>(null);
   const targetRef = useRef<HTMLDivElement>(null);
 
-  const { data: session } = useSession();
-  const [localLoading, setLocalLoading] = useState(false);
+  const { data: session, status } = useSession();
+  const [localLoading, setLocalLoading] = useState(true);
 
   useEffect(() => {
     setMounted(true);
 
     // Fetch CV if it's missing from store
     const fetchCv = async () => {
+      if (cv) {
+        setLocalLoading(false);
+        return;
+      }
+      
+      if (status === 'unauthenticated') {
+        setLocalLoading(false);
+        return;
+      }
+
       if (!cv && session?.user?.accessToken) {
         setLocalLoading(true);
         try {
@@ -55,9 +65,13 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
           });
           if (res.ok) {
             const data = await res.json();
-            // Data is a single CV object, but setCvs expects an array.
-            // If the store is empty, we just set it with this single CV.
-            useCvStore.getState().setCvs(Array.isArray(data) ? data : [data]);
+            const document = Array.isArray(data) ? data[0] : data;
+            if (document) {
+              const currentCvs = useCvStore.getState().cvs;
+              if (!currentCvs.find(c => c.id === document.id)) {
+                useCvStore.getState().addCv(document);
+              }
+            }
           }
         } catch (err) {
           console.error(err);
@@ -292,7 +306,13 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
 
 
 
-  if (!mounted || localLoading) return null;
+  if (!mounted || localLoading || status === 'loading') {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
+        <Loader2 className="w-8 h-8 animate-spin text-indigo-600 mb-4" />
+      </div>
+    );
+  }
 
   if (!cv) {
     return (

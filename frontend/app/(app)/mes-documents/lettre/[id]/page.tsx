@@ -24,7 +24,7 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
   const profile = useProfileStore(state => state.profile);
   
   const [mounted, setMounted] = useState(false);
-  const [localLoading, setLocalLoading] = useState(false);
+  const [localLoading, setLocalLoading] = useState(true); // Always start true unless we are sure we don't need to fetch
   const [isSaving, setIsSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [scale, setScale] = useState(0.5);
@@ -47,7 +47,7 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
   }, []);
   
   const cv = cvs.find(c => c.id === params.id);
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
 
   // Form State
   const [formData, setFormData] = useState({
@@ -64,6 +64,16 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
   useEffect(() => {
     setMounted(true);
     const fetchCv = async () => {
+      if (cv) {
+        setLocalLoading(false);
+        return;
+      }
+      
+      if (status === 'unauthenticated') {
+        setLocalLoading(false);
+        return;
+      }
+
       if (!cv && session?.user?.accessToken) {
         setLocalLoading(true);
         try {
@@ -72,7 +82,13 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
           });
           if (res.ok) {
             const data = await res.json();
-            useCvStore.getState().setCvs(Array.isArray(data) ? data : [data]);
+            const document = Array.isArray(data) ? data[0] : data;
+            if (document) {
+              const currentCvs = useCvStore.getState().cvs;
+              if (!currentCvs.find(c => c.id === document.id)) {
+                useCvStore.getState().addCv(document);
+              }
+            }
           }
         } catch (err) {
           console.error(err);
@@ -221,7 +237,7 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
     }
   };
 
-  if (!mounted || localLoading) {
+  if (!mounted || localLoading || status === 'loading') {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />

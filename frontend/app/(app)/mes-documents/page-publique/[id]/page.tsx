@@ -10,12 +10,16 @@ import { PublicPage } from '@/types/public-page';
 
 export default function EditPublicPage({ params }: { params: { id: string } }) {
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [page, setPage] = useState<PublicPage | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchPage = async () => {
+      if (status === 'unauthenticated') {
+        router.push('/auth/login');
+        return;
+      }
       if (session?.user?.accessToken) {
         try {
           const pages = await publicPagesApi.list(session.user.accessToken);
@@ -34,9 +38,9 @@ export default function EditPublicPage({ params }: { params: { id: string } }) {
       }
     };
     fetchPage();
-  }, [session, params.id, router]);
+  }, [session, status, params.id, router]);
 
-  if (loading) {
+  if (loading || status === 'loading') {
     return (
       <div className="flex h-screen items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
