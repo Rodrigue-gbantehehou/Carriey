@@ -112,9 +112,18 @@ export default async function PrintPage({ searchParams }: PrintPageProps) {
         />
       </div>
 
-      {/* Signal pour Playwright : actif dès que le HTML est analysé */}
+      {/* Signal pour Playwright : actif une fois que toutes les images sont chargées */}
       <script dangerouslySetInnerHTML={{__html: `
-        window.__CV_PRINT_READY__ = true;
+        function signalReady() {
+          setTimeout(function() { window.__CV_PRINT_READY__ = true; }, 500);
+        }
+        if (document.readyState === 'complete') {
+          signalReady();
+        } else {
+          window.addEventListener('load', signalReady);
+          // Fallback de sécurité : générer le PDF même si une image plante après 5 secondes
+          setTimeout(signalReady, 5000);
+        }
       `}} />
     </>
   );
