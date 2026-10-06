@@ -222,6 +222,7 @@ async def update_resume(
     
     # Mettre à jour les champs fournis
     update_data = resume_in.model_dump(exclude_unset=True)
+    template = None
     if "template_id" in update_data and update_data["template_id"]:
         template = db.query(Template).filter(
             (Template.id == update_data["template_id"]) | (Template.slug == update_data["template_id"]),
