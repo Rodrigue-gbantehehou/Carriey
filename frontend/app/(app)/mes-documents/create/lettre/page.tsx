@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useCvStore } from '@/store/cv';
@@ -9,7 +9,7 @@ import { API_BASE } from '@/lib/api';
 import { Sparkles, FileText, ChevronRight, ChevronLeft, Briefcase, Link as LinkIcon, AlignLeft, Building2 } from 'lucide-react';
 import { candidaturesApi } from '@/lib/candidature-api';
 
-export default function CreateCoverLetterWizard() {
+function CreateCoverLetterWizardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session } = useSession();
@@ -329,5 +329,13 @@ export default function CreateCoverLetterWizard() {
 
       </div>
     </div>
+  );
+}
+
+export default function CreateCoverLetterWizard() {
+  return (
+    <Suspense fallback={<div className="min-h-[80vh] flex items-center justify-center text-gray-500">Chargement...</div>}>
+      <CreateCoverLetterWizardContent />
+    </Suspense>
   );
 }

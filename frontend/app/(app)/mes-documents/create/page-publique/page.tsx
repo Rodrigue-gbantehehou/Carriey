@@ -4,8 +4,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { ArrowLeft } from 'lucide-react';
 import { PageEditor } from '@/components/app/public-page/editor/PageEditor';
+import { Suspense } from 'react';
 
-export default function CreatePublicPage() {
+function CreatePublicPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session } = useSession();
@@ -38,5 +39,13 @@ export default function CreatePublicPage() {
         />
       </div>
     </div>
+  );
+}
+
+export default function CreatePublicPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-gray-500">Chargement...</div>}>
+      <CreatePublicPageContent />
+    </Suspense>
   );
 }
