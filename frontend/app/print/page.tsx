@@ -2,10 +2,8 @@
 
 import { useEffect, useState, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { getPrintData } from '@/lib/api';
+import { getPrintData, API_BASE } from '@/lib/api';
 import { CVTemplateRenderer } from '@/components/app/cv/templates';
-// Dynamic import used inside runPageFlow instead
-// Removed ResumeData import to fix TS error
 
 // We augment the window interface directly here to avoid global type issues
 declare global {
@@ -23,6 +21,7 @@ function PrintContent() {
     config: any;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isReady, setIsReady] = useState(false);
 
   const sourceRef = useRef<HTMLDivElement>(null);
   const targetRef = useRef<HTMLDivElement>(null);
@@ -30,6 +29,7 @@ function PrintContent() {
   useEffect(() => {
     if (!id) {
       setError("Aucun identifiant d'impression fourni.");
+      window.__CV_PRINT_READY__ = true;
       return;
     }
 
@@ -40,6 +40,7 @@ function PrintContent() {
       } catch (err) {
         console.error("Erreur lors de la récupération des données:", err);
         setError("Impossible de charger les données du CV.");
+        window.__CV_PRINT_READY__ = true;
       }
     };
 
@@ -70,19 +71,27 @@ function PrintContent() {
 
         targetRef.current.innerHTML = '';
         await pf.flow(sourceRef.current, targetRef.current);
-        
-        // S'assurer que les polices (Google Fonts) sont bien chargées avant de générer le PDF
-        if (document.fonts) {
-          await document.fonts.ready;
+
+        // Si PageFlow n'a rien généré ou a échoué silencieusement, fallback sur le HTML direct
+        if (!targetRef.current.children || targetRef.current.children.length === 0) {
+          targetRef.current.innerHTML = sourceRef.current.innerHTML;
         }
-        
-        // Ajouter un micro-délai pour laisser le DOM respirer (surtout pour Chromium/Playwright)
-        setTimeout(() => {
-          window.__CV_PRINT_READY__ = true;
-        }, 500);
       } catch (error) {
         console.error("PageFlow error:", error);
-        window.__CV_PRINT_READY__ = true; // Signal anyway to avoid timeout hang
+        // Fallback immédiat : injection directe du template source dans le conteneur cible
+        if (sourceRef.current && targetRef.current) {
+          targetRef.current.innerHTML = sourceRef.current.innerHTML;
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsReady(true);
+          if (document.fonts) {
+            try { await document.fonts.ready; } catch (_) {}
+          }
+          setTimeout(() => {
+            window.__CV_PRINT_READY__ = true;
+          }, 300);
+        }
       }
     };
 
@@ -93,10 +102,10 @@ function PrintContent() {
 
     sourceRef.current.addEventListener('pageflow:css-ready', handleCssReady);
 
-    // Fallback: run after 3s if RemoteStyles never fires
+    // Fallback : exécuter après 1s si RemoteStyles n'émet pas l'événement
     fallbackTimeout = setTimeout(() => {
       runPageFlow();
-    }, 3000);
+    }, 1000);
 
     return () => {
       isCancelled = true;
@@ -104,22 +113,6 @@ function PrintContent() {
       if (fallbackTimeout) clearTimeout(fallbackTimeout);
     };
   }, [data]);
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-white text-black p-4">
-        <h1>{error}</h1>
-      </div>
-    );
-  }
-
-  if (!data) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-white text-black p-4">
-        <h1>Chargement du document...</h1>
-      </div>
-    );
-  }
 
   return (
     <>
@@ -144,11 +137,13 @@ function PrintContent() {
         
         /* FIX: Prevent flexbox from breaking print pagination */
         @media print {
+          .no-print, .print-hide-loader {
+            display: none !important;
+          }
           html, body, div, main {
             height: auto !important;
             min-height: auto !important;
           }
-          /* Next.js layout wrappers */
           body > div {
             display: block !important;
           }
@@ -160,21 +155,50 @@ function PrintContent() {
           }
         }
       `}} />
+
+      {/* Message d'erreur visible à l'écran mais pas sur l'impression */}
+      {error && (
+        <div className="flex items-center justify-center h-screen bg-white text-red-600 p-4">
+          <h1>{error}</h1>
+        </div>
+      )}
+
+      {/* Écran d'attente masqué en mode impression (@media print) */}
+      {(!data || !isReady) && !error && (
+        <div className="print-hide-loader flex items-center justify-center h-screen bg-white text-black p-4 fixed inset-0 z-50">
+          <h1 className="text-lg font-semibold">Chargement du document...</h1>
+        </div>
+      )}
       
-      {/* Hidden source container for PageFlow */}
-      <div style={{ display: 'none' }}>
-        <div ref={sourceRef}>
+      {/* SOURCE : Positionné hors-écran pour que PageFlow puisse calculer les hauteurs sans display:none */}
+      <div 
+        ref={sourceRef}
+        className="print-source"
+        style={{
+          position: 'absolute',
+          left: '-9999px',
+          top: 0,
+          width: '210mm',
+          opacity: 0,
+          pointerEvents: 'none'
+        }}
+      >
+        {data && (
           <CVTemplateRenderer 
             templateName={data.template_name}
             data={data.data}
             config={data.config}
-            apiBaseUrl=""
+            apiBaseUrl={API_BASE}
           />
-        </div>
+        )}
       </div>
 
-      {/* Visible target container for printed pages */}
-      <div ref={targetRef} className="print-container" style={{ width: '210mm', minHeight: '297mm', background: 'white', margin: '0 auto' }} />
+      {/* TARGET : Conteneur visible où PageFlow injecte les pages formatées A4 */}
+      <div 
+        ref={targetRef} 
+        className="print-container" 
+        style={{ width: '210mm', minHeight: '297mm', background: 'white', margin: '0 auto' }} 
+      />
     </>
   );
 }
