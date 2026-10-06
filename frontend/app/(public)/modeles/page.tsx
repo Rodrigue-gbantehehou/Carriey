@@ -158,20 +158,24 @@ function ModelesPageContent() {
   const handleSelect = async (template: any) => {
     const def = template.definition || {}
     const sectorId = SECTOR_ID_MAP[selectedSector] || 'tech'
-    const hasExistingData = typeof window !== 'undefined' && (
-      Boolean(localStorage.getItem('cvtor_cv_data')) ||
-      Boolean(localStorage.getItem('cvtor_profile'))
-    )
-    if (hasExistingData) { router.push(`/editor?template=${template.slug}`); return }
-    const params = new URLSearchParams({
-      step: 'method', template: template.slug, sector: sectorId,
-      primary: def.tokens?.colorPrimary || def.colors?.primary || '#2563eb',
-      accent: def.tokens?.colorAccent || def.colors?.accent || '#f59e0b',
-      fontHeading: def.tokens?.fontHeading || def.fonts?.heading || 'Marcellus',
-      fontBody: def.tokens?.fontBody || def.fonts?.body || 'Outfit',
-    })
-    router.push(`/onboarding?${params.toString()}`)
+    const ttype = template.template_type || 'cv'
+
+    // ── Lettre de motivation ──────────────────────────────────────────────
+    if (ttype === 'cover_letter') {
+      router.push(`/mes-documents/create/lettre?template=${template.slug}`)
+      return
+    }
+
+    // ── Page publique ─────────────────────────────────────────────────────
+    if (ttype === 'public_page') {
+      router.push(`/mes-documents/create/page-publique?template=${template.slug}`)
+      return
+    }
+
+    // ── CV ────────────────────────────────────────────────────────────────
+    router.push(`/mes-documents/create/cv?template=${template.slug}`)
   }
+
 
   const filtered = templates.filter(t => {
     // Filtre par type de document (champ template_type du backend)

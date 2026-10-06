@@ -7,8 +7,9 @@ import { THEMES, SECTION_LABELS, EXPIRY_OPTIONS, getExpiresAt, inputClass } from
 import config from '@/lib/config';
 import { useEffect } from 'react';
 
-export function PageEditor({ initialPage, token, onSave, onClose }: {
+export function PageEditor({ initialPage, initialTheme, token, onSave, onClose }: {
   initialPage?: PublicPage;
+  initialTheme?: string;
   token: string;
   onSave: (p: PublicPage) => void;
   onClose: () => void;
@@ -24,7 +25,7 @@ export function PageEditor({ initialPage, token, onSave, onClose }: {
     bio: true, experiences: true, education: true, skills: true,
     projects: true, certifications: true, languages: true, links: true,
   });
-  const [theme, setTheme] = useState<Theme>(initialPage?.theme || 'modern');
+  const [theme, setTheme] = useState<Theme>((initialPage?.theme || initialTheme || 'modern') as Theme);
   const [accent, setAccent] = useState(initialPage?.accent_color || '#6366f1');
   const [showPhoto, setShowPhoto] = useState(initialPage?.show_photo ?? true);
   const [showContact, setShowContact] = useState(initialPage?.show_contact ?? true);

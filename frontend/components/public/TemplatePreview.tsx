@@ -1,11 +1,14 @@
-'use client';
+﻿'use client';
 
 import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { CVTemplateRenderer } from '@/components/app/cv/templates';
+import { LetterTemplateRenderer } from '@/components/app/letter/LetterTemplateRenderer';
+import { PublicPageTemplateRenderer } from '@/components/app/public-page/templates';
 import { API_BASE } from '@/lib/api';
 import config from '@/lib/config';
 import { CVData, TemplateConfig } from '@/types/cv';
+import { PublicPageData } from '@/types/public-page';
 
 interface TemplatePreviewProps {
   template: any;
@@ -59,6 +62,41 @@ const DEFAULT_MOCK_DATA = {
     { name: 'Français', level: 'Natif' },
     { name: 'Anglais', level: 'Avancé' }
   ]
+};
+
+const DEFAULT_MOCK_PUBLIC_PAGE_DATA: PublicPageData = {
+  page: {
+    id: 'preview',
+    slug: 'jean-dupont',
+    title: 'Jean Dupont — Portfolio',
+    theme: 'modern',
+    accent_color: '#6366f1',
+    show_photo: true,
+    show_contact: true,
+    sections: { bio: true, experiences: true, education: true, skills: true, projects: true, certifications: false, languages: true, links: false },
+    custom_bio: null,
+    seo_description: null,
+    views: 0,
+  },
+  profile: {
+    first_name: 'Jean',
+    last_name: 'Dupont',
+    title: 'Développeur Full-Stack',
+    bio: 'Passionné de technologie avec 5 ans d\'expérience en développement web.',
+    location: 'Abidjan, Côte d\'Ivoire',
+    contact_email: 'jean.dupont@email.com',
+    experiences: [
+      { id: '1', title: 'Développeur Senior', company: 'Tech Africa', current: true, start_date: '2021-01', description: 'Développement d\'applications React & Node.js.' },
+    ],
+    educations: [
+      { id: '1', degree: 'Master Informatique', school: 'INP-HB', start_date: '2017-09', end_date: '2019-07' },
+    ],
+    skills: [{ id: '1', name: 'React' }, { id: '2', name: 'Node.js' }, { id: '3', name: 'Python' }],
+    projects: [],
+    certifications: [],
+    languages: [{ id: '1', name: 'Français', level: 'Natif' }, { id: '2', name: 'Anglais', level: 'Avancé' }],
+    links: [],
+  },
 };
 
 const GhostCVSkeleton = () => (
@@ -175,9 +213,9 @@ export default function TemplatePreview({ template, data = DEFAULT_MOCK_DATA, se
     const updateScale = () => {
       if (containerRef.current) {
         const containerWidth = containerRef.current.offsetWidth;
-        const A4_WIDTH_PX = 793.7; // 210mm at 96 DPI
-        // We want the CV to take 100% of the container width
-        const newScale = containerWidth / A4_WIDTH_PX;
+        const isPublicPage = template?.template_type === 'public_page';
+        const CONTENT_WIDTH_PX = isPublicPage ? 1280 : 793.7; // écran 1280px ou A4 210mm à 96 DPI
+        const newScale = containerWidth / CONTENT_WIDTH_PX;
         setDynamicScale(newScale);
       }
     };
@@ -187,7 +225,7 @@ export default function TemplatePreview({ template, data = DEFAULT_MOCK_DATA, se
     updateScale(); // Initial call
 
     return () => resizeObserver.disconnect();
-  }, [isVisible]);
+  }, [isVisible, template?.template_type]);
 
   useEffect(() => {
     if (!isVisible || !template) return;
@@ -256,42 +294,76 @@ export default function TemplatePreview({ template, data = DEFAULT_MOCK_DATA, se
       ref={containerRef}
       className="w-full h-full relative overflow-hidden bg-[#FBFBFB] flex items-center justify-center group/preview"
     >
-      <div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 origin-center transition-all duration-700 ease-out bg-white overflow-hidden shadow-cv"
-        style={{
-          width: '210mm',
-          height: '297mm',
-          transform: `translate(-50%, -50%) scale(${dynamicScale})`,
-          opacity: !loading ? 1 : 0,
-        }}
-      >
-        {!loading && (
-          <ShadowRoot>
-            <div className="w-full h-full pointer-events-none select-none overflow-hidden">
-              <CVTemplateRenderer
-                templateName={template.slug}
-                data={{
-                  ...data,
-                  profile: {
-                    ...data.profile,
-                    photo: data.profile?.photo || stablePhoto
-                  }
-                } as CVData}
-                config={getTemplateConfig(template)}
-                apiBaseUrl={API_BASE}
-              />
+      {(() => {
+        const isPublicPage = template?.template_type === 'public_page';
+        const contentWidth = isPublicPage ? '1280px' : '210mm';
+        const contentHeight = isPublicPage ? '800px' : '297mm';
+        return (
+          <>
+            <div
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 origin-center transition-all duration-700 ease-out bg-white overflow-hidden shadow-cv"
+              style={{
+                width: contentWidth,
+                height: contentHeight,
+                transform: `translate(-50%, -50%) scale(${dynamicScale})`,
+                opacity: !loading ? 1 : 0,
+              }}
+            >
+              {!loading && (
+                <ShadowRoot>
+                  <div className="w-full h-full pointer-events-none select-none overflow-hidden">
+                    {template.template_type === 'cover_letter' ? (
+                      <LetterTemplateRenderer
+                        templateName={template.slug}
+                        data={{
+                          profile: (data as any).profile || {},
+                          formData: {
+                            title: 'Candidature spontan\u00e9e',
+                            recipientName: 'Madame, Monsieur',
+                            companyName: 'Digital Africa',
+                            recipientAddress: 'Abidjan, C\u00f4te d\u0027Ivoire',
+                            subject: 'Candidature au poste de D\u00e9veloppeur',
+                            salutation: 'Madame, Monsieur,',
+                            body: 'Fort de mon exp\u00e9rience, je me permets de vous adresser ma candidature.',
+                            closing: 'Dans l\u0027attente de vous rencontrer, veuillez agr\u00e9er mes salutations distingu\u00e9es.',
+                          },
+                        }}
+                      />
+                    ) : template.template_type === 'public_page' ? (
+                      <PublicPageTemplateRenderer
+                        templateName={template.slug}
+                        data={DEFAULT_MOCK_PUBLIC_PAGE_DATA}
+                        accent={template.definition?.tokens?.colorAccent || '#6366f1'}
+                      />
+                    ) : (
+                      <CVTemplateRenderer
+                        templateName={template.slug}
+                        data={{
+                          ...data,
+                          profile: {
+                            ...data.profile,
+                            photo: data.profile?.photo || stablePhoto
+                          }
+                        } as CVData}
+                        config={getTemplateConfig(template)}
+                        apiBaseUrl={API_BASE}
+                      />
+                    )}
+                  </div>
+                </ShadowRoot>
+              )}
             </div>
-          </ShadowRoot>
-        )}
-      </div>
 
-      {loading && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="origin-center" style={{ width: '210mm', height: '297mm', transform: `scale(${dynamicScale})` }}>
-            <GhostCVSkeleton />
-          </div>
-        </div>
-      )}
+            {loading && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="origin-center" style={{ width: contentWidth, height: contentHeight, transform: `scale(${dynamicScale})` }}>
+                  <GhostCVSkeleton />
+                </div>
+              </div>
+            )}
+          </>
+        );
+      })()}
     </div>
   );
 }

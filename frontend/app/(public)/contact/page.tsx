@@ -20,20 +20,20 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F5F5]">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
 
 
       <main className="py-20 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto shadow-2xl shadow-black/5 rounded-[40px] overflow-hidden bg-white flex flex-col md:flex-row border border-gray-100">
           
           {/* Info Side */}
-          <div className="md:w-2/5 bg-brand-text p-12 text-white relative overflow-hidden flex flex-col justify-between">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-brand-cta opacity-20 blur-[100px] rounded-full -mr-32 -mt-32"></div>
+          <div className="md:w-2/5 bg-gray-900 p-12 text-white relative overflow-hidden flex flex-col justify-between">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-600 opacity-20 blur-[100px] rounded-full -mr-32 -mt-32"></div>
             
             <div className="relative z-10">
-              <h1 className="text-4xl font-black mb-6">Parlons de votre <span className="text-brand-cta">futur</span>.</h1>
+              <h1 className="text-4xl font-black mb-6">Parlons de votre <span className="text-indigo-400">avenir</span>.</h1>
               <p className="text-gray-400 font-medium leading-relaxed mb-12">
-                Vous avez une question, une suggestion ou besoin d&apos;aide ? Notre équipe ivoirienne est à votre écoute.
+                Une question sur la configuration de votre profil central, la génération d'un document ou l'IA ? Notre équipe est à votre écoute pour vous accompagner.
               </p>
  {/*
               <div className="space-y-8">
@@ -75,49 +75,49 @@ export default function ContactPage() {
             <form onSubmit={handleSubmit} className="space-y-8">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-brand-text uppercase tracking-widest">Nom complet</label>
+                  <label className="text-xs font-bold text-gray-900 uppercase tracking-widest">Nom complet</label>
                   <input 
                     required
                     type="text" 
                     placeholder="Jean Kouassi"
-                    className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:border-brand-cta focus:bg-white transition-all font-medium text-brand-text"
+                    className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:border-indigo-600 focus:bg-white transition-all font-medium text-gray-900"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-brand-text uppercase tracking-widest">Email</label>
+                  <label className="text-xs font-bold text-gray-900 uppercase tracking-widest">Email</label>
                   <input 
                     required
                     type="email" 
                     placeholder="jean@exemple.ci"
-                    className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:border-brand-cta focus:bg-white transition-all font-medium text-brand-text"
+                    className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:border-indigo-600 focus:bg-white transition-all font-medium text-gray-900"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-bold text-brand-text uppercase tracking-widest">Sujet</label>
+                <label className="text-xs font-bold text-gray-900 uppercase tracking-widest">Sujet</label>
                 <input 
                   required
                   type="text" 
-                  placeholder="Comment booster mon CV..."
-                  className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:border-brand-cta focus:bg-white transition-all font-medium text-brand-text"
+                  placeholder="Comment adapter mon profil pour..."
+                  className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:border-indigo-600 focus:bg-white transition-all font-medium text-gray-900"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-bold text-brand-text uppercase tracking-widest">Votre message</label>
+                <label className="text-xs font-bold text-gray-900 uppercase tracking-widest">Votre message</label>
                 <textarea 
                   required
                   rows={5}
                   placeholder="Dites-nous comment nous pouvons vous aider..."
-                  className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:border-brand-cta focus:bg-white transition-all font-medium text-brand-text resize-none"
+                  className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:border-indigo-600 focus:bg-white transition-all font-medium text-gray-900 resize-none"
                 ></textarea>
               </div>
 
               <button 
                 type="submit"
                 disabled={loading}
-                className="w-full py-5 bg-brand-cta text-white font-black rounded-2xl hover:bg-emerald-600 shadow-xl shadow-emerald-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-widest text-sm"
+                className="w-full py-5 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-500 shadow-xl shadow-indigo-600/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-widest text-sm"
               >
                 {loading ? 'Envoi en cours...' : 'Envoyer le message'}
               </button>

@@ -4,24 +4,24 @@ import Link from 'next/link';
 
 const faqs = [
   {
+    question: "Qu'est-ce que le Profil Professionnel Central ?",
+    answer: "C'est le cœur de Carriey. Au lieu de refaire votre CV à chaque fois, vous remplissez une seule fois votre profil complet (expériences, compétences, réalisations). Carriey comprend votre parcours et s'en sert pour générer sur-mesure n'importe quel document : CV ciblé, lettre de motivation, ou page publique."
+  },
+  {
+    question: "Comment l'IA adapte-t-elle mes documents ?",
+    answer: "Notre IA analyse l'offre d'emploi que vous visez et votre profil central. Elle sélectionne les expériences les plus pertinentes, reformule si besoin pour faire ressortir vos atouts, et génère un CV et une lettre de motivation parfaitement alignés avec les attentes du recruteur."
+  },
+  {
+    question: "Est-ce que je peux modifier les documents générés ?",
+    answer: "Oui, absolument. Tous les documents générés (CV, lettres, pages publiques) sont entièrement modifiables. Vous gardez le contrôle total sur le design, le contenu et la mise en page avant de les exporter ou de les publier."
+  },
+  {
+    question: "Les documents sont-ils téléchargeables en PDF ?",
+    answer: "Oui, tous vos CV et lettres de motivation sont exportables au format PDF haute définition, optimisés pour passer les filtres ATS des recruteurs et prêts à être envoyés."
+  },
+  {
     question: "Quels sont les moyens de paiement acceptés ?",
     answer: "Nous acceptons les paiements via Mobile Money (Orange Money, MTN MoMo, Moov Money et Wave) ainsi que les cartes bancaires via nos partenaires sécurisés (KkiaPay)."
-  },
-  {
-    question: "Est-ce que je peux modifier mon CV après l'avoir payé ?",
-    answer: "Oui, une fois que vous avez débloqué un modèle ou pris un abonnement, vous pouvez modifier votre CV autant de fois que vous le souhaitez pendant la durée de validité de votre accès."
-  },
-  {
-    question: "Le CV est-il téléchargeable en PDF ?",
-    answer: "Absolument. Tous nos modèles sont exportables au format PDF haute définition, prêt à être envoyé par email ou imprimé."
-  },
-  {
-    question: "Comment fonctionne l'IA de rédaction ?",
-    answer: "Notre IA analyse votre secteur d'activité et vos expériences pour vous suggérer les meilleurs mots-clés et descriptions de postes afin de maximiser vos chances face aux recruteurs."
-  },
-  {
-    question: "Puis-je utiliser l'application sur mon téléphone ?",
-    answer: "Oui, la plateforme est entièrement 'responsive'. Vous pouvez créer, éditer et télécharger vos documents directement depuis votre smartphone."
   }
 ];
 

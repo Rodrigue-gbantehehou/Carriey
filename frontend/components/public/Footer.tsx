@@ -36,7 +36,7 @@ export default function Footer() {
             <h4 className="font-bold text-gray-900 mb-6 text-sm uppercase tracking-widest">Navigation</h4>
             <ul className="space-y-4 text-gray-500 text-sm font-medium">
               <li><Link href="/modeles" className="hover:text-indigo-600 transition-colors">Modèles de CV</Link></li>
-              <li><Link href="/tarifs" className="hover:text-indigo-600 transition-colors">Tarifs & Plans</Link></li>
+              <li><Link href="/pricing" className="hover:text-indigo-600 transition-colors">Tarifs & Plans</Link></li>
               <li><Link href="/faq" className="hover:text-indigo-600 transition-colors">Foire Aux Questions</Link></li>
               <li><Link href="/start" className="hover:text-indigo-600 transition-colors">Créer mon profil</Link></li>
             </ul>

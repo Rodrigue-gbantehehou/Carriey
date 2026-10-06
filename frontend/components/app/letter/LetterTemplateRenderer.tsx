@@ -16,6 +16,10 @@ export function LetterTemplateRenderer({ templateName, folderName, data }: Lette
   if (!folderName && normalizedName.startsWith('lettre-')) {
     normalizedName = normalizedName.replace('lettre-', '');
   }
+  // Si le slug est suffixé par "_lettre" (ex: "classique_lettre"), on retire le suffixe
+  if (!folderName && normalizedName.endsWith('_lettre')) {
+    normalizedName = normalizedName.replace('_lettre', '');
+  }
 
   // Utilisation du registre généré automatiquement
   const TemplateComponent = LETTER_TEMPLATE_REGISTRY[normalizedName];

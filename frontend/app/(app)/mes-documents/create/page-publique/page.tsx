@@ -1,13 +1,16 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { ArrowLeft } from 'lucide-react';
 import { PageEditor } from '@/components/app/public-page/editor/PageEditor';
 
 export default function CreatePublicPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session } = useSession();
+
+  const templateSlug = searchParams.get('template') || 'modern';
 
   return (
     <div className="py-6 sm:py-10 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto font-sans">
@@ -27,6 +30,7 @@ export default function CreatePublicPage() {
       <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-100">
         <PageEditor
           token={session?.user?.accessToken || ''}
+          initialTheme={templateSlug}
           onSave={(page) => {
             router.push('/mes-documents?tab=pages');
           }}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useCvStore } from '@/store/cv';
 import { cvApi } from '@/lib/cv-api';
@@ -11,8 +11,12 @@ import { candidaturesApi } from '@/lib/candidature-api';
 
 export default function CreateCoverLetterWizard() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session } = useSession();
   const { addCv } = useCvStore();
+
+  // Template slug passed from /modeles (e.g. ?template=classique_lettre)
+  const templateSlug = searchParams.get('template') || 'classique';
 
   const [step, setStep] = useState(1);
   const [method, setMethod] = useState<'ai' | 'manual' | null>(null);
@@ -87,6 +91,7 @@ export default function CreateCoverLetterWizard() {
       const newLetter = await cvApi.createResume(session.user.accessToken, {
         title: extractedTitle ? `Lettre - ${extractedTitle}` : 'Nouvelle lettre de motivation',
         doc_type: 'cover_letter',
+        template_id: templateSlug,
         content: {
           recipient: {
             name: '',

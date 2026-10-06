@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useCvStore } from '@/store/cv';
 import { useProfileStore } from '@/store/profile';
@@ -29,6 +29,9 @@ const SECTIONS = [
 
 export default function CreateCvWizard() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const templateSlug = searchParams.get('template');
+
   const { profile } = useProfileStore();
   const { addCv } = useCvStore();
 
@@ -405,8 +408,18 @@ export default function CreateCvWizard() {
                     <button onClick={() => setStep(2)} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 font-semibold px-4 py-3">
                       <ChevronLeft className="w-4 h-4" /> Retour
                     </button>
-                    <button onClick={() => setStep(4)} className="flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-colors">
-                      Continuer <ChevronRight className="w-4 h-4" />
+                    <button 
+                      onClick={() => {
+                        if (templateSlug) {
+                          handleFinish(templateSlug);
+                        } else {
+                          setStep(4);
+                        }
+                      }} 
+                      className="flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-colors"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? 'Création...' : (templateSlug ? 'Créer le CV' : 'Continuer')} <ChevronRight className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
