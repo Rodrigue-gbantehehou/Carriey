@@ -1,6 +1,7 @@
 import os
 import sys
 import uuid
+import json
 import asyncio
 import subprocess
 import logging
@@ -57,13 +58,12 @@ class SetPasswordRequest(BaseModel):
     token: str
     password: str
 
-import json
-import logging
-logger = logging.getLogger(__name__)
-
 # --- CACHE D'IMPRESSION REACT WYSIWYG ---
 CACHE_DIR = STATIC_DIR / "cache"
-CACHE_DIR.mkdir(exist_ok=True)
+try:
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+except Exception as _mkdir_err:
+    logger.warning(f"Impossible de créer CACHE_DIR {CACHE_DIR}: {_mkdir_err}")
 
 async def _cleanup_print_cache(cache_id: str, delay: int = 300):
     await asyncio.sleep(delay)
