@@ -19,7 +19,7 @@ from app.schemas.template import TemplateCreate, TemplateUpdate, TemplateOut, Te
 from app.api.dependencies import get_current_admin, get_current_super_admin
 from app.services.rendering_service import render_html_from_strings, render_html_by_name, PLACEHOLDER_PHOTO_B64
 from generate_pdf_from_html import take_screenshot
-from app.api.v1.endpoints.exports import _PRINT_CACHE
+from app.api.v1.endpoints.exports import CACHE_DIR
 
 from app.core.config import settings
 
@@ -398,11 +398,17 @@ async def generate_template_preview(
 
     # Inscrire les données dummy dans le cache d'impression pour le rendu React WYSIWYG
     preview_token = f"preview_{template.slug}"
-    _PRINT_CACHE[preview_token] = {
+    _preview_payload = {
         "data": PREVIEW_DUMMY_DATA,
         "config": template.definition or {},
         "template_name": template.slug
     }
+    try:
+        import json as _json
+        CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        (CACHE_DIR / f"{preview_token}.json").write_text(_json.dumps(_preview_payload, ensure_ascii=False), encoding="utf-8")
+    except Exception as _e:
+        logger.warning(f"Impossible d'écrire le cache preview: {_e}")
 
     frontend_url = os.getenv("FRONTEND_URL")
     if not frontend_url and os.getenv("ENVIRONMENT", "development").lower() == "production":
