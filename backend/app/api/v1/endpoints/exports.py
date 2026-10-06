@@ -255,7 +255,10 @@ async def export_pdf(
         except Exception as _cache_err:
             logger.error(f"ERREUR écriture cache {cache_file}: {_cache_err}")
             raise HTTPException(status_code=500, detail=f"Impossible d'écrire le cache PDF: {_cache_err}")
-        asyncio.create_task(_cleanup_print_cache(request_id))
+        try:
+            asyncio.create_task(_cleanup_print_cache(request_id))
+        except RuntimeError:
+            pass  # Pas de boucle asyncio active (Passenger/WSGI) - nettoyage ignoré
 
         safe_filename = f"CV_{request_id}.pdf"
         out_pdf = STATIC_DIR / safe_filename
