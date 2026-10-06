@@ -1,0 +1,9 @@
+# Configuration Passenger pour O2Switch
+# Augmente le timeout des requêtes longues (génération PDF via Render ~90s)
+<IfModule Phusion_Passenger>
+    PassengerMaxRequestTime 300
+    PassengerRequestTimeout 300
+</IfModule>
+
+# Aussi configurer le timeout Apache de base
+Timeout 300
