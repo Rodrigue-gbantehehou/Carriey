@@ -221,7 +221,7 @@ PERSONAS = [
             'Réforme complète du curriculum des études médicales alignée sur les standards internationaux.',
             'Négociation de partenariats stratégiques avec des universités européennes et américaines.',
             'Supervision des thèses de doctorat et des mémoires de spécialité.',
-            'Gestion d\'un budget académique annuel de 500M FCFA.'
+            'Gestion d\'un budget académique annuel de 500M XOF.'
           ] }
         ],
         'education': [

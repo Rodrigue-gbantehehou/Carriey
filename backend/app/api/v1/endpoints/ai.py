@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from app.api.dependencies import get_db, get_current_user
 from app.models.user import User
 from app.crud.crud_profile import profile as crud_profile
-from app.services.ai_factory import get_ai_service
+from app.services.ai import get_ai_service
 from pydantic import BaseModel
 from app.core.limiter import limiter
 from fastapi import Request
@@ -223,3 +223,111 @@ async def extract_job_endpoint(
         logger.error(f"Erreur de génération IA : {str(e)}")
         raise HTTPException(status_code=500, detail="L'extraction des détails a échoué.")
 
+
+class AnalyzeFitRequest(BaseModel):
+    job_description: str
+
+@router.post("/analyze-fit")
+@limiter.limit("5/minute")
+async def analyze_fit_endpoint(
+    request: Request,
+    req: AnalyzeFitRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Analyse la compatibilité entre le profil de l'utilisateur et une offre d'emploi.
+    Disponible pour tous les utilisateurs connectés.
+    """
+    if not req.job_description.strip():
+        raise HTTPException(status_code=400, detail="La description de l'offre est requise.")
+
+    profile = crud_profile.get_by_user(db, user_id=current_user.id)
+    if not profile:
+        raise HTTPException(status_code=400, detail="Vous devez d'abord créer un profil.")
+
+    profile_data = {
+        "first_name": profile.first_name,
+        "last_name": profile.last_name,
+        "title": profile.title,
+        "bio": profile.bio,
+        "experience": [{"title": e.title, "company": e.company, "description": e.description} for e in profile.experiences],
+        "education": [{"degree": e.degree, "school": e.school} for e in profile.educations],
+        "skills": [{"name": s.name, "level": s.level} for s in profile.skills],
+        "languages": [{"name": l.name, "level": l.level} for l in profile.languages],
+    }
+
+    try:
+        ai_service = get_ai_service()
+        result = await ai_service.analyze_fit(profile_data, req.job_description)
+        return result
+    except RuntimeError as e:
+        if "QUOTA_EXCEEDED" in str(e):
+            raise HTTPException(status_code=503, detail="Le quota IA est épuisé pour aujourd'hui. Réessayez demain.")
+        raise HTTPException(status_code=500, detail="L'analyse de compatibilité a échoué.")
+    except Exception as e:
+        logger.error(f"Erreur analyze-fit : {str(e)}")
+        raise HTTPException(status_code=500, detail="L'analyse de compatibilité a échoué.")
+
+
+class GenerateLetterRequest(BaseModel):
+    job_description: str
+
+@router.post("/generate-letter")
+@limiter.limit("5/minute")
+async def generate_letter_endpoint(
+    request: Request,
+    req: GenerateLetterRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Génère une lettre de motivation complète à partir du profil et d'une offre.
+    Accessible à tous les utilisateurs connectés.
+    """
+    if not req.job_description.strip():
+        raise HTTPException(status_code=400, detail="La description de l'offre est requise.")
+
+    profile = crud_profile.get_by_user(db, user_id=current_user.id)
+    if not profile:
+        raise HTTPException(status_code=400, detail="Vous devez d'abord créer un profil.")
+
+    profile_data = {
+        "first_name": profile.first_name,
+        "last_name": profile.last_name,
+        "email": profile.contact_email,
+        "phone": profile.contact_phone,
+        "location": profile.location,
+        "title": profile.title,
+        "bio": profile.bio,
+        "experience": [{"title": e.title, "company": e.company, "description": e.description} for e in profile.experiences],
+        "education": [{"degree": e.degree, "school": e.school} for e in profile.educations],
+        "skills": [{"name": s.name, "level": s.level} for s in profile.skills],
+        "languages": [{"name": l.name, "level": l.level} for l in profile.languages],
+    }
+
+    try:
+        ai_service = get_ai_service()
+        letter_dict = await ai_service.generate_cover_letter(profile_data, req.job_description)
+
+        # Assembler le contenu complet de la lettre
+        letter_content = "\n\n".join(filter(None, [
+            letter_dict.get("salutation", ""),
+            letter_dict.get("body", ""),
+            letter_dict.get("closing", ""),
+        ]))
+
+        return {
+            "subject": letter_dict.get("subject", ""),
+            "letter_content": letter_content,
+            "salutation": letter_dict.get("salutation", ""),
+            "body": letter_dict.get("body", ""),
+            "closing": letter_dict.get("closing", ""),
+        }
+    except RuntimeError as e:
+        if "QUOTA_EXCEEDED" in str(e):
+            raise HTTPException(status_code=503, detail="Le quota IA est épuisé pour aujourd'hui.")
+        raise HTTPException(status_code=500, detail="La génération de la lettre a échoué.")
+    except Exception as e:
+        logger.error(f"Erreur generate-letter : {str(e)}")
+        raise HTTPException(status_code=500, detail="La génération de la lettre a échoué.")

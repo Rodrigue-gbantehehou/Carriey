@@ -172,25 +172,22 @@ export default function TemplatesPage() {
       <div className="flex items-center gap-2 border-b border-gray-200 pb-3">
         <button
           onClick={() => setFilter('all')}
-          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-            filter === 'all' ? 'bg-gray-900 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100'
-          }`}
+          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${filter === 'all' ? 'bg-gray-900 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100'
+            }`}
         >
           Tous ({templates.length})
         </button>
         <button
           onClick={() => setFilter('active')}
-          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-            filter === 'active' ? 'bg-emerald-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100'
-          }`}
+          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${filter === 'active' ? 'bg-emerald-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100'
+            }`}
         >
           Actifs ({activeCount})
         </button>
         <button
           onClick={() => setFilter('inactive')}
-          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-            filter === 'inactive' ? 'bg-red-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100'
-          }`}
+          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${filter === 'inactive' ? 'bg-red-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100'
+            }`}
         >
           Inactifs ({templates.length - activeCount})
         </button>
@@ -217,7 +214,7 @@ export default function TemplatesPage() {
                   <tr key={template.id} className="hover:bg-gray-50/60 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                       
+
                         <div>
                           <div className="font-bold text-gray-900">{template.name}</div>
                           <div className="text-xs text-gray-500 line-clamp-1 max-w-xs">{template.description || 'Sans description'}</div>
@@ -230,24 +227,23 @@ export default function TemplatesPage() {
                     <td className="px-6 py-4">
                       {isFree ? (
                         <span className="items-center  text-xs  ">
-   
-                          Gratuit 
+
+                          Gratuit
                         </span>
                       ) : (
                         <span className="items-center  text-xs ">
                           <span className="w-1.5 h-1.5 rounded-full "></span>
-                          {template.price} {template.currency || 'FCFA'}
+                          {template.price} {template.currency || 'XOF'}
                         </span>
                       )}
                     </td>
                     <td className="px-6 py-4">
                       <button
                         onClick={() => toggleTemplate(template.id)}
-                        className={`items-center text-xs  cursor-pointer ${
-                          template.is_active
-                            ? 'text-emerald-800 ' 
+                        className={`items-center text-xs  cursor-pointer ${template.is_active
+                            ? 'text-emerald-800 '
                             : 'text-red-800'
-                        }`}
+                          }`}
                         title="Cliquer pour changer le statut"
                       >
                         {template.is_active ? 'En ligne' : 'Désactivé'}

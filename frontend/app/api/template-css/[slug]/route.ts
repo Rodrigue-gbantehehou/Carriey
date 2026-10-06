@@ -5,32 +5,34 @@ import path from 'path';
 /**
  * GET /api/template-css/[slug]
  *
- * Sert le fichier style.css directement depuis le dossier source du template.
- * Aucune copie dans public/, aucune liste à maintenir.
- * Ajouter un template = créer son dossier avec style.css, c'est tout.
+ * En développement : lit depuis components/app/cv/templates/[slug]/style.css
+ * En production    : lit depuis public/template-assets/[slug]/style.css
+ *                    (copié là par `npm run sync-css` au moment du prebuild)
+ *
+ * NOTE : next.config.js exclut ce chemin du proxy backend ((?!auth|template-css))
  */
 export async function GET(
   _request: NextRequest,
   { params }: { params: { slug: string } }
 ) {
-  // Sécurité : on sanitize le slug pour éviter toute traversée de répertoire
   const slug = (params.slug || '').toLowerCase().replace(/[^a-z0-9_-]/g, '');
 
   if (!slug) {
     return new NextResponse('Not found', { status: 404 });
   }
 
-  const cssPath = path.join(
-    process.cwd(),
-    'components',
-    'app',
-    'cv',
-    'templates',
-    slug,
-    'style.css'
-  );
+  // En production Next.js, `components/` n'est pas dans le bundle serverless.
+  // Le script prebuild (sync-css) copie les CSS dans public/template-assets/.
+  // On lit d'abord depuis public/ (fonctionne en prod ET en dev),
+  // puis fallback sur components/ pour le hot-reload en dev.
+  const candidates = [
+    path.join(process.cwd(), 'public', 'template-assets', slug, 'style.css'),
+    path.join(process.cwd(), 'components', 'app', 'cv', 'templates', slug, 'style.css'),
+  ];
 
-  if (!fs.existsSync(cssPath)) {
+  const cssPath = candidates.find(p => fs.existsSync(p));
+
+  if (!cssPath) {
     return new NextResponse(`Template CSS not found: ${slug}`, { status: 404 });
   }
 
@@ -40,7 +42,6 @@ export async function GET(
     status: 200,
     headers: {
       'Content-Type': 'text/css; charset=utf-8',
-      // Cache côté navigateur 1h en dev, 24h en prod
       'Cache-Control':
         process.env.NODE_ENV === 'production'
           ? 'public, max-age=86400, stale-while-revalidate=3600'
@@ -48,3 +49,4 @@ export async function GET(
     },
   });
 }
+

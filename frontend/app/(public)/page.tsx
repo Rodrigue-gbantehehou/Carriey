@@ -23,7 +23,7 @@ export default function LandingPage() {
       .then(r => r.ok ? r.json() : [])
       .then(data => {
         // Dupliquer pour l'illusion du défilement infini
-        setTemplates(data.length > 0 ? [...data, ...data] : []); 
+        setTemplates(data.length > 0 ? [...data, ...data] : []);
       })
       .catch(console.error);
   }, []);
@@ -31,15 +31,15 @@ export default function LandingPage() {
   useEffect(() => {
     let animationId: number;
     let lastTime = 0;
-    
+
     const scroll = (time: number) => {
       if (!isCarouselHovered && carouselRef.current && templates.length > 0) {
-        if (time - lastTime > 16) { 
-            carouselRef.current.scrollLeft += 1;
-            if (carouselRef.current.scrollLeft >= carouselRef.current.scrollWidth / 2) {
-              carouselRef.current.scrollLeft = 0;
-            }
-            lastTime = time;
+        if (time - lastTime > 16) {
+          carouselRef.current.scrollLeft += 1;
+          if (carouselRef.current.scrollLeft >= carouselRef.current.scrollWidth / 2) {
+            carouselRef.current.scrollLeft = 0;
+          }
+          lastTime = time;
         }
       }
       animationId = requestAnimationFrame(scroll);
@@ -57,12 +57,12 @@ export default function LandingPage() {
     { name: 'Tokyo', style: 'bg-gradient-to-br from-emerald-50 to-white border-emerald-100 shadow-emerald-100/20' }
   ];
 
-  const carouselItems = templates.length > 0 
-    ? templates.map((t, i) => ({ 
-        name: t.name, 
-        style: fallbackThemes[i % fallbackThemes.length].style,
-        originalTemplate: t
-      }))
+  const carouselItems = templates.length > 0
+    ? templates.map((t, i) => ({
+      name: t.name,
+      style: fallbackThemes[i % fallbackThemes.length].style,
+      originalTemplate: t
+    }))
     : fallbackThemes.map(t => ({ ...t, originalTemplate: null }));
 
   return (
@@ -91,7 +91,7 @@ export default function LandingPage() {
                   <ChevronRight className="w-4 h-4" />
                 </Link>
               </div>
-              
+
             </div>
 
             {/* Right: Concept Visual */}
@@ -99,7 +99,7 @@ export default function LandingPage() {
               <div className="absolute -inset-4 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-3xl blur-2xl opacity-50 -z-10"></div>
 
               <div className="flex flex-col items-center">
-               {/* Profile Node (SaaS Window style) */}
+                {/* Profile Node (SaaS Window style) */}
                 <div className="w-64 bg-white rounded-[1rem] shadow-[0_20px_50px_rgba(8,_112,_184,_0.07)] border border-gray-200/60 overflow-hidden relative z-10 mb-5 backdrop-blur-xl transition-transform hover:-translate-y-1 duration-500">
                   {/* Window Header */}
                   <div className="bg-gray-50/50 border-b border-gray-100 px-3 py-2.5 flex items-center gap-1.5">
@@ -365,7 +365,7 @@ export default function LandingPage() {
 
             {/* Output */}
             <div className="space-y-6">
-          
+
 
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex-1 bg-white p-5 rounded-2xl border border-gray-200/60 flex flex-col gap-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
@@ -448,7 +448,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div 
+          <div
             ref={carouselRef}
             onMouseEnter={() => setIsCarouselHovered(true)}
             onMouseLeave={() => setIsCarouselHovered(false)}
@@ -473,9 +473,6 @@ export default function LandingPage() {
                       <div className="w-3/4 h-2 bg-gray-100 rounded mb-2"></div>
                     </div>
                   )}
-                </div>
-                <div className="mt-3 pt-2 border-t border-gray-200/50 flex justify-center items-center">
-                  <span className="font-bold text-gray-900 tracking-tight">CV {theme.name}</span>
                 </div>
               </div>
             ))}
@@ -555,50 +552,59 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {/* Gratuit */}
-            <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-200 flex flex-col">
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Gratuit</h3>
-              <div className="text-3xl font-black text-gray-900 mb-6">0 €</div>
-              <ul className="space-y-3 mb-8 flex-1">
-                {['Profil professionnel', 'Ajout des expériences', 'Analyse d\'offre', 'Adaptation (base)'].map((f, i) => (
-                  <li key={i} className="flex items-center gap-2 text-sm text-gray-600">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" /> {f}
+            <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-200 flex flex-col hover:shadow-md transition-shadow">
+              <h3 className="text-xl font-extrabold text-gray-900 mb-2">Gratuit</h3>
+              <p className="text-sm text-gray-500 mb-6 font-medium">Les bases pour centraliser votre parcours.</p>
+              <div className="text-3xl font-black text-gray-900 mb-8">0 XOF</div>
+              <ul className="space-y-4 mb-8 flex-1">
+                {['Profil professionnel central', 'CV et Lettres (thèmes de base)', 'Analyse d\'offre', 'Générations limitées'].map((f, i) => (
+                  <li key={i} className="flex items-center gap-3 text-sm font-medium text-gray-700">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" /> {f}
                   </li>
                 ))}
               </ul>
-              <Link href="/register" className="block w-full py-3 px-4 bg-gray-100 text-gray-900 font-bold rounded-xl text-center hover:bg-gray-200 transition-colors">
+              <Link href="/register" className="block w-full py-4 px-4 bg-gray-100 text-gray-900 font-bold rounded-xl text-center hover:bg-gray-200 transition-colors">
                 Commencer
               </Link>
             </div>
 
             {/* Plus */}
-            <div className="bg-indigo-600 p-8 rounded-3xl shadow-xl shadow-indigo-600/20 border border-indigo-500 flex flex-col relative transform md:-translate-y-4">
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-indigo-200 text-indigo-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Populaire</div>
-              <h3 className="text-lg font-bold text-white mb-2">Carriey Plus</h3>
-              <div className="text-3xl font-black text-white mb-6">5,99 €<span className="text-base font-normal text-indigo-200">/mois</span></div>
-              <ul className="space-y-3 mb-8 flex-1">
-                {['Tout du Gratuit', 'Thèmes premium', 'Exports avancés (PDF HQ)', 'Historique étendu'].map((f, i) => (
-                  <li key={i} className="flex items-center gap-2 text-sm text-indigo-100">
-                    <CheckCircle2 className="w-4 h-4 text-indigo-300 flex-shrink-0" /> {f}
+            <div className="bg-indigo-600 p-8 rounded-3xl shadow-[0_20px_50px_rgba(79,70,229,0.3)] border border-indigo-500 flex flex-col relative transform md:-translate-y-4">
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white text-indigo-600 text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest shadow-md">
+                Le plus populaire
+              </div>
+              <h3 className="text-xl font-extrabold text-white mb-2">Carriey PRO</h3>
+              <p className="text-sm text-indigo-200 mb-6 font-medium">L'outil ultime pour multiplier vos candidatures.</p>
+              <div className="text-3xl font-black text-white mb-8">
+                3 500 XOF<span className="text-base font-medium text-indigo-200">/mois</span>
+              </div>
+              <ul className="space-y-4 mb-8 flex-1">
+                {['Tout du plan Gratuit', 'Tous les modèles premium', 'IA : Adaptation experte aux offres', 'Export PDF Haute Qualité'].map((f, i) => (
+                  <li key={i} className="flex items-center gap-3 text-sm font-medium text-white">
+                    <CheckCircle2 className="w-5 h-5 text-indigo-300 flex-shrink-0" /> {f}
                   </li>
                 ))}
               </ul>
-              <Link href="/pricing" className="block w-full py-3 px-4 bg-white text-indigo-600 font-bold rounded-xl text-center hover:bg-gray-50 transition-colors">
+              <Link href="/pricing" className="block w-full py-4 px-4 bg-white text-indigo-600 font-bold rounded-xl text-center hover:bg-indigo-50 transition-colors">
                 Découvrir
               </Link>
             </div>
 
-            {/* Pro */}
-            <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-200 flex flex-col">
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Carriey Pro</h3>
-              <div className="text-3xl font-black text-gray-900 mb-6">12,99 €<span className="text-base font-normal text-gray-500">/mois</span></div>
-              <ul className="space-y-3 mb-8 flex-1">
-                {['Tout de Plus', 'Personnalisation poussée', 'Génération IA illimitée', 'Accès prioritaire'].map((f, i) => (
-                  <li key={i} className="flex items-center gap-2 text-sm text-gray-600">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" /> {f}
+            {/* Pro / Entreprise */}
+            <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-200 flex flex-col hover:shadow-md transition-shadow">
+              <h3 className="text-xl font-extrabold text-gray-900 mb-2">Achat unique</h3>
+              <p className="text-sm text-gray-500 mb-6 font-medium">Pour un besoin ponctuel et précis.</p>
+              <div className="text-3xl font-black text-gray-900 mb-8">
+                Dès 900 XOF<span className="text-base font-medium text-gray-400">/modèle</span>
+              </div>
+              <ul className="space-y-4 mb-8 flex-1">
+                {['Débloque ce modèle à vie', 'Génération IA de base (lettre incluse)', 'Export PDF illimité', 'Profil central'].map((f, i) => (
+                  <li key={i} className="flex items-center gap-3 text-sm font-medium text-gray-700">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" /> {f}
                   </li>
                 ))}
               </ul>
-              <Link href="/pricing" className="block w-full py-3 px-4 bg-gray-100 text-gray-900 font-bold rounded-xl text-center hover:bg-gray-200 transition-colors">
+              <Link href="/pricing" className="block w-full py-4 px-4 bg-gray-100 text-gray-900 font-bold rounded-xl text-center hover:bg-gray-200 transition-colors">
                 Découvrir
               </Link>
             </div>

@@ -138,7 +138,9 @@ async def create_resume(
             if not template:
                 raise HTTPException(status_code=400, detail="Aucun template actif disponible sur le système.")
 
-        actual_template_id = template.slug if (template and template.slug) else template.id
+        # Stocker l'UUID en BDD (respecte la FK), mais renvoyer le slug au frontend
+        actual_template_uuid = template.id
+        actual_template_slug = template.slug if template.slug else template.id
 
         try:
             doc_type_val = DocTypeEnum(resume_in.doc_type) if resume_in.doc_type else DocTypeEnum.CV
@@ -147,7 +149,7 @@ async def create_resume(
 
         new_resume = Resume(
             user_id=current_user.id,
-            template_id=actual_template_id,
+            template_id=actual_template_uuid,   # UUID → respecte la FK
             title=resume_in.title,
             content=resume_in.content or {},
             status=ResumeStatus.DRAFT,
@@ -159,12 +161,12 @@ async def create_resume(
         db.commit()
         db.refresh(new_resume)
         
-        # Create a dict that matches ResumeOut to avoid response_model issues
+        # Renvoyer le slug au frontend pour que le renderer React le reconnaisse
         return {
             "id": new_resume.id,
             "user_id": new_resume.user_id,
             "title": new_resume.title,
-            "template_id": new_resume.template_id,
+            "template_id": actual_template_slug,
             "content": new_resume.content,
             "status": new_resume.status.value if hasattr(new_resume.status, 'value') else new_resume.status,
             "doc_type": new_resume.doc_type.value if hasattr(new_resume.doc_type, 'value') else new_resume.doc_type,

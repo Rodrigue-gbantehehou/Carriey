@@ -14,7 +14,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 logger = logging.getLogger(__name__)
 
 BASE_DIR = Path(__file__).parent.parent.resolve()
-MAIL_TEMPLATES_DIR = BASE_DIR / "mail_templates"
+MAIL_TEMPLATES_DIR = BASE_DIR / "templates" / "email"
 
 
 class MailerService:
@@ -189,29 +189,22 @@ class MailerService:
 
     # --- Email 4: Reset mot de passe ---
     def send_password_reset(self, recipient_email: str, full_name: str, reset_link: str) -> bool:
-        html = f"""<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">
-<style>body{{font-family:Arial,sans-serif;color:#1c1c1c;margin:0}}
-.w{{max-width:600px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden}}
-.h{{background:#1c1c1c;padding:40px;text-align:center;color:#fff}}
-.h h1{{margin:0;font-size:24px;font-weight:900}}.b{{padding:32px}}
-.btn{{display:block;text-align:center;background:#00C896;color:#fff;text-decoration:none;padding:16px;border-radius:12px;font-weight:800;margin:24px 0}}
-.warn{{background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:12px;color:#92400e;font-size:13px;margin-top:16px}}
-.f{{padding:20px;background:#f9fafb;text-align:center;color:#9ca3af;font-size:12px}}</style></head>
-<body><div class="w">
-<div class="h"><div style="font-size:40px;margin-bottom:8px">&#128274;</div><h1>Reinitialisation du mot de passe</h1></div>
-<div class="b">
-<p>Bonjour {full_name or ''},</p>
-<p>Vous avez demande la reinitialisation de votre mot de passe {self.app_name}.</p>
-<a href="{reset_link}" class="btn">Reinitialiser mon mot de passe</a>
-<div class="warn">Ce lien est valable <strong>1 heure</strong>. Si vous n'avez pas fait cette demande, ignorez cet email.</div>
-<p style="color:#6b7280;font-size:12px;margin-top:16px">Lien direct : {reset_link}</p>
-</div><div class="f"><p>{self.app_name} - Createur de CV professionnel</p></div>
-</div></body></html>"""
+        ctx = {
+            "full_name": full_name,
+            "reset_link": reset_link,
+            "app_name": self.app_name
+        }
+        html = self._render_template("password_reset.html", ctx)
+        text = self._render_template("password_reset.txt", ctx)
+        
+        if not html:
+            return False
+
         msg = self._build_msg(
             to=recipient_email,
-            subject=f"Reinitialisation de votre mot de passe {self.app_name}",
+            subject=f"Réinitialisation de votre mot de passe {self.app_name}",
             html_body=html,
-            text_body=f"Bonjour {full_name},\n\nLien de reinitialisation (valable 1h) :\n{reset_link}\n\nSi vous n'avez pas fait cette demande, ignorez cet email."
+            text_body=text
         )
         return self._send(msg, recipient_email)
 

@@ -60,7 +60,7 @@ export function ThemeSelector({
         </button>
         <h3 className="text-sm font-bold text-gray-900">Choisir un modèle</h3>
       </div>
-      
+
       {loading ? (
         <div className="flex items-center justify-center p-8">
           <Loader2 className="w-6 h-6 text-indigo-600 animate-spin" />
@@ -75,7 +75,7 @@ export function ThemeSelector({
             >
               <div className="flex-1 p-2 flex items-center justify-center border-b border-gray-50 bg-gray-50/50">
                 {t.preview_image ? (
-                  <img 
+                  <img
                     src={t.preview_image.startsWith('http') ? t.preview_image : `${config.staticBaseUrl}/previews/${t.preview_image.split('/').pop()}`}
                     alt={t.name}
                     className="w-full h-full object-contain"
@@ -92,7 +92,7 @@ export function ThemeSelector({
               <div className="p-2 text-center bg-white flex flex-col">
                 <span className="text-xs font-semibold text-gray-900 truncate">{t.name}</span>
                 {t.price > 0 ? (
-                  <span className="text-[10px] text-amber-600 font-bold mt-0.5">{t.price} FCFA</span>
+                  <span className="text-[10px] text-amber-600 font-bold mt-0.5">{t.price} XOF</span>
                 ) : (
                   <span className="text-[10px] text-emerald-600 font-bold mt-0.5">Gratuit</span>
                 )}

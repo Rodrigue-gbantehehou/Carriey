@@ -104,6 +104,19 @@ class LivePreviewRequest(BaseModel):
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
+
+def generate_unique_slug(base_slug: str, db: Session) -> str:
+    """Génère un slug unique en suffixant -2, -3... si le slug de base est déjà pris.
+    Exemple : 'classique' → 'classique-2' → 'classique-3' (comme Google pour les mails)
+    """
+    candidate = base_slug
+    counter = 2
+    while db.query(Template).filter(Template.slug == candidate).first():
+        candidate = f"{base_slug}-{counter}"
+        counter += 1
+    return candidate
+
+
 @router.post("/preview-live", response_class=HTMLResponse)
 async def preview_template_live(
     req: LivePreviewRequest,
@@ -180,13 +193,15 @@ async def create_template(
     current_user: User = Depends(get_current_admin)
 ):
     """Crée un nouveau template avec des fichiers boilerplate"""
-    # Vérifier que le slug n'existe pas déjà
-    existing = db.query(Template).filter(Template.slug == template_in.slug).first()
-    if existing:
-        raise HTTPException(status_code=400, detail="Un template avec ce slug existe déjà")
+    # Générer un slug unique (auto-suggestion si déjà pris, comme Google pour les mails)
+    unique_slug = generate_unique_slug(template_in.slug, db)
+    if unique_slug != template_in.slug:
+        logger.info(
+            f"Slug '{template_in.slug}' déjà utilisé — slug suggéré automatiquement : '{unique_slug}'"
+        )
     
-    # Dossier physique
-    folder_name = template_in.folder_name if template_in.folder_name else template_in.slug
+    # Dossier physique — utilise le slug unique comme nom de dossier par défaut
+    folder_name = template_in.folder_name if template_in.folder_name else unique_slug
     template_folder = get_template_folder_path(template_in.template_type, folder_name)
     is_new_folder = not template_folder.exists()
     template_folder.mkdir(parents=True, exist_ok=True)
@@ -271,10 +286,12 @@ export default React.memo(Template);
 
     # Créer le template en base
     # On exclut folder_name et definition car on les définit explicitement
-    template_data = template_in.model_dump(exclude={"folder_name", "definition"})
+    # On force aussi le slug unique généré automatiquement
+    template_data = template_in.model_dump(exclude={"folder_name", "definition", "slug"})
     
     new_template = Template(
         **template_data,
+        slug=unique_slug,          # slug unique auto-généré
         created_by=current_user.id,
         is_system=False,
         folder_name=folder_name,

@@ -8,6 +8,7 @@ import { useCvStore } from '@/store/cv';
 import { useUiStore } from '@/store/ui';
 import { FileText, Plus, Target, User, Briefcase, TrendingUp, ChevronRight, Award, Clock, Sparkles, X } from 'lucide-react';
 import { AIAssistant } from '@/components/app/shared/AIAssistant';
+import { PaywallModal } from '@/components/app/shared/PaywallModal';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useRouter } from 'next/navigation';
@@ -37,6 +38,7 @@ export default function AccueilPage() {
 
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const [isCreatingTailoredCv, setIsCreatingTailoredCv] = useState(false);
+  const [showProPaywall, setShowProPaywall] = useState(false);
 
   const handleAiSubmit = async (jobDescription: string) => {
     if (!session?.user?.accessToken) return;
@@ -66,9 +68,14 @@ export default function AccueilPage() {
       const newCv = await cvApi.createResume(session.user.accessToken, payload);
       useCvStore.getState().addCv(newCv);
       router.push(`/mes-documents/cv/${newCv.id}`);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert("Erreur lors de la création du CV ciblé.");
+      // 403 = fonctionnalité PRO → ouvrir le PaywallModal
+      if (err?.message?.startsWith('403')) {
+        setShowProPaywall(true);
+      } else {
+        alert("Erreur lors de la création du CV ciblé.");
+      }
     } finally {
       setIsCreatingTailoredCv(false);
     }
@@ -107,7 +114,15 @@ export default function AccueilPage() {
 
   return (
     <div className="px-6 py-8 space-y-10 max-w-5xl mx-auto animate-fade-in">
-      
+
+      {/* PaywallModal — s'ouvre si l'utilisateur n'est pas PRO */}
+      <PaywallModal
+        isOpen={showProPaywall}
+        onClose={() => setShowProPaywall(false)}
+        title="Fonctionnalité PRO"
+        description="Le ciblage de CV par IA est réservé aux abonnés carriey PRO. Passez au plan PRO pour générer un CV parfaitement ciblé sur chaque offre d'emploi en 1 clic."
+      />
+
       {/* Header compact */}
       <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
         <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">Bonjour {firstName} 👋</h1>
@@ -145,7 +160,7 @@ export default function AccueilPage() {
       <section className="animate-slide-up" style={{ animationDelay: '0.3s' }}>
         <h2 className="text-xs font-bold text-gray-400 mb-4 px-1 uppercase tracking-widest">Actions rapides</h2>
         
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <button 
             onClick={openCreateModal}
             className="flex flex-col items-start gap-3 p-5 rounded-2xl border border-gray-200/60 bg-white/60 backdrop-blur-md shadow-sm hover:border-indigo-300 hover:shadow-xl hover:shadow-indigo-600/10 hover:-translate-y-1 transition-all duration-300 active:scale-95 group"
@@ -200,6 +215,19 @@ export default function AccueilPage() {
             <div className="text-left">
               <p className="font-bold text-gray-900 text-sm">Statistiques</p>
               <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">Voir les métriques</p>
+            </div>
+          </Link>
+
+          <Link
+            href="/analyser"
+            className="flex flex-col items-start gap-3 p-5 rounded-2xl border border-purple-100 bg-gradient-to-br from-purple-50 to-white shadow-sm hover:border-purple-300 hover:shadow-xl hover:shadow-purple-600/10 hover:-translate-y-1 transition-all duration-300 active:scale-95 group"
+          >
+            <div className="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <Target className="w-5 h-5" />
+            </div>
+            <div className="text-left">
+              <p className="font-bold text-gray-900 text-sm">Analyser offre</p>
+              <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">Mon score de match</p>
             </div>
           </Link>
         </div>

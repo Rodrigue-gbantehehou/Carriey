@@ -12,7 +12,7 @@ import { ThemeThumbnail } from '@/components/app/cv/shared/ThemeThumbnail';
 import DndList from '@/components/app/cv/editor/DndList';
 
 import { TEMPLATE_REGISTRY, getDefaultSections } from '@/components/app/cv/templates';
-import { THEMES } from '@/config/themes';
+import { useTemplates } from '@/hooks/useTemplates';
 import { API_BASE } from '@/lib/api';
 
 import { ThemeSelector } from '@/components/app/cv/editor/ThemeSelector';
@@ -31,7 +31,8 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
   const [showThemeSelector, setShowThemeSelector] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false); // Controls the floating sidebar
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
-  const [scale, setScale] = useState(0.5); // Adjusted default zoom to 50%
+  const [scale, setScale] = useState(0.5);
+  const { getLabel: getTemplateLabel } = useTemplates('cv');
 
 
   const cv = cvs.find(c => c.id === params.id);
@@ -408,7 +409,7 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
                       <ThemeThumbnail templateId={cv.template_id} />
                     </div>
                     <div className="flex-1 text-left">
-                      <p className="text-sm font-bold text-gray-900">{THEMES.find(t => t.id === cv.template_id)?.label || 'Classique'}</p>
+                      <p className="text-sm font-bold text-gray-900">{getTemplateLabel(cv.template_id) || 'Classique'}</p>
                       <p className="text-xs font-medium text-indigo-600 mt-1 group-hover:underline">Changer de modèle</p>
                     </div>
                   </div>

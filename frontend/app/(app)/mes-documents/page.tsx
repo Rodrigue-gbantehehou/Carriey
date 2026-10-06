@@ -15,6 +15,7 @@ import { publicPagesApi } from '@/lib/public-pages-api';
 import { PublicPage } from '@/types/public-page';
 import { PageCard } from '@/components/app/public-page/shared/PageCard';
 import { AIAssistant } from '@/components/app/shared/AIAssistant';
+import { PaywallModal } from '@/components/app/shared/PaywallModal';
 
 const TABS = [
   { id: 'all', label: 'Tous' },
@@ -41,6 +42,7 @@ function MesDocumentsContent() {
 
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const [isCreatingTailoredCv, setIsCreatingTailoredCv] = useState(false);
+  const [showProPaywall, setShowProPaywall] = useState(false);
 
   // Vérifier s'il faut ouvrir l'éditeur de page via URL
   useEffect(() => {
@@ -101,9 +103,14 @@ function MesDocumentsContent() {
       const newCv = await cvApi.createResume(session.user.accessToken, payload);
       useCvStore.getState().addCv(newCv);
       router.push(`/mes-documents/cv/${newCv.id}`);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert("Erreur lors de la création du CV ciblé.");
+      // 403 = fonctionnalité PRO → ouvrir le PaywallModal
+      if (err?.message?.startsWith('403')) {
+        setShowProPaywall(true);
+      } else {
+        alert("Erreur lors de la création du CV ciblé.");
+      }
     } finally {
       setIsCreatingTailoredCv(false);
     }
@@ -151,6 +158,15 @@ function MesDocumentsContent() {
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-8 animate-fade-in">
+
+      {/* PaywallModal — s'ouvre si l'utilisateur n'est pas PRO */}
+      <PaywallModal
+        isOpen={showProPaywall}
+        onClose={() => setShowProPaywall(false)}
+        title="Fonctionnalité PRO"
+        description="Le ciblage de CV par IA est réservé aux abonnés carriey PRO. Passez au plan PRO pour générer un CV parfaitement ciblé sur chaque offre d'emploi en 1 clic."
+      />
+
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10 animate-slide-up" style={{ animationDelay: '0.1s' }}>
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Mes documents</h1>

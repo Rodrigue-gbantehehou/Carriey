@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useCvStore } from '@/store/cv';
 import { useProfileStore } from '@/store/profile';
-import { ChevronRight, ChevronLeft, Briefcase, FileText, CheckCircle2, Lock } from 'lucide-react';
-import { THEMES } from '@/config/themes';
+import { ChevronRight, ChevronLeft, Briefcase, FileText, CheckCircle2, Lock, Loader2 } from 'lucide-react';
+import { useTemplates } from '@/hooks/useTemplates';
 import { ThemeThumbnail } from '@/components/app/cv/shared/ThemeThumbnail';
 
 const USAGES = [
@@ -33,6 +33,7 @@ export default function CreateCvWizard() {
   const { addCv } = useCvStore();
 
   const { data: session } = useSession();
+  const { templates, loading: templatesLoading } = useTemplates('cv');
 
   const [step, setStep] = useState(1);
   const [usage, setUsage] = useState('');
@@ -173,15 +174,29 @@ export default function CreateCvWizard() {
             <p className="text-sm text-gray-500 mb-8">Sélectionnez l&apos;apparence de votre CV. Vous pourrez la modifier plus tard.</p>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-              {THEMES.map(t => (
+              {/* Chargement */}
+              {templatesLoading && (
+                Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="rounded-2xl border-2 border-gray-100 overflow-hidden animate-pulse">
+                    <div className="aspect-[1/1.4] bg-gray-100" />
+                    <div className="p-3 flex items-center justify-between border-t border-gray-100">
+                      <div className="h-4 w-20 bg-gray-200 rounded" />
+                      <div className="h-5 w-14 bg-gray-100 rounded-md" />
+                    </div>
+                  </div>
+                ))
+              )}
+
+              {/* Templates depuis l'API */}
+              {!templatesLoading && templates.map(t => (
                 <button
                   key={t.id}
-                  onClick={() => handleFinish(t.id)}
+                  onClick={() => handleFinish(t.slug)}
                   disabled={isSubmitting}
                   className="group flex flex-col text-left rounded-2xl border-2 border-gray-100 hover:border-indigo-600 transition-all overflow-hidden bg-white hover:shadow-xl hover:shadow-indigo-600/10 cursor-pointer disabled:opacity-50"
                 >
                   <div className="aspect-[1/1.4] bg-gray-50 relative flex items-center justify-center p-4 overflow-hidden border-b border-gray-100">
-                    <ThemeThumbnail templateId={t.id} />
+                    <ThemeThumbnail templateId={t.slug} />
                     <div className="absolute inset-0 bg-gray-900/0 group-hover:bg-gray-900/10 transition-colors flex items-center justify-center">
                       <span className="opacity-0 group-hover:opacity-100 bg-white text-gray-900 px-4 py-2 rounded-full font-bold text-sm shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-all">
                         {isSubmitting ? '...' : 'Choisir'}
@@ -189,9 +204,9 @@ export default function CreateCvWizard() {
                     </div>
                   </div>
                   <div className="p-3 flex items-center justify-between border-t border-gray-100 bg-white">
-                    <span className="text-sm font-bold text-gray-900">{t.label}</span>
-                    {t.price > 0 ? (
-                      <span className="text-xs font-black bg-amber-100 text-amber-800 px-2 py-1 rounded-md">{t.price} F</span>
+                    <span className="text-sm font-bold text-gray-900">{t.name}</span>
+                    {Number(t.price) > 0 ? (
+                      <span className="text-xs font-black bg-amber-100 text-amber-800 px-2 py-1 rounded-md">{t.price} {t.currency}</span>
                     ) : (
                       <span className="text-xs font-black bg-green-100 text-green-800 px-2 py-1 rounded-md">Gratuit</span>
                     )}

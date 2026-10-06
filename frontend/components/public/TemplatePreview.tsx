@@ -38,7 +38,7 @@ const DEFAULT_MOCK_DATA = {
       period: '2020 - Présent',
       bullets: [
         'Développement de la stratégie de marque.',
-        'Gestion d\'un budget de 50M FCFA.',
+        'Gestion d\'un budget de 50M XOF.',
         'Augmentation de la visibilité de 150%.'
       ]
     }
@@ -145,8 +145,8 @@ export default function TemplatePreview({ template, data = DEFAULT_MOCK_DATA, se
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Stable random photo based on template ID or name to avoid repetition
-  const photoIndex = template?.id 
-    ? (typeof template.id === 'number' ? template.id % DIVERSE_PHOTOS.length : template.id.length % DIVERSE_PHOTOS.length) 
+  const photoIndex = template?.id
+    ? (typeof template.id === 'number' ? template.id % DIVERSE_PHOTOS.length : template.id.length % DIVERSE_PHOTOS.length)
     : 0;
   const stablePhoto = DIVERSE_PHOTOS[photoIndex];
 
@@ -252,14 +252,14 @@ export default function TemplatePreview({ template, data = DEFAULT_MOCK_DATA, se
   }
 
   return (
-    <div 
+    <div
       ref={containerRef}
       className="w-full h-full relative overflow-hidden bg-[#FBFBFB] flex items-center justify-center group/preview"
     >
-      <div 
+      <div
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 origin-center transition-all duration-700 ease-out bg-white overflow-hidden shadow-cv"
-        style={{ 
-          width: '210mm', 
+        style={{
+          width: '210mm',
           height: '297mm',
           transform: `translate(-50%, -50%) scale(${dynamicScale})`,
           opacity: !loading ? 1 : 0,
@@ -268,8 +268,8 @@ export default function TemplatePreview({ template, data = DEFAULT_MOCK_DATA, se
         {!loading && (
           <ShadowRoot>
             <div className="w-full h-full pointer-events-none select-none overflow-hidden">
-              <CVTemplateRenderer 
-                templateName={template.slug} 
+              <CVTemplateRenderer
+                templateName={template.slug}
                 data={{
                   ...data,
                   profile: {

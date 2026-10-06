@@ -25,8 +25,8 @@ const nextConfig = {
   async rewrites() {
     return [
       {
-        // Proxy all /api/* requests EXCEPT /api/auth/* to the FastAPI backend
-        source: '/api/:path((?!auth).*)',
+        // Proxy all /api/* requests EXCEPT /api/auth/* and /api/template-css/* to the FastAPI backend
+        source: '/api/:path((?!auth|template-css).*)',
         destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:10000/api'}/:path*`,
       },
       {
