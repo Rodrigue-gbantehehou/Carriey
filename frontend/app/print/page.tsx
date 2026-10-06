@@ -7,19 +7,25 @@ interface PrintPageProps {
 }
 
 async function getPrintDataServer(id: string) {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://carapi.nomiks.net/api';
   try {
-    const res = await fetch(`${apiUrl}/exports/print-data/${id}`, {
-      cache: 'no-store',
-      headers: { 'Accept': 'application/json' }
-    });
-    if (!res.ok) {
-      console.error(`Erreur fetch print-data: HTTP ${res.status}`);
+    // ESSENTIEL : Au lieu de faire un fetch() HTTP vers FastAPI,
+    // on lit directement le fichier cache sur le disque.
+    // Cela évite un DEADLOCK sur cPanel/Passenger où le seul worker Python
+    // attend le PDF de Render, qui lui-même attend le Next.js SSR,
+    // qui lui-même tente de requêter le même worker Python !
+    
+    // Chemin relatif depuis frontend/ (process.cwd()) vers backend/static/cache/
+    const cachePath = path.join(process.cwd(), '..', 'backend', 'static', 'cache', `${id}.json`);
+    
+    if (fs.existsSync(cachePath)) {
+      const data = fs.readFileSync(cachePath, 'utf8');
+      return JSON.parse(data);
+    } else {
+      console.error(`Fichier cache introuvable : ${cachePath}`);
       return null;
     }
-    return await res.json();
   } catch (err) {
-    console.error("Erreur récupération données CV SSR:", err);
+    console.error("Erreur lecture données CV depuis le disque:", err);
     return null;
   }
 }
