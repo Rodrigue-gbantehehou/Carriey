@@ -45,6 +45,8 @@ app.post('/generate-pdf', async (req, res) => {
       '--no-sandbox',
       '--disable-setuid-sandbox',
       '--disable-gpu',
+      '--ignore-certificate-errors',
+      '--disable-web-security'
     ];
 
     browser = await chromium.launch({
@@ -53,6 +55,11 @@ app.post('/generate-pdf', async (req, res) => {
     });
 
     const page = await browser.newPage();
+
+    // Intercepter les logs React pour le debug !
+    page.on('console', msg => console.log(`[Browser Console] ${msg.type().toUpperCase()}: ${msg.text()}`));
+    page.on('pageerror', err => console.log(`[Browser Error] ${err.message}`));
+    page.on('requestfailed', request => console.log(`[Browser Request Failed] ${request.url()} - ${request.failure()?.errorText}`));
 
     // Émuler le média d'impression (identique à Python : page.emulate_media(media="print"))
     await page.emulateMedia({ media: 'print' });
