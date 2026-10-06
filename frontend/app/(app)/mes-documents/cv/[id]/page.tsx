@@ -5,7 +5,7 @@ import { useProfileStore } from '@/store/profile';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useRef, Suspense } from 'react';
-import { ArrowLeft, Download, LayoutTemplate, Palette, Check, Settings2, ZoomIn, ZoomOut, X, SlidersHorizontal, ListOrdered } from 'lucide-react';
+import { ArrowLeft, Download, LayoutTemplate, Palette, Check, Settings2, ZoomIn, ZoomOut, X, SlidersHorizontal, ListOrdered, Loader2 } from 'lucide-react';
 import { PageFlow, PageNumberPlugin, mmToPx } from 'pageflow-js';
 import ExportModal from '@/components/app/shared/ExportModal';
 import { ThemeThumbnail } from '@/components/app/cv/shared/ThemeThumbnail';
