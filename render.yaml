@@ -27,16 +27,15 @@ services:
   # ─── Micro-service PDF (Puppeteer) ────────────────────────────────────────
   - type: web
     name: carriey-pdf-service
-    env: node
+    env: docker
     plan: free
     region: frankfurt
-    rootDir: pdf-service
-    buildCommand: npm install && npx playwright install chromium
-    startCommand: npm start
+    dockerContext: pdf-service
+    dockerfilePath: pdf-service/Dockerfile
     healthCheckPath: /health
     envVars:
       - key: PORT
-        value: 10000
+        value: 3001
       - key: PDF_SERVICE_SECRET
         generateValue: true  # Clé secrète auto-générée, à copier dans le backend O2Switch
 
