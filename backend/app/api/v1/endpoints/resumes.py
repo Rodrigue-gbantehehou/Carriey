@@ -230,15 +230,38 @@ async def update_resume(
         if not template:
             raise HTTPException(status_code=400, detail="Le template demandé n'est pas disponible ou est inactif.")
             
-        update_data["template_id"] = template.slug if template.slug else template.id
+        update_data["template_id"] = template.id  # Store UUID in DB to respect Foreign Key
 
     for field, value in update_data.items():
         setattr(resume, field, value)
     
-    db.commit()
-    db.refresh(resume)
+    try:
+        db.commit()
+        db.refresh(resume)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
     
-    return resume
+    # Prepare response dict to return slug to frontend
+    r_dict = {
+        "id": resume.id,
+        "title": resume.title,
+        "template_id": resume.template_id,
+        "status": resume.status.value if hasattr(resume.status, "value") else resume.status,
+        "doc_type": resume.doc_type.value if hasattr(resume.doc_type, "value") else resume.doc_type,
+        "linked_doc_id": resume.linked_doc_id,
+        "content": resume.content,
+        "user_id": resume.user_id,
+        "created_at": resume.created_at,
+        "updated_at": resume.updated_at
+    }
+
+    if resume.template_id:
+        t = template if ("template_id" in update_data and update_data["template_id"]) else db.query(Template).filter(Template.id == resume.template_id).first()
+        if t and t.slug:
+            r_dict["template_id"] = t.slug
+            
+    return r_dict
 
 @router.delete("/{resume_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_resume(
