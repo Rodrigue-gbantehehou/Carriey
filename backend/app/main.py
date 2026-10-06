@@ -1,8 +1,15 @@
 import os
 import sys
 import asyncio
+import time
+import logging
 from pathlib import Path
 from dotenv import load_dotenv
+
+# ─── Logging centralisé (doit être fait en PREMIER) ──────────────────────────
+from app.core.logging_config import setup_logging, get_logger
+setup_logging()
+logger = get_logger("carriey")
 
 # Load env before imports
 env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
@@ -59,6 +66,19 @@ app = FastAPI(
 
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# ─── Middleware de log des requêtes HTTP (style access log) ──────────────────
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    start = time.time()
+    response = await call_next(request)
+    duration_ms = (time.time() - start) * 1000
+    level = logging.WARNING if response.status_code >= 400 else logging.INFO
+    logger.log(level,
+        f'{request.method} {request.url.path} → {response.status_code} '
+        f'({duration_ms:.0f}ms) [{request.client.host if request.client else "?"}]'
+    )
+    return response
 
 # CORS
 app.add_middleware(
