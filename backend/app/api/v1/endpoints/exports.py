@@ -279,7 +279,7 @@ async def export_pdf(
         if pdf_service_url:
             logger.info(f"[PDF Export] 🚀 Calling Render PDF service: {pdf_service_url}")
             import httpx
-            async with httpx.AsyncClient(timeout=60.0) as client:
+            async with httpx.AsyncClient(timeout=120.0) as client:
                 headers = {}
                 if pdf_service_secret:
                     headers["x-api-secret"] = pdf_service_secret

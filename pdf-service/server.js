@@ -59,24 +59,24 @@ app.post('/generate-pdf', async (req, res) => {
 
     console.log(`[PDF Service] Loading page: ${url}`);
 
-    // Charger la page avec timeout de 30 secondes (identique à Python)
+    // Charger la page avec timeout de 90 secondes
     try {
-      await page.goto(url, { waitUntil: 'load', timeout: 30000 });
+      await page.goto(url, { waitUntil: 'networkidle', timeout: 90000 });
     } catch (e) {
-      console.warn(`[PDF Service] Warning: page.goto timed out: ${e.message}. Attempting PDF anyway.`);
+      console.warn(`[PDF Service] Warning: page.goto timed out or networkidle not reached: ${e.message}. Attempting PDF anyway.`);
     }
 
-    // Attendre que le composant React signale être prêt (identique à Python)
+    // Attendre que le composant React signale être prêt
     if (wait_for) {
       try {
         await page.waitForFunction(
           (signal) => window[signal] === true,
           wait_for,
-          { timeout: 12000 }
+          { timeout: 45000 }  // 45s : Next.js hydration + fetch + PageFlow + 500ms delay
         );
         console.log(`[PDF Service] Signal "${wait_for}" reçu, génération du PDF.`);
       } catch (e) {
-        console.warn(`[PDF Service] Notice: "${wait_for}" wait skipped: ${e.message}`);
+        console.warn(`[PDF Service] Notice: "${wait_for}" wait skipped after timeout: ${e.message}`);
       }
     }
 
