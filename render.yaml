@@ -31,7 +31,7 @@ services:
     plan: free
     region: frankfurt
     rootDir: pdf-service
-    buildCommand: npm install && npx playwright install chromium --with-deps
+    buildCommand: npm install && npx playwright install chromium
     startCommand: npm start
     healthCheckPath: /health
     envVars:
