@@ -68,26 +68,36 @@ app.post('/generate-pdf', async (req, res) => {
 
     console.log(`[PDF Service] Loading page: ${url}`);
 
-    // Charger la page avec timeout de 90 secondes
+    // Charger la page avec domcontentloaded (rapide, ne bloque pas sur les requêtes résiduelles)
     try {
-      await page.goto(url, { waitUntil: 'networkidle', timeout: 90000 });
+      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
     } catch (e) {
-      console.warn(`[PDF Service] Warning: page.goto timed out or networkidle not reached: ${e.message}. Attempting PDF anyway.`);
+      console.warn(`[PDF Service] Warning: page.goto domcontentloaded timed out: ${e.message}. Attempting anyway.`);
     }
 
-    // Attendre que le composant React signale être prêt
+    // Attendre que le composant React signale être prêt via le signal __CV_PRINT_READY__
     if (wait_for) {
       try {
         await page.waitForFunction(
           (signal) => window[signal] === true,
           wait_for,
-          { timeout: 45000 }  // 45s : Next.js hydration + fetch + PageFlow + 500ms delay
+          { timeout: 30000 }
         );
         console.log(`[PDF Service] Signal "${wait_for}" reçu, génération du PDF.`);
       } catch (e) {
         console.warn(`[PDF Service] Notice: "${wait_for}" wait skipped after timeout: ${e.message}`);
       }
     }
+
+    // Attendre les polices
+    try {
+      await page.evaluate(() => document.fonts ? document.fonts.ready : Promise.resolve());
+    } catch (e) {
+      console.warn(`[PDF Service] Font wait skipped: ${e.message}`);
+    }
+
+    // Micro pause pour laisser le rendu graphique finaliser
+    await new Promise(r => setTimeout(r, 400));
 
     // Générer le PDF A4 (identique à Python : format="A4", printBackground=True, margin=0)
     const pdfBuffer = await page.pdf({

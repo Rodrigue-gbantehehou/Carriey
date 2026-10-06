@@ -293,27 +293,43 @@ async def export_pdf(
         if pdf_service_url:
             logger.info(f"[PDF Export] 🚀 Calling Render PDF service: {pdf_service_url}")
             import httpx
-            async with httpx.AsyncClient(timeout=120.0) as client:
-                headers = {}
-                if pdf_service_secret:
-                    headers["x-api-secret"] = pdf_service_secret
-                render_res = await client.post(
-                    f"{pdf_service_url.rstrip('/')}/generate-pdf",
-                    json={
-                        "url": print_url,
-                        "wait_for": "__CV_PRINT_READY__",
-                        "filename": f"carriey-cv-{request_id}.pdf"
-                    },
-                    headers=headers
-                )
+            try:
+                async with httpx.AsyncClient(timeout=httpx.Timeout(180.0, connect=30.0)) as client:
+                    headers = {}
+                    if pdf_service_secret:
+                        headers["x-api-secret"] = pdf_service_secret
+                    render_res = await client.post(
+                        f"{pdf_service_url.rstrip('/')}/generate-pdf",
+                        json={
+                            "url": print_url,
+                            "wait_for": "__CV_PRINT_READY__",
+                            "filename": f"carriey-cv-{request_id}.pdf"
+                        },
+                        headers=headers
+                    )
 
-            if render_res.status_code == 200:
-                out_pdf.write_bytes(render_res.content)
-                logger.info(f"[PDF Export] ✅ PDF généré via Render ({len(render_res.content)} bytes)")
-            else:
-                err_detail = render_res.text[:300]
-                logger.error(f"[PDF Export] ❌ Render PDF service error {render_res.status_code}: {err_detail}")
-                raise RuntimeError(f"Echec du service PDF Render ({render_res.status_code}): {err_detail}")
+                if render_res.status_code == 200:
+                    out_pdf.write_bytes(render_res.content)
+                    logger.info(f"[PDF Export] ✅ PDF généré via Render ({len(render_res.content)} bytes)")
+                else:
+                    err_detail = render_res.text[:300]
+                    logger.error(f"[PDF Export] ❌ Render PDF service error {render_res.status_code}: {err_detail}")
+                    raise HTTPException(
+                        status_code=502,
+                        detail=f"Erreur du service PDF distant ({render_res.status_code}): {err_detail}"
+                    )
+            except httpx.TimeoutException as te:
+                logger.error(f"[PDF Export] ❌ Timeout lors de l'appel au service Render PDF: {te}")
+                raise HTTPException(
+                    status_code=504,
+                    detail="Le service de génération PDF a mis trop de temps à répondre (timeout). Le serveur Render était peut-être en cours de réveil. Veuillez réessayer."
+                )
+            except httpx.RequestError as re:
+                logger.error(f"[PDF Export] ❌ Erreur réseau lors de l'appel au service Render PDF: {re}")
+                raise HTTPException(
+                    status_code=502,
+                    detail=f"Impossible de joindre le service PDF distant: {re}"
+                )
 
         else:
             # ─── Fallback local : Playwright (dev uniquement) ──────────────────
