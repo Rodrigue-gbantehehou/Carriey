@@ -57,20 +57,33 @@ class SetPasswordRequest(BaseModel):
     token: str
     password: str
 
+import json
+import logging
+logger = logging.getLogger(__name__)
+
 # --- CACHE D'IMPRESSION REACT WYSIWYG ---
-_PRINT_CACHE: Dict[str, Any] = {}
+CACHE_DIR = STATIC_DIR / "cache"
+CACHE_DIR.mkdir(exist_ok=True)
 
 async def _cleanup_print_cache(cache_id: str, delay: int = 300):
     await asyncio.sleep(delay)
-    _PRINT_CACHE.pop(cache_id, None)
+    cache_file = CACHE_DIR / f"{cache_id}.json"
+    if cache_file.exists():
+        cache_file.unlink(missing_ok=True)
 
 @router.get("/print-data/{print_id}")
 async def get_print_data(print_id: str):
     """Fournit les données de CV temporaires à la vue d'impression React Playwright"""
-    payload = _PRINT_CACHE.get(print_id)
-    if not payload:
+    cache_file = CACHE_DIR / f"{print_id}.json"
+    if not cache_file.exists():
         raise HTTPException(status_code=404, detail="Données d'impression expirées ou introuvables")
-    return payload
+    
+    try:
+        data = json.loads(cache_file.read_text(encoding="utf-8"))
+        return data
+    except Exception as e:
+        logger.error(f"Erreur de lecture du cache {print_id}: {e}")
+        raise HTTPException(status_code=500, detail="Erreur interne de cache")
 
 @router.post("/preview")
 @limiter.limit("15/minute")
@@ -228,12 +241,14 @@ async def export_pdf(
         template = db.query(Template).filter(Template.slug == req.template_name).first()
         
         # Mettre en cache pour la route d'impression React WYSIWYG
-        _PRINT_CACHE[request_id] = {
+        payload = {
             "template_name": req.template_name,
             "folder_name": template.folder_name if template else None,
             "data": req.data,
             "config": req.config or {}
         }
+        cache_file = CACHE_DIR / f"{request_id}.json"
+        cache_file.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
         asyncio.create_task(_cleanup_print_cache(request_id))
 
         safe_filename = f"CV_{request_id}.pdf"
