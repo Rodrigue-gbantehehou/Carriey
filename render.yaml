@@ -23,3 +23,20 @@ services:
         sync: false  # Optionnel pour l'IA
       - key: ENVIRONMENT
         value: production
+
+  # ─── Micro-service PDF (Puppeteer) ────────────────────────────────────────
+  - type: web
+    name: carriey-pdf-service
+    env: node
+    plan: free
+    region: frankfurt
+    rootDir: pdf-service
+    buildCommand: npm install && npx playwright install chromium --with-deps
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: PDF_SERVICE_SECRET
+        generateValue: true  # Clé secrète auto-générée, à copier dans le backend O2Switch
+

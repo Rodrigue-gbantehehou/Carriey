@@ -251,36 +251,68 @@ async def export_pdf(
         else:
             print_url = f"{frontend_url}/print?id={request_id}"
 
-        def run_pdf_cmd():
-            res = None
-            # 1. Rendu React unifié (100% WYSIWYG)
-            try:
-                logger.info(f"[PDF Export] Tentative de rendu React WYSIWYG via {print_url}")
-                cmd = [sys.executable, str(BASE_DIR / "generate_pdf_from_html.py"), "--url", print_url, "--out", str(out_pdf)]
-                res = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
-                if res.returncode == 0 and out_pdf.exists() and out_pdf.stat().st_size > 1000:
-                    logger.info("[PDF Export] ✅ Rendu React réussi avec fidélité absolue !")
-                    return res
-                logger.warning(f"[PDF Export] Rendu React code {res.returncode}, repli sur Jinja2.")
-            except Exception as react_err:
-                logger.warning(f"[PDF Export] Exception rendu React: {react_err}. Repli sur Jinja2...")
+        # ─── Tentative via Render PDF Service (production) ─────────────────────
+        pdf_service_url = os.getenv("PDF_SERVICE_URL")  # ex: https://carriey-pdf-service.onrender.com
+        pdf_service_secret = os.getenv("PDF_SERVICE_SECRET")
 
-            # 2. Repli de secours : Rendu Jinja2 (Sera en échec car les fichiers ont été supprimés)
-            try:
-                html = render_html_by_name(req.template_name, req.data, config_override=req.config)
-                tmp_html.write_text(html, encoding="utf-8")
-                cmd = [sys.executable, str(BASE_DIR / "generate_pdf_from_html.py"), "--html", str(tmp_html), "--out", str(out_pdf)]
-                return subprocess.run(cmd, capture_output=True, text=True, timeout=30)
-            except Exception as e:
-                logger.error(f"Jinja2 Render Error: {e}")
-                # We return the original failed res from React if Jinja2 fails
-                if res is not None: return res
-                raise e
-            
-        result = await asyncio.to_thread(run_pdf_cmd)
-        if result and result.returncode != 0 and (not out_pdf.exists() or out_pdf.stat().st_size == 0):
-            logger.error(f"PDF Generator Error: {result.stderr}")
-            raise RuntimeError(f"Erreur lors de la génération du PDF: {result.stderr}")
+        if pdf_service_url:
+            logger.info(f"[PDF Export] 🚀 Calling Render PDF service: {pdf_service_url}")
+            import httpx
+            async with httpx.AsyncClient(timeout=60.0) as client:
+                headers = {}
+                if pdf_service_secret:
+                    headers["x-api-secret"] = pdf_service_secret
+                render_res = await client.post(
+                    f"{pdf_service_url.rstrip('/')}/generate-pdf",
+                    json={
+                        "url": print_url,
+                        "wait_for": "__CV_PRINT_READY__",
+                        "filename": f"carriey-cv-{request_id}.pdf"
+                    },
+                    headers=headers
+                )
+
+            if render_res.status_code == 200:
+                out_pdf.write_bytes(render_res.content)
+                logger.info(f"[PDF Export] ✅ PDF généré via Render ({len(render_res.content)} bytes)")
+            else:
+                err_detail = render_res.text[:300]
+                logger.error(f"[PDF Export] ❌ Render PDF service error {render_res.status_code}: {err_detail}")
+                raise RuntimeError(f"Echec du service PDF Render ({render_res.status_code}): {err_detail}")
+
+        else:
+            # ─── Fallback local : Playwright (dev uniquement) ──────────────────
+            logger.warning("[PDF Export] PDF_SERVICE_URL non défini, repli sur Playwright local (développement).")
+
+            def run_pdf_cmd():
+                res = None
+                # 1. Rendu React unifié (100% WYSIWYG)
+                try:
+                    logger.info(f"[PDF Export] Tentative de rendu React WYSIWYG via {print_url}")
+                    cmd = [sys.executable, str(BASE_DIR / "generate_pdf_from_html.py"), "--url", print_url, "--out", str(out_pdf)]
+                    res = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+                    if res.returncode == 0 and out_pdf.exists() and out_pdf.stat().st_size > 1000:
+                        logger.info("[PDF Export] ✅ Rendu React réussi avec fidélité absolue !")
+                        return res
+                    logger.warning(f"[PDF Export] Rendu React code {res.returncode}, repli sur Jinja2.")
+                except Exception as react_err:
+                    logger.warning(f"[PDF Export] Exception rendu React: {react_err}. Repli sur Jinja2...")
+
+                # 2. Repli de secours : Rendu Jinja2
+                try:
+                    html = render_html_by_name(req.template_name, req.data, config_override=req.config)
+                    tmp_html.write_text(html, encoding="utf-8")
+                    cmd = [sys.executable, str(BASE_DIR / "generate_pdf_from_html.py"), "--html", str(tmp_html), "--out", str(out_pdf)]
+                    return subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+                except Exception as e:
+                    logger.error(f"Jinja2 Render Error: {e}")
+                    if res is not None: return res
+                    raise e
+                
+            result = await asyncio.to_thread(run_pdf_cmd)
+            if result and result.returncode != 0 and (not out_pdf.exists() or out_pdf.stat().st_size == 0):
+                logger.error(f"PDF Generator Error: {result.stderr}")
+                raise RuntimeError(f"Erreur lors de la génération du PDF: {result.stderr}")
 
         url = f"/static/{out_pdf.name}" if out_pdf.exists() else None
 
@@ -311,6 +343,7 @@ async def export_pdf(
                 tmp_html.unlink(missing_ok=True)
             except Exception:
                 pass
+
 
 @router.post("/export/docx")
 @limiter.limit("5/minute")
