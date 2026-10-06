@@ -48,8 +48,8 @@ async def list_resumes(
     resumes = query.order_by(Resume.created_at.desc()).offset(skip).limit(limit).all()
     
     # Resolve any UUID template_ids to slugs in batch to avoid N+1 queries
-    needs_commit = False
     template_ids = list({r.template_id for r in resumes if r.template_id})
+    template_map = {}
     if template_ids:
         templates = db.query(Template).filter(
             (Template.id.in_(template_ids)) | (Template.slug.in_(template_ids))
@@ -57,16 +57,26 @@ async def list_resumes(
         template_map = {t.id: t for t in templates}
         template_map.update({t.slug: t for t in templates if t.slug})
 
-        for resume in resumes:
-            if resume.template_id:
-                template = template_map.get(resume.template_id)
-                if template and template.slug and template.slug != resume.template_id:
-                    resume.template_id = template.slug
-                    needs_commit = True
-    if needs_commit:
-        db.commit()
+    result = []
+    for r in resumes:
+        r_dict = {
+            "id": r.id,
+            "title": r.title,
+            "template_id": r.template_id,
+            "status": r.status.value if hasattr(r.status, "value") else r.status,
+            "doc_type": r.doc_type.value if hasattr(r.doc_type, "value") else r.doc_type,
+            "linked_doc_id": r.linked_doc_id,
+            "content": r.content,
+            "created_at": r.created_at,
+            "updated_at": r.updated_at
+        }
+        if r.template_id:
+            template = template_map.get(r.template_id)
+            if template and template.slug:
+                r_dict["template_id"] = template.slug
+        result.append(r_dict)
     
-    return resumes
+    return result
 
 @router.get("/{resume_id}", response_model=ResumeOut)
 async def get_resume(
@@ -83,17 +93,29 @@ async def get_resume(
     if not resume:
         raise HTTPException(status_code=404, detail="CV non trouvé")
     
+    # Convert to dict to avoid mutating DB
+    r_dict = {
+        "id": resume.id,
+        "title": resume.title,
+        "template_id": resume.template_id,
+        "status": resume.status.value if hasattr(resume.status, "value") else resume.status,
+        "doc_type": resume.doc_type.value if hasattr(resume.doc_type, "value") else resume.doc_type,
+        "linked_doc_id": resume.linked_doc_id,
+        "content": resume.content,
+        "user_id": resume.user_id,
+        "created_at": resume.created_at,
+        "updated_at": resume.updated_at
+    }
+
     # Resolve template_id: if it's a UUID, convert to slug for the frontend
     if resume.template_id:
         template = db.query(Template).filter(
             (Template.id == resume.template_id) | (Template.slug == resume.template_id)
         ).first()
-        if template and template.slug and template.slug != resume.template_id:
-            resume.template_id = template.slug
-            db.commit()
-            db.refresh(resume)
-    
-    return resume
+        if template and template.slug:
+            r_dict["template_id"] = template.slug
+            
+    return r_dict
 
 from fastapi import Request
 
