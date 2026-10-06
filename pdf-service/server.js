@@ -54,7 +54,9 @@ app.post('/generate-pdf', async (req, res) => {
       args: launchArgs,
     });
 
-    const page = await browser.newPage();
+    const page = await browser.newPage({
+      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    });
 
     // Intercepter les logs React pour le debug !
     page.on('console', msg => console.log(`[Browser Console] ${msg.type().toUpperCase()}: ${msg.text()}`));
