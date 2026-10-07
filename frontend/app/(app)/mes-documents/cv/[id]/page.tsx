@@ -287,13 +287,20 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
         );
 
         if (res.url) {
-          // Trigger file download
-          const link = document.createElement('a');
-          link.href = res.url;
-          link.setAttribute('download', `${cv.title || 'CV'}.pdf`);
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
+          try {
+            const fileRes = await fetch(res.url);
+            const blob = await fileRes.blob();
+            const localUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = localUrl;
+            link.setAttribute('download', `${cv.title || 'CV'}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(localUrl);
+          } catch (e) {
+            window.open(res.url, '_blank');
+          }
         }
       } catch (err) {
         console.error("Erreur lors de l'export PDF:", err);

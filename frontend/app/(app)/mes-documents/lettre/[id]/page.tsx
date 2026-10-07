@@ -192,12 +192,21 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
           "sandbox-bypass-id"
         );
         if (res.url) {
-          const link = document.createElement('a');
-          link.href = res.url;
-          link.setAttribute('download', `${formData.title || 'Lettre'}.pdf`);
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
+          try {
+            const fileRes = await fetch(res.url);
+            const blob = await fileRes.blob();
+            const localUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = localUrl;
+            link.setAttribute('download', `${formData.title || 'Lettre'}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(localUrl);
+          } catch (e) {
+            // Fallback if CORS fails
+            window.open(res.url, '_blank');
+          }
         }
       } catch (err) {
         console.error("Erreur lors de l'export PDF:", err);
