@@ -28,9 +28,11 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
   const [isSaving, setIsSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [scale, setScale] = useState(0.5);
-  const [isMobileFormOpen, setIsMobileFormOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'content' | 'design' | 'ai'>('content');
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [isDesignModalOpen, setIsDesignModalOpen] = useState(false);
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [isAIModalOpen, setIsAIModalOpen] = useState(false);
   
   const [dbThemes, setDbThemes] = useState<any[]>([]);
 
@@ -339,8 +341,86 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
       formData={formData}
       setFormData={setFormData}
       updateCv={updateCv}
-      setActiveTab={setActiveTab}
+      setActiveTab={() => {
+        setIsAIModalOpen(false);
+        setIsFormModalOpen(true);
+      }}
     />
+  );
+
+  const renderModal = (isOpen: boolean, onClose: () => void, title: string, icon: React.ReactNode, children: React.ReactNode) => {
+    if (!isOpen) return null;
+    return (
+      <div className="fixed inset-0 z-[100] flex flex-col sm:items-center sm:justify-center p-0 sm:p-4">
+        <div className="hidden sm:block absolute inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity" onClick={onClose} />
+        <div className="relative bg-white w-full h-[100dvh] sm:h-auto sm:w-[600px] sm:max-h-[90vh] flex flex-col sm:rounded-2xl shadow-2xl z-10 overflow-hidden animate-in fade-in sm:zoom-in duration-200">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-white flex-shrink-0">
+            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+              {icon}
+              {title}
+            </h3>
+            <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          <div className="p-6 overflow-y-auto bg-gray-50 flex-1 custom-scrollbar">
+            {children}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderSidebarMenu = () => (
+    <div className="space-y-4">
+      {/* Design Button */}
+      <button 
+        onClick={() => setIsDesignModalOpen(true)}
+        className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl transition-colors group"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-white text-indigo-600 shadow-sm border border-gray-200 flex items-center justify-center">
+            <Palette className="w-4 h-4" />
+          </div>
+          <div className="text-left">
+            <p className="text-sm font-bold text-gray-900">Choix du modèle</p>
+            <p className="text-xs text-gray-500 font-medium group-hover:underline">{currentThemeObj?.name || 'Classique'}</p>
+          </div>
+        </div>
+      </button>
+
+      {/* Edit Button */}
+      <button 
+        onClick={() => setIsFormModalOpen(true)}
+        className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl transition-colors group"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-white text-indigo-600 shadow-sm border border-gray-200 flex items-center justify-center">
+            <PenTool className="w-4 h-4" />
+          </div>
+          <div className="text-left">
+            <p className="text-sm font-bold text-gray-900">Éditer la lettre</p>
+            <p className="text-xs text-gray-500 font-medium group-hover:underline">Modifier le contenu</p>
+          </div>
+        </div>
+      </button>
+
+      {/* AI Button */}
+      <button 
+        onClick={() => setIsAIModalOpen(true)}
+        className="w-full flex items-center justify-between p-4 bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 rounded-xl transition-colors group"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-white text-indigo-600 shadow-sm border border-indigo-200 flex items-center justify-center">
+            <Sparkles className="w-4 h-4" />
+          </div>
+          <div className="text-left">
+            <p className="text-sm font-bold text-indigo-900">Assistant IA</p>
+            <p className="text-xs text-indigo-600 font-medium group-hover:underline">Générer avec l'IA</p>
+          </div>
+        </div>
+      </button>
+    </div>
   );
 
   return (
@@ -389,7 +469,7 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
         </div>
         <div className="flex items-center gap-3 mt-2 md:mt-0">
           <button
-            onClick={() => setIsMobileFormOpen(true)}
+            onClick={() => setIsSettingsOpen(true)}
             className="lg:hidden inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-full font-semibold text-sm hover:bg-gray-200 transition-colors"
           >
             <Settings2 className="w-4 h-4" /> Options
@@ -415,31 +495,13 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 print:hidden">
         
         {/* Desktop Sidebar */}
-        <div className="hidden lg:block lg:col-span-4 space-y-6">
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 sticky top-6">
-            <div className="flex p-1 bg-gray-100/80 rounded-xl mb-6">
-              <button
-                onClick={() => setActiveTab('design')}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium rounded-lg transition-all ${activeTab === 'design' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
-              >
-                <Palette className="w-3.5 h-3.5" /> Modèle
-              </button>
-              <button
-                onClick={() => setActiveTab('content')}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium rounded-lg transition-all ${activeTab === 'content' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
-              >
-                <PenTool className="w-3.5 h-3.5" /> Éditer
-              </button>
-              <button
-                onClick={() => setActiveTab('ai')}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium rounded-lg transition-all ${activeTab === 'ai' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
-              >
-                <Sparkles className="w-3.5 h-3.5" /> IA
-              </button>
-            </div>
-            {activeTab === 'content' && FormContent()}
-            {activeTab === 'design' && DesignContent()}
-            {activeTab === 'ai' && AIContent()}
+        <div className="hidden lg:block lg:col-span-4 space-y-6 relative z-[60]">
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 sticky top-6 z-[60]">
+            <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+              <Settings2 className="w-5 h-5 text-indigo-600" />
+              Personnalisation
+            </h2>
+            {renderSidebarMenu()}
           </div>
         </div>
 
@@ -490,45 +552,29 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
         </div>
       </div>
       
-      {/* Mobile Form Modal */}
-      {isMobileFormOpen && (
-        <div className="fixed inset-0 z-50 bg-gray-50 flex flex-col lg:hidden">
-          <div className="flex items-center justify-between p-4 bg-white border-b border-gray-200">
-            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <Settings2 className="w-5 h-5 text-indigo-600" />
-              Options
-            </h2>
-            <button onClick={() => setIsMobileFormOpen(false)} className="p-2 text-gray-500 hover:bg-gray-100 rounded-full">
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-          <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
-            <div className="flex p-1 bg-white border border-gray-200 rounded-xl mb-6 shadow-sm">
-              <button
-                onClick={() => setActiveTab('design')}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-medium rounded-lg transition-all ${activeTab === 'design' ? 'bg-indigo-50 text-indigo-600' : 'text-gray-500 hover:text-gray-900'}`}
-              >
-                <Palette className="w-3.5 h-3.5" /> Modèle
-              </button>
-              <button
-                onClick={() => setActiveTab('content')}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-medium rounded-lg transition-all ${activeTab === 'content' ? 'bg-indigo-50 text-indigo-600' : 'text-gray-500 hover:text-gray-900'}`}
-              >
-                <PenTool className="w-3.5 h-3.5" /> Éditer
-              </button>
-              <button
-                onClick={() => setActiveTab('ai')}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-medium rounded-lg transition-all ${activeTab === 'ai' ? 'bg-indigo-50 text-indigo-600' : 'text-gray-500 hover:text-gray-900'}`}
-              >
-                <Sparkles className="w-3.5 h-3.5" /> IA
+      {/* Mobile Settings Modal */}
+      {isSettingsOpen && (
+        <div className="lg:hidden fixed inset-0 z-[100] flex flex-col p-0">
+          <div className="relative bg-white w-full h-[100dvh] flex flex-col z-10 overflow-hidden animate-in fade-in duration-200">
+            <div className="h-14 flex items-center justify-between px-6 border-b border-gray-100 flex-shrink-0">
+              <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                <Settings2 className="w-5 h-5 text-indigo-600" /> Personnalisation
+              </h2>
+              <button onClick={() => setIsSettingsOpen(false)} className="p-2 hover:bg-gray-100 rounded-full text-gray-500 transition-colors">
+                <X className="w-5 h-5" />
               </button>
             </div>
-            {activeTab === 'content' && FormContent()}
-            {activeTab === 'design' && DesignContent()}
-            {activeTab === 'ai' && AIContent()}
+            <div className="flex-1 overflow-y-auto p-6 bg-white">
+              {renderSidebarMenu()}
+            </div>
           </div>
         </div>
       )}
+
+      {/* Tool Modals */}
+      {renderModal(isDesignModalOpen, () => setIsDesignModalOpen(false), "Choix du modèle", <Palette className="w-5 h-5 text-indigo-600" />, DesignContent())}
+      {renderModal(isFormModalOpen, () => setIsFormModalOpen(false), "Éditer la lettre", <PenTool className="w-5 h-5 text-indigo-600" />, FormContent())}
+      {renderModal(isAIModalOpen, () => setIsAIModalOpen(false), "Assistant IA", <Sparkles className="w-5 h-5 text-indigo-600" />, AIContent())}
 
       {cv && (
         <ExportModal 
