@@ -160,8 +160,8 @@ export default function AnalyserPage() {
       const { cvApi } = await import('@/lib/cv-api')
       const newLetter = await cvApi.createResume(session.user.accessToken, {
         title: `Lettre – ${result?.angle?.title || new Date().toLocaleDateString()}`,
-        template_id: 'classique',
-        doc_type: 'lettre',
+        template_id: 'classique_lettre',
+        doc_type: 'cover_letter',
         content: {
           subject: letterData.subject || '',
           salutation: letterData.salutation || 'Madame, Monsieur,',
