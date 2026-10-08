@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query, Request, Response
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime, timezone
@@ -132,8 +132,8 @@ async def delete_page(
 # ──────────────────────────────────────────────
 
 @router.get("/public/{slug}")
-async def get_public_page(slug: str, db: Session = Depends(get_db)):
-    """Fetch a public page by slug. Increments view count. Returns full filtered profile."""
+async def get_public_page(slug: str, request: Request, response: Response, db: Session = Depends(get_db)):
+    """Fetch a public page by slug. Increments view count (once per day per user). Returns full filtered profile."""
     page = crud_public_page.get_by_slug(db, slug)
     if not page:
         raise HTTPException(status_code=404, detail="Cette page n'existe pas")
@@ -150,8 +150,12 @@ async def get_public_page(slug: str, db: Session = Depends(get_db)):
         if now > exp:
             raise HTTPException(status_code=410, detail="Ce lien a expiré")
 
-    # Increment views
-    crud_public_page.increment_views(db, page)
+    # Increment views (with anti double-count)
+    cookie_name = f"viewed_page_{page.id}"
+    viewed = request.cookies.get(cookie_name)
+    if not viewed:
+        crud_public_page.increment_views(db, page)
+        response.set_cookie(key=cookie_name, value="1", max_age=3600*24, httponly=True, samesite='lax')
 
     # Fetch owner's profile
     profile = profile_crud.get_by_user(db, user_id=page.user_id)
