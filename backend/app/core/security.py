@@ -28,6 +28,9 @@ def get_password_hash(password: str) -> str:
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     """Crée un nouveau token JWT"""
     to_encode = data.copy()
+    if "purpose" not in to_encode:
+        to_encode["purpose"] = "access"
+        
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:

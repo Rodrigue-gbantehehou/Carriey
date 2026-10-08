@@ -24,6 +24,12 @@ async def get_current_user(
     
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        
+        # Verify purpose to prevent using reset/setup tokens for login
+        purpose = payload.get("purpose")
+        if purpose and purpose != "access":
+            raise credentials_exception
+            
         email: Optional[str] = payload.get("sub")
         if email is None:
             raise credentials_exception
@@ -53,6 +59,12 @@ async def get_optional_user(
     token = auth_header.replace("Bearer ", "")
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        
+        # Verify purpose
+        purpose = payload.get("purpose")
+        if purpose and purpose != "access":
+            return None
+            
         email: Optional[str] = payload.get("sub")
         if email is None:
             return None
