@@ -411,21 +411,11 @@ async def export_pdf(
         return {"file": str(out_pdf), "url": url}
     except HTTPException as http_exc:
         logger.error(f"[PDF Export] HTTPException capturée: status={http_exc.status_code} detail={http_exc.detail!r}")
-        try:
-            (STATIC_DIR / "error.txt").write_text(
-                f"HTTPException {http_exc.status_code}: {http_exc.detail!r}", encoding="utf-8"
-            )
-        except:
-            pass
         raise
     except Exception as e:
         import traceback
         tb = traceback.format_exc()
         logger.error(f"PDF export error: {tb}")
-        try:
-            (STATIC_DIR / "error.txt").write_text(tb, encoding="utf-8")
-        except:
-            pass
         raise HTTPException(status_code=400, detail=repr(e))
     finally:
         if tmp_html is not None:

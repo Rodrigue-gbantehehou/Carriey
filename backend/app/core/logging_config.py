@@ -9,7 +9,7 @@ from pathlib import Path
 
 # ─── Répertoire des logs ──────────────────────────────────────────────────────
 BASE_DIR = Path(__file__).resolve().parents[2]  # backend/
-LOG_DIR = BASE_DIR / "static" / "logs"
+LOG_DIR = BASE_DIR / "logs"
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 
 LOG_FILE = LOG_DIR / "carriey.log"

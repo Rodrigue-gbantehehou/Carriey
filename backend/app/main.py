@@ -56,12 +56,26 @@ from slowapi.errors import RateLimitExceeded
 from fastapi import Request
 from app.core.limiter import limiter
 
+from contextlib import asynccontextmanager
+from app.services.cleanup_service import cleanup_service
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    logger.info("Démarrage des services d'arrière-plan...")
+    cleanup_service.start(retention_hours=48, interval_seconds=3600)
+    yield
+    # Shutdown
+    logger.info("Arrêt des services d'arrière-plan...")
+    cleanup_service.stop()
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version="1.0.0",
     description=f"API Backend for {settings.PROJECT_NAME} Flutter & Web",
     docs_url="/docs",
-    redoc_url="/redoc"
+    redoc_url="/redoc",
+    lifespan=lifespan
 )
 
 app.state.limiter = limiter
