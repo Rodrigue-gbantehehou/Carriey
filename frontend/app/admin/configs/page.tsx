@@ -21,7 +21,9 @@ export default function AdminConfigsPage() {
     // Form states
     const [aiProvider, setAiProvider] = useState('gemini')
     const [aiModelGemini, setAiModelGemini] = useState('gemini-2.0-flash')
+    const [aiKeyGemini, setAiKeyGemini] = useState('')
     const [aiModelGroq, setAiModelGroq] = useState('llama-3.3-70b-versatile')
+    const [aiKeyGroq, setAiKeyGroq] = useState('')
 
     useEffect(() => {
         const fetchConfigs = async () => {
@@ -39,9 +41,15 @@ export default function AdminConfigsPage() {
                         
                     const geminiModel = data.find(c => c.key === 'ai_model_gemini')?.value
                     if (geminiModel) setAiModelGemini(geminiModel)
+                    
+                    const geminiKey = data.find(c => c.key === 'ai_key_gemini')?.value
+                    if (geminiKey) setAiKeyGemini(geminiKey)
                         
                     const groqModel = data.find(c => c.key === 'ai_model_groq')?.value
                     if (groqModel) setAiModelGroq(groqModel)
+                    
+                    const groqKey = data.find(c => c.key === 'ai_key_groq')?.value
+                    if (groqKey) setAiKeyGroq(groqKey)
                 }
             } catch (err: any) {
                 toast.error(err.message)
@@ -73,7 +81,9 @@ export default function AdminConfigsPage() {
             await Promise.all([
                 saveConfig('ai_provider', aiProvider),
                 saveConfig('ai_model_gemini', aiModelGemini),
-                saveConfig('ai_model_groq', aiModelGroq)
+                saveConfig('ai_key_gemini', aiKeyGemini),
+                saveConfig('ai_model_groq', aiModelGroq),
+                saveConfig('ai_key_groq', aiKeyGroq)
             ])
             toast.success("Configurations IA mises à jour !")
         } catch (err: any) {
@@ -126,30 +136,56 @@ export default function AdminConfigsPage() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-                        {/* Gemini Model */}
-                        <div className={`p-4 rounded-md border ${aiProvider === 'gemini' ? 'border-purple-200 bg-purple-50/30' : 'border-gray-100 bg-gray-50'}`}>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Modèle Gemini</label>
-                            <input
-                                type="text"
-                                value={aiModelGemini}
-                                onChange={(e) => setAiModelGemini(e.target.value)}
-                                placeholder="ex: gemini-2.0-flash"
-                                className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-purple-200"
-                            />
-                            <p className="text-xs text-gray-500 mt-1">Nom exact du modèle (ex: gemini-2.0-flash, gemini-1.5-pro).</p>
+                        {/* Gemini Config */}
+                        <div className={`p-4 rounded-md border space-y-4 ${aiProvider === 'gemini' ? 'border-purple-200 bg-purple-50/30' : 'border-gray-100 bg-gray-50'}`}>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Modèle Gemini</label>
+                                <input
+                                    type="text"
+                                    value={aiModelGemini}
+                                    onChange={(e) => setAiModelGemini(e.target.value)}
+                                    placeholder="ex: gemini-2.0-flash"
+                                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-purple-200"
+                                />
+                                <p className="text-[11px] text-gray-500 mt-1">Nom exact du modèle.</p>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Clé API Gemini (Optionnel)</label>
+                                <input
+                                    type="password"
+                                    value={aiKeyGemini}
+                                    onChange={(e) => setAiKeyGemini(e.target.value)}
+                                    placeholder="Laisser vide pour utiliser le .env"
+                                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-purple-200"
+                                />
+                                <p className="text-[11px] text-gray-500 mt-1">Surcharge la variable GEMINI_API_KEY.</p>
+                            </div>
                         </div>
 
-                        {/* Groq Model */}
-                        <div className={`p-4 rounded-md border ${aiProvider === 'groq' ? 'border-purple-200 bg-purple-50/30' : 'border-gray-100 bg-gray-50'}`}>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Modèle Groq</label>
-                            <input
-                                type="text"
-                                value={aiModelGroq}
-                                onChange={(e) => setAiModelGroq(e.target.value)}
-                                placeholder="ex: llama-3.3-70b-versatile"
-                                className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-purple-200"
-                            />
-                            <p className="text-xs text-gray-500 mt-1">Nom exact du modèle (ex: llama-3.3-70b-versatile, mixtral-8x7b-32768).</p>
+                        {/* Groq Config */}
+                        <div className={`p-4 rounded-md border space-y-4 ${aiProvider === 'groq' ? 'border-purple-200 bg-purple-50/30' : 'border-gray-100 bg-gray-50'}`}>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Modèle Groq</label>
+                                <input
+                                    type="text"
+                                    value={aiModelGroq}
+                                    onChange={(e) => setAiModelGroq(e.target.value)}
+                                    placeholder="ex: llama-3.3-70b-versatile"
+                                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-purple-200"
+                                />
+                                <p className="text-[11px] text-gray-500 mt-1">Nom exact du modèle.</p>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Clé API Groq (Optionnel)</label>
+                                <input
+                                    type="password"
+                                    value={aiKeyGroq}
+                                    onChange={(e) => setAiKeyGroq(e.target.value)}
+                                    placeholder="Laisser vide pour utiliser le .env"
+                                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-purple-200"
+                                />
+                                <p className="text-[11px] text-gray-500 mt-1">Surcharge la variable GROQ_API_KEY.</p>
+                            </div>
                         </div>
                     </div>
 

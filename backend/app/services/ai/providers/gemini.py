@@ -14,9 +14,12 @@ class GeminiProvider(LLMProvider):
     Aucune logique métier, aucun prompt ici.
     """
 
-    def __init__(self, model_name: Optional[str] = None):
-        # Le SDK lit GEMINI_API_KEY depuis l'environnement automatiquement
-        self.client = genai.Client()
+    def __init__(self, api_key: Optional[str] = None, model_name: Optional[str] = None):
+        if api_key:
+            self.client = genai.Client(api_key=api_key)
+        else:
+            self.client = genai.Client() # Fallback sur l'environnement
+            
         self.model = model_name if model_name else "gemini-2.0-flash"
 
     async def generate_json(self, prompt: str) -> Tuple[Dict[str, Any], Dict[str, Any]]:
