@@ -276,3 +276,22 @@ async def update_profile(
     db.refresh(current_user)
     log_audit(db, current_user.id, "update_profile", "user", current_user.id, {})
     return current_user
+
+
+class AcceptTermsRequest(BaseModel):
+    version: str
+
+@router.post("/accept-terms")
+async def accept_terms(
+    req: AcceptTermsRequest,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """Met à jour la version des CGU acceptées par l'utilisateur"""
+    current_user.accepted_terms_version = req.version
+    db.commit()
+    db.refresh(current_user)
+    
+    log_audit(db, current_user.id, "accept_terms", "user", current_user.id, {"version": req.version})
+    
+    return {"message": "Conditions acceptées avec succès", "accepted_terms_version": current_user.accepted_terms_version}

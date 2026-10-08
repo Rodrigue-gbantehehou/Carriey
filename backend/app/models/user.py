@@ -23,6 +23,9 @@ class User(Base):
     # Token revocation mechanism
     token_version = Column(Integer, default=1, nullable=False, server_default="1")
     
+    # Legal & Compliance
+    accepted_terms_version = Column(String(50), default="1.0", nullable=False, server_default="1.0")
+    
     # AI Quotas
     ai_quota_used_today = Column(Integer, default=0, nullable=False, server_default="0")
     last_ai_usage_date = Column(DateTime(timezone=True), nullable=True)

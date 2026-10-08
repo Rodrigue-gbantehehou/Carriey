@@ -22,6 +22,7 @@ class UserResponse(UserBase):
     created_at: datetime
     premium_until: Optional[datetime] = None
     subscription_status: str
+    accepted_terms_version: str
 
     class Config:
         from_attributes = True

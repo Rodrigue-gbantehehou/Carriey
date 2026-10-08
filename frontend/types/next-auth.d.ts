@@ -9,6 +9,7 @@ declare module "next-auth" {
             accessToken: string
             premium_until?: string | null
             subscription_status?: string
+            accepted_terms_version?: string
         } & DefaultSession["user"]
     }
 
@@ -19,6 +20,7 @@ declare module "next-auth" {
         full_name?: string
         premium_until?: string | null
         subscription_status?: string
+        accepted_terms_version?: string
     }
 }
 
@@ -27,5 +29,6 @@ declare module "next-auth/jwt" {
         id: string
         role: string
         accessToken: string
+        accepted_terms_version?: string
     }
 }

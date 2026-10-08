@@ -21,6 +21,11 @@ export const config = {
     tokenKey: 'auth_token',
   },
 
+  // Configuration Légale (CGU / Confidentialité)
+  legal: {
+    currentTermsVersion: '1.1', // Incrementez ceci pour forcer les utilisateurs à réaccepter les CGU
+  },
+
   // Chemins de l'application
   paths: {
     login: '/login',

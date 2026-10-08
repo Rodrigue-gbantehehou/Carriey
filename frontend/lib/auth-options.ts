@@ -72,6 +72,7 @@ export const authOptions: NextAuthOptions = {
             accessToken: token,
             premium_until: userData.premium_until,
             subscription_status: userData.subscription_status,
+            accepted_terms_version: userData.accepted_terms_version,
           };
 
         } catch (e) {
@@ -89,6 +90,7 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.premium_until = user.premium_until;
         token.subscription_status = user.subscription_status;
+        token.accepted_terms_version = user.accepted_terms_version;
       }
       return token;
     },
@@ -98,6 +100,7 @@ export const authOptions: NextAuthOptions = {
       session.user.id = token.id as string;
       session.user.premium_until = token.premium_until as string | null | undefined;
       session.user.subscription_status = token.subscription_status as string | undefined;
+      session.user.accepted_terms_version = token.accepted_terms_version as string | undefined;
       return session;
     }
   },

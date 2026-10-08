@@ -2,6 +2,7 @@ import './globals.css';
 import { Metadata } from 'next';
 import { NextAuthProvider } from '@/contexts/NextAuthProvider';
 import { Toaster } from 'react-hot-toast';
+import LegalConsentWrapper from '@/components/app/layout/LegalConsentWrapper';
 
 import siteMetadata from './metadata';
 export const metadata: Metadata = siteMetadata;
@@ -20,7 +21,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="antialiased bg-gray-50" style={{ fontFamily: "'Inter', sans-serif" }}>
         <NextAuthProvider>
           <div className="min-h-screen flex flex-col">
-            {children}
+            <LegalConsentWrapper>
+              {children}
+            </LegalConsentWrapper>
             <Toaster position="top-right" />
           </div>
         </NextAuthProvider>
