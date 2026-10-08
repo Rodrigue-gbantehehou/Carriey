@@ -15,7 +15,8 @@ import {
     Globe,
     User,
     Lock,
-    Settings
+    Settings,
+    MessageSquare
 } from 'lucide-react'
 
 // Sidebar nav items
@@ -39,6 +40,7 @@ const navSections = [
             { label: 'Utilisateurs', href: '/admin/users', icon: Users },
             { label: 'Paiements', href: '/admin/payments', icon: CreditCard },
             { label: 'Tarifs & Plans', href: '/admin/plans', icon: CreditCard },
+            { label: 'Messages', href: '/admin/messages', icon: MessageSquare },
         ]
     },
     {
