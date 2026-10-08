@@ -118,7 +118,7 @@ async def upload_profile_photo(
         if old_path.exists():
             old_path.unlink()
     
-    filename = f"{current_user.id}_{uuid.uuid4().hex[:8]}.{ext}"
+    filename = f"{current_user.id}_{uuid.uuid4().hex}.{ext}"
     file_path = photos_dir / filename
     with open(file_path, 'wb') as f:
         f.write(contents)
@@ -133,8 +133,21 @@ async def upload_profile_photo(
 @router.get("/photo/{filename}")
 async def get_profile_photo(filename: str):
     """Serve a profile photo from the private directory"""
+    # Prevent path traversal
+    if "/" in filename or "\\" in filename or ".." in filename:
+        raise HTTPException(status_code=400, detail="Nom de fichier invalide")
+        
     BASE_DIR = Path(__file__).resolve().parents[4]
-    file_path = BASE_DIR / "private_uploads" / "photos" / filename
+    photos_dir = BASE_DIR / "private_uploads" / "photos"
+    file_path = photos_dir / filename
+    
+    # Double check absolute path
+    try:
+        if not file_path.resolve().is_relative_to(photos_dir.resolve()):
+            raise HTTPException(status_code=400, detail="Accès refusé")
+    except ValueError:
+        pass # In case is_relative_to is not available in older python, though Python 3.9+ has it.
+
     if not file_path.exists() or not file_path.is_file():
         raise HTTPException(status_code=404, detail="Photo introuvable")
     return FileResponse(path=file_path)
