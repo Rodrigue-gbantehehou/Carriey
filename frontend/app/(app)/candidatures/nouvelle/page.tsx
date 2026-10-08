@@ -57,7 +57,7 @@ function ScoreRing({ score }: { score: number }) {
   )
 }
 
-export default function AnalyserPage() {
+export default function NouvelleCandidaturePage() {
   const { data: session } = useSession()
   const router = useRouter()
   const [jobText, setJobText] = useState('')
@@ -160,7 +160,7 @@ export default function AnalyserPage() {
         },
       })
 
-      toast.success('✅ Lettre de motivation créée !', { id: toastId })
+      toast.success('Lettre de motivation créée !', { id: toastId })
       router.push(`/mes-documents/lettre/${newLetter.id}`)
     } catch (err) {
       toast.error('Erreur lors de la génération. Réessayez.', { id: toastId })
@@ -179,16 +179,18 @@ export default function AnalyserPage() {
             <div className="flex items-center gap-2 text-xs text-gray-400 font-semibold mb-4">
               <Link href="/accueil" className="hover:text-indigo-600 transition-colors">Accueil</Link>
               <ChevronRight className="w-3 h-3" />
-              <span className="text-gray-700">Analyse de correspondance</span>
+              <Link href="/candidatures" className="hover:text-indigo-600 transition-colors">Candidatures</Link>
+              <ChevronRight className="w-3 h-3" />
+              <span className="text-gray-700">Nouvelle</span>
             </div>
             <div className="flex items-center gap-3 mb-3">
               <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center">
                 <Target className="w-5 h-5 text-indigo-600" />
               </div>
-              <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Analyse de correspondance</h1>
+              <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Nouvelle candidature</h1>
             </div>
             <p className="text-gray-500 font-medium text-sm max-w-xl">
-              Collez une offre d'emploi. Carriey analyse votre profil et vous dit exactement où vous en êtes — et comment vous positionner.
+              Démarrez une nouvelle candidature en collant l'offre visée. Carriey analyse votre profil et vous prépare un CV et une lettre sur-mesure.
             </p>
           </div>
 

@@ -36,31 +36,7 @@ export default function AccueilPage() {
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
 
-  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
-  const [isCreatingTailoredCv, setIsCreatingTailoredCv] = useState(false);
   const [showProPaywall, setShowProPaywall] = useState(false);
-
-  const handleAiSubmit = async (jobDescription: string) => {
-    if (!session?.user?.accessToken) return;
-    setIsAiModalOpen(false);
-    setIsCreatingTailoredCv(true);
-
-    try {
-      const { createTailoredCv } = await import('@/lib/cv-adaptation-service');
-      const newCv = await createTailoredCv(session.user.accessToken, jobDescription);
-      router.push(`/mes-documents/cv/${newCv.id}`);
-    } catch (err: any) {
-      console.error(err);
-      // 403 = fonctionnalité PRO → ouvrir le PaywallModal
-      if (err?.message?.startsWith('403')) {
-        setShowProPaywall(true);
-      } else {
-        alert("Erreur lors de la création du CV ciblé.");
-      }
-    } finally {
-      setIsCreatingTailoredCv(false);
-    }
-  };
 
   const firstName = profile?.first_name || session?.user?.name?.split(' ')[0] || profile?.username || 'vous';
   const completion = getCompletionPercent(profile, about);
@@ -142,36 +118,18 @@ export default function AccueilPage() {
         <h2 className="text-xs font-bold text-gray-400 mb-4 px-1 uppercase tracking-widest">Actions rapides</h2>
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <button
-            onClick={openCreateModal}
-            className="flex flex-col items-start gap-3 p-5 rounded-2xl border border-gray-200/60 bg-white/60 backdrop-blur-md shadow-sm hover:border-indigo-300 hover:shadow-xl hover:shadow-indigo-600/10 hover:-translate-y-1 transition-all duration-300 active:scale-95 group"
+          <Link
+            href="/candidatures/nouvelle"
+            className="flex flex-col items-start gap-3 p-5 rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-white shadow-sm hover:border-indigo-300 hover:shadow-xl hover:shadow-indigo-600/10 hover:-translate-y-1 transition-all duration-300 active:scale-95 group"
           >
-            <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+            <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
               <Plus className="w-5 h-5" />
             </div>
             <div className="text-left">
-              <p className="font-bold text-gray-900 text-sm">Créer CV</p>
-              <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">Générer un document</p>
+              <p className="font-bold text-gray-900 text-sm">Nouvelle candidature</p>
+              <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">Adapter CV & Lettre par IA</p>
             </div>
-          </button>
-
-          <button
-            onClick={() => setIsAiModalOpen(true)}
-            disabled={isCreatingTailoredCv}
-            className="flex flex-col items-start gap-3 p-5 rounded-2xl border border-gray-200/60 bg-white/60 backdrop-blur-md shadow-sm hover:border-emerald-300 hover:shadow-xl hover:shadow-emerald-600/10 hover:-translate-y-1 transition-all duration-300 active:scale-95 group disabled:opacity-70 disabled:hover:translate-y-0 disabled:hover:shadow-sm"
-          >
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-              {isCreatingTailoredCv ? (
-                <div className="w-5 h-5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <Target className="w-5 h-5" />
-              )}
-            </div>
-            <div className="text-left">
-              <p className="font-bold text-gray-900 text-sm">Cibler offre</p>
-              <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">Adapter par IA</p>
-            </div>
-          </button>
+          </Link>
 
           <Link
             href="/candidatures"
@@ -196,19 +154,6 @@ export default function AccueilPage() {
             <div className="text-left">
               <p className="font-bold text-gray-900 text-sm">Statistiques</p>
               <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">Voir les métriques</p>
-            </div>
-          </Link>
-
-          <Link
-            href="/analyser"
-            className="flex flex-col items-start gap-3 p-5 rounded-2xl border border-purple-100 bg-gradient-to-br from-purple-50 to-white shadow-sm hover:border-purple-300 hover:shadow-xl hover:shadow-purple-600/10 hover:-translate-y-1 transition-all duration-300 active:scale-95 group"
-          >
-            <div className="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-              <Target className="w-5 h-5" />
-            </div>
-            <div className="text-left">
-              <p className="font-bold text-gray-900 text-sm">Analyser offre</p>
-              <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">Mon score de match</p>
             </div>
           </Link>
         </div>
@@ -249,31 +194,6 @@ export default function AccueilPage() {
         </div>
       </section>
 
-      {/* AIAssistant Modal */}
-      {isAiModalOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsAiModalOpen(false)} />
-          <div className="relative bg-white rounded-3xl p-6 w-full max-w-2xl shadow-2xl">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-emerald-600" />
-                Créer un CV ciblé
-              </h3>
-              <button onClick={() => setIsAiModalOpen(false)} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <p className="text-sm text-gray-500 mb-6">
-              Collez l'annonce ou la description de l'offre d'emploi ci-dessous. L'IA va analyser votre Master Profile, générer une accroche et adapter vos expériences.
-            </p>
-            <AIAssistant
-              onGenerate={handleAiSubmit}
-              placeholder="Ex: Développeur React avec 5 ans d'expérience..."
-              buttonText="Générer mon CV sur-mesure"
-            />
-          </div>
-        </div>
-      )}
     </div>
   );
 }
