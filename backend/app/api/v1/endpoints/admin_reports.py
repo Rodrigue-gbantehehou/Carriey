@@ -200,3 +200,55 @@ async def get_revenue_chart(
         }
         for r in results
     ]
+
+# ─── Statistiques IA (Coûts et jetons) ────────────────────────────────────────
+@router.get("/ai-stats")
+async def get_ai_stats(
+    db: Session = Depends(get_db),
+    admin: User = Depends(get_current_admin)
+):
+    """
+    Calcule le coût total de l'IA, coût moyen par utilisateur, et sépare les utilisateurs gratuits des payants.
+    """
+    from app.models.ai_log import AILog
+    
+    total_operations = db.query(func.count(AILog.id)).scalar() or 0
+    total_cost = db.query(func.sum(AILog.cost_usd)).scalar() or 0.0
+    total_prompt_tokens = db.query(func.sum(AILog.prompt_tokens)).scalar() or 0
+    total_completion_tokens = db.query(func.sum(AILog.completion_tokens)).scalar() or 0
+
+    avg_cost_per_op = total_cost / total_operations if total_operations > 0 else 0.0
+
+    # Coût par utilisateur
+    unique_users = db.query(func.count(func.distinct(AILog.user_id))).scalar() or 0
+    avg_cost_per_user = total_cost / unique_users if unique_users > 0 else 0.0
+
+    # Coût utilisateurs gratuits vs payants
+    now = datetime.now()
+    
+    # Jointure pour récupérer le statut premium au moment de la requête (ou actuel)
+    # Pour simplifier, on prend le statut premium ACTUEL de l'utilisateur.
+    query = db.query(
+        User.premium_until, 
+        func.sum(AILog.cost_usd).label("cost")
+    ).join(AILog, User.id == AILog.user_id).group_by(User.id).all()
+
+    free_cost = 0.0
+    paid_cost = 0.0
+
+    for premium_until, cost in query:
+        if premium_until and premium_until > now:
+            paid_cost += cost
+        else:
+            free_cost += cost
+
+    return {
+        "total_operations": total_operations,
+        "total_cost_usd": float(total_cost),
+        "total_prompt_tokens": int(total_prompt_tokens),
+        "total_completion_tokens": int(total_completion_tokens),
+        "avg_cost_per_operation_usd": float(avg_cost_per_op),
+        "avg_cost_per_user_usd": float(avg_cost_per_user),
+        "free_users_cost_usd": float(free_cost),
+        "paid_users_cost_usd": float(paid_cost),
+    }
