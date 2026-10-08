@@ -177,7 +177,10 @@ async def send_email_to_user(
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erreur: {str(e)}")
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Erreur admin_users: {e}")
+        raise HTTPException(status_code=500, detail="Une erreur interne est survenue.")
 
 
 @router.post("/{user_id}/reset-password")

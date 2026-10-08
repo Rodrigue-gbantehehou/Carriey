@@ -160,7 +160,10 @@ async def upload_template_preview(
         preview_url = f"/static/previews/{safe_filename}"
         return {"preview_url": preview_url, "message": "Image uploadée avec succès"}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erreur lors de l'upload: {str(e)}")
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Erreur admin_templates upload: {e}")
+        raise HTTPException(status_code=500, detail="Une erreur interne est survenue lors de l'upload.")
 
 
 @router.get("/", response_model=List[TemplateListOut])
@@ -544,4 +547,7 @@ async def update_template_files(
 
         return files_in
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erreur lors de l'écriture des fichiers: {str(e)}")
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Erreur admin_templates ecriture fichiers: {e}")
+        raise HTTPException(status_code=500, detail="Une erreur interne est survenue lors de l'écriture des fichiers.")

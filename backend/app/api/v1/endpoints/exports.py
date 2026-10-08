@@ -99,7 +99,7 @@ async def preview_html(request: Request, req: PreviewRequest):
     except Exception as e:
         import traceback
         logger.error(f"Preview error: {traceback.format_exc()}")
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail="Erreur interne lors du traitement de l'utilisateur d'export.")
 
 async def _get_or_create_export_user(req: ExportRequest, current_user: Optional[UserOut], db: Session):
     """Gère la création/récupération d'utilisateur pour l'export avec vérification du paiement"""
@@ -416,7 +416,7 @@ async def export_pdf(
         import traceback
         tb = traceback.format_exc()
         logger.error(f"PDF export error: {tb}")
-        raise HTTPException(status_code=400, detail=repr(e))
+        raise HTTPException(status_code=400, detail="Une erreur est survenue lors de l'export PDF.")
     finally:
         if tmp_html is not None:
             try:
@@ -470,7 +470,7 @@ async def export_docx_endpoint(
     except Exception as e:
         import traceback
         logger.error(f"DOCX export error: {traceback.format_exc()}")
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail="Une erreur est survenue lors de l'export DOCX.")
 
 @router.post("/auth/set-password")
 async def set_password(req: SetPasswordRequest, db: Session = Depends(get_db)):

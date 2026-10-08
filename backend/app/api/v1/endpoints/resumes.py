@@ -196,10 +196,11 @@ async def create_resume(
             "created_at": new_resume.created_at
         }
     except Exception as e:
-        import traceback
-        traceback.print_exc()
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Erreur DB lors de la création du CV : {e}")
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Une erreur interne est survenue lors de l'enregistrement.")
 
 
 
@@ -240,8 +241,11 @@ async def update_resume(
         db.commit()
         db.refresh(resume)
     except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Erreur DB lors de la modification du CV : {e}")
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Une erreur interne est survenue lors de la suppression.")
     
     # Prepare response dict to return slug to frontend
     r_dict = {
