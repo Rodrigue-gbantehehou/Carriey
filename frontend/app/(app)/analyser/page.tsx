@@ -116,13 +116,12 @@ export default function AnalyserPage() {
           usage: 'ciblee',
           disabledSections: tailoredData.disabledSections || [],
           disabledItems: tailoredData.disabledItems || {},
-          highlights: tailoredData.highlights || {},
-          summary: tailoredData.suggestedSummary || '',
+          summary: tailoredData.summary || '',
         },
       }
 
       const newCv = await cvApi.createResume(session.user.accessToken, payload)
-      toast.success('✅ CV ciblé créé avec succès !', { id: toastId })
+      toast.success('CV ciblé créé avec succès !', { id: toastId })
       router.push(`/mes-documents/cv/${newCv.id}`)
     } catch (err: any) {
       const msg = err?.message || ''
