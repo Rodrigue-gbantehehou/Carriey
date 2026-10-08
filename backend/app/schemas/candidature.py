@@ -12,6 +12,9 @@ class CandidatureBase(BaseModel):
     logo_url: Optional[str] = None
     match_score: Optional[int] = Field(None, ge=0, le=100)
     job_description: Optional[str] = None
+    analysis_result: Optional[dict] = None
+    resume_id: Optional[str] = None
+    cover_letter_id: Optional[str] = None
 
 class CandidatureCreate(CandidatureBase):
     pass
@@ -26,6 +29,9 @@ class CandidatureUpdate(BaseModel):
     logo_url: Optional[str] = None
     match_score: Optional[int] = Field(None, ge=0, le=100)
     job_description: Optional[str] = None
+    analysis_result: Optional[dict] = None
+    resume_id: Optional[str] = None
+    cover_letter_id: Optional[str] = None
 
 class CandidatureOut(CandidatureBase):
     id: str

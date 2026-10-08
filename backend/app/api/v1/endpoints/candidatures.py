@@ -20,6 +20,23 @@ def read_candidatures(
     candidatures = crud_candidature.get_by_user(db=db, user_id=current_user.id)
     return candidatures
 
+@router.get("/{id}", response_model=CandidatureOut)
+def read_candidature(
+    *,
+    db: Session = Depends(get_db),
+    id: str,
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Get a single application by ID.
+    """
+    candidature = crud_candidature.get(db=db, id=id)
+    if not candidature:
+        raise HTTPException(status_code=404, detail="Candidature not found")
+    if candidature.user_id != current_user.id and current_user.role != "SUPER_ADMIN":
+        raise HTTPException(status_code=403, detail="Not enough permissions")
+    return candidature
+
 @router.post("/", response_model=CandidatureOut)
 def create_candidature(
     *,

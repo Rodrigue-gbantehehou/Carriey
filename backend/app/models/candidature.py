@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, String, Enum, ForeignKey, DateTime, Date, Text, Integer
+from sqlalchemy import Column, String, Enum, ForeignKey, DateTime, Date, Text, Integer, JSON
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.db.session import Base
@@ -28,6 +28,10 @@ class Candidature(Base):
     
     match_score = Column(Integer, nullable=True)
     job_description = Column(Text, nullable=True)
+    analysis_result = Column(JSON, nullable=True)
+
+    resume_id = Column(String(36), ForeignKey("resumes.id", ondelete="SET NULL"), nullable=True)
+    cover_letter_id = Column(String(36), ForeignKey("resumes.id", ondelete="SET NULL"), nullable=True)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

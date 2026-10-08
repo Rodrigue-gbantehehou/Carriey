@@ -6,7 +6,7 @@ import { candidaturesApi } from '@/lib/candidature-api';
 import { AIAssistant } from '@/components/app/shared/AIAssistant';
 import config from '@/lib/config';
 import { useSession } from 'next-auth/react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Suspense } from 'react';
 
 type Status = 'envoyee' | 'entretien' | 'acceptee' | 'refusee';
@@ -34,6 +34,7 @@ function CandidaturesContent() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<Status | 'all'>('all');
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [viewMode, setViewMode] = useState<'grid' | 'kanban'>('kanban');
 
   const [applications, setApplications] = useState<Application[]>([]);
@@ -187,6 +188,7 @@ function CandidaturesContent() {
       company: data.companyName && data.companyName !== 'Non précisé' ? data.companyName : prev.company,
       role: data.jobTitle && data.jobTitle !== 'Non précisé' ? data.jobTitle : prev.role,
       location: data.location && data.location !== 'Non précisé' ? data.location : prev.location,
+      job_description: prompt
     }));
   };
 
@@ -213,11 +215,13 @@ function CandidaturesContent() {
       if (editingApp) {
         const updated = await candidaturesApi.update(editingApp.id, formData);
         setApplications(prev => prev.map(a => a.id === updated.id ? updated : a));
+        setIsModalOpen(false);
       } else {
         const created = await candidaturesApi.create(formData);
         setApplications(prev => [created, ...prev]);
+        setIsModalOpen(false);
+        router.push(`/candidatures/${created.id}`);
       }
-      setIsModalOpen(false);
     } catch (e) {
       alert("Erreur de sauvegarde");
     } finally {
@@ -236,7 +240,10 @@ function CandidaturesContent() {
       >
         {/* Actions (on hover) */}
         <div className="absolute top-1 right-1 flex items-center opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 backdrop-blur-md rounded shadow-sm border border-gray-100 z-10">
-          <button onClick={() => openEditModal(app)} className="p-1 text-gray-500 hover:text-indigo-600 transition-colors" title="Modifier">
+          <button onClick={() => router.push(`/candidatures/${app.id}`)} className="p-1 text-gray-500 hover:text-indigo-600 transition-colors" title="Ouvrir (Parcours unique)">
+            <ExternalLink className="w-2.5 h-2.5 md:w-3 md:h-3" />
+          </button>
+          <button onClick={() => openEditModal(app)} className="p-1 text-gray-500 hover:text-indigo-600 transition-colors" title="Modifier rapidement">
             <Edit2 className="w-2.5 h-2.5 md:w-3 md:h-3" />
           </button>
           <button onClick={() => handleDelete(app.id)} className="p-1 text-gray-500 hover:text-red-600 transition-colors" title="Supprimer">
@@ -430,6 +437,10 @@ function CandidaturesContent() {
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1.5">Localisation</label>
                   <input type="text" value={formData.location} onChange={e => setFormData({ ...formData, location: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Texte de l'offre (Optionnel)</label>
+                  <textarea rows={4} value={formData.job_description} onChange={e => setFormData({ ...formData, job_description: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all resize-y text-sm" placeholder="Collez l'offre ici si vous ne l'avez pas déjà extraite via l'IA..."></textarea>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

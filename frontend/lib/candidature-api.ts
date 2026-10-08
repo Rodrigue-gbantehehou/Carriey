@@ -15,6 +15,19 @@ export const candidaturesApi = {
     return res.json();
   },
 
+  async get(id: string) {
+    const session = await getSession();
+    if (!session?.user?.accessToken) return null;
+
+    const res = await fetch(`${config.apiBaseUrl}/candidatures/${id}`, {
+      headers: {
+        'Authorization': `Bearer ${session.user.accessToken}`
+      }
+    });
+    if (!res.ok) throw new Error('Failed to fetch candidature');
+    return res.json();
+  },
+
   async create(data: any) {
     const session = await getSession();
     if (!session?.user?.accessToken) throw new Error("Unauthorized");
