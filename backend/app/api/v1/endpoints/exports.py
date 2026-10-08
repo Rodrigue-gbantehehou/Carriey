@@ -514,37 +514,22 @@ async def export_user_data(
     current_user: User = Depends(get_optional_user),
     db: Session = Depends(get_db)
 ):
-    """Exporte toutes les données de l'utilisateur au format JSON"""
+    """Exporte toutes les données personnelles de l'utilisateur au format JSON (Conformité RGPD)"""
     if not current_user:
         raise HTTPException(status_code=401, detail="Non autorisé")
         
-    from fastapi.encoders import jsonable_encoder
-    from app.crud.crud_profile import profile as crud_profile
-    from app.models.resume import Resume
-    from app.models.candidature import Candidature
+    from app.services.user_account_service import export_user_gdpr_data
+    export_data = export_user_gdpr_data(db=db, user=current_user)
     
-    user_profile = crud_profile.get_by_user(db=db, user_id=current_user.id)
-    resumes = db.query(Resume).filter(Resume.user_id == current_user.id).all()
-    candidatures = db.query(Candidature).filter(Candidature.user_id == current_user.id).all()
-    
-    export_data = {
-        "user": {
-            "email": current_user.email,
-            "full_name": current_user.full_name,
-            "role": current_user.role,
-            "subscription_status": current_user.subscription_status
-        },
-        "profile": jsonable_encoder(user_profile) if user_profile else None,
-        "resumes": jsonable_encoder(resumes),
-        "candidatures": jsonable_encoder(candidatures),
-        "exported_at": datetime.now().isoformat()
-    }
+    # Audit log
+    log_audit(db, current_user.id, "gdpr_data_export", "user", current_user.id, {})
     
     # Return as a downloadable JSON file
+    filename = f"carriey_export_{current_user.id[:8]}_{datetime.now().strftime('%Y%m%d')}.json"
     return JSONResponse(
         content=export_data,
         headers={
-            "Content-Disposition": f"attachment; filename=cvtor_export_{current_user.id[:8]}.json"
+            "Content-Disposition": f"attachment; filename={filename}"
         }
     )
 

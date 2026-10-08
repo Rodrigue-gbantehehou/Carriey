@@ -112,8 +112,9 @@ STATIC_DIR.mkdir(exist_ok=True)
 
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
-# Include the API router
-app.include_router(api_router, prefix=settings.API_STR)
+# Include the API router (supports both /api and /api/v1)
+app.include_router(api_router, prefix="/api")
+app.include_router(api_router, prefix="/api/v1")
 
 @app.get("/")
 def root():

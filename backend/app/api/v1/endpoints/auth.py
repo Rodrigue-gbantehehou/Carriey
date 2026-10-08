@@ -295,3 +295,35 @@ async def accept_terms(
     log_audit(db, current_user.id, "accept_terms", "user", current_user.id, {"version": req.version})
     
     return {"message": "Conditions acceptées avec succès", "accepted_terms_version": current_user.accepted_terms_version}
+
+
+class DeleteAccountRequest(BaseModel):
+    password: Optional[str] = None
+    confirmation: Optional[str] = None
+
+@router.delete("/me")
+async def delete_my_account(
+    req: Optional[DeleteAccountRequest] = None,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Suppression définitive du compte et de toutes les données personnelles (Droit à l'effacement RGPD Art. 17).
+    Supprime tous les CVs, candidatures, fichiers générés et photos sur le disque.
+    """
+    if req and req.password:
+        if not utils.verify_password(req.password, current_user.hashed_password):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Le mot de passe saisi est incorrect."
+            )
+    elif req and req.confirmation:
+        if req.confirmation.strip().upper() != "SUPPRIMER":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Veuillez saisir 'SUPPRIMER' pour confirmer la suppression définitive."
+            )
+
+    from app.services.user_account_service import delete_user_account_and_data
+    result = delete_user_account_and_data(db=db, user=current_user)
+    return result

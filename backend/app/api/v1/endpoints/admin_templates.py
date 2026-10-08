@@ -88,10 +88,10 @@ PREVIEW_DUMMY_DATA = {
     ],
     "projects": [
         {
-            "name": "CVtor Platform",
+            "name": "Carriey Platform",
             "description": "Plateforme de génération de CV en ligne",
             "tech": "Next.js, FastAPI, MySQL",
-            "url": "github.com/jeandupont/cvtor"
+            "url": "github.com/jeandupont/carriey"
         }
     ]
 }

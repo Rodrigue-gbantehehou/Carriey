@@ -22,7 +22,7 @@ TEMPLATES_DIR = BASE_DIR.parent / "frontend" / "components" / "app" / "cv" / "te
 
 def seed_admin_user(db: Session):
     """Créer un utilisateur super admin par défaut"""
-    admin_email = "admin@cvtor.com"
+    admin_email = "admin@carriey.com"
     
     # Vérifier si l'admin existe déjà
     existing_admin = db.query(User).filter(User.email == admin_email).first()
@@ -166,7 +166,7 @@ def main():
         
         print("\n✅ Database seeding completed successfully!")
         print("\n📝 Credentials:")
-        print("   Admin: admin@cvtor.com / admin123")
+        print("   Admin: admin@carriey.com / admin123")
         print("   User:  user@test.com / test123")
         
     except Exception as e:

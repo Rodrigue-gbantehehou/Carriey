@@ -22,7 +22,7 @@ except ImportError as e:
     sys.exit(1)
 
 # Setup Database
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./cvtor.db")
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./carriey.db")
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

@@ -40,7 +40,7 @@ target_metadata = Base.metadata
 
 # ── Lire DATABASE_URL depuis l'environnement (override alembic.ini) ───────────
 def get_url() -> str:
-    url = os.environ.get("DATABASE_URL", "sqlite:///./cvtor.db")
+    url = os.environ.get("DATABASE_URL", "sqlite:///./carriey.db")
     # Normaliser mysql:// → mysql+pymysql://
     if url.startswith("mysql://"):
         url = url.replace("mysql://", "mysql+pymysql://", 1)

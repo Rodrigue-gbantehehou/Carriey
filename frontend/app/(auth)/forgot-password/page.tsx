@@ -2,8 +2,8 @@ import { Suspense } from 'react';
 import ForgotPasswordForm from '@/components/auth/ForgotPasswordForm';
 
 export const metadata = {
-  title: 'Mot de passe oublié - CVtor',
-  description: 'Réinitialisez votre mot de passe pour accéder à votre compte CVtor',
+  title: 'Mot de passe oublié - Carriey',
+  description: 'Réinitialisez votre mot de passe pour accéder à votre compte Carriey',
 };
 
 export default function ForgotPasswordPage() {

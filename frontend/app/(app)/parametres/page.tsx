@@ -2,9 +2,9 @@
 import config from '@/lib/config';
 
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import { useProfileStore } from '@/store/profile';
-import { User, Lock, Trash2, Download, CreditCard, Bell, ChevronRight, CheckCircle2, X, Loader2, ExternalLink } from 'lucide-react';
+import { User, Lock, Trash2, Download, CreditCard, Bell, ChevronRight, CheckCircle2, X, Loader2, ExternalLink, AlertTriangle, ShieldAlert } from 'lucide-react';
 
 export default function ParametresPage() {
   const { data: session } = useSession();
@@ -81,35 +81,111 @@ export default function ParametresPage() {
     }
   };
 
+  // GDPR Data Export state
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportFeedback, setExportFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  // GDPR Account Deletion state
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleteConfirmationText, setDeleteConfirmationText] = useState('');
+  const [deletePassword, setDeletePassword] = useState('');
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
+
   const handleExportData = async () => {
     if (!session?.user?.accessToken) return;
 
+    setIsExporting(true);
+    setExportFeedback(null);
+
     try {
-      const res = await fetch(`${config.apiBaseUrl}/exports/data`, {
+      const apiBase = (process.env.NEXT_PUBLIC_API_URL ?? '/api/v1').replace(/\/$/, '');
+      const res = await fetch(`${apiBase}/exports/data`, {
         headers: {
           'Authorization': `Bearer ${session.user.accessToken}`
         }
       });
 
-      if (!res.ok) throw new Error("Erreur lors de l'exportation");
+      if (!res.ok) {
+        const errData = await res.json().catch(() => null);
+        throw new Error(errData?.detail || "Erreur lors de l'exportation des données.");
+      }
+
+      // Read filename from Content-Disposition if available
+      let filename = `carriey_export_${new Date().toISOString().slice(0, 10)}.json`;
+      const disposition = res.headers.get('Content-Disposition');
+      if (disposition && disposition.includes('filename=')) {
+        const match = disposition.match(/filename=(.+?)(?:;|$)/);
+        if (match && match[1]) {
+          filename = match[1].replace(/['"]/g, '');
+        }
+      }
 
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `mes_donnees_carriey.json`;
+      a.download = filename;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-    } catch (e) {
-      alert("Une erreur est survenue lors de l'exportation de vos données.");
+
+      setExportFeedback({
+        type: 'success',
+        message: 'Vos données ont été téléchargées avec succès (JSON conforme RGPD).'
+      });
+      setTimeout(() => setExportFeedback(null), 5000);
+    } catch (e: any) {
+      setExportFeedback({
+        type: 'error',
+        message: e.message || "Une erreur est survenue lors de l'exportation de vos données."
+      });
+    } finally {
+      setIsExporting(false);
     }
   };
 
-  const handleDeleteAccount = () => {
-    if (confirm("Êtes-vous sûr de vouloir supprimer définitivement votre compte ? Cette action est irréversible.")) {
-      alert("Demande de suppression envoyée.");
+  const handleConfirmDeleteAccount = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setDeleteError('');
+
+    const confirmationMatches = deleteConfirmationText.trim().toUpperCase() === 'SUPPRIMER';
+    if (!confirmationMatches && !deletePassword.trim()) {
+      return setDeleteError("Veuillez saisir votre mot de passe ou taper 'SUPPRIMER' pour confirmer.");
+    }
+
+    setIsDeletingAccount(true);
+    try {
+      const apiBase = (process.env.NEXT_PUBLIC_API_URL ?? '/api/v1').replace(/\/$/, '');
+      const res = await fetch(`${apiBase}/auth/me`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.user?.accessToken}`
+        },
+        body: JSON.stringify({
+          password: deletePassword.trim() || undefined,
+          confirmation: deleteConfirmationText.trim() || undefined
+        })
+      });
+
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        throw new Error(data?.detail || "Échec de la suppression du compte.");
+      }
+
+      // Nettoyer stockage local et déconnecter
+      if (typeof window !== 'undefined') {
+        localStorage.clear();
+        sessionStorage.clear();
+      }
+
+      // Déconnexion et redirection
+      await signOut({ callbackUrl: '/login?deleted=1' });
+    } catch (err: any) {
+      setDeleteError(err.message || "Une erreur est survenue lors de la suppression de votre compte.");
+      setIsDeletingAccount(false);
     }
   };
 
@@ -272,41 +348,70 @@ export default function ParametresPage() {
       </Section>
 
       <Section
-        title="Données et confidentialité"
-        description="Contrôlez vos données personnelles."
+        title="Données et confidentialité (RGPD)"
+        description="Contrôlez vos données personnelles et exercez vos droits d'accès et d'effacement."
       >
         <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
+          {exportFeedback && (
+            <div className={`p-4 rounded-2xl flex items-center gap-3 text-sm font-medium animate-slide-up ${
+              exportFeedback.type === 'success' 
+                ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' 
+                : 'bg-red-50 text-red-800 border border-red-200'
+            }`}>
+              {exportFeedback.type === 'success' ? (
+                <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+              ) : (
+                <AlertTriangle className="w-5 h-5 text-red-600 shrink-0" />
+              )}
+              <p>{exportFeedback.message}</p>
+            </div>
+          )}
+
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start sm:items-center gap-4">
+              <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
                 <Download className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-gray-900">Exporter mes données</p>
-                <p className="text-xs text-gray-500 mt-0.5 max-w-sm">
-                  Téléchargez une copie complète de votre profil, de vos CV et lettres au format JSON.
+                <p className="text-sm font-semibold text-gray-900">Exporter mes données (Art. 15 & 20 RGPD)</p>
+                <p className="text-xs text-gray-500 mt-0.5 max-w-md">
+                  Téléchargez une archive complète et structurée au format JSON de votre profil, de vos CVs, candidatures et transactions.
                 </p>
               </div>
             </div>
-            <button onClick={handleExportData} className="px-4 py-2 bg-white border border-gray-200 text-gray-700 text-sm font-bold rounded-xl hover:bg-gray-50 transition-colors shadow-sm">
-              Exporter
+            <button 
+              onClick={handleExportData} 
+              disabled={isExporting}
+              className="px-5 py-2.5 bg-white border border-gray-200 text-gray-800 text-sm font-bold rounded-xl hover:bg-gray-50 transition-all shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 shrink-0"
+            >
+              {isExporting ? <Loader2 className="w-4 h-4 animate-spin text-blue-600" /> : <Download className="w-4 h-4 text-blue-600" />}
+              {isExporting ? 'Export en cours...' : 'Exporter (JSON)'}
             </button>
           </div>
 
-          <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center">
+          <div className="pt-6 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start sm:items-center gap-4">
+              <div className="w-10 h-10 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center shrink-0">
                 <Trash2 className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-red-600">Supprimer le compte</p>
-                <p className="text-xs text-gray-500 mt-0.5 max-w-sm">
-                  Supprime définitivement votre compte et toutes vos données. Cette action est irréversible.
+                <p className="text-sm font-semibold text-red-600">Supprimer mon compte (Art. 17 RGPD)</p>
+                <p className="text-xs text-gray-500 mt-0.5 max-w-md">
+                  Supprime définitivement et sans délai votre compte, vos CVs, vos photos et l'intégralité de vos données de nos serveurs.
                 </p>
               </div>
             </div>
-            <button onClick={handleDeleteAccount} className="px-4 py-2 bg-red-50 text-red-600 border border-red-100 text-sm font-bold rounded-xl hover:bg-red-100 transition-colors">
-              Supprimer
+            <button 
+              onClick={() => {
+                setDeleteError('');
+                setDeletePassword('');
+                setDeleteConfirmationText('');
+                setIsDeleteModalOpen(true);
+              }} 
+              className="px-5 py-2.5 bg-red-50 text-red-600 border border-red-200 text-sm font-bold rounded-xl hover:bg-red-100 transition-all flex items-center justify-center gap-2 shrink-0"
+            >
+              <Trash2 className="w-4 h-4" />
+              Supprimer le compte
             </button>
           </div>
         </div>
@@ -359,6 +464,135 @@ export default function ParametresPage() {
                 <button type="submit" disabled={isChangingPassword || passwordSuccess} className="px-5 py-3 sm:py-2.5 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 disabled:opacity-50 w-full sm:w-auto flex justify-center items-center gap-2 transition-all">
                   {isChangingPassword ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                   {isChangingPassword ? 'Enregistrement...' : 'Enregistrer'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* GDPR Account Deletion Modal */}
+      {isDeleteModalOpen && (
+        <div className="fixed inset-0 z-50 flex flex-col justify-end sm:items-center sm:justify-center p-0 sm:p-4">
+          <div 
+            className="absolute inset-0 bg-gray-950/60 backdrop-blur-md transition-opacity" 
+            onClick={() => !isDeletingAccount && setIsDeleteModalOpen(false)}
+          />
+
+          <div className="relative bg-white w-full sm:max-w-lg sm:rounded-3xl rounded-t-3xl shadow-2xl z-10 flex flex-col border border-red-100 overflow-hidden animate-slide-up sm:animate-scale-in">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-red-600 to-rose-700 p-6 text-white relative">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shrink-0">
+                  <ShieldAlert className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-black tracking-tight">Supprimer définitivement mon compte</h2>
+                  <p className="text-xs text-red-100 font-medium mt-0.5">Droit à l'effacement — Article 17 du RGPD</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => !isDeletingAccount && setIsDeleteModalOpen(false)}
+                disabled={isDeletingAccount}
+                className="absolute top-5 right-5 text-white/70 hover:text-white bg-white/10 p-2 rounded-full transition-colors disabled:opacity-50"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <form onSubmit={handleConfirmDeleteAccount} className="p-6 space-y-5">
+              <div className="bg-red-50/70 border border-red-200/80 rounded-2xl p-4 text-xs text-red-900 space-y-2">
+                <p className="font-bold flex items-center gap-1.5 text-red-950 text-sm">
+                  <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
+                  Cette action est immédiate et irréversible.
+                </p>
+                <p className="text-gray-700">
+                  Conformément au RGPD, toutes les données associées à votre compte seront physiquement purgées de nos bases et serveurs de fichiers :
+                </p>
+                <ul className="list-disc pl-5 space-y-1 text-gray-600 font-medium">
+                  <li>Tous vos CVs et lettres de motivation enregistrés</li>
+                  <li>Vos fichiers PDF et documents générés sur le disque</li>
+                  <li>Vos photos de profil et pièces jointes</li>
+                  <li>Votre profil maître complet et historique de candidatures</li>
+                </ul>
+              </div>
+
+              {deleteError && (
+                <div className="p-3.5 bg-red-50 text-red-700 border border-red-200 rounded-xl text-xs font-semibold flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 shrink-0 text-red-600" />
+                  <span>{deleteError}</span>
+                </div>
+              )}
+
+              <div className="space-y-4 pt-1">
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                    Option 1 : Votre mot de passe actuel
+                  </label>
+                  <input
+                    type="password"
+                    placeholder="Entrez votre mot de passe pour confirmer"
+                    value={deletePassword}
+                    onChange={(e) => {
+                      setDeletePassword(e.target.value);
+                      setDeleteError('');
+                    }}
+                    disabled={isDeletingAccount}
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-red-500 focus:bg-white outline-none transition-all"
+                  />
+                </div>
+
+                <div className="relative flex py-1 items-center">
+                  <div className="flex-grow border-t border-gray-200"></div>
+                  <span className="flex-shrink mx-4 text-gray-400 text-xs font-bold uppercase">Ou</span>
+                  <div className="flex-grow border-t border-gray-200"></div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                    Option 2 : Tapez le mot <span className="text-red-600 font-black">SUPPRIMER</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Tapez SUPPRIMER pour confirmer"
+                    value={deleteConfirmationText}
+                    onChange={(e) => {
+                      setDeleteConfirmationText(e.target.value);
+                      setDeleteError('');
+                    }}
+                    disabled={isDeletingAccount}
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-red-500 focus:bg-white outline-none transition-all uppercase placeholder:normal-case font-mono font-bold"
+                  />
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="pt-4 border-t border-gray-100 flex flex-col sm:flex-row justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsDeleteModalOpen(false)}
+                  disabled={isDeletingAccount}
+                  className="px-5 py-2.5 text-gray-700 font-bold hover:bg-gray-100 rounded-xl text-sm transition-colors disabled:opacity-50"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  disabled={isDeletingAccount || (!deletePassword.trim() && deleteConfirmationText.trim().toUpperCase() !== 'SUPPRIMER')}
+                  className="px-6 py-2.5 bg-red-600 text-white font-bold rounded-xl shadow-lg shadow-red-600/30 hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm transition-all"
+                >
+                  {isDeletingAccount ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Suppression en cours...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-4 h-4" />
+                      Supprimer définitivement
+                    </>
+                  )}
                 </button>
               </div>
             </form>

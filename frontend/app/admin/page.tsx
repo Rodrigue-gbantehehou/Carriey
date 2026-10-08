@@ -92,7 +92,7 @@ export default function AdminDashboard() {
     <div className="space-y-8">
       <div>
         <h1 className="text-xl font-semibold text-gray-900 mb-1">Tableau de bord</h1>
-        <p className="text-sm text-gray-500">Vue d'ensemble des performances de la plateforme CVtor.</p>
+        <p className="text-sm text-gray-500">Vue d'ensemble des performances de la plateforme Carriey.</p>
       </div>
 
       {/* Stats Grid */}

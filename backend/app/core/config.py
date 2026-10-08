@@ -32,7 +32,7 @@ class Settings(BaseSettings):
     DATA_DIR: str = os.getenv("DATA_DIR", os.path.join(BASE_DIR, "data"))
     
     # Database
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./cvtor.db")
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./carriey.db")
     
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
     SECRET_KEY: str = os.getenv("JWT_SECRET_KEY") or os.getenv("SECRET_KEY") or "your-secret-key-here-change-in-production"

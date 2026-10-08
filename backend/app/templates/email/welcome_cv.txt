@@ -16,4 +16,4 @@ Vous trouverez votre CV en pièce jointe.
 Votre CV est disponible en téléchargement dans votre espace personnel.
 {% endif %}
 
-L'équipe CVTor.
+L'équipe Carriey.

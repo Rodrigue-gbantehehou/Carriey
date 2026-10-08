@@ -12,7 +12,7 @@ pymysql.install_as_MySQLdb()
 load_dotenv()
 
 # Récupérer l'URL de la base de données depuis les variables d'environnement
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./cvtor.db")
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./carriey.db")
 
 # Si on utilise MySQL, on force l'utilisation de pymysql (plus simple sur Render)
 if DATABASE_URL.startswith("mysql://"):

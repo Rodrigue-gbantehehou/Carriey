@@ -77,7 +77,7 @@ Carriey est un constructeur de CV moderne et intelligent qui combine :
 ## 📂 Structure du Projet
 
 ```
-cvtor/
+carriey/
 ├── frontend/          # Application Next.js
 │   ├── components/    # Composants React
 │   ├── pages/         # Pages de l'application

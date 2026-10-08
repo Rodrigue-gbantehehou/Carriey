@@ -159,7 +159,7 @@ async def send_email_to_user(
 <body><div class="w">
 <div class="h"><h1>{safe_subject}</h1></div>
 <div class="b"><p style="white-space:pre-wrap;line-height:1.6">{safe_message}</p></div>
-<div class="f"><p>CVtor - Message de l'equipe support</p></div>
+<div class="f"><p>Carriey - Message de l'equipe support</p></div>
 </div></body></html>"""
 
         msg = mailer_service._build_msg(

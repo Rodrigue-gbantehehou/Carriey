@@ -6,7 +6,7 @@ from typing import List, Optional
 from app.db.session import get_db
 from app.models.contact import ContactMessage
 from app.schemas.contact import ContactMessageOut
-from app.api.deps import get_current_active_admin
+from app.api.dependencies import get_current_admin
 
 router = APIRouter()
 
@@ -15,7 +15,7 @@ def get_contact_messages(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_admin = Depends(get_current_active_admin)
+    current_admin = Depends(get_current_admin)
 ):
     """
     Get all contact messages (Admin only).
@@ -27,7 +27,7 @@ def get_contact_messages(
 def delete_contact_message(
     message_id: str,
     db: Session = Depends(get_db),
-    current_admin = Depends(get_current_active_admin)
+    current_admin = Depends(get_current_admin)
 ):
     """
     Delete a contact message.

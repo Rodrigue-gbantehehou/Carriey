@@ -141,7 +141,7 @@ async def delete_user(
             detail="Vous ne pouvez pas supprimer votre propre compte"
         )
     
-    db.delete(user)
-    db.commit()
+    from app.services.user_account_service import delete_user_account_and_data
+    delete_user_account_and_data(db, user)
     
     return None

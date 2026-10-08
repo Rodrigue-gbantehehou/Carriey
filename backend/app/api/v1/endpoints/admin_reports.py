@@ -57,7 +57,7 @@ async def export_users_csv(
         ])
 
     output.seek(0)
-    filename = f"cvtor_utilisateurs_{datetime.now().strftime('%Y%m%d')}.csv"
+    filename = f"carriey_utilisateurs_{datetime.now().strftime('%Y%m%d')}.csv"
     return StreamingResponse(
         iter([output.getvalue()]),
         media_type="text/csv",
@@ -103,7 +103,7 @@ async def export_payments_csv(
         ])
 
     output.seek(0)
-    filename = f"cvtor_paiements_{datetime.now().strftime('%Y%m%d')}.csv"
+    filename = f"carriey_paiements_{datetime.now().strftime('%Y%m%d')}.csv"
     return StreamingResponse(
         iter([output.getvalue()]),
         media_type="text/csv",

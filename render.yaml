@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: cvtor-backend
+    name: carriey-backend
     env: docker
     plan: free
     region: frankfurt  # Ou une autre région supportant le free tier
@@ -16,7 +16,7 @@ services:
       - key: JWT_SECRET_KEY
         generateValue: true
       - key: BACKEND_CORS_ORIGINS
-        sync: false  # À remplir avec l'URL Vercel (ex: https://cvtor.vercel.app)
+        sync: false  # À remplir avec l'URL Vercel (ex: https://carriey.vercel.app)
       - key: FRONTEND_URL
         sync: false  # À remplir avec l'URL Vercel
       - key: HF_TOKEN
