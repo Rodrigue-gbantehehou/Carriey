@@ -23,6 +23,10 @@ class User(Base):
     # Token revocation mechanism
     token_version = Column(Integer, default=1, nullable=False, server_default="1")
     
+    # AI Quotas
+    ai_quota_used_today = Column(Integer, default=0, nullable=False, server_default="0")
+    last_ai_usage_date = Column(DateTime(timezone=True), nullable=True)
+    
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 

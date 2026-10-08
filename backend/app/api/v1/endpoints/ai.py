@@ -4,6 +4,7 @@ from app.api.dependencies import get_db, get_current_user
 from app.models.user import User
 from app.crud.crud_profile import profile as crud_profile
 from app.services.ai import get_ai_service
+from app.services.ai_quota_service import check_and_consume_ai_quota
 from pydantic import BaseModel
 from app.core.limiter import limiter
 from fastapi import Request
@@ -63,7 +64,10 @@ async def generate_cover_letter_endpoint(
         "languages": [{"name": l.name, "level": l.level} for l in profile.languages]
     }
 
-    # 2. Appeler le service d'IA
+    # 2. Vérifier et consommer le quota IA
+    check_and_consume_ai_quota(db, current_user)
+
+    # 3. Appeler le service d'IA
     try:
         ai_service = get_ai_service()
         letter_dict = await ai_service.generate_cover_letter(profile_data, req.job_description)
@@ -97,6 +101,8 @@ async def generate_public_bio_endpoint(
         "skills": [{"name": s.name, "level": s.level} for s in profile.skills],
     }
 
+    check_and_consume_ai_quota(db, current_user)
+
     try:
         ai_service = get_ai_service()
         res = await ai_service.generate_public_bio(profile_data, req.target_audience)
@@ -128,6 +134,8 @@ async def generate_slug_suggestions_endpoint(
         "last_name": profile.last_name,
         "title": profile.title,
     }
+
+    check_and_consume_ai_quota(db, current_user)
 
     try:
         ai_service = get_ai_service()
@@ -180,6 +188,8 @@ async def tailor_cv_endpoint(
         ]
     }
 
+    check_and_consume_ai_quota(db, current_user)
+
     try:
         ai_service = get_ai_service()
         res = await ai_service.tailor_cv(profile_data, req.job_description)
@@ -205,8 +215,11 @@ class ExtractJobResponse(BaseModel):
 async def extract_job_endpoint(
     request: Request,
     req: ExtractJobRequest,
+    db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    check_and_consume_ai_quota(db, current_user)
+
     try:
         ai_service = get_ai_service()
         res = await ai_service.extract_job_details(req.job_text)
@@ -257,6 +270,8 @@ async def analyze_fit_endpoint(
         "languages": [{"name": l.name, "level": l.level} for l in profile.languages],
     }
 
+    check_and_consume_ai_quota(db, current_user)
+
     try:
         ai_service = get_ai_service()
         result = await ai_service.analyze_fit(profile_data, req.job_description)
@@ -305,6 +320,8 @@ async def generate_letter_endpoint(
         "skills": [{"name": s.name, "level": s.level} for s in profile.skills],
         "languages": [{"name": l.name, "level": l.level} for l in profile.languages],
     }
+
+    check_and_consume_ai_quota(db, current_user)
 
     try:
         ai_service = get_ai_service()
