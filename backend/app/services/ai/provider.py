@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Any
+from typing import Dict, Any, Tuple
 
 
 class LLMProvider(ABC):
@@ -12,9 +12,9 @@ class LLMProvider(ABC):
     """
 
     @abstractmethod
-    async def generate_json(self, prompt: str) -> Dict[str, Any]:
+    async def generate_json(self, prompt: str) -> Tuple[Dict[str, Any], Dict[str, Any]]:
         """
-        Envoie un prompt au LLM et retourne la réponse parsée en JSON.
+        Envoie un prompt au LLM et retourne un tuple : (réponse parsée en JSON, métadonnées de consommation).
         
         Raises:
             RuntimeError("QUOTA_EXCEEDED") si le quota est dépassé.

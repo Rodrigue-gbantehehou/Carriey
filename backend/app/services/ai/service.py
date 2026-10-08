@@ -20,7 +20,7 @@ Pour changer de provider LLM :
 
 import json
 import logging
-from typing import Dict, Any
+from typing import Dict, Any, Tuple
 from app.services.ai.provider import LLMProvider
 
 logger = logging.getLogger(__name__)
@@ -39,7 +39,7 @@ class AIService:
     # MÉTHODE PRIVÉE
     # ─────────────────────────────────────────────────────────────────────────
 
-    async def _ask(self, prompt: str) -> Dict[str, Any]:
+    async def _ask(self, prompt: str) -> Tuple[Dict[str, Any], Dict[str, Any]]:
         """Délègue l'appel LLM au provider injecté."""
         return await self._provider.generate_json(prompt)
 
@@ -47,7 +47,7 @@ class AIService:
     # GÉNÉRATION LETTRE DE MOTIVATION
     # ─────────────────────────────────────────────────────────────────────────
 
-    async def generate_cover_letter(self, profile_data: Dict[str, Any], job_description: str) -> Dict[str, str]:
+    async def generate_cover_letter(self, profile_data: Dict[str, Any], job_description: str) -> Tuple[Dict[str, str], Dict[str, Any]]:
         """
         Génère une lettre de motivation ciblée à partir du profil et de l'offre.
         Retourne: subject, salutation, body, closing
@@ -87,7 +87,7 @@ RÉPONSE ATTENDUE :
     # GÉNÉRATION BIO PAGE PUBLIQUE
     # ─────────────────────────────────────────────────────────────────────────
 
-    async def generate_public_bio(self, profile_data: Dict[str, Any], target_audience: str) -> Dict[str, str]:
+    async def generate_public_bio(self, profile_data: Dict[str, Any], target_audience: str) -> Tuple[Dict[str, str], Dict[str, Any]]:
         """
         Génère un pitch d'accroche et une description SEO pour la page publique.
         Retourne: custom_bio, seo_description
@@ -118,7 +118,7 @@ RÉPONSE ATTENDUE :
     # SUGGESTIONS DE SLUG URL
     # ─────────────────────────────────────────────────────────────────────────
 
-    async def generate_slug_suggestions(self, profile_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def generate_slug_suggestions(self, profile_data: Dict[str, Any]) -> Tuple[Dict[str, Any], Dict[str, Any]]:
         """
         Génère 3 suggestions de slug URL pour la page publique du candidat.
         Retourne: suggestions (list), titles (list)
@@ -155,7 +155,7 @@ RÉPONSE ATTENDUE :
     # ADAPTATION CV (PRO)
     # ─────────────────────────────────────────────────────────────────────────
 
-    async def tailor_cv(self, profile_data: Dict[str, Any], job_description: str) -> Dict[str, Any]:
+    async def tailor_cv(self, profile_data: Dict[str, Any], job_description: str) -> Tuple[Dict[str, Any], Dict[str, Any]]:
         """
         Adapte un CV (summary + descriptions d'expériences) pour une offre spécifique.
         Fonctionnalité PRO uniquement.
@@ -203,7 +203,7 @@ RÉPONSE ATTENDUE (JSON strictement valide) :
     # EXTRACTION DÉTAILS D'OFFRE
     # ─────────────────────────────────────────────────────────────────────────
 
-    async def extract_job_details(self, job_text: str) -> Dict[str, str]:
+    async def extract_job_details(self, job_text: str) -> Tuple[Dict[str, str], Dict[str, Any]]:
         """
         Extrait les informations clés d'une offre d'emploi brute.
         Retourne: companyName, jobTitle, location
@@ -236,7 +236,7 @@ RÉPONSE ATTENDUE :
     # ANALYSE DE CORRESPONDANCE PROFIL / OFFRE
     # ─────────────────────────────────────────────────────────────────────────
 
-    async def analyze_fit(self, profile_data: Dict[str, Any], job_description: str) -> Dict[str, Any]:
+    async def analyze_fit(self, profile_data: Dict[str, Any], job_description: str) -> Tuple[Dict[str, Any], Dict[str, Any]]:
         """
         Analyse la compatibilité entre un profil et une offre d'emploi.
         Disponible pour tous les utilisateurs connectés.

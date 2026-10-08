@@ -1,7 +1,7 @@
 import json
 import logging
 import asyncio
-from typing import Dict, Any
+from typing import Dict, Any, Tuple
 from google import genai
 from app.services.ai.provider import LLMProvider
 
@@ -19,7 +19,7 @@ class GeminiProvider(LLMProvider):
         self.client = genai.Client()
         self.model = "gemini-2.0-flash"
 
-    async def generate_json(self, prompt: str) -> Dict[str, Any]:
+    async def generate_json(self, prompt: str) -> Tuple[Dict[str, Any], Dict[str, Any]]:
         try:
             def make_call():
                 return self.client.models.generate_content(
@@ -35,7 +35,20 @@ class GeminiProvider(LLMProvider):
             if text.endswith("```"):
                 text = text[:-3]
 
-            return json.loads(text.strip())
+            result_json = json.loads(text.strip())
+            
+            prompt_tokens = 0
+            completion_tokens = 0
+            if hasattr(response, "usage_metadata") and response.usage_metadata:
+                prompt_tokens = getattr(response.usage_metadata, "prompt_token_count", 0)
+                completion_tokens = getattr(response.usage_metadata, "candidates_token_count", 0)
+                
+            metadata = {
+                "model": self.model,
+                "prompt_tokens": prompt_tokens,
+                "completion_tokens": completion_tokens
+            }
+            return result_json, metadata
 
         except Exception as e:
             err_str = str(e)

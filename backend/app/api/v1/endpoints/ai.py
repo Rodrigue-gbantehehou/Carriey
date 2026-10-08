@@ -4,7 +4,7 @@ from app.api.dependencies import get_db, get_current_user
 from app.models.user import User
 from app.crud.crud_profile import profile as crud_profile
 from app.services.ai import get_ai_service
-from app.services.ai_quota_service import check_and_consume_ai_quota
+from app.services.ai_quota_service import check_and_consume_ai_quota, log_ai_usage
 from pydantic import BaseModel
 from app.core.limiter import limiter
 from fastapi import Request
@@ -70,7 +70,8 @@ async def generate_cover_letter_endpoint(
     # 3. Appeler le service d'IA
     try:
         ai_service = get_ai_service()
-        letter_dict = await ai_service.generate_cover_letter(profile_data, req.job_description)
+        letter_dict, metadata = await ai_service.generate_cover_letter(profile_data, req.job_description)
+        log_ai_usage(db, current_user, "generate_cover_letter", metadata)
         
         return CoverLetterResponse(
             subject=letter_dict.get("subject", ""),
@@ -105,7 +106,9 @@ async def generate_public_bio_endpoint(
 
     try:
         ai_service = get_ai_service()
-        res = await ai_service.generate_public_bio(profile_data, req.target_audience)
+        res, metadata = await ai_service.generate_public_bio(profile_data, req.target_audience)
+        log_ai_usage(db, current_user, "generate_public_bio", metadata)
+        
         return PublicBioResponse(
             custom_bio=res.get("custom_bio", ""),
             seo_description=res.get("seo_description", "")
@@ -139,7 +142,9 @@ async def generate_slug_suggestions_endpoint(
 
     try:
         ai_service = get_ai_service()
-        res = await ai_service.generate_slug_suggestions(profile_data)
+        res, metadata = await ai_service.generate_slug_suggestions(profile_data)
+        log_ai_usage(db, current_user, "generate_slug_suggestions", metadata)
+        
         suggestions = res.get("suggestions", [])
         titles = res.get("titles", [])
         return SlugSuggestionsResponse(suggestions=suggestions, titles=titles)
@@ -192,7 +197,8 @@ async def tailor_cv_endpoint(
 
     try:
         ai_service = get_ai_service()
-        res = await ai_service.tailor_cv(profile_data, req.job_description)
+        res, metadata = await ai_service.tailor_cv(profile_data, req.job_description)
+        log_ai_usage(db, current_user, "tailor_cv", metadata)
         return res
     except RuntimeError as e:
         if "QUOTA_EXCEEDED" in str(e):
@@ -222,7 +228,9 @@ async def extract_job_endpoint(
 
     try:
         ai_service = get_ai_service()
-        res = await ai_service.extract_job_details(req.job_text)
+        res, metadata = await ai_service.extract_job_details(req.job_text)
+        log_ai_usage(db, current_user, "extract_job", metadata)
+        
         return ExtractJobResponse(
             companyName=res.get("companyName", ""),
             jobTitle=res.get("jobTitle", ""),
@@ -274,7 +282,8 @@ async def analyze_fit_endpoint(
 
     try:
         ai_service = get_ai_service()
-        result = await ai_service.analyze_fit(profile_data, req.job_description)
+        result, metadata = await ai_service.analyze_fit(profile_data, req.job_description)
+        log_ai_usage(db, current_user, "analyze_fit", metadata)
         return result
     except RuntimeError as e:
         if "QUOTA_EXCEEDED" in str(e):
@@ -325,7 +334,8 @@ async def generate_letter_endpoint(
 
     try:
         ai_service = get_ai_service()
-        letter_dict = await ai_service.generate_cover_letter(profile_data, req.job_description)
+        letter_dict, metadata = await ai_service.generate_cover_letter(profile_data, req.job_description)
+        log_ai_usage(db, current_user, "generate_letter", metadata)
 
         # Assembler le contenu complet de la lettre
         letter_content = "\n\n".join(filter(None, [

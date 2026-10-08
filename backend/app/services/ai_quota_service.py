@@ -3,6 +3,7 @@ import logging
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from app.models.user import User
+from app.models.ai_log import AILog
 
 logger = logging.getLogger(__name__)
 
@@ -50,3 +51,28 @@ def check_and_consume_ai_quota(db: Session, user: User, cost: int = 1):
         f"{user.ai_quota_used_today}/{quota_limit} (PRO: {is_pro})"
     )
     return True
+
+def log_ai_usage(db: Session, user: User, operation: str, metadata: dict):
+    """
+    Enregistre l'utilisation de l'IA (modèle, tokens, coût) dans la table ai_logs.
+    """
+    model_name = metadata.get("model", "unknown")
+    prompt_tokens = metadata.get("prompt_tokens", 0)
+    completion_tokens = metadata.get("completion_tokens", 0)
+    
+    cost_usd = 0.0
+    if "gemini-2.0-flash" in model_name:
+        cost_usd = (prompt_tokens / 1_000_000 * 0.15) + (completion_tokens / 1_000_000 * 0.60)
+    elif "gpt-oss" in model_name or "groq" in model_name:
+        cost_usd = (prompt_tokens / 1_000_000 * 0.0) + (completion_tokens / 1_000_000 * 0.0)  # Llama 3 etc on groq is very cheap
+        
+    ai_log = AILog(
+        user_id=user.id,
+        operation_type=operation,
+        model_name=model_name,
+        prompt_tokens=prompt_tokens,
+        completion_tokens=completion_tokens,
+        cost_usd=cost_usd
+    )
+    db.add(ai_log)
+    db.commit()
