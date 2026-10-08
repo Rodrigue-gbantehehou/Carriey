@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.api.dependencies import get_db, get_current_user
+from app.api.dependencies import get_db, get_current_active_user
 from app.models.user import User
 from app.crud.crud_profile import profile as crud_profile
 from app.services.ai import get_ai_service
@@ -36,7 +36,7 @@ async def generate_cover_letter_endpoint(
     request: Request,
     req: CoverLetterRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_active_user)
 ):
     """
     Génère une lettre de motivation à partir du profil de l'utilisateur et d'une description d'offre.
@@ -89,7 +89,7 @@ async def generate_public_bio_endpoint(
     request: Request,
     req: PublicBioRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_active_user)
 ):
     profile = crud_profile.get_by_user(db, user_id=current_user.id)
     if not profile:
@@ -126,7 +126,7 @@ class SlugSuggestionsResponse(BaseModel):
 async def generate_slug_suggestions_endpoint(
     request: Request,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_active_user)
 ):
     profile = crud_profile.get_by_user(db, user_id=current_user.id)
     if not profile:
@@ -167,7 +167,7 @@ async def tailor_cv_endpoint(
     request: Request,
     req: TailorCvRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_active_user)
 ):
     # Vérification Premium
     if not current_user.premium_until or current_user.premium_until.replace(tzinfo=timezone.utc) < datetime.now(timezone.utc):
@@ -222,7 +222,7 @@ async def extract_job_endpoint(
     request: Request,
     req: ExtractJobRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_active_user)
 ):
     check_and_consume_ai_quota(db, current_user)
 
@@ -254,7 +254,7 @@ async def analyze_fit_endpoint(
     request: Request,
     req: AnalyzeFitRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_active_user)
 ):
     """
     Analyse la compatibilité entre le profil de l'utilisateur et une offre d'emploi.
@@ -303,7 +303,7 @@ async def generate_letter_endpoint(
     request: Request,
     req: GenerateLetterRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_active_user)
 ):
     """
     Génère une lettre de motivation complète à partir du profil et d'une offre.

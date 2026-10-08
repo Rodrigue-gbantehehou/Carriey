@@ -111,8 +111,6 @@ async def create_payment(
         provider_name = payment_in.provider or "kkiapay"
         provider = payment_manager.get_provider(provider_name)
     except ValueError as e:
-        import logging
-        logger = logging.getLogger(__name__)
         logger.error(f"Erreur provider paiement: {e}")
         raise HTTPException(status_code=400, detail="Une erreur est survenue lors de la création du paiement.")
 
