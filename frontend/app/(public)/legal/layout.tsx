@@ -1,16 +1,91 @@
+'use client';
+
 import { ReactNode } from 'react';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { ArrowLeft, Scale, Shield, Database, Trash2, FileText, ChevronRight } from 'lucide-react';
+import config from '@/lib/config';
+import Image from 'next/image';
+
+const LEGAL_PAGES = [
+  { href: '/legal/cgu', label: 'Conditions Générales d\'Utilisation', icon: Scale },
+  { href: '/legal/privacy', label: 'Politique de confidentialité', icon: Shield },
+  { href: '/legal/mentions-legales', label: 'Mentions Légales', icon: FileText },
+  { href: '/legal/data-retention', label: 'Conservation des données', icon: Database },
+  { href: '/legal/data-deletion', label: 'Politique de suppression', icon: Trash2 },
+];
 
 export default function LegalLayout({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto">
-        <Link href="/accueil" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-indigo-600 mb-8 transition-colors">
-          <ArrowLeft className="w-4 h-4" /> Retour à l'accueil
-        </Link>
-        <div className="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-xl p-8 sm:p-12 text-gray-700 prose prose-indigo max-w-none">
-          {children}
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <header className="bg-white border-b border-gray-100 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link href="/" className="flex items-center gap-2 group">
+              <Image src={config.appLogo} alt={config.appName} width={28} height={28} className="object-contain" />
+              <span className="text-lg font-bold text-gray-900">{config.appName}</span>
+            </Link>
+            <span className="hidden sm:inline-block w-px h-6 bg-gray-200"></span>
+            <span className="hidden sm:inline-block text-sm font-medium text-gray-500 uppercase tracking-widest">Legal Hub</span>
+          </div>
+          <Link href="/" className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors flex items-center gap-1.5">
+            <ArrowLeft className="w-4 h-4" /> Retour au site
+          </Link>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+        <div className="flex flex-col lg:flex-row gap-12">
+          
+          {/* Sidebar */}
+          <aside className="w-full lg:w-72 flex-shrink-0">
+            <div className="sticky top-24">
+              <h3 className="text-xs font-semibold text-gray-900 uppercase tracking-wider mb-4 px-3">
+                Documentation légale
+              </h3>
+              <nav className="space-y-1">
+                {LEGAL_PAGES.map((page) => {
+                  const isActive = pathname === page.href;
+                  const Icon = page.icon;
+                  return (
+                    <Link
+                      key={page.href}
+                      href={page.href}
+                      className={`group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-lg transition-colors ${
+                        isActive
+                          ? 'bg-indigo-50 text-indigo-600'
+                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Icon className={`w-4.5 h-4.5 ${isActive ? 'text-indigo-600' : 'text-gray-400 group-hover:text-gray-600'}`} />
+                        {page.label}
+                      </div>
+                      {isActive && <ChevronRight className="w-4 h-4 text-indigo-600" />}
+                    </Link>
+                  );
+                })}
+              </nav>
+            </div>
+          </aside>
+
+          {/* Content */}
+          <main className="flex-1 min-w-0">
+            <div className="prose prose-indigo max-w-4xl prose-headings:font-bold prose-h1:text-3xl prose-h1:tracking-tight prose-h1:text-gray-900 prose-h2:text-xl prose-h2:mt-10 prose-h2:mb-4 prose-p:text-gray-600 prose-p:leading-relaxed prose-li:text-gray-600 prose-strong:text-gray-900 prose-a:text-indigo-600">
+              {children}
+            </div>
+            
+            <div className="mt-16 pt-8 border-t border-gray-100">
+              <p className="text-sm text-gray-500">
+                Vous avez des questions concernant ces documents ? <Link href="/contact" className="text-indigo-600 hover:underline">Contactez notre équipe légale</Link>.
+              </p>
+            </div>
+          </main>
+          
         </div>
       </div>
     </div>
