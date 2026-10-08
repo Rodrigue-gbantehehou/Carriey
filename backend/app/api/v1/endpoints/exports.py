@@ -124,7 +124,12 @@ async def _get_or_create_export_user(req: ExportRequest, current_user: Optional[
         target_user_id = current_user.id
     elif req.guest_email:
         user = db.query(User).filter(User.email == req.guest_email).first()
-        if not user:
+        if user:
+            raise HTTPException(
+                status_code=401, 
+                detail="Cet email est déjà associé à un compte. Veuillez vous connecter."
+            )
+        else:
             random_pass = secrets.token_urlsafe(16)
             user = User(
                 email=req.guest_email,
@@ -142,7 +147,9 @@ async def _get_or_create_export_user(req: ExportRequest, current_user: Optional[
                 expires_delta=timedelta(days=7)
             )
         target_user_id = user.id
-
+    else:
+        raise HTTPException(status_code=400, detail="Vous devez être connecté ou fournir un guest_email pour l'export.")
+    
     # 3. Vérification de l'accès / Paiement (Sauf pour les ADMINS)
     is_admin = current_user and current_user.role in [UserRole.ADMIN, UserRole.SUPER_ADMIN]
     
