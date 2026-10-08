@@ -8,7 +8,7 @@ import os
 
 from app.db.session import get_db
 from app.models.user import User
-from app.models.profile import MasterProfile, Experience, Education, Skill, Project, Certification, Language, Achievement, Link, Document, CustomSection, CustomSectionItem
+from app.models.profile import MasterProfile, Experience, Education, Skill, Project, Certification, Language, Achievement, Link, Document, CustomSection, CustomSectionItem, Visibility
 from app.schemas.profile import (
     MasterProfile as MasterProfileOut, MasterProfileUpdate, MasterProfileCreate,
     Experience as ExperienceOut, ExperienceCreate,
@@ -303,5 +303,19 @@ async def update_custom_section_item(
         setattr(item, field, value)
     db.commit()
     db.refresh(item)
+    db.refresh(item)
     return item
+
+@router.get("/public/{username}", response_model=MasterProfileOut)
+async def get_public_profile(username: str, db: Session = Depends(get_db)):
+    """Fetch a public profile by username."""
+    profile = db.query(MasterProfile).filter(MasterProfile.username == username).first()
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profil non trouvé")
+    
+    # Optional: check visibility if we want, but for now we just return it
+    if profile.visibility == Visibility.PRIVATE:
+        raise HTTPException(status_code=403, detail="Ce profil est privé")
+        
+    return profile
 
