@@ -103,27 +103,11 @@ export default function AnalyserPage() {
     const toastId = toast.loading('🎯 Adaptation de votre CV en cours...')
 
     try {
-      const { aiApi } = await import('@/lib/ai-api')
-      const { cvApi } = await import('@/lib/cv-api')
+      const { createTailoredCv } = await import('@/lib/cv-adaptation-service')
 
-      const tailoredData = await aiApi.tailorCv(session.user.accessToken, jobText)
+      const titleSuffix = result?.angle?.title || new Date().toLocaleDateString()
+      const newCv = await createTailoredCv(session.user.accessToken, jobText, titleSuffix)
 
-      const payload = {
-        title: `CV Ciblé – ${result?.angle?.title || new Date().toLocaleDateString()}`,
-        template_id: 'classique',
-        doc_type: 'cv',
-        content: {
-          usage: 'ciblee',
-          disabledSections: tailoredData.disabledSections || [],
-          disabledItems: tailoredData.disabledItems || {},
-          overrides: {
-            summary: tailoredData.summary || '',
-            experiences: tailoredData.experiences || {},
-          },
-        },
-      }
-
-      const newCv = await cvApi.createResume(session.user.accessToken, payload)
       toast.success('CV ciblé créé avec succès !', { id: toastId })
       router.push(`/mes-documents/cv/${newCv.id}`)
     } catch (err: any) {

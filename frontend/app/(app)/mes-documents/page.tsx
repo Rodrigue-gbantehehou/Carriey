@@ -82,26 +82,8 @@ function MesDocumentsContent() {
     setIsCreatingTailoredCv(true);
 
     try {
-      const { aiApi } = await import('@/lib/ai-api');
-      const tailoredData = await aiApi.tailorCv(session.user.accessToken, jobDescription);
-
-      const payload = {
-        title: `CV Ciblé - ${new Date().toLocaleDateString()}`,
-        template_id: 'classique',
-        doc_type: 'cv',
-        content: {
-          usage: 'spontanee',
-          disabledSections: tailoredData.disabledSections || [],
-          disabledItems: tailoredData.disabledItems || {},
-          overrides: {
-            summary: tailoredData.summary,
-            experiences: tailoredData.experiences
-          }
-        }
-      };
-
-      const newCv = await cvApi.createResume(session.user.accessToken, payload);
-      useCvStore.getState().addCv(newCv);
+      const { createTailoredCv } = await import('@/lib/cv-adaptation-service');
+      const newCv = await createTailoredCv(session.user.accessToken, jobDescription);
       router.push(`/mes-documents/cv/${newCv.id}`);
     } catch (err: any) {
       console.error(err);
