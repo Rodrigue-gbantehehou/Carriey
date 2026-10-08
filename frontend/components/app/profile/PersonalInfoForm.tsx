@@ -28,6 +28,9 @@ export default function PersonalInfoForm({ isOpen, onClose }: PersonalInfoFormPr
         linkedin_url: profile.linkedin_url,
         website: profile.website,
         github_url: profile.github_url,
+        visibility: profile.visibility || 'private',
+        show_email: profile.show_email ?? false,
+        show_phone: profile.show_phone ?? false,
       });
     }
   }, [isOpen, profile]);
@@ -59,6 +62,28 @@ export default function PersonalInfoForm({ isOpen, onClose }: PersonalInfoFormPr
               <div><label className="block text-sm font-medium text-gray-700 mb-1.5">LinkedIn</label><input type="url" value={personalForm.linkedin_url || ''} onChange={e => setPersonalForm({...personalForm, linkedin_url: e.target.value})} placeholder="https://linkedin.com/in/..." className={inputClass} /></div>
               <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Portfolio / Site web</label><input type="url" value={personalForm.website || ''} onChange={e => setPersonalForm({...personalForm, website: e.target.value})} placeholder="https://..." className={inputClass} /></div>
               <div><label className="block text-sm font-medium text-gray-700 mb-1.5">GitHub</label><input type="url" value={personalForm.github_url || ''} onChange={e => setPersonalForm({...personalForm, github_url: e.target.value})} placeholder="https://github.com/..." className={inputClass} /></div>
+            </div>
+          </div>
+          
+          <div className="border-t border-gray-100 pt-5 mt-5">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Confidentialité</p>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Visibilité du profil public</label>
+                <select value={personalForm.visibility || 'private'} onChange={e => setPersonalForm({...personalForm, visibility: e.target.value})} className={inputClass}>
+                  <option value="private">Privé (Désactivé)</option>
+                  <option value="public">Public (Indexable par les moteurs de recherche)</option>
+                  <option value="link_only">Lien uniquement (Non indexable)</option>
+                </select>
+              </div>
+              <div className="flex items-center gap-3">
+                <input type="checkbox" id="show_email" checked={personalForm.show_email || false} onChange={e => setPersonalForm({...personalForm, show_email: e.target.checked})} className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300" />
+                <label htmlFor="show_email" className="text-sm text-gray-700">Afficher mon adresse email sur mon profil public</label>
+              </div>
+              <div className="flex items-center gap-3">
+                <input type="checkbox" id="show_phone" checked={personalForm.show_phone || false} onChange={e => setPersonalForm({...personalForm, show_phone: e.target.checked})} className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300" />
+                <label htmlFor="show_phone" className="text-sm text-gray-700">Afficher mon numéro de téléphone sur mon profil public</label>
+              </div>
             </div>
           </div>
           

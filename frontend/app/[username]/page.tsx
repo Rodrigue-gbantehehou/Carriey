@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import {
   Briefcase, GraduationCap, Globe, Award,
-  MapPin, Mail, ExternalLink, ArrowLeft,
+  MapPin, Mail, Phone, ExternalLink, ArrowLeft,
 } from 'lucide-react';
 import config from '@/lib/config';
 
@@ -19,8 +19,10 @@ interface PublicProfile {
   title?: string;
   bio?: string;
   contact_email?: string;
+  contact_phone?: string;
   location?: string;
   photo_url?: string;
+  visibility: 'public' | 'private' | 'link_only';
   skills?: { id: string; name: string; level?: string }[];
   experiences?: { id: string; title: string; company: string; start_date?: string; end_date?: string; current?: boolean; description?: string }[];
   educations?: { id: string; degree: string; school: string; start_date?: string; end_date?: string }[];
@@ -92,6 +94,13 @@ export async function generateMetadata(
       title,
       description,
       images: [imageUrl],
+    },
+    robots: profile.visibility === 'link_only' ? {
+      index: false,
+      follow: false,
+    } : {
+      index: true,
+      follow: true,
     }
   };
 }
@@ -157,6 +166,11 @@ export default async function PublicProfilePage({ params }: Props) {
               {profile.contact_email && (
                 <a href={`mailto:${profile.contact_email}`} className="flex items-center gap-1 hover:text-indigo-600 transition-colors">
                   <Mail className="w-3.5 h-3.5" />{profile.contact_email}
+                </a>
+              )}
+              {profile.contact_phone && (
+                <a href={`tel:${profile.contact_phone}`} className="flex items-center gap-1 hover:text-indigo-600 transition-colors">
+                  <Phone className="w-3.5 h-3.5" />{profile.contact_phone}
                 </a>
               )}
             </div>

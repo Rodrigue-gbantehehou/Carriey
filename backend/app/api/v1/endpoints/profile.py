@@ -310,12 +310,16 @@ async def update_custom_section_item(
 async def get_public_profile(username: str, db: Session = Depends(get_db)):
     """Fetch a public profile by username."""
     profile = db.query(MasterProfile).filter(MasterProfile.username == username).first()
-    if not profile:
+    
+    # If the profile doesn't exist or is strictly private, return a 404 (to avoid exposing its existence)
+    if not profile or profile.visibility == Visibility.PRIVATE:
         raise HTTPException(status_code=404, detail="Profil non trouvé")
     
-    # Optional: check visibility if we want, but for now we just return it
-    if profile.visibility == Visibility.PRIVATE:
-        raise HTTPException(status_code=403, detail="Ce profil est privé")
+    # Scrub private data if the user opted out
+    if not profile.show_email:
+        profile.contact_email = None
+    if not profile.show_phone:
+        profile.contact_phone = None
         
     return profile
 

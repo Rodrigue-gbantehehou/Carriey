@@ -30,6 +30,8 @@ class MasterProfile(Base):
     photo_url = Column(Text, nullable=True)  # Stored as base64 data URL or external URL
     
     visibility = Column(Enum(Visibility), default=Visibility.PRIVATE)
+    show_email = Column(Boolean(), default=False)
+    show_phone = Column(Boolean(), default=False)
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

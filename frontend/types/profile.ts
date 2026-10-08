@@ -103,6 +103,8 @@ export interface MasterProfile {
   github_url?: string;
   photo_url?: string;
   visibility: 'public' | 'private' | 'link_only';
+  show_email: boolean;
+  show_phone: boolean;
   
   experiences: ProfileExperience[];
   educations: ProfileEducation[];
