@@ -290,3 +290,62 @@ RÉPONSE ATTENDUE :
 }}
 """
         return await self._ask(prompt)
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # EXTRACTION CV (PDF TEXT)
+    # ─────────────────────────────────────────────────────────────────────────
+
+    async def extract_cv_info(self, text: str) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+        """
+        Extrait les informations structurées d'un CV brut.
+        """
+        prompt = f"""
+Tu es un assistant RH expert en extraction de données.
+Analyse le texte suivant issu d'un CV et extrais les informations dans un format JSON strict.
+
+Structure JSON attendue (ne renvoie RIEN D'AUTRE que le JSON):
+{{
+  "title": "Titre professionnel (ex: Développeur Full Stack)",
+  "bio": "Résumé du profil (max 3 phrases)",
+  "experiences": [
+    {{
+      "title": "Titre du poste",
+      "company": "Nom de l'entreprise",
+      "location": "Lieu",
+      "start_date": "MM/YYYY (ou YYYY)",
+      "end_date": "MM/YYYY (ou 'Présent')",
+      "description": "Description des missions (html autorisé : <ul><li>...</li></ul>)"
+    }}
+  ],
+  "educations": [
+    {{
+      "degree": "Diplôme ou formation",
+      "school": "École / Institution",
+      "location": "Lieu",
+      "start_date": "YYYY",
+      "end_date": "YYYY",
+      "description": "Détails"
+    }}
+  ],
+  "skills": ["Compétence 1", "Compétence 2", "Compétence 3"],
+  "projects": [
+    {{
+      "title": "Nom du projet",
+      "description": "Courte description",
+      "link": "URL si présente"
+    }}
+  ],
+  "certifications": [
+    {{
+      "name": "Nom de la certif",
+      "issuer": "Organisme",
+      "date": "YYYY"
+    }}
+  ]
+}}
+
+CV à analyser :
+\"\"\"{text}\"\"\"
+"""
+        return await self._ask(prompt)
+

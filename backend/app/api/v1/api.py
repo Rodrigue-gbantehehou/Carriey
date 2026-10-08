@@ -3,7 +3,7 @@ from app.api.v1.endpoints import (
     auth, profile, resumes, templates, exports, payments, personas, 
     admin_users, admin_templates, stats, admin_audit, admin_payments, 
     admin_resumes, admin_reports, public_pages, ai, plans, candidatures,
-    admin_configs, contact, admin_messages
+    admin_configs, contact, admin_messages, import_cv
 )
 
 api_router = APIRouter()
@@ -19,6 +19,7 @@ api_router.include_router(ai.router, prefix="/ai", tags=["ai"])
 api_router.include_router(plans.router, prefix="/plans", tags=["plans"])
 api_router.include_router(candidatures.router, prefix="/candidatures", tags=["candidatures"])
 api_router.include_router(contact.router, prefix="/contact", tags=["contact"])
+api_router.include_router(import_cv.router, prefix="/import-cv", tags=["import-cv"])
 
 # Admin routes
 api_router.include_router(admin_templates.router, prefix="/admin/templates", tags=["admin"])
