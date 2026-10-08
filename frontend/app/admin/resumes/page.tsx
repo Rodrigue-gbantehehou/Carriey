@@ -277,7 +277,7 @@ export default function AdminResumesPage() {
                     <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between p-6 border-b border-gray-100">
                             <div>
-                                <h2 className="text-lg font-black text-gray-900">{selectedDoc.title}</h2>
+                                <h2 className="text-lg font-bold text-gray-900">{selectedDoc.title}</h2>
                                 <p className="text-sm text-gray-500">{selectedDoc.user_email}</p>
                             </div>
                             <button onClick={() => setSelectedDoc(null)} className="p-2 hover:bg-gray-100 rounded-xl transition-all">
@@ -308,7 +308,7 @@ export default function AdminResumesPage() {
                                         </div>
                                     </div>
                                     <div>
-                                        <div className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Contenu JSON</div>
+                                        <div className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Contenu JSON</div>
                                         <pre className="bg-gray-900 text-emerald-400 text-xs p-4 rounded-xl overflow-auto max-h-64 font-mono">
                                             {JSON.stringify(docDetail.content, null, 2)}
                                         </pre>

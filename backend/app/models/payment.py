@@ -16,6 +16,7 @@ class PaymentStatus(str, enum.Enum):
     SUCCESS = "success"
     FAILED = "failed"
     CANCELLED = "cancelled"
+    CONSUMED = "consumed"
 
 class Payment(Base):
     __tablename__ = "payments"

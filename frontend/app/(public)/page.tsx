@@ -78,15 +78,15 @@ export default function LandingPage() {
             {/* Left: Copy */}
             <div className="max-w-2xl animate-fade-in">
 
-              <h1 className="text-4xl lg:text-5xl font-extrabold text-gray-900 tracking-tight leading-[1.15] mb-5">
-                Votre parcours professionnel. <br />
+              <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 tracking-tight leading-[1.15] mb-5">
+                Votre parcours professionnel en <br />
                 <span className="text-indigo-600">Un seul endroit.</span>
               </h1>
               <p className="text-lg text-gray-600 mb-8 leading-relaxed font-medium">
-                Créez votre profil professionnel une fois et utilisez-le pour construire vos CV, lettres de motivation et autres documents adaptés à chaque opportunité.
+                Créez votre profil professionnel une fois et utilisez-le pour construire le documents adaptés à chaque opportunité.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link href="/register" className="inline-flex items-center justify-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-xl text-base font-bold shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 hover:-translate-y-0.5 transition-all">
+                <Link href="/register" className="inline-flex items-center justify-center gap-2 bg-indigo-600 text-white px-5 py-2 rounded-xl text-base font-medium shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 hover:-translate-y-0.5 transition-all">
                   Créer mon profil gratuitement
                   <ChevronRight className="w-4 h-4" />
                 </Link>
@@ -108,7 +108,7 @@ export default function LandingPage() {
                       <div className="w-2 h-2 rounded-full bg-gray-300"></div>
                       <div className="w-2 h-2 rounded-full bg-gray-300"></div>
                     </div>
-                    <div className="mx-auto text-[9px] font-semibold text-gray-400 tracking-widest uppercase">Profil Master</div>
+                    <div className="mx-auto text-[9px] font-semibold text-gray-400 tracking-widest uppercase">Profil Professionnel</div>
                   </div>
 
                   {/* Window Content (Abstract UI Skeleton) */}
@@ -186,7 +186,7 @@ export default function LandingPage() {
       <section id="fonctionnement" className="py-16 bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-10">
-            <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight sm:text-3xl mb-3">
+            <h2 className="text-2xl font-bold text-gray-900 tracking-tight sm:text-3xl mb-3">
               Comment ça fonctionne
             </h2>
             <p className="text-base text-gray-600">
@@ -201,7 +201,7 @@ export default function LandingPage() {
             {/* Step 1 */}
             <div className="relative text-center">
               <div className="w-24 h-24 mx-auto bg-white border-4 border-indigo-50 rounded-full flex items-center justify-center mb-6 shadow-sm">
-                <span className="text-3xl font-black text-indigo-600">01</span>
+                <span className="text-3xl font-bold text-indigo-600">01</span>
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Construisez votre profil</h3>
               <p className="text-gray-600 leading-relaxed">
@@ -211,7 +211,7 @@ export default function LandingPage() {
             {/* Step 2 */}
             <div className="relative text-center">
               <div className="w-24 h-24 mx-auto bg-white border-4 border-indigo-50 rounded-full flex items-center justify-center mb-6 shadow-sm">
-                <span className="text-3xl font-black text-indigo-600">02</span>
+                <span className="text-3xl font-bold text-indigo-600">02</span>
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Choisissez ce dont vous avez besoin</h3>
               <p className="text-gray-600 leading-relaxed">
@@ -221,7 +221,7 @@ export default function LandingPage() {
             {/* Step 3 */}
             <div className="relative text-center">
               <div className="w-24 h-24 mx-auto bg-white border-4 border-indigo-50 rounded-full flex items-center justify-center mb-6 shadow-sm">
-                <span className="text-3xl font-black text-indigo-600">03</span>
+                <span className="text-3xl font-bold text-indigo-600">03</span>
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Adaptez et exportez</h3>
               <p className="text-gray-600 leading-relaxed">
@@ -237,7 +237,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
             <div>
-              <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight mb-5 leading-tight sm:text-3xl">
+              <h2 className="text-2xl font-bold text-gray-900 tracking-tight mb-5 leading-tight sm:text-3xl">
                 Ne recommencez plus votre CV à chaque candidature.
               </h2>
               <p className="text-lg text-gray-600 mb-8 leading-relaxed">
@@ -261,7 +261,7 @@ export default function LandingPage() {
             <div className="relative">
               <div className="bg-white/80 backdrop-blur-xl p-8 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-gray-100 relative z-10">
                 <div className="text-center mb-8 relative">
-                  <div className="inline-flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-indigo-600/30 z-10 relative">
+                  <div className="inline-flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-2xl font-medium shadow-lg shadow-indigo-600/30 z-10 relative">
                     <UserCircle className="w-5 h-5" />
                     MON PROFIL MASTER
                   </div>
@@ -271,7 +271,7 @@ export default function LandingPage() {
 
                 {/* Branches using sleek SVG */}
                 <div className="relative h-16 w-full flex justify-center -mt-6 mb-2">
-                  <svg width="340" height="64" viewBox="0 0 340 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="absolute top-0">
+                  <svg width="330" height="67" viewBox="0 0 340 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="absolute top-0">
                     <path d="M170 0 V 32" stroke="#CBD5E1" strokeWidth="2" strokeDasharray="4 4" />
                     <path d="M50 32 H 290" stroke="#CBD5E1" strokeWidth="2" strokeDasharray="4 4" />
                     <path d="M50 32 V 64" stroke="#CBD5E1" strokeWidth="2" strokeDasharray="4 4" />
@@ -286,7 +286,7 @@ export default function LandingPage() {
 
                 <div className="flex justify-between text-center gap-4 relative z-10">
                   <div className="flex-1">
-                    <div className="bg-gray-50 border border-gray-200/60 px-4 py-3 rounded-xl text-sm font-bold text-gray-700 mb-4 shadow-sm flex items-center justify-center gap-2">
+                    <div className="bg-gray-50 border border-gray-200/60 px-3 py-2 rounded-xl text-sm font-medium text-gray-700 mb-4 shadow-sm flex items-center justify-center gap-2">
                       <FileText className="w-4 h-4 text-indigo-500" /> CV
                     </div>
                     <div className="space-y-2">
@@ -296,7 +296,7 @@ export default function LandingPage() {
                     </div>
                   </div>
                   <div className="flex-1">
-                    <div className="bg-gray-50 border border-gray-200/60 px-4 py-3 rounded-xl text-sm font-bold text-gray-700 mb-4 shadow-sm flex items-center justify-center gap-2">
+                    <div className="bg-gray-50 border border-gray-200/60 px-3 py-2 rounded-xl text-sm font-medium text-gray-700 mb-4 shadow-sm flex items-center justify-center gap-2">
                       <LayoutTemplate className="w-4 h-4 text-purple-500" /> Lettre
                     </div>
                     <div className="space-y-2">
@@ -306,7 +306,7 @@ export default function LandingPage() {
                     </div>
                   </div>
                   <div className="flex-1">
-                    <div className="bg-gray-50 border border-gray-200/60 px-4 py-3 rounded-xl text-sm font-bold text-gray-700 mb-4 shadow-sm flex items-center justify-center gap-2">
+                    <div className="bg-gray-50 border border-gray-200/60 px-3 py-2 rounded-xl text-sm font-medium text-gray-700 mb-4 shadow-sm flex items-center justify-center gap-2">
                       <Globe className="w-4 h-4 text-emerald-500" /> Profil
                     </div>
                     <div className="space-y-2">
@@ -324,7 +324,7 @@ export default function LandingPage() {
       <section className="py-16 bg-white border-y border-gray-100">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 text-center mb-10">
 
-          <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight sm:text-3xl mb-4">
+          <h2 className="text-2xl font-bold text-gray-900 tracking-tight sm:text-3xl mb-4">
             Une candidature différente pour chaque opportunité.
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -389,11 +389,7 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
-          <div className="mt-8 text-center">
-            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-50 text-green-700 font-bold text-sm border border-green-200">
-              <CheckCircle2 className="w-4 h-4" /> Ces fonctionnalités sont gratuites
-            </span>
-          </div>
+         
         </div>
       </section>
 
@@ -402,7 +398,7 @@ export default function LandingPage() {
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
         <div className="relative max-w-7xl mx-auto px-6 lg:px-8 z-10">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl mb-4">
+            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl mb-4">
               Ce que vous pouvez créer
             </h2>
             <p className="text-gray-600 text-lg">
@@ -440,7 +436,7 @@ export default function LandingPage() {
       <section id="modeles" className="py-16 bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-10">
-            <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight sm:text-3xl mb-3">
+            <h2 className="text-2xl font-bold text-gray-900 tracking-tight sm:text-3xl mb-3">
               Votre contenu. Votre style.
             </h2>
             <p className="text-lg text-gray-600">
@@ -457,7 +453,7 @@ export default function LandingPage() {
             className="flex gap-6 overflow-x-auto pb-8 pt-4 no-scrollbar -mx-6 px-6 lg:-mx-8 lg:px-8 cursor-pointer"
           >
             {carouselItems.map((theme, i) => (
-              <div key={i} className={`flex-shrink-0 w-[260px] sm:w-[300px] rounded-2xl border-2 p-3 flex flex-col shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ${theme.style}`}>
+              <div key={i} className={`flex-shrink-0 w-[260px] sm:w-[300px] rounded-2xl border-2 flex flex-col shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ${theme.style}`}>
                 <div className="relative w-full aspect-[1/1.414] bg-white/50 backdrop-blur-sm rounded-xl border border-white overflow-hidden">
                   {theme.originalTemplate ? (
                     <TemplatePreview template={theme.originalTemplate} />
@@ -488,7 +484,7 @@ export default function LandingPage() {
       {/* 8. Pour qui ? */}
       <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight sm:text-3xl text-center mb-10">
+          <h2 className="text-2xl font-bold text-gray-900 tracking-tight sm:text-3xl text-center mb-10">
             Quel que soit votre parcours.
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -516,7 +512,7 @@ export default function LandingPage() {
       {/* 9. Simple / Puissant */}
       <section className="py-16 bg-white border-y border-gray-100">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 text-center">
-          <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight sm:text-3xl mb-6">
+          <h2 className="text-2xl font-bold text-gray-900 tracking-tight sm:text-3xl mb-6">
             Commencez simplement. Allez aussi loin que vous le souhaitez.
           </h2>
           <div className="flex flex-col md:flex-row justify-center items-center gap-8 mt-12 max-w-4xl mx-auto">
@@ -545,7 +541,7 @@ export default function LandingPage() {
       <section id="tarifs" className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-10">
-            <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight sm:text-3xl mb-4">
+            <h2 className="text-2xl font-bold text-gray-900 tracking-tight sm:text-3xl mb-4">
               Des tarifs simples et transparents
             </h2>
           </div>
@@ -553,12 +549,12 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {/* Gratuit */}
             <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-200 flex flex-col hover:shadow-md transition-shadow">
-              <h3 className="text-xl font-extrabold text-gray-900 mb-2">Gratuit</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Gratuit</h3>
               <p className="text-sm text-gray-500 mb-6 font-medium">Les bases pour centraliser votre parcours.</p>
-              <div className="text-3xl font-black text-gray-900 mb-8">0 XOF</div>
+              <div className="text-3xl font-bold text-gray-900 mb-8">0 XOF</div>
               <ul className="space-y-4 mb-8 flex-1">
                 {['Profil professionnel central', 'CV et Lettres (thèmes de base)', 'Analyse d\'offre', 'Générations limitées'].map((f, i) => (
-                  <li key={i} className="flex items-center gap-3 text-sm font-medium text-gray-700">
+                  <li key={i} className="flex items-center gap-3 text-sm font-relative text-gray-700">
                     <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" /> {f}
                   </li>
                 ))}
@@ -570,17 +566,17 @@ export default function LandingPage() {
 
             {/* Plus */}
             <div className="bg-indigo-600 p-8 rounded-3xl shadow-[0_20px_50px_rgba(79,70,229,0.3)] border border-indigo-500 flex flex-col relative transform md:-translate-y-4">
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white text-indigo-600 text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest shadow-md">
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white text-indigo-600 text-[10px] font-bold px-4 py-1.5 rounded-full uppercase tracking-widest shadow-md">
                 Le plus populaire
               </div>
-              <h3 className="text-xl font-extrabold text-white mb-2">Carriey PRO</h3>
+              <h3 className="text-xl font-bold text-white mb-2">Carriey PRO</h3>
               <p className="text-sm text-indigo-200 mb-6 font-medium">L'outil ultime pour multiplier vos candidatures.</p>
-              <div className="text-3xl font-black text-white mb-8">
+              <div className="text-3xl font-bold text-white mb-8">
                 3 500 XOF<span className="text-base font-medium text-indigo-200">/mois</span>
               </div>
               <ul className="space-y-4 mb-8 flex-1">
                 {['Tout du plan Gratuit', 'Tous les modèles premium', 'IA : Adaptation experte aux offres', 'Export PDF Haute Qualité'].map((f, i) => (
-                  <li key={i} className="flex items-center gap-3 text-sm font-medium text-white">
+                  <li key={i} className="flex items-center gap-3 text-sm font-relative text-white">
                     <CheckCircle2 className="w-5 h-5 text-indigo-300 flex-shrink-0" /> {f}
                   </li>
                 ))}
@@ -592,14 +588,14 @@ export default function LandingPage() {
 
             {/* Pro / Entreprise */}
             <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-200 flex flex-col hover:shadow-md transition-shadow">
-              <h3 className="text-xl font-extrabold text-gray-900 mb-2">Achat unique</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Achat unique</h3>
               <p className="text-sm text-gray-500 mb-6 font-medium">Pour un besoin ponctuel et précis.</p>
-              <div className="text-3xl font-black text-gray-900 mb-8">
+              <div className="text-3xl font-bold text-gray-900 mb-8">
                 Dès 900 XOF<span className="text-base font-medium text-gray-400">/modèle</span>
               </div>
               <ul className="space-y-4 mb-8 flex-1">
                 {['Débloque ce modèle à vie', 'Génération IA de base (lettre incluse)', 'Export PDF illimité', 'Profil central'].map((f, i) => (
-                  <li key={i} className="flex items-center gap-3 text-sm font-medium text-gray-700">
+                  <li key={i} className="flex items-center gap-3 text-sm font-relative text-gray-700">
                     <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" /> {f}
                   </li>
                 ))}
@@ -615,7 +611,7 @@ export default function LandingPage() {
       {/* 11. FAQ */}
       <section id="faq" className="py-16 bg-white">
         <div className="max-w-3xl mx-auto px-6">
-          <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight text-center mb-12 sm:text-3xl">
+          <h2 className="text-2xl font-bold text-gray-900 tracking-tight text-center mb-12 sm:text-3xl">
             Questions fréquentes
           </h2>
           <div className="space-y-6">
@@ -658,7 +654,7 @@ export default function LandingPage() {
       <section className="py-24 bg-white text-center px-6 relative overflow-hidden border-t border-gray-100">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
         <div className="max-w-3xl mx-auto relative z-10">
-          <h2 className="text-3xl font-extrabold text-gray-900 mb-6 sm:text-4xl tracking-tight">Votre parcours mérite plus qu'un seul CV.</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-6 sm:text-4xl tracking-tight">Votre parcours mérite plus qu'un seul CV.</h2>
           <p className="text-xl text-gray-600 mb-10">Créez votre profil gratuitement et commencez à construire vos documents professionnels.</p>
           <Link href="/register" className="inline-flex items-center justify-center gap-2 bg-indigo-600 text-white px-8 py-4 rounded-xl text-lg font-bold shadow-xl shadow-indigo-600/20 hover:bg-indigo-700 transition-all hover:-translate-y-1">
             Commencer gratuitement

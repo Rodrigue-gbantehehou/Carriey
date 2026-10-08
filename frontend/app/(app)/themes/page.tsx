@@ -22,7 +22,7 @@ interface DbTheme {
 export default function ThemesPage() {
   const router = useRouter();
   const { data: session } = useSession();
-  
+
   const isUserPro = session?.user?.subscription_status === 'active';
   const isAdmin = session?.user?.role === 'ADMIN' || session?.user?.role === 'SUPER_ADMIN';
   const hasProAccess = isUserPro || isAdmin;
@@ -30,7 +30,7 @@ export default function ThemesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<ThemeCategory>('all');
   const [activeTheme, setActiveTheme] = useState<string>('classique');
-  
+
   const [dbThemes, setDbThemes] = useState<DbTheme[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -49,27 +49,27 @@ export default function ThemesPage() {
         if (isMounted) setIsLoading(false);
       }
     };
-    
+
     fetchThemes();
     return () => { isMounted = false; };
   }, []);
 
   const filteredThemes = dbThemes.filter(theme => {
     const matchesSearch = theme.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = 
-      filter === 'all' || 
-      theme.template_type === filter || 
+    const matchesFilter =
+      filter === 'all' ||
+      theme.template_type === filter ||
       (filter === 'page' && ['public_page', 'page_publique', 'public', 'profil'].includes(theme.template_type));
     return matchesSearch && matchesFilter;
   });
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-8 animate-fade-in pb-24">
-      
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10 animate-slide-up" style={{ animationDelay: '0.1s' }}>
         <div>
-          <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">Thèmes et designs</h1>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Thèmes et designs</h1>
           <p className="text-base text-gray-500 mt-1">
             Personnalisez l'apparence de vos CV et de votre profil public.
           </p>
@@ -78,29 +78,29 @@ export default function ThemesPage() {
 
       {/* Filters & Search */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8 animate-slide-up" style={{ animationDelay: '0.2s' }}>
-        
+
         {/* Category tabs */}
         <div className="flex items-center gap-1 bg-white/60 backdrop-blur-md border border-gray-200/60 p-1.5 rounded-2xl overflow-x-auto hide-scrollbar shadow-sm w-full md:w-auto">
-          <button 
-            onClick={() => setFilter('all')} 
+          <button
+            onClick={() => setFilter('all')}
             className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${filter === 'all' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'}`}
           >
             Tous
           </button>
-          <button 
-            onClick={() => setFilter('cv')} 
+          <button
+            onClick={() => setFilter('cv')}
             className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${filter === 'cv' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'}`}
           >
             CV
           </button>
-          <button 
-            onClick={() => setFilter('cover_letter')} 
+          <button
+            onClick={() => setFilter('cover_letter')}
             className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${filter === 'cover_letter' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'}`}
           >
             Lettres
           </button>
-          <button 
-            onClick={() => setFilter('page')} 
+          <button
+            onClick={() => setFilter('page')}
             className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${filter === 'page' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'}`}
           >
             Pages
@@ -132,9 +132,9 @@ export default function ThemesPage() {
             const isThemePro = theme.price > 0;
             const requiresPayment = isThemePro && !hasProAccess;
             const category = 'Moderne'; // Default mock category for now
-            
+
             return (
-              <div 
+              <div
                 key={theme.id}
                 className="bg-white/60 backdrop-blur-md rounded-3xl overflow-hidden shadow-sm transition-all duration-300 group flex flex-col cursor-pointer border border-gray-200/60 hover:shadow-xl hover:shadow-indigo-600/5 hover:-translate-y-1 hover:border-indigo-200"
               >
@@ -142,9 +142,9 @@ export default function ThemesPage() {
                 <div className="aspect-[1/1.4] bg-gray-100 border-b border-gray-100 relative overflow-hidden flex items-center justify-center p-4">
                   <div className="w-full h-full bg-white shadow-sm rounded-sm p-0 relative border border-gray-100 transition-transform group-hover:scale-[1.02] overflow-hidden">
                     {theme.preview_image ? (
-                      <img 
-                        src={theme.preview_image.startsWith('http') ? theme.preview_image : `${config.staticBaseUrl}/previews/${theme.preview_image.split('/').pop()}`} 
-                        alt={theme.name} 
+                      <img
+                        src={theme.preview_image.startsWith('http') ? theme.preview_image : `${config.staticBaseUrl}/previews/${theme.preview_image.split('/').pop()}`}
+                        alt={theme.name}
                         className="w-full h-full object-cover object-top"
                       />
                     ) : (
@@ -165,11 +165,11 @@ export default function ThemesPage() {
                   <div className="flex-1">
                     {isThemePro ? (
                       <span className="text-gray-900 text-xs font-bold flex items-center gap-1.5">
-                       {hasProAccess ? (
-                         <span className="text-indigo-600 flex items-center gap-1"><Star className="w-4 h-4 fill-current" /> Inclus (Pro)</span>
-                       ) : (
-                         <>{theme.price} {theme.currency}</>
-                       )}
+                        {hasProAccess ? (
+                          <span className="text-indigo-600 flex items-center gap-1"><Star className="w-4 h-4 fill-current" /> Inclus (Pro)</span>
+                        ) : (
+                          <>{theme.price} {theme.currency}</>
+                        )}
                       </span>
                     ) : (
                       <span className="text-gray-900 text-xs font-bold">
@@ -177,15 +177,14 @@ export default function ThemesPage() {
                       </span>
                     )}
                   </div>
-                  
+
                   {/* Button replaces Price badge */}
                   <div>
-                    <button 
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-all flex items-center justify-center ${
-                        requiresPayment 
-                          ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-600/20 hover:-translate-y-0.5' 
+                    <button
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-all flex items-center justify-center ${requiresPayment
+                          ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-600/20 hover:-translate-y-0.5'
                           : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
-                      }`}
+                        }`}
                       onClick={(e) => {
                         e.stopPropagation();
                         if (requiresPayment) {

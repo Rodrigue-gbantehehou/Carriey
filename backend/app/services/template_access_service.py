@@ -38,7 +38,13 @@ class TemplateAccessService:
         if template.price == 0:
             return True
         
-        # Sinon, vérifier si l'utilisateur a un accès enregistré
+        # Vérifier si l'utilisateur a un abonnement premium actif
+        from app.models.user import User
+        user = db.query(User).filter(User.id == user_id).first()
+        if user and user.premium_until and user.premium_until > datetime.now():
+            return True
+            
+        # Sinon, vérifier si l'utilisateur a un accès spécifique enregistré
         # (On vérifie par ID ou par slug pour des raisons de rétrocompatibilité avec les anciens paiements)
         access = db.query(UserTemplateAccess).filter(
             UserTemplateAccess.user_id == user_id,
@@ -46,16 +52,6 @@ class TemplateAccessService:
         ).first()
         
         if not access:
-            # Fallback de sécurité : si le webhook a planté mais que le paiement est SUCCESS
-            from app.models.payment import Payment, PaymentStatus
-            successful_payment = db.query(Payment).filter(
-                Payment.user_id == user_id,
-                Payment.template_id.in_([template.id, template.slug]),
-                Payment.status == PaymentStatus.SUCCESS
-            ).first()
-            if successful_payment:
-                # On pourrait recréer l'accès ici, mais au moins on lui donne l'autorisation
-                return True
             return False
         
         # Vérifier si l'accès n'a pas expiré

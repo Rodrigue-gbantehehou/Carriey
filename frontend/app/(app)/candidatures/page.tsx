@@ -24,14 +24,14 @@ export default function CandidaturesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<Status | 'all'>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'kanban'>('kanban');
-  
+
   const [applications, setApplications] = useState<Application[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingApp, setEditingApp] = useState<Application | null>(null);
-  
+
   // Form State
   const [formData, setFormData] = useState({
     company: '',
@@ -66,7 +66,7 @@ export default function CandidaturesPage() {
   });
 
   const getStatusConfig = (status: Status) => {
-    switch(status) {
+    switch (status) {
       case 'envoyee': return { label: 'Envoyée', className: 'bg-blue-50 text-blue-700 border-blue-200' };
       case 'entretien': return { label: 'Entretien', className: 'bg-orange-50 text-orange-700 border-orange-200' };
       case 'acceptee': return { label: 'Acceptée', className: 'bg-green-50 text-green-700 border-green-200' };
@@ -135,12 +135,12 @@ export default function CandidaturesPage() {
       },
       body: JSON.stringify({ job_text: prompt })
     });
-    
+
     if (!res.ok) {
       const error = await res.json();
       throw new Error(error.detail || "Erreur de l'IA");
     }
-    
+
     const data = await res.json();
     setFormData(prev => ({
       ...prev,
@@ -188,7 +188,7 @@ export default function CandidaturesPage() {
   const renderCard = (app: Application) => {
     const statusConfig = getStatusConfig(app.status);
     return (
-      <div 
+      <div
         key={app.id}
         draggable
         onDragStart={(e) => handleDragStart(e, app.id)}
@@ -253,12 +253,12 @@ export default function CandidaturesPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10 animate-slide-up" style={{ animationDelay: '0.1s' }}>
         <div>
-          <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">Mes candidatures</h1>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Mes candidatures</h1>
           <p className="text-base text-gray-500 mt-1">
             Suivez l'avancement de vos postulations en un coup d'œil.
           </p>
         </div>
-        <button 
+        <button
           onClick={openAddModal}
           className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20 hover:scale-[1.02] active:scale-[0.98]"
         >
@@ -269,7 +269,7 @@ export default function CandidaturesPage() {
 
       {/* Filters & Search */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8 animate-slide-up" style={{ animationDelay: '0.2s' }}>
-        
+
         {/* Status tabs (Grid only) */}
         <div className={`flex items-center gap-1 bg-white/60 backdrop-blur-md border border-gray-200/60 p-1.5 rounded-2xl overflow-x-auto hide-scrollbar shadow-sm w-full md:w-auto ${viewMode === 'kanban' ? 'opacity-50 pointer-events-none' : ''}`}>
           <button onClick={() => setFilter('all')} className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${filter === 'all' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'}`}>Toutes</button>
@@ -288,7 +288,7 @@ export default function CandidaturesPage() {
               <LayoutGrid className="w-4 h-4" />
             </button>
           </div>
-          
+
           <div className="relative flex-1 md:w-64">
             <Search className="w-4 h-4 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
             <input
@@ -319,8 +319,8 @@ export default function CandidaturesPage() {
           {columns.map(col => {
             const colApps = applications.filter(a => a.status === col.id && (a.company?.toLowerCase().includes(searchTerm.toLowerCase()) || a.role?.toLowerCase().includes(searchTerm.toLowerCase())));
             return (
-              <div 
-                key={col.id} 
+              <div
+                key={col.id}
                 className={`flex-1 min-w-0 flex flex-col rounded-xl border p-2 md:p-3 ${col.color}`}
                 onDragOver={handleDragOver}
                 onDrop={(e) => handleDrop(e, col.id)}
@@ -349,7 +349,7 @@ export default function CandidaturesPage() {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex flex-col justify-end sm:items-center sm:justify-center">
           <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
-          
+
           <div className="relative bg-white w-full sm:max-w-lg sm:rounded-3xl rounded-t-3xl shadow-2xl z-10 flex flex-col max-h-[90vh] animate-slide-up sm:animate-scale-in">
             {/* Drag handle (mobile only) */}
             <div className="flex justify-center pt-3 pb-1 sm:hidden">
@@ -364,13 +364,13 @@ export default function CandidaturesPage() {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            
+
             <div className="overflow-y-auto overflow-x-hidden hide-scrollbar">
-              
+
               {!editingApp && (
                 <div className="px-5 sm:px-6 pt-5 border-b border-gray-100 pb-5 bg-gradient-to-br from-indigo-50/50 to-purple-50/50">
-                  <AIAssistant 
-                    onGenerate={handleExtractJob} 
+                  <AIAssistant
+                    onGenerate={handleExtractJob}
                     placeholder="Collez l'annonce ou l'offre d'emploi ici. L'IA va extraire l'entreprise, le poste et la localisation automatiquement..."
                     buttonText="Extraire les infos"
                     loadingText="Analyse de l'offre..."
@@ -381,21 +381,21 @@ export default function CandidaturesPage() {
               <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1.5">Entreprise *</label>
-                  <input required type="text" value={formData.company} onChange={e => setFormData({...formData, company: e.target.value})} className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
+                  <input required type="text" value={formData.company} onChange={e => setFormData({ ...formData, company: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1.5">Poste *</label>
-                  <input required type="text" value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})} className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
+                  <input required type="text" value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1.5">Localisation</label>
-                  <input type="text" value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
+                  <input type="text" value={formData.location} onChange={e => setFormData({ ...formData, location: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
                 </div>
-                
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-1.5">Statut</label>
-                    <select value={formData.status} onChange={e => setFormData({...formData, status: e.target.value as Status})} className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all cursor-pointer">
+                    <select value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value as Status })} className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all cursor-pointer">
                       <option value="envoyee">Envoyée</option>
                       <option value="entretien">Entretien</option>
                       <option value="acceptee">Acceptée</option>
@@ -404,15 +404,15 @@ export default function CandidaturesPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-1.5">Date d'envoi</label>
-                    <input type="date" value={formData.applied_date} onChange={e => setFormData({...formData, applied_date: e.target.value})} className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
+                    <input type="date" value={formData.applied_date} onChange={e => setFormData({ ...formData, applied_date: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1.5">Lien de l'offre</label>
-                  <input type="url" placeholder="https://..." value={formData.url} onChange={e => setFormData({...formData, url: e.target.value})} className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
+                  <input type="url" placeholder="https://..." value={formData.url} onChange={e => setFormData({ ...formData, url: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
                 </div>
-                
+
                 <div className="mt-8 flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-gray-100">
                   <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-3 sm:py-2.5 text-gray-600 font-bold hover:bg-gray-100 rounded-xl w-full sm:w-auto text-center transition-colors">Annuler</button>
                   <button type="submit" disabled={isSubmitting} className="px-5 py-3 sm:py-2.5 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 disabled:opacity-50 w-full sm:w-auto flex justify-center transition-all">

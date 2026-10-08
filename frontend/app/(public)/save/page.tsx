@@ -42,7 +42,7 @@ export default function SavePage() {
       {/* Header */}
       <header className="relative z-10 px-6 py-6">
         <Link href="/" className="inline-flex items-center gap-2 group">
-          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-black text-lg">C</div>
+          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-lg">C</div>
           <span className="text-lg font-bold text-gray-900 tracking-tight">carriey</span>
         </Link>
       </header>

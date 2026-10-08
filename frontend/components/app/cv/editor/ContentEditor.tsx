@@ -288,7 +288,7 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
                 default: return null;
               }
             };
-            
+
             const getTabLabel = (t: string) => {
               switch (t) {
                 case 'profile': return 'Profil';
@@ -311,18 +311,17 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
                   if (wizardStep === undefined) setActiveTab(tab as typeof activeTab)
                 }}
                 disabled={wizardStep !== undefined}
-                className={`flex flex-col items-center gap-1.5 p-2 rounded-xl text-[10px] font-bold transition-all border min-w-[70px] ${
-                  activeTab === tab
+                className={`flex flex-col items-center gap-1.5 p-2 rounded-xl text-[10px] font-bold transition-all border min-w-[70px] ${activeTab === tab
                     ? 'bg-[#00C896]/10 text-[#00C896] border-[#00C896]/20 shadow-sm'
                     : 'bg-white text-[#777777] border-transparent hover:bg-gray-50 hover:text-[#1c1c1c]'
-                }`}
+                  }`}
               >
                 {getTabIcon(tab)}
                 {getTabLabel(tab)}
               </button>
             )
           })}
-          
+
           {data.doc_type === 'cover_letter' && ['profile', 'recipient', 'letter_body'].map((tab, idx) => {
             return (
               <button
@@ -331,11 +330,10 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
                   if (wizardStep === undefined) setActiveTab(tab as typeof activeTab)
                 }}
                 disabled={wizardStep !== undefined}
-                className={`flex flex-col items-center gap-1.5 p-2 rounded-xl text-[10px] font-bold transition-all border min-w-[70px] ${
-                  activeTab === tab
+                className={`flex flex-col items-center gap-1.5 p-2 rounded-xl text-[10px] font-bold transition-all border min-w-[70px] ${activeTab === tab
                     ? 'bg-[#00C896]/10 text-[#00C896] border-[#00C896]/20 shadow-sm'
                     : 'bg-white text-[#777777] border-transparent hover:bg-gray-50 hover:text-[#1c1c1c]'
-                }`}
+                  }`}
               >
                 {tab === 'profile' && <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>}
                 {tab === 'recipient' && <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>}
@@ -356,11 +354,11 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
               <div className="relative group">
                 <div className="w-20 h-20 rounded-2xl bg-gray-50 border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden transition-all group-hover:border-[#00C896]">
                   {data.profile?.photo ? (
-                    <Image 
-                      src={data.profile.photo} 
-                      alt="Profile" 
-                      fill 
-                      className="object-cover" 
+                    <Image
+                      src={data.profile.photo}
+                      alt="Profile"
+                      fill
+                      className="object-cover"
                     />
                   ) : (
                     <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -525,7 +523,7 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
             {(data.experience || []).map((exp: any, idx: number) => (
               <div key={idx} className="bg-white rounded-xl p-4 space-y-3 border border-gray-200 shadow-sm">
                 <div className="flex justify-between items-center border-b border-gray-200 pb-2 mb-2">
-                  <span className="text-[10px] font-black text-[#00C896] uppercase">Expérience #{idx + 1}</span>
+                  <span className="text-[10px] font-bold text-[#00C896] uppercase">Expérience #{idx + 1}</span>
                   <button
                     onClick={() => deleteExperience(idx)}
                     className="text-red-400 hover:text-red-500 transition-colors p-1"
@@ -621,7 +619,7 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
             {(data.education || []).map((edu: any, idx: number) => (
               <div key={idx} className="bg-white rounded-xl p-4 space-y-3 border border-gray-200 shadow-sm">
                 <div className="flex justify-between items-center border-b border-gray-200 pb-2 mb-2">
-                  <span className="text-[10px] font-black text-[#00C896] uppercase">Diplôme #{idx + 1}</span>
+                  <span className="text-[10px] font-bold text-[#00C896] uppercase">Diplôme #{idx + 1}</span>
                   <button
                     onClick={() => deleteEducation(idx)}
                     className="text-red-400 hover:text-red-500 transition-colors p-1"
@@ -689,7 +687,7 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
             {(data.skills?.groups || []).map((group: any, idx: number) => (
               <div key={idx} className="bg-white rounded-xl p-4 space-y-3 border border-gray-200 shadow-sm">
                 <div className="flex justify-between items-center border-b border-gray-200 pb-2 mb-2">
-                  <span className="text-[10px] font-black text-[#00C896] uppercase">Compétences #{idx + 1}</span>
+                  <span className="text-[10px] font-bold text-[#00C896] uppercase">Compétences #{idx + 1}</span>
                   <button
                     onClick={() => deleteSkillGroup(idx)}
                     className="text-red-400 hover:text-red-500 transition-colors p-1"
@@ -774,7 +772,7 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
             {(data.projects || []).map((p: any, idx: number) => (
               <div key={idx} className="bg-white rounded-xl p-4 space-y-3 border border-gray-200 shadow-sm">
                 <div className="flex justify-between items-center border-b border-gray-200 pb-2 mb-2">
-                  <span className="text-[10px] font-black text-[#00C896] uppercase">Projet #{idx + 1}</span>
+                  <span className="text-[10px] font-bold text-[#00C896] uppercase">Projet #{idx + 1}</span>
                   <button
                     onClick={() => {
                       const projects = [...(data.projects || [])]; projects.splice(idx, 1); setData({ ...data, projects });
@@ -917,19 +915,19 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
             {/* Editing Custom Sections Content */}
             {(data.custom_sections || []).length > 0 && (
               <div className="space-y-4 pt-4 border-t border-gray-200">
-                <h4 className="text-[10px] font-black text-[#777777] uppercase">Contenu des Sections Personnalisées</h4>
+                <h4 className="text-[10px] font-bold text-[#777777] uppercase">Contenu des Sections Personnalisées</h4>
                 {data.custom_sections?.map((cs: any, idx: number) => (
                   <div key={cs.id} className="bg-gray-50 p-4 rounded-xl border border-gray-200">
                     <div className="flex justify-between items-center mb-2">
-                       <span className="text-xs font-bold text-[#1c1c1c]">{cs.title}</span>
-                       <button onClick={() => {
-                         const cs_list = [...(data.custom_sections || [])]; cs_list.splice(idx,1); setData({...data, custom_sections: cs_list});
-                       }} className="text-red-500 hover:scale-110 transition-transform"><i className="fas fa-trash"></i></button>
+                      <span className="text-xs font-bold text-[#1c1c1c]">{cs.title}</span>
+                      <button onClick={() => {
+                        const cs_list = [...(data.custom_sections || [])]; cs_list.splice(idx, 1); setData({ ...data, custom_sections: cs_list });
+                      }} className="text-red-500 hover:scale-110 transition-transform"><i className="fas fa-trash"></i></button>
                     </div>
                     <textarea
                       value={cs.content}
                       onChange={(e) => {
-                        const cs_list = [...(data.custom_sections || [])]; cs_list[idx].content = e.target.value; setData({...data, custom_sections: cs_list});
+                        const cs_list = [...(data.custom_sections || [])]; cs_list[idx].content = e.target.value; setData({ ...data, custom_sections: cs_list });
                       }}
                       rows={4}
                       className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-[#1c1c1c] text-sm outline-none resize-none focus:ring-1 focus:ring-[#00C896]"

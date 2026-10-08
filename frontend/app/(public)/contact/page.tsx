@@ -25,17 +25,17 @@ export default function ContactPage() {
 
       <main className="py-20 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto shadow-2xl shadow-black/5 rounded-[40px] overflow-hidden bg-white flex flex-col md:flex-row border border-gray-100">
-          
+
           {/* Info Side */}
-          <div className="md:w-2/5 bg-gray-900 p-12 text-white relative overflow-hidden flex flex-col justify-between">
+          <div className="md:w-2/5 bg-indigo-600 p-12 text-white relative overflow-hidden flex flex-col justify-between">
             <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-600 opacity-20 blur-[100px] rounded-full -mr-32 -mt-32"></div>
-            
+
             <div className="relative z-10">
-              <h1 className="text-4xl font-black mb-6">Parlons de votre <span className="text-indigo-400">avenir</span>.</h1>
-              <p className="text-gray-400 font-medium leading-relaxed mb-12">
+              <h1 className="text-4xl font-bold mb-6">Parlons</h1>
+              <p className="text-white font-relative leading-relaxed mb-12">
                 Une question sur la configuration de votre profil central, la génération d'un document ou l'IA ? Notre équipe est à votre écoute pour vous accompagner.
               </p>
- {/*
+              {/*
               <div className="space-y-8">
                 <div className="flex items-center gap-5 group">
                   <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center group-hover:bg-brand-cta transition-colors">
@@ -66,7 +66,7 @@ export default function ContactPage() {
             </div>
 
             <div className="relative z-10 pt-12 border-t border-white/10 mt-12">
-              <p className="text-sm font-medium text-gray-400">Suivez-nous sur les réseaux pour des conseils carrière hebdomadaires.</p>
+              <p className="text-sm font-medium text-white">Suivez-nous sur les réseaux pour des conseils carrière hebdomadaires.</p>
             </div>
           </div>
 
@@ -76,18 +76,18 @@ export default function ContactPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-gray-900 uppercase tracking-widest">Nom complet</label>
-                  <input 
+                  <input
                     required
-                    type="text" 
+                    type="text"
                     placeholder="Jean Kouassi"
                     className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:border-indigo-600 focus:bg-white transition-all font-medium text-gray-900"
                   />
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-gray-900 uppercase tracking-widest">Email</label>
-                  <input 
+                  <input
                     required
-                    type="email" 
+                    type="email"
                     placeholder="jean@exemple.ci"
                     className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:border-indigo-600 focus:bg-white transition-all font-medium text-gray-900"
                   />
@@ -96,9 +96,9 @@ export default function ContactPage() {
 
               <div className="space-y-2">
                 <label className="text-xs font-bold text-gray-900 uppercase tracking-widest">Sujet</label>
-                <input 
+                <input
                   required
-                  type="text" 
+                  type="text"
                   placeholder="Comment adapter mon profil pour..."
                   className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:border-indigo-600 focus:bg-white transition-all font-medium text-gray-900"
                 />
@@ -106,7 +106,7 @@ export default function ContactPage() {
 
               <div className="space-y-2">
                 <label className="text-xs font-bold text-gray-900 uppercase tracking-widest">Votre message</label>
-                <textarea 
+                <textarea
                   required
                   rows={5}
                   placeholder="Dites-nous comment nous pouvons vous aider..."
@@ -114,10 +114,10 @@ export default function ContactPage() {
                 ></textarea>
               </div>
 
-              <button 
+              <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-5 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-500 shadow-xl shadow-indigo-600/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-widest text-sm"
+                className="w-full py-5 bg-indigo-600 text-white font-bold rounded-2xl hover:bg-indigo-500 shadow-xl shadow-indigo-600/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-widest text-sm"
               >
                 {loading ? 'Envoi en cours...' : 'Envoyer le message'}
               </button>

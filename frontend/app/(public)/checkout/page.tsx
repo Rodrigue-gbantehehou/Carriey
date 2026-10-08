@@ -190,7 +190,7 @@ function CheckoutContent() {
         <div className="max-w-4xl mx-auto">
 
           <div className="text-center mb-10">
-            <h1 className="text-3xl font-black text-gray-900 mb-4">Finaliser votre commande</h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">Finaliser votre commande</h1>
             <p className="text-gray-500 flex items-center justify-center gap-2">
               <ShieldCheck className="w-5 h-5 text-emerald-500" />
               Paiement 100% sécurisé
@@ -209,12 +209,12 @@ function CheckoutContent() {
                   <p className="text-sm text-gray-500 mt-1">{plan.desc}</p>
                 </div>
                 <div className="text-right">
-                  <span className="font-black text-xl text-gray-900">{plan.price}</span>
+                  <span className="font-bold text-xl text-gray-900">{plan.price}</span>
                   <span className="text-sm font-bold text-gray-500 ml-1">{plan.currency}</span>
                 </div>
               </div>
 
-              <div className="flex justify-between items-center text-lg font-black text-indigo-900">
+              <div className="flex justify-between items-center text-lg font-bold text-indigo-900">
                 <span>Total à payer</span>
                 <span>{plan.price} {plan.currency}</span>
               </div>

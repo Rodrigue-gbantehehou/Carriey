@@ -31,21 +31,21 @@ const TEMPLATE_META: Record<string, {
   isAtsFriendly?: boolean
   badge?: string
 }> = {
-  classique:   { category: 'corporate',   badge: 'Populaire', description: 'Structure traditionnelle et sobre, parfaitement adaptée aux milieux formels.', tags: ['Santé', 'Commerce & Vente', 'Administration', 'Finance & Gestion'], isAtsFriendly: true },
-  moderne:     { category: 'tech',         badge: 'Tendance',  description: 'Design épuré et dynamique, idéal pour les métiers du numérique.', tags: ['Informatique & Tech', 'BTP & Ingénierie', 'Digital'], isAtsFriendly: true },
-  professional:{ category: 'corporate',   description: 'Équilibre parfait entre modernité et sérieux pour cadres et managers.', tags: ['Commerce & Vente', 'Management', 'Marketing & Com'], isAtsFriendly: true },
-  tokyo:       { category: 'minimalist',  description: 'Minimalisme radical pour une lisibilité maximale et un impact direct.', tags: ['Informatique & Tech', 'Marketing & Com', 'Freelance'], isAtsFriendly: true },
-  creatif:     { category: 'creative',    badge: 'Original',   description: 'Mise en page audacieuse pour valoriser originalité et portfolio.', tags: ['Marketing & Com', 'Design & Créatif', 'Arts'] },
-  rodrigue:    { category: 'corporate',   badge: 'Premium',    description: 'Élégance premium avec une touche de luxe pour les hautes fonctions.', tags: ['Management', 'Luxe', 'Direction'] },
-  abidjan:     { category: 'minimalist',  description: 'Un classique robuste, conçu pour la clarté et l\'efficacité.', tags: ['Social', 'Santé', 'Administration'], isAtsFriendly: true },
-  dakar:       { category: 'minimalist',  description: 'Structure aérée et moderne, polyvalente pour tous types de profils.', tags: ['BTP & Ingénierie', 'Enseignement', 'Polyvalent'], isAtsFriendly: true },
+  classique: { category: 'corporate', badge: 'Populaire', description: 'Structure traditionnelle et sobre, parfaitement adaptée aux milieux formels.', tags: ['Santé', 'Commerce & Vente', 'Administration', 'Finance & Gestion'], isAtsFriendly: true },
+  moderne: { category: 'tech', badge: 'Tendance', description: 'Design épuré et dynamique, idéal pour les métiers du numérique.', tags: ['Informatique & Tech', 'BTP & Ingénierie', 'Digital'], isAtsFriendly: true },
+  professional: { category: 'corporate', description: 'Équilibre parfait entre modernité et sérieux pour cadres et managers.', tags: ['Commerce & Vente', 'Management', 'Marketing & Com'], isAtsFriendly: true },
+  tokyo: { category: 'minimalist', description: 'Minimalisme radical pour une lisibilité maximale et un impact direct.', tags: ['Informatique & Tech', 'Marketing & Com', 'Freelance'], isAtsFriendly: true },
+  creatif: { category: 'creative', badge: 'Original', description: 'Mise en page audacieuse pour valoriser originalité et portfolio.', tags: ['Marketing & Com', 'Design & Créatif', 'Arts'] },
+  rodrigue: { category: 'corporate', badge: 'Premium', description: 'Élégance premium avec une touche de luxe pour les hautes fonctions.', tags: ['Management', 'Luxe', 'Direction'] },
+  abidjan: { category: 'minimalist', description: 'Un classique robuste, conçu pour la clarté et l\'efficacité.', tags: ['Social', 'Santé', 'Administration'], isAtsFriendly: true },
+  dakar: { category: 'minimalist', description: 'Structure aérée et moderne, polyvalente pour tous types de profils.', tags: ['BTP & Ingénierie', 'Enseignement', 'Polyvalent'], isAtsFriendly: true },
 }
 
 const FILTERS = [
-  { id: 'all',          label: 'Tous',                   icon: Filter },
-  { id: 'cv',           label: 'CV',                     icon: FileText },
-  { id: 'cover_letter', label: 'Lettre de motivation',   icon: Mail },
-  { id: 'public_page',  label: 'Page publique',          icon: Globe },
+  { id: 'all', label: 'Tous', icon: Filter },
+  { id: 'cv', label: 'CV', icon: FileText },
+  { id: 'cover_letter', label: 'Lettre', icon: Mail },
+  { id: 'public_page', label: 'Page', icon: Globe },
 ]
 
 const PREVIEW_DATA = {
@@ -77,17 +77,17 @@ function TemplateCard({ template, onSelect, selectedSector, previewData, index }
   // Label et badge de type
   const typeLabel = ttype === 'cover_letter' ? 'Lettre de motivation'
     : ttype === 'public_page' ? 'Page publique'
-    : 'CV'
+      : 'CV'
   const typeBgClass = ttype === 'cover_letter' ? 'bg-violet-100 text-violet-700'
     : ttype === 'public_page' ? 'bg-sky-100 text-sky-700'
-    : 'bg-indigo-100 text-indigo-700'
+      : 'bg-indigo-100 text-indigo-700'
 
   const ctaText = ttype === 'cover_letter' ? 'Créer cette lettre'
     : ttype === 'public_page' ? 'Créer cette page'
-    : 'Utiliser ce modèle'
+      : 'Utiliser ce modèle'
   const ctaSub = ttype === 'cover_letter' ? 'Générée par IA en 30 secondes'
     : ttype === 'public_page' ? 'Publiez votre profil en ligne'
-    : 'CV prêt en 2 minutes'
+      : 'CV prêt en 2 minutes'
 
   return (
     <div
@@ -106,7 +106,7 @@ function TemplateCard({ template, onSelect, selectedSector, previewData, index }
 
         {/* Overlay au survol */}
         <div className="absolute inset-0 bg-gray-900/50 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center z-10 gap-3">
-          <div className="px-7 py-3 bg-white text-gray-900 text-sm font-extrabold rounded-xl shadow-2xl transform translate-y-3 group-hover:translate-y-0 transition-all duration-300">
+          <div className="px-7 py-3 bg-white text-gray-900 text-sm font-bold rounded-xl shadow-2xl transform translate-y-3 group-hover:translate-y-0 transition-all duration-300">
             {ctaText}
           </div>
           <p className="text-white/75 text-xs font-medium translate-y-3 group-hover:translate-y-0 transition-all duration-400 delay-75">
@@ -243,14 +243,14 @@ function ModelesPageContent() {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[400px] bg-indigo-50 rounded-[100%] blur-3xl opacity-60 -z-0" />
 
         <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
-         
+
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Left: Copy */}
             <div>
-           
 
-              <h1 className="text-4xl lg:text-5xl font-extrabold text-gray-900 tracking-tight leading-[1.15] mb-5">
+
+              <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 tracking-tight leading-[1.15] mb-5">
                 Votre profil.{' '}
                 <span className="text-indigo-600">Plusieurs présentations.</span>
               </h1>
@@ -274,7 +274,7 @@ function ModelesPageContent() {
 
               <Link
                 href="/register"
-                className="inline-flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-xl text-sm font-bold shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 hover:-translate-y-0.5 transition-all"
+                className="inline-flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-xl text-sm font-medium shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 hover:-translate-y-0.5 transition-all"
               >
                 Créer mon profil gratuitement
                 <ArrowRight className="w-4 h-4" />
@@ -333,18 +333,16 @@ function ModelesPageContent() {
         <div className="max-w-7xl mx-auto px-6 py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           {/* Category filters */}
           <div className="flex items-center gap-2 overflow-x-auto pb-0.5 no-scrollbar">
-            <Filter className="w-4 h-4 text-gray-400 shrink-0" />
             {FILTERS.map(f => {
               const Icon = f.icon
               return (
                 <button
                   key={f.id}
                   onClick={() => setFilter(f.id as any)}
-                  className={`inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-xl whitespace-nowrap border transition-all ${
-                    filter === f.id
+                  className={`inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-xl whitespace-nowrap border transition-all ${filter === f.id
                       ? 'bg-indigo-600 text-white border-indigo-600 shadow-md'
                       : 'bg-white text-gray-500 border-gray-200 hover:border-indigo-300 hover:text-indigo-600'
-                  }`}
+                    }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
                   {f.label}
@@ -362,7 +360,7 @@ function ModelesPageContent() {
               <input type="checkbox" className="sr-only" checked={showFreeOnly} onChange={e => setShowFreeOnly(e.target.checked)} />
               <span className="text-xs font-bold text-gray-600 group-hover:text-emerald-600 transition-colors">Gratuits seulement</span>
             </label>
-            <span className="text-[11px] font-extrabold text-gray-400 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100 whitespace-nowrap">
+            <span className="text-[11px] font-bold text-gray-400 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100 whitespace-nowrap">
               {filtered.length} modèle{filtered.length > 1 ? 's' : ''}
             </span>
           </div>
@@ -442,7 +440,7 @@ function ModelesPageContent() {
                 <div className={`w-12 h-12 ${color} rounded-xl flex items-center justify-center mb-4`}>
                   <Icon className="w-6 h-6" />
                 </div>
-                <h3 className="font-extrabold text-gray-900 mb-2">{title}</h3>
+                <h3 className="font-bold text-gray-900 mb-2">{title}</h3>
                 <p className="text-sm text-gray-500 leading-relaxed">{desc}</p>
               </div>
             ))}
@@ -455,7 +453,7 @@ function ModelesPageContent() {
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-indigo-50 rounded-[100%] blur-3xl opacity-60" />
         <div className="max-w-3xl mx-auto px-6 text-center relative z-10">
-          <h2 className="text-3xl lg:text-4xl font-extrabold text-gray-900 tracking-tight mb-5">
+          <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 tracking-tight mb-5">
             Prêt à décrocher votre prochain poste ?
           </h2>
           <p className="text-lg text-gray-600 mb-8 font-medium leading-relaxed">
@@ -464,7 +462,7 @@ function ModelesPageContent() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/register"
-              className="inline-flex items-center justify-center gap-2 bg-indigo-600 text-white px-8 py-4 rounded-xl text-base font-bold shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 hover:-translate-y-0.5 transition-all"
+              className="inline-flex items-center justify-center gap-2 bg-indigo-600 text-white px-8 py-4 rounded-xl text-base font-medium shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 hover:-translate-y-0.5 transition-all"
             >
               Créer mon profil gratuitement <ArrowRight className="w-5 h-5" />
             </Link>

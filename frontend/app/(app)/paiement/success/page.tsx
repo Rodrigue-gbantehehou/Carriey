@@ -39,7 +39,7 @@ function PaymentSuccessContent() {
           </div>
         </div>
 
-        <h1 className="text-4xl font-black text-gray-900 mb-3 tracking-tight">
+        <h1 className="text-4xl font-bold text-gray-900 mb-3 tracking-tight">
           Paiement Réussi !
         </h1>
         <p className="text-lg text-gray-600 mb-2">
@@ -77,13 +77,13 @@ function PaymentSuccessContent() {
 
         <Link
           href="/dashboard"
-          className="block w-full py-4 bg-gray-900 text-white font-black rounded-2xl hover:bg-black transition-all shadow-xl shadow-black/10 mb-3 text-center"
+          className="block w-full py-4 bg-gray-900 text-white font-bold rounded-2xl hover:bg-black transition-all shadow-xl shadow-black/10 mb-3 text-center"
         >
           Accéder à mon tableau de bord
         </Link>
         <Link
           href="/editor"
-          className="block w-full py-4 bg-emerald-500 text-white font-black rounded-2xl hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 text-center"
+          className="block w-full py-4 bg-emerald-500 text-white font-bold rounded-2xl hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 text-center"
         >
           Créer mon CV maintenant →
         </Link>

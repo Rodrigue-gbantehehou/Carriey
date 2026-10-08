@@ -35,6 +35,8 @@ router = APIRouter()
 BASE_DIR = Path(__file__).resolve().parents[4]
 STATIC_DIR = BASE_DIR / "static"
 STATIC_DIR.mkdir(exist_ok=True)
+PRIVATE_EXPORTS_DIR = BASE_DIR / "private_exports"
+PRIVATE_EXPORTS_DIR.mkdir(exist_ok=True)
 
 # --- MODELS ---
 class PreviewRequest(BaseModel):
@@ -157,6 +159,20 @@ async def _get_or_create_export_user(req: ExportRequest, current_user: Optional[
                 is_prod = os.getenv("ENVIRONMENT", "development").lower() == "production"
                 payment_valid = False
                 
+                # ----- SECURITY VERIFICATIONS -----
+                if payment:
+                    if payment.status == PaymentStatus.CONSUMED:
+                        raise HTTPException(status_code=400, detail="Ce paiement a déjà été utilisé.")
+                    if payment.user_id != target_user_id:
+                        raise HTTPException(status_code=403, detail="Ce paiement n'appartient pas à cet utilisateur.")
+                    if payment.template_id and template and payment.template_id != template.id:
+                        raise HTTPException(status_code=400, detail="Ce paiement ne correspond pas à ce modèle.")
+                    
+                    expected_amount = 300 if req.plan == "trial" else (template.price if template else 1000)
+                    if float(payment.amount) < float(expected_amount):
+                        raise HTTPException(status_code=400, detail="Le montant du paiement est insuffisant.")
+                # -----------------------------------
+                
                 if payment and payment.status == PaymentStatus.SUCCESS:
                     payment_valid = True
                 else:
@@ -209,6 +225,10 @@ async def _get_or_create_export_user(req: ExportRequest, current_user: Optional[
                 if payment_valid and template and target_user_id:
                     expires_at = datetime.now() + timedelta(days=14) if req.plan == "trial" else None
                     TemplateAccessService.grant_access(db=db, user_id=target_user_id, template_id=template.id, expires_at=expires_at, payment_id=payment.id if payment else None)
+                    
+                    if payment:
+                        payment.status = PaymentStatus.CONSUMED
+                        db.commit()
                 else:
                     logger.warning(f"DEBUG: 402 Error. payment_valid={payment_valid}, template={template is not None}, target_user_id={target_user_id}")
                     raise HTTPException(status_code=402, detail="Paiement requis ou non validé")
@@ -272,7 +292,7 @@ async def export_pdf(
             pass  # Pas de boucle asyncio active (Passenger/WSGI) - nettoyage ignoré
 
         safe_filename = f"CV_{request_id}.pdf"
-        out_pdf = STATIC_DIR / safe_filename
+        out_pdf = PRIVATE_EXPORTS_DIR / safe_filename
         tmp_html = BASE_DIR / f"_tmp_render_{request_id}.html"
 
         frontend_url = os.getenv("FRONTEND_URL")
@@ -365,7 +385,14 @@ async def export_pdf(
                 logger.error(f"PDF Generator Error: {result.stderr}")
                 raise RuntimeError(f"Erreur lors de la génération du PDF: {result.stderr}")
 
-        url = f"/static/{out_pdf.name}" if out_pdf.exists() else None
+        if out_pdf.exists():
+            download_token = create_access_token(
+                data={"sub": out_pdf.name, "type": "export"},
+                expires_delta=timedelta(hours=24)
+            )
+            url = f"{settings.API_STR}/exports/download/{download_token}"
+        else:
+            url = None
 
         # 3. Envoyer l'email de confirmation
         if url and (is_new_user or req.guest_email):
@@ -423,10 +450,17 @@ async def export_docx_endpoint(
         
         request_id = str(uuid.uuid4())
         safe_filename = f"CV_{request_id}.docx"
-        out_docx = STATIC_DIR / safe_filename
+        out_docx = PRIVATE_EXPORTS_DIR / safe_filename
         
         result_path = export_docx(req.data, out_docx)
-        url = f"/static/{out_docx.name}" if out_docx.exists() else None
+        if out_docx.exists():
+            download_token = create_access_token(
+                data={"sub": out_docx.name, "type": "export"},
+                expires_delta=timedelta(hours=24)
+            )
+            url = f"{settings.API_STR}/exports/download/{download_token}"
+        else:
+            url = None
         
         if url and (is_new_user or req.guest_email):
             email = req.guest_email or (current_user.email if current_user else None)
@@ -510,3 +544,31 @@ async def export_user_data(
         }
     )
 
+from fastapi.responses import FileResponse
+
+@router.get("/download/{token}")
+async def download_export(token: str):
+    """Télécharge un fichier exporté (PDF ou DOCX) via un lien temporaire/signé"""
+    from jose import jwt, JWTError
+    from app.core.security import SECRET_KEY, ALGORITHM
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        filename = payload.get("sub")
+        token_type = payload.get("type")
+        
+        if token_type != "export" or not filename:
+            raise HTTPException(status_code=400, detail="Token invalide")
+            
+        file_path = PRIVATE_EXPORTS_DIR / filename
+        if not file_path.exists():
+            raise HTTPException(status_code=404, detail="Fichier non trouvé ou expiré")
+            
+        media_type = "application/pdf" if filename.endswith(".pdf") else "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        return FileResponse(
+            path=file_path, 
+            filename=filename, 
+            media_type=media_type,
+            content_disposition_type="attachment"
+        )
+    except JWTError:
+        raise HTTPException(status_code=403, detail="Lien expiré ou invalide")

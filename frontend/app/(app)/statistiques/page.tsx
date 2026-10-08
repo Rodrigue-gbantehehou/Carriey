@@ -5,12 +5,12 @@ import { useSession } from 'next-auth/react';
 import { useProfileStore } from '@/store/profile';
 import { candidaturesApi } from '@/lib/candidature-api';
 import config from '@/lib/config';
-import { 
-  BarChart3, 
-  Briefcase, 
-  FileText, 
-  Eye, 
-  TrendingUp, 
+import {
+  BarChart3,
+  Briefcase,
+  FileText,
+  Eye,
+  TrendingUp,
   CalendarDays,
   Target,
   Send,
@@ -24,7 +24,7 @@ import Link from 'next/link';
 export default function StatistiquesPage() {
   const { data: session } = useSession();
   const { profile } = useProfileStore();
-  
+
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState({
     totalCandidatures: 0,
@@ -40,17 +40,17 @@ export default function StatistiquesPage() {
   useEffect(() => {
     async function fetchStats() {
       if (!session?.user?.accessToken) return;
-      
+
       try {
         // Fetch Candidatures
         const candidatures = await candidaturesApi.list();
-        
+
         // Fetch Resumes & Letters
         const resDocs = await fetch(`${config.apiBaseUrl}/resumes/`, {
           headers: { 'Authorization': `Bearer ${session.user.accessToken}` }
         });
         const docs = await resDocs.json();
-        
+
         const cvs = docs.filter((d: any) => d.doc_type === 'cv' || !d.doc_type);
         const letters = docs.filter((d: any) => d.doc_type === 'cover_letter');
 
@@ -70,7 +70,7 @@ export default function StatistiquesPage() {
         setIsLoading(false);
       }
     }
-    
+
     fetchStats();
   }, [session]);
 
@@ -94,7 +94,7 @@ export default function StatistiquesPage() {
       <div className="flex items-start justify-between">
         <div>
           <p className="text-xs font-semibold text-gray-500">{title}</p>
-          <h3 className="text-2xl font-extrabold text-gray-900 mt-1.5 tracking-tight group-hover:scale-105 transition-transform origin-left">{value}</h3>
+          <h3 className="text-2xl font-bold text-gray-900 mt-1.5 tracking-tight group-hover:scale-105 transition-transform origin-left">{value}</h3>
         </div>
         <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${colorClass}`}>
           <Icon className="w-5 h-5" />
@@ -115,7 +115,7 @@ export default function StatistiquesPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 animate-slide-up">
         <div>
-          <h1 className="text-xl font-extrabold text-gray-900 tracking-tight">Vos Statistiques</h1>
+          <h1 className="text-xl font-bold text-gray-900 tracking-tight">Vos Statistiques</h1>
           <p className="text-sm text-gray-500 mt-1">
             Analysez l'impact de vos candidatures et l'attractivité de votre profil.
           </p>
@@ -129,27 +129,27 @@ export default function StatistiquesPage() {
         </div>
       ) : (
         <div className="space-y-6">
-          
+
           {/* Top KPI row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            <StatCard 
-              title="Candidatures envoyées" 
-              value={stats.totalCandidatures} 
-              icon={Send} 
+            <StatCard
+              title="Candidatures envoyées"
+              value={stats.totalCandidatures}
+              icon={Send}
               colorClass="bg-blue-50 text-blue-600 border border-blue-100"
               delay={0.1}
             />
-            <StatCard 
-              title="Entretiens obtenus" 
-              value={stats.interview} 
-              icon={Target} 
+            <StatCard
+              title="Entretiens obtenus"
+              value={stats.interview}
+              icon={Target}
               colorClass="bg-orange-50 text-orange-600 border border-orange-100"
               delay={0.2}
             />
-            <StatCard 
-              title="Vues du profil public" 
-              value={stats.publicViews} 
-              icon={Eye} 
+            <StatCard
+              title="Vues du profil public"
+              value={stats.publicViews}
+              icon={Eye}
               colorClass="bg-purple-50 text-purple-600 border border-purple-100"
               delay={0.3}
             />
@@ -158,12 +158,12 @@ export default function StatistiquesPage() {
                 <BarChart3 className="w-16 h-16 transform translate-x-2 -translate-y-2" />
               </div>
               <p className="text-indigo-100 font-medium text-xs">Complétion du profil</p>
-              <h3 className="text-3xl font-black mt-1">{completionRate}%</h3>
-              
+              <h3 className="text-3xl font-bold mt-1">{completionRate}%</h3>
+
               <div className="w-full bg-black/20 rounded-full h-1.5 mt-3 overflow-hidden">
                 <div className="bg-white h-1.5 rounded-full transition-all duration-1000 ease-out" style={{ width: `${completionRate}%` }}></div>
               </div>
-              
+
               <p className="text-[10px] text-indigo-100 mt-2">
                 {completionRate === 100 ? "Parfait ! Votre profil est complet." : "Complétez votre profil pour plus de visibilité."}
               </p>
@@ -171,14 +171,14 @@ export default function StatistiquesPage() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-            
+
             {/* Funnel de conversion */}
             <div className="lg:col-span-2 bg-white/60 backdrop-blur-md p-5 rounded-3xl border border-gray-100 shadow-sm animate-slide-up" style={{ animationDelay: '0.5s' }}>
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-base font-bold text-gray-900">Entonnoir de conversion</h3>
                 <Link href="/candidatures" className="text-xs font-semibold text-indigo-600 hover:text-indigo-700">Voir tout</Link>
               </div>
-              
+
               <div className="space-y-5">
                 <div className="relative">
                   <div className="flex justify-between text-xs font-semibold mb-1.5">
@@ -225,7 +225,7 @@ export default function StatistiquesPage() {
             {/* Production de documents */}
             <div className="bg-white/60 backdrop-blur-md p-5 rounded-3xl border border-gray-100 shadow-sm animate-slide-up" style={{ animationDelay: '0.6s' }}>
               <h3 className="text-base font-bold text-gray-900 mb-5">Documents créés</h3>
-              
+
               <div className="space-y-3.5">
                 <div className="flex items-center justify-between p-3.5 bg-gray-50 rounded-2xl border border-gray-100 hover:border-indigo-200 transition-colors">
                   <div className="flex items-center gap-2.5">
@@ -236,9 +236,9 @@ export default function StatistiquesPage() {
                       <p className="font-bold text-sm text-gray-900">CV générés</p>
                     </div>
                   </div>
-                  <span className="text-lg font-black text-indigo-600">{stats.totalResumes}</span>
+                  <span className="text-lg font-bold text-indigo-600">{stats.totalResumes}</span>
                 </div>
-                
+
                 <div className="flex items-center justify-between p-3.5 bg-gray-50 rounded-2xl border border-gray-100 hover:border-blue-200 transition-colors">
                   <div className="flex items-center gap-2.5">
                     <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
@@ -248,7 +248,7 @@ export default function StatistiquesPage() {
                       <p className="font-bold text-gray-900">Lettres de motiv.</p>
                     </div>
                   </div>
-                  <span className="text-xl font-black text-blue-600">{stats.totalLetters}</span>
+                  <span className="text-xl font-bold text-blue-600">{stats.totalLetters}</span>
                 </div>
               </div>
 
@@ -258,7 +258,7 @@ export default function StatistiquesPage() {
                 </Link>
               </div>
             </div>
-            
+
           </div>
         </div>
       )}

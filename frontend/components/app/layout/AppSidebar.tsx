@@ -12,11 +12,11 @@ import { useProfileStore } from '@/store/profile';
 import { useEffect } from 'react';
 
 const NAV = [
-  { href: '/accueil',       label: 'Accueil',         icon: Home },
-  { href: '/profil',        label: 'Mon profil',      icon: User },
-  { href: '/mes-documents', label: 'Mes documents',   icon: FileText },
-  { href: '/candidatures',  label: 'Mes candidatures', icon: Briefcase },
-  { href: '/themes',        label: 'Thèmes',          icon: Palette },
+  { href: '/accueil', label: 'Accueil', icon: Home },
+  { href: '/profil', label: 'Mon profil', icon: User },
+  { href: '/mes-documents', label: 'Mes documents', icon: FileText },
+  { href: '/candidatures', label: 'Mes candidatures', icon: Briefcase },
+  { href: '/themes', label: 'Thèmes', icon: Palette },
 ];
 
 export default function AppSidebar() {
@@ -39,7 +39,7 @@ export default function AppSidebar() {
       <div className="px-6 py-5 border-b border-gray-100">
         <Link href="/accueil" className="flex items-center gap-2.5 group select-none">
           <Image src={config.appLogo} alt={config.appName} width={32} height={32} className="object-contain" priority />
-          <span className="text-xl font-black tracking-tight text-indigo-600">{config.appName}</span>
+          <span className="text-xl font-bold tracking-tight text-indigo-600">{config.appName}</span>
         </Link>
       </div>
 
@@ -51,11 +51,10 @@ export default function AppSidebar() {
             <Link
               key={href}
               href={href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group ${
-                active
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group ${active
                   ? 'bg-indigo-50 text-indigo-700'
                   : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-              }`}
+                }`}
             >
               <Icon className={`w-4.5 h-4.5 flex-shrink-0 ${active ? 'text-indigo-600' : 'text-gray-400 group-hover:text-gray-600'}`} />
               {label}
@@ -68,9 +67,8 @@ export default function AppSidebar() {
       <div className="border-t border-gray-100 px-3 py-3 space-y-0.5">
         <Link
           href="/parametres"
-          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group ${
-            pathname === '/parametres' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50'
-          }`}
+          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group ${pathname === '/parametres' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50'
+            }`}
         >
           <Settings className="w-4 h-4 text-gray-400 group-hover:text-gray-600" />
           Paramètres

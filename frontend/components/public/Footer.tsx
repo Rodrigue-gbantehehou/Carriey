@@ -38,7 +38,7 @@ export default function Footer() {
               <li><Link href="/modeles" className="hover:text-indigo-600 transition-colors">Modèles de CV</Link></li>
               <li><Link href="/pricing" className="hover:text-indigo-600 transition-colors">Tarifs & Plans</Link></li>
               <li><Link href="/faq" className="hover:text-indigo-600 transition-colors">Foire Aux Questions</Link></li>
-              <li><Link href="/start" className="hover:text-indigo-600 transition-colors">Créer mon profil</Link></li>
+              <li><Link href="/register" className="hover:text-indigo-600 transition-colors">Créer mon profil</Link></li>
             </ul>
           </div>
 

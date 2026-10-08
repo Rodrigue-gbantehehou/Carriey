@@ -30,10 +30,10 @@ const SECTIONS = [
 function CreateCvWizardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   const { profile } = useProfileStore();
   const { addCv, cvs } = useCvStore();
-  
+
   // Logic pour le template par défaut : URL -> Dernier CV modifié -> 'classique'
   const recentCvs = cvs.filter(c => c.doc_type === 'cv')
     .sort((a, b) => new Date(b.updated_at || b.created_at).getTime() - new Date(a.updated_at || a.created_at).getTime());
@@ -214,9 +214,9 @@ function CreateCvWizardContent() {
                   <div className="p-3 flex items-center justify-between border-t border-gray-100 bg-white">
                     <span className="text-sm font-bold text-gray-900">{t.name}</span>
                     {Number(t.price) > 0 ? (
-                      <span className="text-xs font-black bg-amber-100 text-amber-800 px-2 py-1 rounded-md">{t.price} {t.currency}</span>
+                      <span className="text-xs font-bold bg-amber-100 text-amber-800 px-2 py-1 rounded-md">{t.price} {t.currency}</span>
                     ) : (
-                      <span className="text-xs font-black bg-green-100 text-green-800 px-2 py-1 rounded-md">Gratuit</span>
+                      <span className="text-xs font-bold bg-green-100 text-green-800 px-2 py-1 rounded-md">Gratuit</span>
                     )}
                   </div>
                 </button>
@@ -264,8 +264,8 @@ function CreateCvWizardContent() {
                         key={u.id}
                         onClick={() => setUsage(u.label)}
                         className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all text-left ${usage === u.label
-                            ? 'border-indigo-600 bg-indigo-50/50 shadow-sm'
-                            : 'border-gray-100 hover:border-gray-200 hover:bg-gray-50'
+                          ? 'border-indigo-600 bg-indigo-50/50 shadow-sm'
+                          : 'border-gray-100 hover:border-gray-200 hover:bg-gray-50'
                           }`}
                       >
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${usage === u.label ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-500'}`}>
@@ -413,14 +413,14 @@ function CreateCvWizardContent() {
                     <button onClick={() => setStep(2)} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 font-semibold px-4 py-3">
                       <ChevronLeft className="w-4 h-4" /> Retour
                     </button>
-                    <button 
+                    <button
                       onClick={() => {
                         if (templateSlug) {
                           handleFinish(templateSlug);
                         } else {
                           setStep(4);
                         }
-                      }} 
+                      }}
                       className="flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-colors"
                       disabled={isSubmitting}
                     >

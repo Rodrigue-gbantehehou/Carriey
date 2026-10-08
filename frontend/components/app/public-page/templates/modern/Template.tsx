@@ -6,8 +6,8 @@ import { User, MapPin, Mail, Phone, Globe, Briefcase, GraduationCap, Wrench, Fol
 function fmtDate(d?: string) {
   if (!d) return '';
   const [y, m] = d.split('-');
-  const months = ['jan.','fév.','mars','avr.','mai','juin','juil.','août','sep.','oct.','nov.','déc.'];
-  return m ? `${months[parseInt(m)-1]} ${y}` : y;
+  const months = ['jan.', 'fév.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sep.', 'oct.', 'nov.', 'déc.'];
+  return m ? `${months[parseInt(m) - 1]} ${y}` : y;
 }
 
 export default function ModernTheme({ data, accent }: { data: PublicPageData; accent: string }) {
@@ -31,7 +31,7 @@ export default function ModernTheme({ data, accent }: { data: PublicPageData; ac
               </div>
             )}
             <div>
-              <h1 className="text-3xl font-black text-white">{name}</h1>
+              <h1 className="text-3xl font-bold text-white">{name}</h1>
               {profile.title && <p className="text-white/80 font-semibold mt-1">{profile.title}</p>}
               {page.show_contact && (
                 <div className="flex flex-wrap gap-x-4 gap-y-1 mt-3 text-white/70 text-sm">
@@ -63,7 +63,7 @@ export default function ModernTheme({ data, accent }: { data: PublicPageData; ac
             <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-5 flex items-center gap-2"><Briefcase className="w-4 h-4" />Expériences</h2>
             <div className="space-y-5">
               {profile.experiences.map((e: any, i: number) => (
-                <div key={e.id} className={`relative pl-4 ${i < profile.experiences.length-1 ? 'pb-5 border-b border-gray-50' : ''}`}>
+                <div key={e.id} className={`relative pl-4 ${i < profile.experiences.length - 1 ? 'pb-5 border-b border-gray-50' : ''}`}>
                   <div className="absolute left-0 top-2 w-2 h-2 rounded-full" style={{ backgroundColor: accent }} />
                   <p className="font-bold text-gray-900">{e.title}</p>
                   <p className="text-sm font-semibold" style={{ color: accent }}>{e.company}</p>

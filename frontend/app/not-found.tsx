@@ -6,7 +6,7 @@ export default function NotFound() {
       <div className="max-w-md w-full text-center">
         {/* 404 number */}
         <div className="relative mb-8">
-          <p className="text-[150px] font-black text-gray-100 leading-none select-none">
+          <p className="text-[150px] font-bold text-gray-100 leading-none select-none">
             404
           </p>
           <div className="absolute inset-0 flex items-center justify-center">
@@ -18,7 +18,7 @@ export default function NotFound() {
           </div>
         </div>
 
-        <h1 className="text-3xl font-black text-brand-text mb-3 tracking-tight">
+        <h1 className="text-3xl font-bold text-brand-text mb-3 tracking-tight">
           Page introuvable
         </h1>
         <p className="text-brand-muted mb-8 font-medium">

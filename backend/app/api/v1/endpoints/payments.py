@@ -1,5 +1,5 @@
 import os
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Header
 from sqlalchemy.orm import Session
 from decimal import Decimal
@@ -18,6 +18,25 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
+def get_expected_price(db: Session, template_id: Optional[str] = None, plan_code: Optional[str] = None) -> Optional[float]:
+    """
+    Détermine le prix attendu depuis la base de données (backend) 
+    plutôt que de faire confiance au montant envoyé par le navigateur.
+    """
+    if template_id:
+        from app.models.template import Template
+        template = db.query(Template).filter(
+            (Template.id == template_id) | (Template.slug == template_id)
+        ).first()
+        if template:
+            return float(template.price)
+    elif plan_code:
+        from app.models.subscription_plan import SubscriptionPlan
+        plan = db.query(SubscriptionPlan).filter(SubscriptionPlan.code == plan_code).first()
+        if plan:
+            return float(plan.price)
+    return None
+
 @router.post("/create", response_model=Dict[str, Any])
 async def create_payment(
     payment_in: PaymentCreate,
@@ -27,6 +46,19 @@ async def create_payment(
     """
     Crée une intention de paiement pour un template ou un abonnement via le PaymentManager.
     """
+    # 0. Vérification du montant attendu côté backend (Sécurité P0)
+    expected_price = get_expected_price(db, template_id=payment_in.template_id, plan_code=payment_in.plan_code)
+    
+    if expected_price is None:
+        raise HTTPException(status_code=404, detail="Template ou Plan introuvable")
+
+    if float(payment_in.amount) != expected_price:
+        logger.error(f"Tentative de fraude détectée pour user {current_user.id}: attendu {expected_price}, reçu {payment_in.amount}")
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Le montant envoyé ({payment_in.amount}) ne correspond pas au prix attendu ({expected_price})"
+        )
+
     # 1. Vérifications initiales
     if payment_in.template_id:
         template = db.query(Template).filter(
@@ -66,7 +98,7 @@ async def create_payment(
         template_id=payment_in.template_id,
         plan_code=payment_in.plan_code,
         provider=payment_in.provider,
-        amount=payment_in.amount,
+        amount=expected_price,
         currency=payment_in.currency,
         status=PaymentStatus.PENDING
     )
@@ -89,15 +121,18 @@ async def create_payment(
         "template_id": payment_in.template_id
     }
     
-    callback_url = f"{os.getenv('BACKEND_URL', 'http://localhost:8000')}/api/v1/payments/{provider_name}/callback"
+    # L'URL Frontend pour la redirection après paiement (widget Kkiapay, etc.)
+    frontend_url = os.getenv('FRONTEND_URL', 'http://localhost:3000')
+    success_url = f"{frontend_url}/checkout/success"
+    cancel_url = f"{frontend_url}/checkout"
 
     # 5. Créer le checkout via le provider
     try:
         checkout_data = await provider.create_checkout(
-            amount=float(payment_in.amount),
+            amount=float(expected_price),
             currency=payment_in.currency,
-            success_url=callback_url,
-            cancel_url=callback_url,
+            success_url=success_url,
+            cancel_url=cancel_url,
             metadata=metadata
         )
         
@@ -151,6 +186,16 @@ async def handle_webhook(
 
     # Extraire une potentielle signature depuis les headers
     signature = request.headers.get("x-kkiapay-signature") or request.headers.get("stripe-signature") or request.headers.get("x-fedapay-signature") or ""
+    
+    # Pour FedaPay, si un custom header Feda_WebHook_Key est utilisé
+    if provider_name == "fedapay":
+        from app.core.config import settings
+        feda_custom_key = request.headers.get("feda_webhook_key") or request.headers.get("Feda_WebHook_Key") or request.headers.get("feda-webhook-key")
+        if settings.FEDA_WEBHOOK_KEY:
+            # On vérifie directement ici pour la sécurité P0
+            if feda_custom_key != settings.FEDA_WEBHOOK_KEY:
+                raise HTTPException(status_code=403, detail="Signature FedaPay invalide")
+            signature = feda_custom_key
 
     # NOTE SÉCURITÉ: La vérification de la signature ou de la transaction est déléguée au provider.
     # Kkiapay revérifie la transaction via son API, Stripe nécessite une signature, etc.
@@ -170,6 +215,23 @@ async def handle_webhook(
     
     if not payment:
         raise HTTPException(status_code=404, detail="Paiement introuvable dans la base")
+
+    # Vérification stricte du montant payé par rapport au montant attendu
+    paid_amount = result.get("metadata", {}).get("amount") or result.get("raw_data", {}).get("amount")
+    if paid_amount is not None:
+        if float(paid_amount) != float(payment.amount):
+            payment.status = PaymentStatus.FAILED
+            payment.meta_data = {**(payment.meta_data or {}), "error": f"Montant payé invalide: {paid_amount} vs {payment.amount}"}
+            db.commit()
+            raise HTTPException(status_code=400, detail="Le montant réellement payé ne correspond pas au prix attendu")
+        
+        # Enregistrer explicitement le montant réellement payé et attendu pour audit
+        payment.meta_data = {
+            **(payment.meta_data or {}), 
+            "expected_amount": float(payment.amount), 
+            "paid_amount": float(paid_amount)
+        }
+        db.commit()
 
     prev_status = payment.status
     

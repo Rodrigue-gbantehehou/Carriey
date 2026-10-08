@@ -205,8 +205,8 @@ function MesDocumentsContent() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`px-4 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${activeTab === tab.id
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
+                ? 'bg-white text-gray-900 shadow-sm'
+                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
                 }`}
             >
               {tab.label}
@@ -397,7 +397,7 @@ function MesDocumentsContent() {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40" onClick={() => setConfirmDeletePage(null)} />
           <div className="relative bg-white rounded-3xl p-6 w-full max-w-sm shadow-xl">
-            <h3 className="text-lg font-black text-gray-900 mb-2">Supprimer la page ?</h3>
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Supprimer la page ?</h3>
             <p className="text-sm text-gray-500 mb-6">
               Voulez-vous vraiment supprimer &quot;{confirmDeletePage.title}&quot; ? Cette action est irréversible.
             </p>

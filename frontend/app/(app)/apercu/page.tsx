@@ -110,16 +110,15 @@ export default function ApercuPage() {
               )}
             </div>
             {/* Visibility badge */}
-            <div className={`flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ${
-              profile.visibility === 'public'
+            <div className={`flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ${profile.visibility === 'public'
                 ? 'bg-green-50 text-green-700 border border-green-200'
                 : 'bg-gray-100 text-gray-500 border border-gray-200'
-            }`}>
+              }`}>
               {profile.visibility === 'public' ? <><Eye className="w-3 h-3" /> Public</> : <><Lock className="w-3 h-3" /> Privé</>}
             </div>
           </div>
 
-          <h1 className="text-2xl font-black text-gray-900 leading-tight">{displayName}</h1>
+          <h1 className="text-2xl font-bold text-gray-900 leading-tight">{displayName}</h1>
           {profile.title && <p className="text-indigo-600 font-semibold text-sm mt-1">{profile.title}</p>}
 
           {/* Contact chips */}

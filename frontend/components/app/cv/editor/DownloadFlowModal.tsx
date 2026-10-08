@@ -61,7 +61,7 @@ export default function DownloadFlowModal({ isOpen, onClose, onSuccess, template
     if (session?.user) {
       if (session.user.email) setEmail(session.user.email)
       if (session.user.name) setName(session.user.name)
-      
+
       // Si on a déjà les infos, on peut potentiellement sauter l'étape identity
       // Mais restons prudents et laissons l'utilisateur confirmer
     }
@@ -86,7 +86,7 @@ export default function DownloadFlowModal({ isOpen, onClose, onSuccess, template
     try {
       const provider = PaymentFactory.getProvider(selectedMethod)
       const amount = selectedPlan === 'trial' ? 300 : parseInt(templatePrice.replace(/\s/g, ''))
-      
+
       const response = await provider.initiate(
         { value: amount, currency: 'XOF' },
         { name, email }
@@ -123,25 +123,25 @@ export default function DownloadFlowModal({ isOpen, onClose, onSuccess, template
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-300">
-      <div 
+      <div
         className="absolute inset-0 bg-brand-text/80 backdrop-blur-md"
         onClick={() => {
           if (!isProcessing) {
-             console.log("Backdrop clicked, calling onClose")
-             onClose()
+            console.log("Backdrop clicked, calling onClose")
+            onClose()
           } else {
-             console.log("Backdrop clicked but suppressed because isProcessing is true")
+            console.log("Backdrop clicked but suppressed because isProcessing is true")
           }
         }}
       />
-      
-      <div 
+
+      <div
         className="relative w-full max-w-lg bg-white rounded-[24px] sm:rounded-[32px] shadow-2xl flex flex-col overflow-hidden border border-gray-100 animate-in zoom-in-95 slide-in-from-bottom-4 duration-500 max-h-[95vh]"
       >
         {/* Header decoration */}
         <div className="absolute top-0 left-0 w-full h-1.5 bg-brand-cta" />
-        
-        <button 
+
+        <button
           type="button"
           onClick={() => {
             console.log("Modal Close Button Clicked")
@@ -159,7 +159,7 @@ export default function DownloadFlowModal({ isOpen, onClose, onSuccess, template
                 <div className="w-16 h-16 bg-brand-cta/10 text-brand-cta rounded-2xl flex items-center justify-center mx-auto mb-6">
                   <Icons.Sparkles />
                 </div>
-                <h2 className="text-3xl font-black text-brand-text tracking-tight uppercase leading-none">Prêt à briller ?</h2>
+                <h2 className="text-3xl font-bold text-brand-text tracking-tight uppercase leading-none">Prêt à briller ?</h2>
                 <p className="text-brand-muted font-medium">Récupérez votre CV professionnel en quelques secondes.</p>
               </div>
 
@@ -167,8 +167,8 @@ export default function DownloadFlowModal({ isOpen, onClose, onSuccess, template
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1">Votre Nom Complet</label>
                   <div className="relative">
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="John Doe"
@@ -182,8 +182,8 @@ export default function DownloadFlowModal({ isOpen, onClose, onSuccess, template
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1">Adresse Email</label>
                   <div className="relative">
-                    <input 
-                      type="email" 
+                    <input
+                      type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="email@exemple.com"
@@ -196,11 +196,11 @@ export default function DownloadFlowModal({ isOpen, onClose, onSuccess, template
                 </div>
               </div>
 
-              <button 
+              <button
                 type="button"
                 onClick={handleNext}
                 disabled={!name || !email}
-                className="w-full py-5 bg-brand-text text-white font-black rounded-2xl hover:bg-black transition-all flex items-center justify-center gap-2 group disabled:opacity-50"
+                className="w-full py-5 bg-brand-text text-white font-bold rounded-2xl hover:bg-black transition-all flex items-center justify-center gap-2 group disabled:opacity-50"
               >
                 Continuer vers le téléchargement
                 <div className="group-hover:translate-x-1 transition-transform">
@@ -213,37 +213,35 @@ export default function DownloadFlowModal({ isOpen, onClose, onSuccess, template
           {step === 'pricing' && (
             <div className="space-y-8 animate-in slide-in-from-right-4 duration-300">
               <div className="text-center space-y-3">
-                <span className="px-3 py-1 bg-brand-cta/10 text-brand-cta text-[10px] font-black uppercase tracking-widest rounded-full">
+                <span className="px-3 py-1 bg-brand-cta/10 text-brand-cta text-[10px] font-bold uppercase tracking-widest rounded-full">
                   Offre Limitée
                 </span>
-                <h2 className="text-2xl font-black text-brand-text tracking-tight uppercase">Activez votre Excellence</h2>
+                <h2 className="text-2xl font-bold text-brand-text tracking-tight uppercase">Activez votre Excellence</h2>
               </div>
 
               <div className="space-y-4">
                 {/* Trial Plan */}
-                <button 
+                <button
                   onClick={() => setSelectedPlan('trial')}
-                  className={`w-full p-6 h-full text-left rounded-3xl border-2 transition-all relative overflow-hidden group ${
-                    selectedPlan === 'trial' ? 'border-brand-cta bg-brand-cta/5' : 'border-gray-100 hover:border-brand-cta/30 bg-white'
-                  }`}
+                  className={`w-full p-6 h-full text-left rounded-3xl border-2 transition-all relative overflow-hidden group ${selectedPlan === 'trial' ? 'border-brand-cta bg-brand-cta/5' : 'border-gray-100 hover:border-brand-cta/30 bg-white'
+                    }`}
                 >
                   {selectedPlan === 'trial' && (
-                    <div className="absolute top-0 right-0 bg-brand-cta text-white px-4 py-1.5 text-[10px] font-black rounded-bl-xl uppercase tracking-widest">
+                    <div className="absolute top-0 right-0 bg-brand-cta text-white px-4 py-1.5 text-[10px] font-bold rounded-bl-xl uppercase tracking-widest">
                       Conseillé
                     </div>
                   )}
                   {/* L'ancien bloc mal placé a été retiré ici */}
                   <div className="flex items-start gap-4">
-                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center mt-1 transition-colors ${
-                      selectedPlan === 'trial' ? 'border-brand-cta bg-brand-cta' : 'border-gray-200'
-                    }`}>
+                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center mt-1 transition-colors ${selectedPlan === 'trial' ? 'border-brand-cta bg-brand-cta' : 'border-gray-200'
+                      }`}>
                       {selectedPlan === 'trial' && <Icons.Check />}
                     </div>
                     <div className="space-y-1">
-                      <h3 className="font-black text-brand-text text-lg italic">Pass Elite 14 Jours</h3>
+                      <h3 className="font-bold text-brand-text text-lg italic">Pass Elite 14 Jours</h3>
                       <p className="text-brand-muted text-xs font-medium">Testez ce modèle pendant 14 jours. Téléchargements illimités pendant la période.</p>
                       <div className="flex items-baseline gap-1 mt-2">
-                        <span className="text-2xl font-black text-brand-text">300 F</span>
+                        <span className="text-2xl font-bold text-brand-text">300 F</span>
                         <span className="text-brand-muted text-xs font-bold uppercase">CFA</span>
                       </div>
                     </div>
@@ -251,23 +249,21 @@ export default function DownloadFlowModal({ isOpen, onClose, onSuccess, template
                 </button>
 
                 {/* Single Plan */}
-                <button 
+                <button
                   onClick={() => setSelectedPlan('single')}
-                  className={`w-full p-6 text-left rounded-3xl border-2 transition-all group ${
-                    selectedPlan === 'single' ? 'border-brand-cta bg-brand-cta/5' : 'border-gray-100 hover:border-brand-cta/30 bg-white'
-                  }`}
+                  className={`w-full p-6 text-left rounded-3xl border-2 transition-all group ${selectedPlan === 'single' ? 'border-brand-cta bg-brand-cta/5' : 'border-gray-100 hover:border-brand-cta/30 bg-white'
+                    }`}
                 >
                   <div className="flex items-start gap-4">
-                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center mt-1 transition-colors ${
-                      selectedPlan === 'single' ? 'border-brand-cta bg-brand-cta' : 'border-gray-200'
-                    }`}>
+                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center mt-1 transition-colors ${selectedPlan === 'single' ? 'border-brand-cta bg-brand-cta' : 'border-gray-200'
+                      }`}>
                       {selectedPlan === 'single' && <Icons.Check />}
                     </div>
                     <div className="space-y-1">
                       <h3 className="font-bold text-gray-600 uppercase tracking-tight">Achat unique</h3>
                       <p className="text-brand-muted text-xs font-medium">Accès permanent à ce modèle. Téléchargements illimités, sans limite de temps.</p>
                       <div className="flex items-baseline gap-1 mt-2">
-                        <span className="text-xl font-black text-gray-600">{templatePrice} F</span>
+                        <span className="text-xl font-bold text-gray-600">{templatePrice} F</span>
                         <span className="text-brand-muted text-xs font-bold uppercase">CFA</span>
                       </div>
                     </div>
@@ -280,7 +276,7 @@ export default function DownloadFlowModal({ isOpen, onClose, onSuccess, template
                   <Icons.Shield />
                 </div>
                 <div className="space-y-1.5">
-                  <p className="text-xs font-black text-emerald-950 uppercase tracking-wide">Inclus avec votre déblocage :</p>
+                  <p className="text-xs font-bold text-emerald-950 uppercase tracking-wide">Inclus avec votre déblocage :</p>
                   <ul className="text-[11px] text-emerald-900/80 font-medium space-y-1">
                     <li className="flex items-center gap-1.5"><span className="text-emerald-600 font-bold">✓</span> PDF vectoriel haute fidélité (sans aucun filigrane)</li>
                     <li className="flex items-center gap-1.5"><span className="text-emerald-600 font-bold">✓</span> 100% lisible par les robots de recrutement (ATS)</li>
@@ -289,10 +285,10 @@ export default function DownloadFlowModal({ isOpen, onClose, onSuccess, template
                 </div>
               </div>
 
-              <button 
+              <button
                 type="button"
                 onClick={handleNext}
-                className="w-full py-5 bg-brand-text text-white font-black rounded-2xl hover:bg-black transition-all shadow-xl shadow-black/10 uppercase tracking-wider text-sm"
+                className="w-full py-5 bg-brand-text text-white font-bold rounded-2xl hover:bg-black transition-all shadow-xl shadow-black/10 uppercase tracking-wider text-sm"
               >
                 Continuer vers le paiement
               </button>
@@ -302,70 +298,67 @@ export default function DownloadFlowModal({ isOpen, onClose, onSuccess, template
           {step === 'payment' && (
             <div className="space-y-8 animate-in slide-in-from-right-4 duration-300">
               <div className="text-center space-y-2">
-                <h2 className="text-2xl font-black text-brand-text tracking-tight uppercase">Méthode de Paiement</h2>
+                <h2 className="text-2xl font-bold text-brand-text tracking-tight uppercase">Méthode de Paiement</h2>
                 <p className="text-brand-muted font-medium">Plus que cette étape pour télécharger votre CV.</p>
               </div>
 
               <div className="space-y-4">
-                 <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1">Sélectionnez votre moyen de paiement</div>
-                 
-                 <div className="grid grid-cols-2 gap-4">
-                    <button 
-                      type="button"
-                      onClick={() => setSelectedMethod('mobile_money')}
-                      className={`flex flex-col items-center gap-3 p-6 rounded-3xl border-2 transition-all group ${
-                        selectedMethod === 'mobile_money' ? 'border-brand-cta bg-brand-cta/5' : 'border-gray-100 bg-white'
-                      }`}
-                    >
-                       <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110 ${
-                         selectedMethod === 'mobile_money' ? 'bg-white shadow-sm text-brand-cta' : 'bg-gray-50 text-brand-text'
-                       }`}>
-                          <Icons.Smartphone />
-                       </div>
-                       <span className="text-[10px] font-bold uppercase tracking-wider">Mobile Money</span>
-                       <span className={`text-[8px] font-black px-2 py-0.5 rounded-full uppercase ${
-                         selectedMethod === 'mobile_money' ? 'text-brand-cta bg-brand-cta/10' : 'text-gray-400 bg-gray-100'
-                       }`}>via FedaPay</span>
-                    </button>
-                    <button 
-                      type="button"
-                      disabled={true}
-                      className="flex flex-col items-center gap-3 p-6 rounded-3xl border-2 border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed relative"
-                    >
-                       <div className="absolute top-2 right-2">
-                          <span className="bg-orange-500 text-white text-[8px] font-black px-2 py-0.5 rounded-full uppercase">Maintenance</span>
-                       </div>
-                       <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-gray-100 text-gray-400">
-                          <Icons.CreditCard />
-                       </div>
-                       <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Carte Visa</span>
-                       <span className="text-[8px] font-black px-2 py-0.5 rounded-full uppercase text-gray-400 bg-gray-200">Bientôt disponible</span>
-                    </button>
-                 </div>
+                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1">Sélectionnez votre moyen de paiement</div>
 
-                 <div className="pt-4 space-y-4">
-                    <div className="flex -space-x-2 justify-center pb-4 opacity-40 grayscale">
-                        <div className="w-8 h-8 rounded-full bg-blue-600 border-2 border-white flex items-center justify-center text-[10px] font-bold text-white uppercase italic">V</div>
-                        <div className="w-8 h-8 rounded-full bg-orange-500 border-2 border-white flex items-center justify-center text-[10px] font-bold text-white uppercase italic">M</div>
-                        <div className="w-8 h-8 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center text-[10px] font-bold text-white uppercase italic">P</div>
+                <div className="grid grid-cols-2 gap-4">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedMethod('mobile_money')}
+                    className={`flex flex-col items-center gap-3 p-6 rounded-3xl border-2 transition-all group ${selectedMethod === 'mobile_money' ? 'border-brand-cta bg-brand-cta/5' : 'border-gray-100 bg-white'
+                      }`}
+                  >
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110 ${selectedMethod === 'mobile_money' ? 'bg-white shadow-sm text-brand-cta' : 'bg-gray-50 text-brand-text'
+                      }`}>
+                      <Icons.Smartphone />
                     </div>
-                    
-                    <button 
-                      type="button"
-                      onClick={handlePayment}
-                      disabled={isProcessing}
-                      className="w-full py-5 bg-brand-cta text-white font-black rounded-2xl hover:bg-emerald-600 transition-all shadow-xl shadow-emerald-500/20 uppercase tracking-widest disabled:opacity-50 flex items-center justify-center gap-3"
-                    >
-                      {isProcessing ? (
-                        <>
-                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                          Traitement...
-                        </>
-                      ) : (
-                        `Payer ${selectedPlan === 'trial' ? '300 F' : `${templatePrice} F`} & Télécharger`
-                      )}
-                    </button>
-                 </div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider">Mobile Money</span>
+                    <span className={`text-[8px] font-bold px-2 py-0.5 rounded-full uppercase ${selectedMethod === 'mobile_money' ? 'text-brand-cta bg-brand-cta/10' : 'text-gray-400 bg-gray-100'
+                      }`}>via FedaPay</span>
+                  </button>
+                  <button
+                    type="button"
+                    disabled={true}
+                    className="flex flex-col items-center gap-3 p-6 rounded-3xl border-2 border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed relative"
+                  >
+                    <div className="absolute top-2 right-2">
+                      <span className="bg-orange-500 text-white text-[8px] font-bold px-2 py-0.5 rounded-full uppercase">Maintenance</span>
+                    </div>
+                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-gray-100 text-gray-400">
+                      <Icons.CreditCard />
+                    </div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Carte Visa</span>
+                    <span className="text-[8px] font-bold px-2 py-0.5 rounded-full uppercase text-gray-400 bg-gray-200">Bientôt disponible</span>
+                  </button>
+                </div>
+
+                <div className="pt-4 space-y-4">
+                  <div className="flex -space-x-2 justify-center pb-4 opacity-40 grayscale">
+                    <div className="w-8 h-8 rounded-full bg-blue-600 border-2 border-white flex items-center justify-center text-[10px] font-bold text-white uppercase italic">V</div>
+                    <div className="w-8 h-8 rounded-full bg-orange-500 border-2 border-white flex items-center justify-center text-[10px] font-bold text-white uppercase italic">M</div>
+                    <div className="w-8 h-8 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center text-[10px] font-bold text-white uppercase italic">P</div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handlePayment}
+                    disabled={isProcessing}
+                    className="w-full py-5 bg-brand-cta text-white font-bold rounded-2xl hover:bg-emerald-600 transition-all shadow-xl shadow-emerald-500/20 uppercase tracking-widest disabled:opacity-50 flex items-center justify-center gap-3"
+                  >
+                    {isProcessing ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        Traitement...
+                      </>
+                    ) : (
+                      `Payer ${selectedPlan === 'trial' ? '300 F' : `${templatePrice} F`} & Télécharger`
+                    )}
+                  </button>
+                </div>
               </div>
 
               <p className="text-center text-[10px] text-brand-muted font-medium px-8 leading-relaxed">

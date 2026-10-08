@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     FEDAPAY_PUBLIC_KEY: Optional[str] = None
     FEDAPAY_SECRET_KEY: Optional[str] = None
     FEDAPAY_SANDBOX: bool = True
+    FEDA_WEBHOOK_KEY: Optional[str] = None
     
     # Paths
     BASE_DIR: str = os.path.dirname(os.path.abspath(__file__))

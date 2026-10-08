@@ -3,7 +3,7 @@ import { LetterTemplateProps } from '../../types';
 
 export default function ClassiqueTemplate({ data }: LetterTemplateProps) {
   const { profile, formData } = data;
-  
+
   const displayName = profile?.first_name || profile?.last_name
     ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim()
     : profile?.username || 'Votre Nom';
@@ -17,7 +17,7 @@ export default function ClassiqueTemplate({ data }: LetterTemplateProps) {
 
       {/* Header (Sender Info) */}
       <div className="mb-10 border-b border-gray-300 pb-5">
-        <h1 className="text-3xl font-black text-gray-900 mb-2 uppercase tracking-tight">{displayName}</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2 uppercase tracking-tight">{displayName}</h1>
         <div className="text-gray-600 text-sm flex items-center gap-3 flex-wrap">
           {profile?.contact_phone && <span>{profile.contact_phone}</span>}
           {profile?.contact_phone && profile?.contact_email && <span>•</span>}
@@ -53,7 +53,7 @@ export default function ClassiqueTemplate({ data }: LetterTemplateProps) {
       <div className="mb-6 font-medium text-gray-900">
         {formData.salutation}
       </div>
-      
+
       <div className="whitespace-pre-wrap mb-8 text-justify text-gray-700 leading-[1.8]">
         {formData.body}
       </div>

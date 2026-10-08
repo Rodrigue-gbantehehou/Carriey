@@ -120,7 +120,7 @@ export default function ProfilePage() {
               </svg>
             </div>
             <div>
-              <h1 className="text-2xl font-black text-brand-text">Mon Profil</h1>
+              <h1 className="text-2xl font-bold text-brand-text">Mon Profil</h1>
               <p className="text-brand-muted text-sm">{session?.user?.email}</p>
             </div>
           </div>
@@ -130,21 +130,19 @@ export default function ProfilePage() {
         <div className="flex gap-2 mb-6 bg-white border border-gray-100 rounded-2xl p-1">
           <button
             onClick={() => setActiveTab('profile')}
-            className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all ${
-              activeTab === 'profile'
+            className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === 'profile'
                 ? 'bg-brand-text text-white shadow-sm'
                 : 'text-brand-muted hover:text-brand-text'
-            }`}
+              }`}
           >
             Informations
           </button>
           <button
             onClick={() => setActiveTab('security')}
-            className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all ${
-              activeTab === 'security'
+            className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === 'security'
                 ? 'bg-brand-text text-white shadow-sm'
                 : 'text-brand-muted hover:text-brand-text'
-            }`}
+              }`}
           >
             Sécurité
           </button>
@@ -236,11 +234,10 @@ export default function ProfilePage() {
                   required
                   value={confirmPassword}
                   onChange={e => setConfirmPassword(e.target.value)}
-                  className={`w-full px-4 py-3 bg-gray-50 border rounded-xl focus:outline-none focus:bg-white transition-all text-sm font-medium text-brand-text ${
-                    confirmPassword && confirmPassword !== newPassword
+                  className={`w-full px-4 py-3 bg-gray-50 border rounded-xl focus:outline-none focus:bg-white transition-all text-sm font-medium text-brand-text ${confirmPassword && confirmPassword !== newPassword
                       ? 'border-red-300 focus:border-red-400'
                       : 'border-gray-100 focus:border-brand-cta'
-                  }`}
+                    }`}
                 />
                 {confirmPassword && confirmPassword !== newPassword && (
                   <p className="text-xs text-red-500 mt-1">Les mots de passe ne correspondent pas</p>

@@ -153,7 +153,7 @@ export default function ExportModal({ isOpen, onClose, cv, onExport }: ExportMod
                 </div>
               ) : isPremium && !isUnlocked ? (
                 <div className="text-right">
-                  <span className="text-xs font-black bg-amber-100 text-amber-800 px-2 py-1 rounded-md">{price} {currency}</span>
+                  <span className="text-xs font-bold bg-amber-100 text-amber-800 px-2 py-1 rounded-md">{price} {currency}</span>
                 </div>
               ) : (
                 <div className="flex items-center gap-1.5 text-green-600 text-xs font-bold bg-green-50 px-2 py-1 rounded-md">

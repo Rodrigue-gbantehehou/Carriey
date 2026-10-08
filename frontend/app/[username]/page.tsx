@@ -69,7 +69,7 @@ export default function PublicProfilePage() {
         <p className="text-4xl mb-4">👤</p>
         <h1 className="text-xl font-bold text-gray-900">Profil introuvable</h1>
         <p className="text-sm text-gray-500 mt-2">L'adresse <strong>carriey.com/{username}</strong> n'existe pas encore.</p>
-        <Link href="/start" className="mt-6 inline-flex items-center gap-2 bg-indigo-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-indigo-700 transition-colors">
+        <Link href="/register" className="mt-6 inline-flex items-center gap-2 bg-indigo-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-indigo-700 transition-colors">
           Créer mon profil
         </Link>
       </div>
@@ -84,7 +84,7 @@ export default function PublicProfilePage() {
 
       {/* Minimal header */}
       <header className="bg-white border-b border-gray-100 px-5 h-12 flex items-center justify-between">
-        <Link href="/" className="text-base font-black tracking-tight text-indigo-600">carriey</Link>
+        <Link href="/" className="text-base font-bold tracking-tight text-indigo-600">carriey</Link>
         <Link href="/profil" className="flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-gray-900 transition-colors">
           <ArrowLeft className="w-3.5 h-3.5" />
           Modifier mon profil

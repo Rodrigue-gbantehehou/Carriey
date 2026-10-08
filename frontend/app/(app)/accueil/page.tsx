@@ -44,12 +44,12 @@ export default function AccueilPage() {
     if (!session?.user?.accessToken) return;
     setIsAiModalOpen(false);
     setIsCreatingTailoredCv(true);
-    
+
     try {
       const { aiApi } = await import('@/lib/ai-api');
       const { cvApi } = await import('@/lib/cv-api');
       const tailoredData = await aiApi.tailorCv(session.user.accessToken, jobDescription);
-      
+
       const payload = {
         title: `CV Ciblé - ${new Date().toLocaleDateString()}`,
         template_id: 'classique',
@@ -64,7 +64,7 @@ export default function AccueilPage() {
           }
         }
       };
-      
+
       const newCv = await cvApi.createResume(session.user.accessToken, payload);
       useCvStore.getState().addCv(newCv);
       router.push(`/mes-documents/cv/${newCv.id}`);
@@ -83,12 +83,12 @@ export default function AccueilPage() {
 
   const firstName = profile?.first_name || session?.user?.name?.split(' ')[0] || profile?.username || 'vous';
   const completion = getCompletionPercent(profile, about);
-  
+
   const recentDocs = [...cvs].sort((a, b) => new Date(b.updated_at || b.created_at || Date.now()).getTime() - new Date(a.updated_at || a.created_at || Date.now()).getTime()).slice(0, 3);
 
   useEffect(() => {
     setMounted(true);
-    
+
     const fetchProfile = async () => {
       if (session?.user?.accessToken) {
         setLoading(true);
@@ -106,7 +106,7 @@ export default function AccueilPage() {
         }
       }
     };
-    
+
     fetchProfile();
   }, [session, setProfile, setLoading]);
 
@@ -125,7 +125,7 @@ export default function AccueilPage() {
 
       {/* Header compact */}
       <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
-        <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">Bonjour {firstName} 👋</h1>
+        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Bonjour {firstName} 👋</h1>
         <p className="text-base text-gray-500 mt-1">
           Voici votre tableau de bord personnel.
         </p>
@@ -137,13 +137,13 @@ export default function AccueilPage() {
           <div className="flex justify-between items-end mb-4">
             <div>
               <p className="text-indigo-200 text-xs font-bold tracking-widest mb-1.5 uppercase">Profil professionnel</p>
-              <p className="text-2xl font-black">Complété à {completion}%</p>
+              <p className="text-2xl font-bold">Complété à {completion}%</p>
             </div>
             <Link href="/profil" className="bg-white/20 hover:bg-white/30 transition-colors backdrop-blur-md rounded-2xl p-3 shadow-sm">
               <ChevronRight className="w-5 h-5 text-white" />
             </Link>
           </div>
-          
+
           <div className="h-1.5 rounded-full bg-white/20 overflow-hidden">
             <div
               className="h-full rounded-full bg-white transition-all duration-1000 ease-out"
@@ -151,7 +151,7 @@ export default function AccueilPage() {
             />
           </div>
         </div>
-        
+
         {/* Decor */}
         <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 bg-white opacity-5 rounded-full blur-2xl pointer-events-none" />
       </div>
@@ -159,9 +159,9 @@ export default function AccueilPage() {
       {/* Quick Actions (Grid 2x2) */}
       <section className="animate-slide-up" style={{ animationDelay: '0.3s' }}>
         <h2 className="text-xs font-bold text-gray-400 mb-4 px-1 uppercase tracking-widest">Actions rapides</h2>
-        
+
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <button 
+          <button
             onClick={openCreateModal}
             className="flex flex-col items-start gap-3 p-5 rounded-2xl border border-gray-200/60 bg-white/60 backdrop-blur-md shadow-sm hover:border-indigo-300 hover:shadow-xl hover:shadow-indigo-600/10 hover:-translate-y-1 transition-all duration-300 active:scale-95 group"
           >
@@ -173,8 +173,8 @@ export default function AccueilPage() {
               <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">Générer un document</p>
             </div>
           </button>
-          
-          <button 
+
+          <button
             onClick={() => setIsAiModalOpen(true)}
             disabled={isCreatingTailoredCv}
             className="flex flex-col items-start gap-3 p-5 rounded-2xl border border-gray-200/60 bg-white/60 backdrop-blur-md shadow-sm hover:border-emerald-300 hover:shadow-xl hover:shadow-emerald-600/10 hover:-translate-y-1 transition-all duration-300 active:scale-95 group disabled:opacity-70 disabled:hover:translate-y-0 disabled:hover:shadow-sm"
@@ -191,8 +191,8 @@ export default function AccueilPage() {
               <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">Adapter par IA</p>
             </div>
           </button>
-          
-          <Link 
+
+          <Link
             href="/candidatures"
             className="flex flex-col items-start gap-3 p-5 rounded-2xl border border-gray-200/60 bg-white/60 backdrop-blur-md shadow-sm hover:border-blue-300 hover:shadow-xl hover:shadow-blue-600/10 hover:-translate-y-1 transition-all duration-300 active:scale-95 group"
           >
@@ -204,8 +204,8 @@ export default function AccueilPage() {
               <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">Suivre l'avancement</p>
             </div>
           </Link>
-          
-          <Link 
+
+          <Link
             href="/statistiques"
             className="flex flex-col items-start gap-3 p-5 rounded-2xl border border-gray-200/60 bg-white/60 backdrop-blur-md shadow-sm hover:border-orange-300 hover:shadow-xl hover:shadow-orange-600/10 hover:-translate-y-1 transition-all duration-300 active:scale-95 group"
           >
@@ -239,7 +239,7 @@ export default function AccueilPage() {
           <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Récemment modifiés</h2>
           <Link href="/mes-documents" className="text-sm font-bold text-indigo-600 hover:text-indigo-700 transition-colors">Voir tout</Link>
         </div>
-        
+
         <div className="space-y-3">
           {recentDocs.length > 0 ? (
             recentDocs.map((doc) => (
@@ -267,7 +267,7 @@ export default function AccueilPage() {
           )}
         </div>
       </section>
-      
+
       {/* AIAssistant Modal */}
       {isAiModalOpen && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">

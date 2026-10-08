@@ -59,7 +59,7 @@ function ErrorPage({ status, message }: { status: number; message: string }) {
         <div className={`w-16 h-16 rounded-2xl mx-auto mb-5 flex items-center justify-center ${isExpired ? 'bg-amber-100' : 'bg-red-100'}`}>
           {isExpired ? <Clock className="w-8 h-8 text-amber-500" /> : <AlertTriangle className="w-8 h-8 text-red-500" />}
         </div>
-        <h1 className="text-2xl font-black text-gray-900 mb-2">
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">
           {isExpired ? 'Lien expiré' : 'Page introuvable'}
         </h1>
         <p className="text-gray-500 text-sm mb-6">{message}</p>

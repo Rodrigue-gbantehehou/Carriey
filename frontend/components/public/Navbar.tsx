@@ -66,23 +66,22 @@ export default function Navbar() {
         <div className="hidden md:flex flex-1 items-center justify-end gap-3">
           {user ? (
             <div className="flex items-center gap-4">
+              {/*
               <div className="flex flex-col items-end">
                 <span className="text-sm font-semibold text-gray-900">{user.name || user.email?.split('@')[0]}</span>
                 <div className="flex items-center gap-2 mt-0.5">
-                  <Link href="/accueil" className="text-xs font-medium text-indigo-600 hover:text-indigo-700 transition-colors">
-                    Mon Profil
-                  </Link>
+                 
                   <span className="text-gray-300 text-xs">•</span>
                   <button onClick={logout} className="text-xs font-medium text-red-500 hover:text-red-600 transition-colors">
                     Déconnexion
                   </button>
                 </div>
-              </div>
+              </div>*/}
               <Link
-                href="/accueil"
-                className="px-5 py-2.5 bg-gray-900 text-white font-semibold rounded-xl hover:bg-gray-800 transition-all text-sm"
+                href="/profil"
+                className="px-5 py-2.5 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-600 transition-all text-sm"
               >
-                Mon Espace
+                Mon Profil
               </Link>
             </div>
           ) : (
@@ -139,7 +138,6 @@ export default function Navbar() {
             <div className="pt-6 border-t border-gray-100 flex flex-col gap-3">
               {user ? (
                 <>
-                  <Link href="/dashboard" className="w-full py-3 bg-gray-900 text-white text-center font-semibold rounded-xl">Mon Espace</Link>
                   <Link href="/profil" className="w-full py-3 bg-indigo-50 text-indigo-700 text-center font-semibold rounded-xl">Mon Profil</Link>
                   <button onClick={logout} className="w-full py-3 bg-red-50 text-red-600 text-center font-semibold rounded-xl">Déconnexion</button>
                 </>
