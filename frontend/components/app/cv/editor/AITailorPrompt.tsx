@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { API_BASE } from '@/lib/api';
+
 import { Briefcase, Sparkles, CheckCircle2 } from 'lucide-react';
 import { PaywallModal } from '@/components/app/shared/PaywallModal';
 
@@ -30,17 +30,8 @@ export function AITailorPrompt({ cvId, currentOverrides, onOverridesGenerated }:
     setIsGenerating(true);
     setAiSuccess(false);
     try {
-      const res = await fetch(`${API_BASE}/ai/tailor-cv`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.user.accessToken}`
-        },
-        body: JSON.stringify({ job_description: prompt })
-      });
-
-      if (!res.ok) throw new Error(await res.text());
-      const data = await res.json();
+      const { aiApi } = await import('@/lib/ai-api');
+      const data = await aiApi.tailorCv(session.user.accessToken, prompt);
 
       const newOverrides = {
         ...currentOverrides,
