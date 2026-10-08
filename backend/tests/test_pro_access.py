@@ -67,3 +67,43 @@ def test_template_access_requires_pro(client, db_session, make_user, make_templa
     # L'utilisateur PRO n'a pas forcément besoin de l'accès enregistré via payment
     # S'il a is_pro, check_user_access renvoie True.
     assert TemplateAccessService.check_user_access(db_session, pro_user.id, template.id) is True
+
+def test_premium_template_routes_pro_access(client, db_session, make_user, make_template):
+    """PRO-002: L'accès et l'export d'un template premium sont correctement bloqués/autorisés."""
+    from tests.conftest import API, headers_for
+    from app.models.resume import Resume
+    
+    free_user = make_user()
+    pro_user = make_user(premium_days=30)
+    expired_user = make_user(premium_days=-10)
+    
+    template = make_template(price=1000.0) # Premium
+    
+    # 1. Accès gratuit refusé
+    res_free = client.get(f"{API}/templates/{template.slug}/check-access", headers=headers_for(free_user))
+    assert res_free.status_code == 200
+    assert res_free.json()["has_access"] is False
+    
+    # 2. Accès PRO accepté
+    res_pro = client.get(f"{API}/templates/{template.slug}/check-access", headers=headers_for(pro_user))
+    assert res_pro.status_code == 200
+    assert res_pro.json()["has_access"] is True
+    
+    # 3. Export PRO accepté
+    resume_pro = Resume(user_id=pro_user.id, title="Pro CV", content="{}")
+    db_session.add(resume_pro)
+    db_session.commit()
+    
+    payload_pro = {"template_name": template.slug, "data": {"resume": {"id": resume_pro.id}}}
+    res_exp_pro = client.post(f"{API}/exports/export/pdf", headers=headers_for(pro_user), json=payload_pro)
+    assert res_exp_pro.status_code not in (403, 401)
+    
+    # 4. Export après expiration refusé
+    resume_exp = Resume(user_id=expired_user.id, title="Expired CV", content="{}")
+    db_session.add(resume_exp)
+    db_session.commit()
+    
+    payload_exp = {"template_name": template.slug, "data": {"resume": {"id": resume_exp.id}}}
+    res_exp_expired = client.post(f"{API}/exports/export/pdf", headers=headers_for(expired_user), json=payload_exp)
+    # L'endpoint retourne 402 (Payment Required) pour accès non payant — comportement correct
+    assert res_exp_expired.status_code in (402, 403)
