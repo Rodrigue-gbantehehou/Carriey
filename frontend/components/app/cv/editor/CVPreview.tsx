@@ -6,8 +6,8 @@ import { API_BASE } from '@/lib/api';
 interface CVPreviewProps {
   scale: number;
   setScale: React.Dispatch<React.SetStateAction<number>>;
-  sourceRef: React.RefObject<HTMLDivElement>;
-  targetRef: React.RefObject<HTMLDivElement>;
+  sourceRef: React.RefObject<HTMLDivElement | null>;
+  targetRef: React.RefObject<HTMLDivElement | null>;
   templateId: string;
   adapterData: any;
   templateConfig: any;

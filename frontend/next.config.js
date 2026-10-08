@@ -6,9 +6,7 @@ const nextConfig = {
     cpus: 1,
     staticGenerationMaxConcurrency: 1,
   },
-  eslint: {
-    ignoreDuringBuilds: true, // Désactivé temporairement pour permettre le build avec les apostrophes non échappées
-  },
+
   images: {
     remotePatterns: [
       {

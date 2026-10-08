@@ -13,9 +13,10 @@ import path from 'path';
  */
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
-  const slug = (params.slug || '').toLowerCase().replace(/[^a-z0-9_-]/g, '');
+  const p = await params;
+  const slug = (p.slug || '').toLowerCase().replace(/[^a-z0-9_-]/g, '');
 
   if (!slug) {
     return new NextResponse('Not found', { status: 404 });
