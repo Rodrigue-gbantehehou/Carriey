@@ -4,7 +4,18 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import config from '@/lib/config'
 import { toast } from 'react-hot-toast'
-import { Users, Banknote, Download } from 'lucide-react'
+import { Users, Banknote, Download, BrainCircuit, Activity, Coins } from 'lucide-react'
+
+interface AIStats {
+    total_operations: number
+    total_cost_usd: number
+    total_prompt_tokens: number
+    total_completion_tokens: number
+    avg_cost_per_operation_usd: number
+    avg_cost_per_user_usd: number
+    free_users_cost_usd: number
+    paid_users_cost_usd: number
+}
 
 interface ReportStat {
     period: string
@@ -18,6 +29,7 @@ interface ReportStat {
 export default function AdminReportsPage() {
     const { data: session } = useSession()
     const [reports, setReports] = useState<ReportStat[]>([])
+    const [aiStats, setAiStats] = useState<AIStats | null>(null)
     const [loading, setLoading] = useState(true)
 
     // Export states
@@ -28,11 +40,19 @@ export default function AdminReportsPage() {
     useEffect(() => {
         const fetchReports = async () => {
             try {
-                const res = await fetch(`${config.apiBaseUrl}/admin/reports/monthly?months=6`, {
-                    headers: { 'Authorization': `Bearer ${session?.user?.accessToken}` }
-                })
-                if (res.ok) {
-                    setReports(await res.json())
+                const [resReports, resAi] = await Promise.all([
+                    fetch(`${config.apiBaseUrl}/admin/reports/monthly?months=6`, {
+                        headers: { 'Authorization': `Bearer ${session?.user?.accessToken}` }
+                    }),
+                    fetch(`${config.apiBaseUrl}/admin/reports/ai-stats`, {
+                        headers: { 'Authorization': `Bearer ${session?.user?.accessToken}` }
+                    })
+                ])
+                if (resReports.ok) {
+                    setReports(await resReports.json())
+                }
+                if (resAi.ok) {
+                    setAiStats(await resAi.json())
                 }
             } catch (err: any) {
                 toast.error(err.message)
@@ -97,6 +117,64 @@ export default function AdminReportsPage() {
                 <h1 className="text-xl font-semibold text-gray-900 mb-1">Rapports et Exports</h1>
                 <p className="text-sm text-gray-500">Statistiques mensuelles et exports de données au format CSV.</p>
             </div>
+
+            {/* Statistiques IA */}
+            {aiStats && (
+                <div className="bg-white border border-gray-200 rounded-md p-5 shadow-sm">
+                    <div className="flex items-center gap-3 mb-5">
+                        <div className="w-8 h-8 bg-purple-50 rounded-md flex items-center justify-center text-purple-600 border border-purple-100">
+                            <BrainCircuit className="w-4 h-4" />
+                        </div>
+                        <h2 className="text-base font-semibold text-gray-900">Coûts et Consommation IA</h2>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="p-4 bg-gray-50 rounded-md border border-gray-100">
+                            <div className="flex items-center gap-2 text-gray-500 mb-1">
+                                <Activity className="w-4 h-4" />
+                                <span className="text-xs font-medium uppercase tracking-wider">Opérations</span>
+                            </div>
+                            <p className="text-2xl font-bold text-gray-900">{aiStats.total_operations.toLocaleString()}</p>
+                            <p className="text-xs text-gray-500 mt-1">{(aiStats.total_prompt_tokens + aiStats.total_completion_tokens).toLocaleString()} tokens</p>
+                        </div>
+                        
+                        <div className="p-4 bg-gray-50 rounded-md border border-gray-100">
+                            <div className="flex items-center gap-2 text-gray-500 mb-1">
+                                <Coins className="w-4 h-4" />
+                                <span className="text-xs font-medium uppercase tracking-wider">Coût Total</span>
+                            </div>
+                            <p className="text-2xl font-bold text-gray-900">${aiStats.total_cost_usd.toFixed(4)}</p>
+                            <p className="text-xs text-gray-500 mt-1">~${aiStats.avg_cost_per_operation_usd.toFixed(4)} / op</p>
+                        </div>
+                        
+                        <div className="p-4 bg-gray-50 rounded-md border border-gray-100">
+                            <div className="flex items-center gap-2 text-gray-500 mb-1">
+                                <Users className="w-4 h-4" />
+                                <span className="text-xs font-medium uppercase tracking-wider">Coût / Utilisateur</span>
+                            </div>
+                            <p className="text-2xl font-bold text-gray-900">${aiStats.avg_cost_per_user_usd.toFixed(4)}</p>
+                            <p className="text-xs text-gray-500 mt-1">En moyenne</p>
+                        </div>
+
+                        <div className="p-4 bg-purple-50 rounded-md border border-purple-100">
+                            <div className="flex items-center gap-2 text-purple-600 mb-1">
+                                <Banknote className="w-4 h-4" />
+                                <span className="text-xs font-medium uppercase tracking-wider">Gratuit vs Payant</span>
+                            </div>
+                            <div className="mt-1 flex flex-col gap-1">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-xs text-purple-700">Plans Gratuits</span>
+                                    <span className="text-sm font-semibold text-purple-900">${aiStats.free_users_cost_usd.toFixed(4)}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-xs text-purple-700">Plans PRO</span>
+                                    <span className="text-sm font-semibold text-purple-900">${aiStats.paid_users_cost_usd.toFixed(4)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Actions d'export */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
