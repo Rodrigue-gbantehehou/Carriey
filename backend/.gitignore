@@ -13,3 +13,13 @@
 # 🗂️ Autres dossiers de cache (optionnel mais recommandé)
 __pycache__/
 *.pyc
+
+# ?? Ignorer les uploads prives et les logs
+/private_exports/
+/private_uploads/
+/logs/
+
+# ?? Ignorer les medias generes ou uploades
+/static/photos/
+/app/core/static/previews/
+_tmp_render_*.html

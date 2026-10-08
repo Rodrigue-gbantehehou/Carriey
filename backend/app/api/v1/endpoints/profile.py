@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from typing import List
 from pathlib import Path
@@ -98,17 +99,22 @@ async def upload_profile_photo(
     
     contents = await file.read()
     
-    # Save file to /static/photos/
+    # Save file to /private_uploads/photos/
     ext = file.filename.rsplit('.', 1)[-1].lower() if file.filename and '.' in file.filename else 'jpg'
-    # profile.py is at: backend/app/api/v1/endpoints/profile.py → parents[4] = backend/
     BASE_DIR = Path(__file__).resolve().parents[4]
-    photos_dir = BASE_DIR / "static" / "photos"
+    photos_dir = BASE_DIR / "private_uploads" / "photos"
     photos_dir.mkdir(parents=True, exist_ok=True)
     
     # Delete old photo if it exists and is a local file
-    if profile_db.photo_url and '/static/photos/' in str(profile_db.photo_url):
-        old_filename = profile_db.photo_url.split('/static/photos/')[-1]
+    if profile_db.photo_url and '/api/v1/profile/photo/' in str(profile_db.photo_url):
+        old_filename = profile_db.photo_url.split('/api/v1/profile/photo/')[-1]
         old_path = photos_dir / old_filename
+        if old_path.exists():
+            old_path.unlink()
+    elif profile_db.photo_url and '/static/photos/' in str(profile_db.photo_url):
+        # Fallback pour le nettoyage de l'ancienne architecture
+        old_filename = profile_db.photo_url.split('/static/photos/')[-1]
+        old_path = BASE_DIR / "static" / "photos" / old_filename
         if old_path.exists():
             old_path.unlink()
     
@@ -117,12 +123,21 @@ async def upload_profile_photo(
     with open(file_path, 'wb') as f:
         f.write(contents)
     
-    # Store as a server-relative URL
-    photo_url = f"/static/photos/{filename}"
+    # Store as an API-relative URL instead of static
+    photo_url = f"/api/v1/profile/photo/{filename}"
     profile_db.photo_url = photo_url
     db.commit()
     db.refresh(profile_db)
     return profile_db
+
+@router.get("/photo/{filename}")
+async def get_profile_photo(filename: str):
+    """Serve a profile photo from the private directory"""
+    BASE_DIR = Path(__file__).resolve().parents[4]
+    file_path = BASE_DIR / "private_uploads" / "photos" / filename
+    if not file_path.exists() or not file_path.is_file():
+        raise HTTPException(status_code=404, detail="Photo introuvable")
+    return FileResponse(path=file_path)
 
 # --- Helper for sub-entities ---
 
