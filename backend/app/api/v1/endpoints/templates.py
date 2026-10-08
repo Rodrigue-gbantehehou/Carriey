@@ -73,7 +73,7 @@ async def check_template_access(
         }
     
     is_free = template.price == 0
-    is_premium = current_user.premium_until and current_user.premium_until.replace(tzinfo=timezone.utc) > datetime.now(timezone.utc)
+    is_premium = current_user.is_pro
     has_access = is_free or is_premium or TemplateAccessService.check_user_access(db, current_user.id, template.id)
     
     return {

@@ -41,3 +41,9 @@ class User(Base):
     def __repr__(self):
         return f"<User {self.email}>"
 
+    @property
+    def is_pro(self) -> bool:
+        """Centralisation de la vérification de l'abonnement Premium (PRO-001)"""
+        from datetime import datetime, timezone
+        return bool(self.premium_until and self.premium_until.replace(tzinfo=timezone.utc) > datetime.now(timezone.utc))
+

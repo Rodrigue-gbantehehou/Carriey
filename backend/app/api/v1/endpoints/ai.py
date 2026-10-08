@@ -170,7 +170,7 @@ async def tailor_cv_endpoint(
     current_user: User = Depends(get_current_active_user)
 ):
     # Vérification Premium
-    if not current_user.premium_until or current_user.premium_until.replace(tzinfo=timezone.utc) < datetime.now(timezone.utc):
+    if not current_user.is_pro:
         raise HTTPException(status_code=403, detail="L'adaptation de CV par l'IA est une fonctionnalité PRO.")
         
     profile = crud_profile.get_by_user(db, user_id=current_user.id)

@@ -41,7 +41,7 @@ class TemplateAccessService:
         # Vérifier si l'utilisateur a un abonnement premium actif
         from app.models.user import User
         user = db.query(User).filter(User.id == user_id).first()
-        if user and user.premium_until and user.premium_until > datetime.now():
+        if user and user.is_pro:
             return True
             
         # Sinon, vérifier si l'utilisateur a un accès spécifique enregistré

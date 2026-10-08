@@ -26,7 +26,7 @@ def check_and_consume_ai_quota(db: Session, user: User, cost: int = 1):
         user.last_ai_usage_date = now
 
     # 2. Déterminer la limite
-    is_pro = user.premium_until and user.premium_until.replace(tzinfo=timezone.utc) > now
+    is_pro = user.is_pro
     quota_limit = PRO_QUOTA_PER_DAY if is_pro else FREE_QUOTA_PER_DAY
 
     # 3. Vérifier le dépassement
