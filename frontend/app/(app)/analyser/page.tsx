@@ -19,6 +19,9 @@ interface FitResult {
   gaps: string[]
   angle: { title: string; advice: string }
   keywords_to_use: string[]
+  company?: string
+  role?: string
+  location?: string
 }
 
 function ScoreRing({ score }: { score: number }) {
@@ -276,7 +279,8 @@ export default function AnalyserPage() {
 
                   {/* Sauvegarder en candidature */}
                   <Link
-                    href={`/candidatures?new=1&score=${result.score}`}
+                    href={`/candidatures?new=1&score=${result.score}&company=${encodeURIComponent(result.company || '')}&role=${encodeURIComponent(result.role || '')}&location=${encodeURIComponent(result.location || '')}`}
+                    onClick={() => sessionStorage.setItem('tempJobDescription', jobText)}
                     className="flex flex-col items-start gap-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl p-4 text-left transition-all hover:-translate-y-0.5 group"
                   >
                     <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">

@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, String, Enum, ForeignKey, DateTime, Date, Text
+from sqlalchemy import Column, String, Enum, ForeignKey, DateTime, Date, Text, Integer
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.db.session import Base
@@ -25,6 +25,9 @@ class Candidature(Base):
     
     url = Column(Text, nullable=True)
     logo_url = Column(Text, nullable=True)
+    
+    match_score = Column(Integer, nullable=True)
+    job_description = Column(Text, nullable=True)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

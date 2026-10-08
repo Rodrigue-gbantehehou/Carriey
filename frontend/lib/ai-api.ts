@@ -22,6 +22,9 @@ export const TailorCvResponseSchema = z.object({
 export type TailorCvResponse = z.infer<typeof TailorCvResponseSchema>;
 
 export const AnalyzeFitResponseSchema = z.object({
+  company: z.string().optional(),
+  role: z.string().optional(),
+  location: z.string().optional(),
   score: z.number().min(0).max(100),
   verdict: z.string(),
   strengths: z.array(z.string()),

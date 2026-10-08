@@ -6,6 +6,8 @@ import { candidaturesApi } from '@/lib/candidature-api';
 import { AIAssistant } from '@/components/app/shared/AIAssistant';
 import config from '@/lib/config';
 import { useSession } from 'next-auth/react';
+import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 
 type Status = 'envoyee' | 'entretien' | 'acceptee' | 'refusee';
 
@@ -21,8 +23,17 @@ interface Application {
 }
 
 export default function CandidaturesPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto text-indigo-600" /></div>}>
+      <CandidaturesContent />
+    </Suspense>
+  );
+}
+
+function CandidaturesContent() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<Status | 'all'>('all');
+  const searchParams = useSearchParams();
   const [viewMode, setViewMode] = useState<'grid' | 'kanban'>('kanban');
 
   const [applications, setApplications] = useState<Application[]>([]);
@@ -39,13 +50,38 @@ export default function CandidaturesPage() {
     location: '',
     status: 'envoyee' as Status,
     url: '',
-    applied_date: new Date().toISOString().split('T')[0]
+    applied_date: new Date().toISOString().split('T')[0],
+    match_score: undefined as number | undefined,
+    job_description: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchCandidatures();
   }, []);
+
+  useEffect(() => {
+    if (searchParams.get('new') === '1') {
+      const spCompany = searchParams.get('company') || '';
+      const spRole = searchParams.get('role') || '';
+      const spLocation = searchParams.get('location') || '';
+      const spScore = searchParams.get('score');
+      const tempJobDesc = sessionStorage.getItem('tempJobDescription');
+
+      setFormData(prev => ({
+        ...prev,
+        company: spCompany !== 'Non précisé' ? spCompany : '',
+        role: spRole !== 'Non précisé' ? spRole : '',
+        location: spLocation !== 'Non précisé' ? spLocation : '',
+        match_score: spScore ? parseInt(spScore, 10) : undefined,
+        job_description: tempJobDesc || ''
+      }));
+      if (tempJobDesc) {
+        sessionStorage.removeItem('tempJobDescription');
+      }
+      setIsModalOpen(true);
+    }
+  }, [searchParams]);
 
   const fetchCandidatures = async () => {
     try {
@@ -83,7 +119,9 @@ export default function CandidaturesPage() {
       location: '',
       status: 'envoyee',
       url: '',
-      applied_date: new Date().toISOString().split('T')[0]
+      applied_date: new Date().toISOString().split('T')[0],
+      match_score: undefined,
+      job_description: ''
     });
     setIsModalOpen(true);
   };
@@ -96,7 +134,9 @@ export default function CandidaturesPage() {
       location: app.location || '',
       status: app.status,
       url: app.url || '',
-      applied_date: app.applied_date ? new Date(app.applied_date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
+      applied_date: app.applied_date ? new Date(app.applied_date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      match_score: (app as any).match_score,
+      job_description: (app as any).job_description || ''
     });
     setIsModalOpen(true);
   };
@@ -408,9 +448,20 @@ export default function CandidaturesPage() {
                   </div>
                 </div>
 
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Lien de l'offre</label>
+                    <input type="url" placeholder="https://..." value={formData.url} onChange={e => setFormData({ ...formData, url: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Score IA (%)</label>
+                    <input type="number" min="0" max="100" placeholder="Ex: 85" value={formData.match_score || ''} onChange={e => setFormData({ ...formData, match_score: e.target.value ? parseInt(e.target.value, 10) : undefined })} className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
+                  </div>
+                </div>
+
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Lien de l'offre</label>
-                  <input type="url" placeholder="https://..." value={formData.url} onChange={e => setFormData({ ...formData, url: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Texte de l'offre (Optionnel)</label>
+                  <textarea rows={4} placeholder="Collez l'annonce ici..." value={formData.job_description} onChange={e => setFormData({ ...formData, job_description: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all resize-none"></textarea>
                 </div>
 
                 <div className="mt-8 flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-gray-100">
