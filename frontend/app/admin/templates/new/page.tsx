@@ -1,33 +1,47 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import config from '@/lib/config'
 import { ArrowLeft, CheckCircle2, AlertCircle, Settings, DollarSign, Info, Code, Image as ImageIcon, Upload } from 'lucide-react'
+import { usePlans } from '@/lib/hooks/usePlans'
 
 export default function NewTemplatePage() {
   const { data: session } = useSession()
   const router = useRouter()
+  
+  const { getPlanByCode } = usePlans()
+  const singlePlan = getPlanByCode('single')
   
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
 
-  // État du formulaire
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
     description: '',
-    price: '',
+    price: '0',
     currency: 'XOF',
     is_active: false,
     folder_name: '',
     template_type: 'cv',
     preview_image: ''
   })
+
+  // Synchronise le prix du nouveau template (Premium par défaut ou Gratuit si 0)
+  useEffect(() => {
+    if (singlePlan && formData.price !== '0' && formData.price === '') {
+      setFormData(prev => ({
+        ...prev,
+        price: String(singlePlan.price),
+        currency: singlePlan.currency
+      }))
+    }
+  }, [singlePlan, formData.price])
 
   const [templateConfig, setTemplateConfig] = useState({
     fonts: { heading: 'Arial', body: 'Arial' },
@@ -323,10 +337,11 @@ export default function NewTemplatePage() {
                   name="price"
                   min="0"
                   step="50"
-                  value={formData.price}
+                  value={formData.price === '0' ? '0' : (singlePlan?.price || formData.price)}
                   onChange={handleInputChange}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-md px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-200"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-md px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-200 opacity-70 cursor-not-allowed"
                   placeholder="0"
+                  readOnly
                 />
               </div>
 
@@ -334,9 +349,10 @@ export default function NewTemplatePage() {
                 <label className="block text-xs font-semibold text-gray-700 mb-1">Devise</label>
                 <select
                   name="currency"
-                  value={formData.currency}
+                  value={formData.price === '0' ? formData.currency : (singlePlan?.currency || formData.currency)}
                   onChange={handleInputChange}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-md px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-200"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-md px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-200 opacity-70 cursor-not-allowed"
+                  disabled
                 >
                   <option value="XOF">XOF (Franc CFA)</option>
                   <option value="EUR">EUR (€ Euro)</option>
@@ -357,7 +373,7 @@ export default function NewTemplatePage() {
               <div className="bg-purple-50 border border-purple-100 rounded-md p-3.5 mb-5 flex items-start gap-2.5 text-xs text-purple-800">
                 <Info className="w-4 h-4 text-purple-600 shrink-0 mt-0.5" />
                 <span>
-                  <strong>Modèle Premium :</strong> Le candidat paiera {formData.price} {formData.currency} via Mobile Money (FedaPay / KkiaPay) avant de générer son PDF.
+                  <strong>Modèle Premium :</strong> Le candidat paiera {singlePlan?.price || formData.price} {singlePlan?.currency || formData.currency} (Défini par le plan Achat Unique) via Mobile Money avant de générer son PDF.
                 </span>
               </div>
             )}

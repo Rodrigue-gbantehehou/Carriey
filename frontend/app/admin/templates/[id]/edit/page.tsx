@@ -6,11 +6,15 @@ import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import config from '@/lib/config'
 import { ArrowLeft, CheckCircle2, AlertCircle, Settings, DollarSign, Image as ImageIcon, Code, Play, Upload, Info } from 'lucide-react'
+import { usePlans } from '@/lib/hooks/usePlans'
 
 export default function EditTemplatePage() {
   const { data: session } = useSession()
   const router = useRouter()
   const { id } = useParams()
+  
+  const { getPlanByCode } = usePlans()
+  const singlePlan = getPlanByCode('single')
 
   const [template, setTemplate] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -61,6 +65,16 @@ export default function EditTemplatePage() {
 
     fetchTemplate()
   }, [id, session])
+
+  useEffect(() => {
+    if (singlePlan && formData.price !== '0' && (parseFloat(formData.price) !== singlePlan.price || formData.currency !== singlePlan.currency)) {
+      setFormData(prev => ({
+        ...prev,
+        price: String(singlePlan.price),
+        currency: singlePlan.currency
+      }))
+    }
+  }, [singlePlan, formData.price, formData.currency])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target
@@ -374,10 +388,11 @@ export default function EditTemplatePage() {
                   name="price"
                   min="0"
                   step="50"
-                  value={formData.price}
+                  value={formData.price === '0' ? '0' : (singlePlan?.price || formData.price)}
                   onChange={handleInputChange}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-md px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-200"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-md px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-200 opacity-70 cursor-not-allowed"
                   placeholder="0"
+                  readOnly
                 />
               </div>
 
@@ -385,9 +400,10 @@ export default function EditTemplatePage() {
                 <label className="block text-xs font-semibold text-gray-700 mb-1">Devise</label>
                 <select
                   name="currency"
-                  value={formData.currency}
+                  value={formData.price === '0' ? formData.currency : (singlePlan?.currency || formData.currency)}
                   onChange={handleInputChange}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-md px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-200"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-md px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-200 opacity-70 cursor-not-allowed"
+                  disabled
                 >
                   <option value="XOF">XOF (Franc CFA)</option>
                   <option value="EUR">EUR (€ Euro)</option>
@@ -408,7 +424,7 @@ export default function EditTemplatePage() {
               <div className="bg-purple-50 border border-purple-100 rounded-md p-3.5 mb-5 flex items-start gap-2.5 text-xs text-purple-800">
                 <Info className="w-4 h-4 text-purple-600 shrink-0 mt-0.5" />
                 <span>
-                  <strong>Modèle Premium :</strong> Le candidat paiera {formData.price} {formData.currency} via Mobile Money (FedaPay / KkiaPay) avant de générer son PDF haute fidélité.
+                  <strong>Modèle Premium :</strong> Le candidat paiera {singlePlan?.price || formData.price} {singlePlan?.currency || formData.currency} (Défini par le plan Achat Unique) via Mobile Money avant de générer son PDF.
                 </span>
               </div>
             )}
