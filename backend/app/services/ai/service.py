@@ -265,7 +265,8 @@ INSTRUCTIONS :
 5. Donne une recommandation sur l'angle de profil à adopter.
 6. Donne un verdict court (1-2 phrases) et honnête sur les chances.
 7. Liste les mots-clés importants à utiliser dans les documents.
-8. Fournis UNIQUEMENT une réponse JSON strictement valide.
+8. Évalue si le profil fourni (qui peut être vide) manque de données fondamentales pour cette offre. Si oui, retourne dans `missing_info` un tableau de types de données manquantes requises (ex: ["expériences", "compétences techniques", "formations"]). Si le profil est suffisant, retourne un tableau vide [].
+9. Fournis UNIQUEMENT une réponse JSON strictement valide.
 
 RÉPONSE ATTENDUE :
 {{
@@ -286,7 +287,8 @@ RÉPONSE ATTENDUE :
     "title": "Développeur Full-Stack orienté produit",
     "advice": "Mettez en avant votre capacité à travailler en autonomie et à livrer des fonctionnalités complètes."
   }},
-  "keywords_to_use": ["Python", "API REST", "Agile", "livraison produit"]
+  "keywords_to_use": ["Python", "API REST", "Agile", "livraison produit"],
+  "missing_info": ["expériences", "compétences techniques"]
 }}
 """
         return await self._ask(prompt)

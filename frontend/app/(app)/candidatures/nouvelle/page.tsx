@@ -22,6 +22,7 @@ interface FitResult {
   company?: string
   role?: string
   location?: string
+  missing_info?: string[]
 }
 
 function ScoreRing({ score }: { score: number }) {
@@ -222,6 +223,30 @@ export default function NouvelleCandidaturePage() {
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700 font-medium mb-6 flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" /> {error}
+            </div>
+          )}
+
+          {/* Missing Info Warning */}
+          {result?.missing_info && result.missing_info.length > 0 && (
+            <div className="bg-amber-50 border border-amber-200 rounded-2xl px-6 py-5 mb-6">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                <div>
+                  <h3 className="text-amber-800 font-bold text-sm mb-1">
+                    Profil incomplet pour une analyse optimale
+                  </h3>
+                  <p className="text-amber-700 text-sm mb-3">
+                    Pour améliorer la précision de l'IA et lui permettre de générer un CV sur-mesure, vous devez renseigner : <span className="font-semibold">{result.missing_info.join(', ')}</span>.
+                  </p>
+                  <Link 
+                    href="/profil" 
+                    className="inline-flex items-center gap-1.5 text-sm font-bold text-amber-700 hover:text-amber-900 bg-amber-100/50 hover:bg-amber-200/50 px-3 py-1.5 rounded-lg transition-colors"
+                  >
+                    <FileText className="w-4 h-4" />
+                    Compléter mon profil (ou Importer mon CV)
+                  </Link>
+                </div>
+              </div>
             </div>
           )}
 
