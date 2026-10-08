@@ -2,7 +2,8 @@ from fastapi import APIRouter
 from app.api.v1.endpoints import (
     auth, profile, resumes, templates, exports, payments, personas, 
     admin_users, admin_templates, stats, admin_audit, admin_payments, 
-    admin_resumes, admin_reports, public_pages, ai, plans, candidatures
+    admin_resumes, admin_reports, public_pages, ai, plans, candidatures,
+    admin_configs
 )
 
 api_router = APIRouter()
@@ -26,4 +27,5 @@ api_router.include_router(admin_users.router, prefix="/admin/users", tags=["admi
 api_router.include_router(admin_payments.router, prefix="/admin/payments", tags=["admin"])
 api_router.include_router(admin_resumes.router, prefix="/admin/resumes", tags=["admin"])
 api_router.include_router(admin_reports.router, prefix="/admin/reports", tags=["admin"])
+api_router.include_router(admin_configs.router, prefix="/admin/configs", tags=["admin"])
 

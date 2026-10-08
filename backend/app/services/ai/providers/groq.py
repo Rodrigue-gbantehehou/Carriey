@@ -1,7 +1,7 @@
 import json
 import logging
 import asyncio
-from typing import Dict, Any, Tuple
+from typing import Dict, Any, Tuple, Optional
 from groq import Groq
 from app.services.ai.provider import LLMProvider
 
@@ -14,9 +14,9 @@ class GroqProvider(LLMProvider):
     Aucune logique métier, aucun prompt ici.
     """
 
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: str, model_name: Optional[str] = None):
         self.client = Groq(api_key=api_key)
-        self.model = "openai/gpt-oss-120b"
+        self.model = model_name if model_name else "llama-3.3-70b-versatile"
 
     async def generate_json(self, prompt: str) -> Tuple[Dict[str, Any], Dict[str, Any]]:
         try:

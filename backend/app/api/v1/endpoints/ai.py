@@ -69,7 +69,7 @@ async def generate_cover_letter_endpoint(
 
     # 3. Appeler le service d'IA
     try:
-        ai_service = get_ai_service()
+        ai_service = get_ai_service(db)
         letter_dict, metadata = await ai_service.generate_cover_letter(profile_data, req.job_description)
         log_ai_usage(db, current_user, "generate_cover_letter", metadata)
         
@@ -105,7 +105,7 @@ async def generate_public_bio_endpoint(
     check_and_consume_ai_quota(db, current_user)
 
     try:
-        ai_service = get_ai_service()
+        ai_service = get_ai_service(db)
         res, metadata = await ai_service.generate_public_bio(profile_data, req.target_audience)
         log_ai_usage(db, current_user, "generate_public_bio", metadata)
         
@@ -141,7 +141,7 @@ async def generate_slug_suggestions_endpoint(
     check_and_consume_ai_quota(db, current_user)
 
     try:
-        ai_service = get_ai_service()
+        ai_service = get_ai_service(db)
         res, metadata = await ai_service.generate_slug_suggestions(profile_data)
         log_ai_usage(db, current_user, "generate_slug_suggestions", metadata)
         
@@ -196,7 +196,7 @@ async def tailor_cv_endpoint(
     check_and_consume_ai_quota(db, current_user)
 
     try:
-        ai_service = get_ai_service()
+        ai_service = get_ai_service(db)
         res, metadata = await ai_service.tailor_cv(profile_data, req.job_description)
         log_ai_usage(db, current_user, "tailor_cv", metadata)
         return res
@@ -227,7 +227,7 @@ async def extract_job_endpoint(
     check_and_consume_ai_quota(db, current_user)
 
     try:
-        ai_service = get_ai_service()
+        ai_service = get_ai_service(db)
         res, metadata = await ai_service.extract_job_details(req.job_text)
         log_ai_usage(db, current_user, "extract_job", metadata)
         
@@ -281,7 +281,7 @@ async def analyze_fit_endpoint(
     check_and_consume_ai_quota(db, current_user)
 
     try:
-        ai_service = get_ai_service()
+        ai_service = get_ai_service(db)
         result, metadata = await ai_service.analyze_fit(profile_data, req.job_description)
         log_ai_usage(db, current_user, "analyze_fit", metadata)
         return result
@@ -333,7 +333,7 @@ async def generate_letter_endpoint(
     check_and_consume_ai_quota(db, current_user)
 
     try:
-        ai_service = get_ai_service()
+        ai_service = get_ai_service(db)
         letter_dict, metadata = await ai_service.generate_cover_letter(profile_data, req.job_description)
         log_ai_usage(db, current_user, "generate_letter", metadata)
 

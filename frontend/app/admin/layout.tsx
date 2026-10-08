@@ -14,7 +14,8 @@ import {
     ShieldAlert,
     Globe,
     User,
-    Lock
+    Lock,
+    Settings
 } from 'lucide-react'
 
 // Sidebar nav items
@@ -43,8 +44,9 @@ const navSections = [
     {
         title: 'Outils',
         items: [
-            { label: 'Rapports', href: '/admin/reports', icon: LineChart },
+            { label: 'Rapports & IA', href: '/admin/reports', icon: LineChart },
             { label: 'Logs Système', href: '/admin/audit', icon: ShieldAlert },
+            { label: 'Configurations', href: '/admin/configs', icon: Settings },
         ]
     },
 ]

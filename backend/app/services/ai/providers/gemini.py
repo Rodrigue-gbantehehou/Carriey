@@ -1,7 +1,7 @@
 import json
 import logging
 import asyncio
-from typing import Dict, Any, Tuple
+from typing import Dict, Any, Tuple, Optional
 from google import genai
 from app.services.ai.provider import LLMProvider
 
@@ -14,10 +14,10 @@ class GeminiProvider(LLMProvider):
     Aucune logique métier, aucun prompt ici.
     """
 
-    def __init__(self):
+    def __init__(self, model_name: Optional[str] = None):
         # Le SDK lit GEMINI_API_KEY depuis l'environnement automatiquement
         self.client = genai.Client()
-        self.model = "gemini-2.0-flash"
+        self.model = model_name if model_name else "gemini-2.0-flash"
 
     async def generate_json(self, prompt: str) -> Tuple[Dict[str, Any], Dict[str, Any]]:
         try:

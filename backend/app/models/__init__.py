@@ -8,3 +8,4 @@ from .user_template_access import UserTemplateAccess
 from .profile import MasterProfile, Experience, Education, Skill, Project, Certification
 from .candidature import Candidature
 from .ai_log import AILog
+from .system_config import SystemConfig
