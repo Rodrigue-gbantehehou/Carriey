@@ -290,3 +290,59 @@ async def get_ai_stats(
         "models_breakdown": models_breakdown,
         "operations_breakdown": operations_breakdown,
     }
+
+
+# ─── Economics (MONEY-003) ────────────────────────────────────────────────────
+@router.get("/economics")
+async def get_economics(
+    db: Session = Depends(get_db),
+    admin: User = Depends(get_current_admin)
+):
+    """
+    Calcule les métriques économiques globales (ARPU, Marges, Conversion, etc.)
+    """
+    from app.models.ai_log import AILog
+    
+    total_users = db.query(func.count(User.id)).scalar() or 0
+    total_revenue = db.query(func.sum(Payment.amount)).filter(Payment.status == PaymentStatus.SUCCESS).scalar() or Decimal("0")
+    total_revenue = float(total_revenue)
+    
+    # 1. Taux de conversion (Utilisateurs ayant payé au moins 1 fois / Total utilisateurs)
+    paying_users_count = db.query(func.count(func.distinct(Payment.user_id))).filter(Payment.status == PaymentStatus.SUCCESS).scalar() or 0
+    conversion_rate = (paying_users_count / total_users * 100) if total_users > 0 else 0.0
+    
+    # 2. Taux de renouvellement (Utilisateurs ayant payé > 1 fois / Utilisateurs ayant payé au moins 1 fois)
+    # Pour un MVP, on compte ceux qui ont plusieurs paiements success.
+    subquery = db.query(Payment.user_id).filter(Payment.status == PaymentStatus.SUCCESS).group_by(Payment.user_id).having(func.count(Payment.id) > 1).subquery()
+    renewing_users_count = db.query(func.count(subquery.c.user_id)).scalar() or 0
+    renewal_rate = (renewing_users_count / paying_users_count * 100) if paying_users_count > 0 else 0.0
+
+    # 3. ARPU (Average Revenue Per User) sur tous les utilisateurs
+    arpu = (total_revenue / total_users) if total_users > 0 else 0.0
+
+    # 4. Coût IA
+    total_ai_cost_usd = db.query(func.sum(AILog.cost_usd)).scalar() or 0.0
+    exchange_rate = 600  # 1 USD = 600 XOF (approximatif pour les calculs)
+    total_ai_cost_xof = float(total_ai_cost_usd) * exchange_rate
+    ai_cost_per_user = (total_ai_cost_xof / total_users) if total_users > 0 else 0.0
+
+    # 5. Coût de paiement (Estimation générique: 2.5% du revenu + frais fixes potentiels)
+    payment_cost_rate = 0.025
+    payment_cost_per_user = (arpu * payment_cost_rate)
+    total_payment_cost = total_revenue * payment_cost_rate
+
+    # 6. Marge par utilisateur
+    margin_per_user = arpu - ai_cost_per_user - payment_cost_per_user
+
+    return {
+        "total_users": total_users,
+        "paying_users": paying_users_count,
+        "total_revenue_xof": total_revenue,
+        "arpu_xof": arpu,
+        "conversion_rate_pct": conversion_rate,
+        "renewal_rate_pct": renewal_rate,
+        "ai_cost_per_user_xof": ai_cost_per_user,
+        "payment_cost_per_user_xof": payment_cost_per_user,
+        "margin_per_user_xof": margin_per_user,
+        "total_margin_xof": total_revenue - total_ai_cost_xof - total_payment_cost
+    }

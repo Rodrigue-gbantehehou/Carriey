@@ -38,10 +38,24 @@ interface ReportStat {
     payment_count: number
 }
 
+interface Economics {
+    total_users: number
+    paying_users: number
+    total_revenue_xof: number
+    arpu_xof: number
+    conversion_rate_pct: number
+    renewal_rate_pct: number
+    ai_cost_per_user_xof: number
+    payment_cost_per_user_xof: number
+    margin_per_user_xof: number
+    total_margin_xof: number
+}
+
 export default function AdminReportsPage() {
     const { data: session } = useSession()
     const [reports, setReports] = useState<ReportStat[]>([])
     const [aiStats, setAiStats] = useState<AIStats | null>(null)
+    const [economics, setEconomics] = useState<Economics | null>(null)
     const [loading, setLoading] = useState(true)
 
     // Export states
@@ -52,11 +66,14 @@ export default function AdminReportsPage() {
     useEffect(() => {
         const fetchReports = async () => {
             try {
-                const [resReports, resAi] = await Promise.all([
+                const [resReports, resAi, resEcon] = await Promise.all([
                     fetch(`${config.apiBaseUrl}/admin/reports/monthly?months=6`, {
                         headers: { 'Authorization': `Bearer ${session?.user?.accessToken}` }
                     }),
                     fetch(`${config.apiBaseUrl}/admin/reports/ai-stats`, {
+                        headers: { 'Authorization': `Bearer ${session?.user?.accessToken}` }
+                    }),
+                    fetch(`${config.apiBaseUrl}/admin/reports/economics`, {
                         headers: { 'Authorization': `Bearer ${session?.user?.accessToken}` }
                     })
                 ])
@@ -65,6 +82,9 @@ export default function AdminReportsPage() {
                 }
                 if (resAi.ok) {
                     setAiStats(await resAi.json())
+                }
+                if (resEcon.ok) {
+                    setEconomics(await resEcon.json())
                 }
             } catch (err: any) {
                 toast.error(err.message)
@@ -129,6 +149,51 @@ export default function AdminReportsPage() {
                 <h1 className="text-xl font-semibold text-gray-900 mb-1">Rapports et Exports</h1>
                 <p className="text-sm text-gray-500">Statistiques mensuelles et exports de données au format CSV.</p>
             </div>
+
+            {/* Economics (MONEY-003) */}
+            {economics && (
+                <div className="bg-white border border-gray-200 rounded-md p-5 shadow-sm">
+                    <div className="flex items-center gap-3 mb-5">
+                        <div className="w-8 h-8 bg-emerald-50 rounded-md flex items-center justify-center text-emerald-600 border border-emerald-100">
+                            <Coins className="w-4 h-4" />
+                        </div>
+                        <h2 className="text-base font-semibold text-gray-900">Unit Economics & Métriques Clés</h2>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                        <div className="bg-gray-50 rounded-md p-4 border border-gray-100">
+                            <p className="text-xs text-gray-500 font-medium mb-1">ARPU (Revenu moyen)</p>
+                            <p className="text-xl font-bold text-gray-900">{Math.round(economics.arpu_xof)} XOF</p>
+                            <p className="text-[10px] text-gray-400 mt-1">Total généré / Total utilisateurs</p>
+                        </div>
+                        <div className="bg-gray-50 rounded-md p-4 border border-gray-100">
+                            <p className="text-xs text-gray-500 font-medium mb-1">Coût IA par Utilisateur</p>
+                            <p className="text-xl font-bold text-gray-900">{Math.round(economics.ai_cost_per_user_xof)} XOF</p>
+                            <p className="text-[10px] text-gray-400 mt-1">Tokens LLM / Total utilisateurs</p>
+                        </div>
+                        <div className="bg-gray-50 rounded-md p-4 border border-gray-100">
+                            <p className="text-xs text-gray-500 font-medium mb-1">Coût Paiement (Est.)</p>
+                            <p className="text-xl font-bold text-gray-900">{Math.round(economics.payment_cost_per_user_xof)} XOF</p>
+                            <p className="text-[10px] text-gray-400 mt-1">Frais provider (2.5%) / Utilisateur</p>
+                        </div>
+                        <div className="bg-emerald-50 rounded-md p-4 border border-emerald-100">
+                            <p className="text-xs text-emerald-700 font-medium mb-1">Marge Nette (par util.)</p>
+                            <p className="text-xl font-bold text-emerald-900">{Math.round(economics.margin_per_user_xof)} XOF</p>
+                            <p className="text-[10px] text-emerald-600/80 mt-1">Ce qu'il reste dans notre poche</p>
+                        </div>
+                        <div className="bg-indigo-50 rounded-md p-4 border border-indigo-100">
+                            <p className="text-xs text-indigo-700 font-medium mb-1">Taux de Conversion</p>
+                            <p className="text-xl font-bold text-indigo-900">{economics.conversion_rate_pct.toFixed(2)} %</p>
+                            <p className="text-[10px] text-indigo-600/80 mt-1">{economics.paying_users} clients sur {economics.total_users} inscrits</p>
+                        </div>
+                        <div className="bg-indigo-50 rounded-md p-4 border border-indigo-100">
+                            <p className="text-xs text-indigo-700 font-medium mb-1">Taux de Renouvellement</p>
+                            <p className="text-xl font-bold text-indigo-900">{economics.renewal_rate_pct.toFixed(2)} %</p>
+                            <p className="text-[10px] text-indigo-600/80 mt-1">Clients avec +1 paiement réussi</p>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Statistiques IA */}
             {aiStats && (
