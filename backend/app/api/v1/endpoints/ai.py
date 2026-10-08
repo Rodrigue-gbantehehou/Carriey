@@ -8,6 +8,7 @@ from app.services.ai_quota_service import check_and_consume_ai_quota, log_ai_usa
 from pydantic import BaseModel
 from app.core.limiter import limiter
 from fastapi import Request
+from app.utils.audit import log_audit
 import logging
 
 logger = logging.getLogger(__name__)
@@ -199,6 +200,7 @@ async def tailor_cv_endpoint(
         ai_service = get_ai_service(db)
         res, metadata = await ai_service.tailor_cv(profile_data, req.job_description)
         log_ai_usage(db, current_user, "tailor_cv", metadata)
+        log_audit(db, current_user.id, "tailor_cv", "cv", None, {})
         return res
     except RuntimeError as e:
         if "QUOTA_EXCEEDED" in str(e):
@@ -284,6 +286,7 @@ async def analyze_fit_endpoint(
         ai_service = get_ai_service(db)
         result, metadata = await ai_service.analyze_fit(profile_data, req.job_description)
         log_ai_usage(db, current_user, "analyze_fit", metadata)
+        log_audit(db, current_user.id, "analyze_fit", "candidature", None, {"score": result.get("score")})
         return result
     except RuntimeError as e:
         if "QUOTA_EXCEEDED" in str(e):

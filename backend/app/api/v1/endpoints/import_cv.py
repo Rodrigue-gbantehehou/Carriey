@@ -7,6 +7,7 @@ from app.api.dependencies import get_db, get_current_active_user
 from app.models.user import User
 from app.services.ai import get_ai_service
 from app.services.ai_quota_service import check_and_consume_ai_quota, log_ai_usage
+from app.utils.audit import log_audit
 import pypdf
 import io
 
@@ -53,6 +54,8 @@ async def extract_profile_from_cv(
         
         # Log usage
         # log_ai_usage(...) # Simplifié
+        
+        log_audit(db, current_user.id, "import_cv", "profile", current_user.id, {"file_size": len(content)})
 
         return data
     except Exception as e:

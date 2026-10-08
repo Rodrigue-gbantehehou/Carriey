@@ -27,6 +27,7 @@ from export_docx import export_docx
 from app.core.config import settings
 from app.core.limiter import limiter
 from fastapi import Request
+from app.utils.audit import log_audit
 
 logger = logging.getLogger(__name__)
 
@@ -415,6 +416,9 @@ async def export_pdf(
                     setup_link=setup_link
                 )
         
+        if current_user:
+            log_audit(db, current_user.id, "export_cv", "cv", req.template_name, {"format": "pdf"})
+        
         return {"file": str(out_pdf), "url": url}
     except HTTPException as http_exc:
         logger.error(f"[PDF Export] HTTPException capturée: status={http_exc.status_code} detail={http_exc.detail!r}")
@@ -470,6 +474,9 @@ async def export_docx_endpoint(
                     full_name=name, 
                     setup_link=setup_link
                 )
+
+        if current_user:
+            log_audit(db, current_user.id, "export_cv", "cv", req.template_name, {"format": "docx"})
 
         return {"file": str(out_docx), "url": url}
     except HTTPException:

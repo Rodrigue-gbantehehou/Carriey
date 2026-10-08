@@ -25,6 +25,7 @@ from app.schemas.profile import (
 )
 from app.crud.crud_profile import profile as crud_profile
 from app.api.dependencies import get_current_active_user
+from app.utils.audit import log_audit
 
 router = APIRouter()
 
@@ -77,6 +78,7 @@ async def update_my_profile(
         raise HTTPException(status_code=404, detail="Profil non trouvé")
     
     updated_profile = crud_profile.update(db, db_obj=profile_db, obj_in=profile_in)
+    log_audit(db, current_user.id, "update_profile", "profile", profile_db.id, {})
     return updated_profile
 
 @router.post("/me/photo", response_model=MasterProfileOut)
