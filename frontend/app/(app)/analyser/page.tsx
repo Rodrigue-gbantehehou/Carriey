@@ -116,7 +116,10 @@ export default function AnalyserPage() {
           usage: 'ciblee',
           disabledSections: tailoredData.disabledSections || [],
           disabledItems: tailoredData.disabledItems || {},
-          summary: tailoredData.summary || '',
+          overrides: {
+            summary: tailoredData.summary || '',
+            experiences: tailoredData.experiences || {},
+          },
         },
       }
 

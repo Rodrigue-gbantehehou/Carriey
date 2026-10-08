@@ -1,22 +1,64 @@
 import { API_BASE } from './api';
+import { z } from 'zod';
 
-/**
- * CV-001 — Contrat du endpoint POST /ai/tailor-cv
- * Toute modification de ce type DOIT être répercutée dans service.py (tailor_cv)
- */
-export interface TailorCvResponse {
-  /** Accroche adaptée pour l'offre */
-  summary: string;
+// ─── Schémas Zod (validation runtime) ────────────────────────────────────────
+// CV-001: Source de vérité partagée entre TypeScript et l'API backend.
+// Toute modification du prompt dans service.py doit être reflétée ici.
+
+export const TailorCvResponseSchema = z.object({
+  /** Accroche adaptée pour l'offre (2-3 phrases) */
+  summary: z.string(),
   /**
    * Map id_expérience → { description: string }
    * Les descriptions sont réécrites avec les mots-clés de l'offre.
    */
-  experiences: Record<string, { description: string }>;
+  experiences: z.record(z.string(), z.object({ description: z.string() })).default({}),
   /** Sections hors-sujet à masquer (ex: ["projects"]) */
-  disabledSections: string[];
+  disabledSections: z.array(z.string()).default([]),
   /** Items hors-sujet par section (ex: { experiences: ["id1"] }) */
-  disabledItems: Record<string, string[]>;
+  disabledItems: z.record(z.string(), z.array(z.string())).default({}),
+});
+
+export type TailorCvResponse = z.infer<typeof TailorCvResponseSchema>;
+
+export const AnalyzeFitResponseSchema = z.object({
+  score: z.number().min(0).max(100),
+  verdict: z.string(),
+  strengths: z.array(z.string()),
+  gaps: z.array(z.string()),
+  angle: z.object({
+    title: z.string(),
+    advice: z.string(),
+  }),
+  keywords_to_use: z.array(z.string()),
+});
+
+export type AnalyzeFitResponse = z.infer<typeof AnalyzeFitResponseSchema>;
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+async function parseJsonResponse<T>(
+  response: Response,
+  schema: z.ZodType<T>,
+  errorMsg: string,
+): Promise<T> {
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    const detail = (err as any)?.detail || errorMsg;
+    throw new Error(`${response.status}: ${detail}`);
+  }
+  const raw = await response.json();
+  const parsed = schema.safeParse(raw);
+  if (!parsed.success) {
+    console.error('[AI API] Validation échouée:', parsed.error.flatten());
+    // On log et on renvoie quand même les données brutes castées pour ne pas bloquer l'UX
+    // mais on peut choisir de lever une erreur si la rigueur est requise
+    return raw as T;
+  }
+  return parsed.data;
 }
+
+// ─── API ──────────────────────────────────────────────────────────────────────
 
 export const aiApi = {
   generateCoverLetter: async (token: string, jobDescription: string) => {
@@ -64,7 +106,7 @@ export const aiApi = {
 
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));
-      const detail = err?.detail || 'Erreur lors de la génération des slugs';
+      const detail = (err as any)?.detail || 'Erreur lors de la génération des slugs';
       throw new Error(`${response.status}: ${detail}`);
     }
 
@@ -82,12 +124,27 @@ export const aiApi = {
       body: JSON.stringify({ job_description: jobDescription }),
     });
 
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      const detail = err?.detail || "Erreur lors de l'adaptation du CV";
-      throw new Error(`${response.status}: ${detail}`);
-    }
+    return parseJsonResponse(
+      response,
+      TailorCvResponseSchema,
+      "Erreur lors de l'adaptation du CV",
+    );
+  },
 
-    return response.json() as Promise<TailorCvResponse>;
-  }
+  analyzeFit: async (token: string, jobDescription: string): Promise<AnalyzeFitResponse> => {
+    const response = await fetch(`${API_BASE}/ai/analyze-fit`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ job_description: jobDescription }),
+    });
+
+    return parseJsonResponse(
+      response,
+      AnalyzeFitResponseSchema,
+      "Erreur lors de l'analyse de correspondance",
+    );
+  },
 };
