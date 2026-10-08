@@ -80,8 +80,8 @@ function CheckoutContent() {
   }, [type, searchParams]);
 
   const plan = dynamicPlan || (type === 'pro'
-    ? { name: 'Pass carriey PRO', price: 1500, currency: 'F CFA', desc: 'Accès illimité à tous les modèles et à l\'IA.' }
-    : { name: 'Achat Unique', price: 2000, currency: 'F CFA', desc: 'Débloquez votre modèle de CV à vie.' });
+    ? { name: 'Chargement...', price: 0, currency: '', desc: '' }
+    : { name: 'Chargement...', price: 0, currency: '', desc: '' });
 
   useEffect(() => {
     if (status === 'unauthenticated') {

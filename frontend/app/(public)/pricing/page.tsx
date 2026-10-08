@@ -4,8 +4,14 @@ import Link from 'next/link';
 import { CheckCircle2 } from 'lucide-react';
 import Navbar from '@/components/public/Navbar';
 import Footer from '@/components/public/Footer';
+import { usePlans } from '@/lib/hooks/usePlans';
 
 export default function TarifsPage() {
+  const { getPlanByCode, loading } = usePlans();
+  const freePlan = getPlanByCode('free');
+  const proPlan = getPlanByCode('pro_14');
+  const singlePlan = getPlanByCode('single');
+
   return (
     <div className="min-h-screen bg-[#FDFDFD] font-sans selection:bg-indigo-200 flex flex-col">
       {/* Decorative Header Background */}
@@ -25,13 +31,17 @@ export default function TarifsPage() {
 
       <main className="pb-24 -mt-12 relative z-20 flex-1">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          {loading ? (
+            <div className="flex justify-center items-center py-20">
+              <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {/* Gratuit */}
             <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-200 flex flex-col hover:shadow-md transition-shadow">
               <h3 className="text-xl font-bold text-gray-900 mb-2">Gratuit</h3>
               <p className="text-sm text-gray-500 mb-6 font-medium">Les bases pour centraliser votre parcours.</p>
-              <div className="text-3xl font-bold text-gray-900 mb-8">0 XOF</div>
+              <div className="text-3xl font-bold text-gray-900 mb-8">{freePlan ? `${freePlan.price} ${freePlan.currency}` : '0 XOF'}</div>
               <ul className="space-y-4 mb-8 flex-1">
                 {['Profil professionnel central', 'CV et Lettres (thèmes de base)', 'Analyse d\'offre', 'Générations limitées'].map((f, i) => (
                   <li key={i} className="flex items-center gap-3 text-sm font-relative text-gray-700">
@@ -52,7 +62,7 @@ export default function TarifsPage() {
               <h3 className="text-xl font-bold text-white mb-2">Carriey PRO</h3>
               <p className="text-sm text-indigo-200 mb-6 font-medium">L'outil ultime pour multiplier vos candidatures.</p>
               <div className="text-3xl font-bold text-white mb-8">
-                3 500 XOF<span className="text-base font-medium text-indigo-200">/mois</span>
+                {proPlan ? `${proPlan.price} ${proPlan.currency}` : '1 500 XOF'}<span className="text-base font-medium text-indigo-200">/{proPlan?.duration_days} jours</span>
               </div>
               <ul className="space-y-4 mb-8 flex-1">
                 {['Tout du plan Gratuit', 'Tous les modèles premium', 'IA : Adaptation experte aux offres', 'Export PDF Haute Qualité', 'Profil public (Bientôt)'].map((f, i) => (
@@ -71,7 +81,7 @@ export default function TarifsPage() {
               <h3 className="text-xl font-bold text-gray-900 mb-2">Achat unique</h3>
               <p className="text-sm text-gray-500 mb-6 font-medium">Pour un besoin ponctuel et précis.</p>
               <div className="text-3xl font-bold text-gray-900 mb-8">
-                Dès 900 XOF<span className="text-base font-medium text-gray-400">/modèle</span>
+                Dès {singlePlan ? `${singlePlan.price} ${singlePlan.currency}` : '2000 XOF'}<span className="text-base font-medium text-gray-400">/modèle</span>
               </div>
               <ul className="space-y-4 mb-8 flex-1">
                 {['Débloque ce modèle à vie', 'Génération IA de base (lettre incluse)', 'Export PDF illimité', 'Profil professionnel central'].map((f, i) => (
@@ -84,7 +94,8 @@ export default function TarifsPage() {
                 Voir les modèles
               </Link>
             </div>
-          </div>
+            </div>
+          )}
         </div>
       </main>
     </div>

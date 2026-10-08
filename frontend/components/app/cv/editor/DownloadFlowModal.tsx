@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import { PaymentFactory } from '@/lib/payments/factory'
 import { toast } from 'react-hot-toast'
 import config from '@/lib/config'
+import { usePlans } from '@/lib/hooks/usePlans'
 
 interface DownloadFlowModalProps {
   isOpen: boolean
@@ -55,6 +56,9 @@ export default function DownloadFlowModal({ isOpen, onClose, onSuccess, template
   const [step, setStep] = useState<ModalStep>('identity')
   const [email, setEmail] = useState('')
   const [name, setName] = useState('')
+  
+  const { getPlanByCode } = usePlans()
+  const proPlan = getPlanByCode('pro_14')
 
   // Pré-remplir les données si l'utilisateur est connecté
   useEffect(() => {
@@ -241,8 +245,7 @@ export default function DownloadFlowModal({ isOpen, onClose, onSuccess, template
                       <h3 className="font-bold text-brand-text text-lg italic">Pass Elite 14 Jours</h3>
                       <p className="text-brand-muted text-xs font-medium">Testez ce modèle pendant 14 jours. Téléchargements illimités pendant la période.</p>
                       <div className="flex items-baseline gap-1 mt-2">
-                        <span className="text-2xl font-bold text-brand-text">300 F</span>
-                        <span className="text-brand-muted text-xs font-bold uppercase">CFA</span>
+                        <span className="text-2xl font-bold text-brand-text">{proPlan ? proPlan.price : 1500} {proPlan?.currency || 'F CFA'}</span>
                       </div>
                     </div>
                   </div>
@@ -263,8 +266,7 @@ export default function DownloadFlowModal({ isOpen, onClose, onSuccess, template
                       <h3 className="font-bold text-gray-600 uppercase tracking-tight">Achat unique</h3>
                       <p className="text-brand-muted text-xs font-medium">Accès permanent à ce modèle. Téléchargements illimités, sans limite de temps.</p>
                       <div className="flex items-baseline gap-1 mt-2">
-                        <span className="text-xl font-bold text-gray-600">{templatePrice} F</span>
-                        <span className="text-brand-muted text-xs font-bold uppercase">CFA</span>
+                        <span className="text-xl font-bold text-gray-600">{templatePrice} F CFA</span>
                       </div>
                     </div>
                   </div>
