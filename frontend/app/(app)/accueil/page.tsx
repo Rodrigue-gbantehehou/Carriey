@@ -7,7 +7,6 @@ import { useProfileStore } from '@/store/profile';
 import { useCvStore } from '@/store/cv';
 import { useUiStore } from '@/store/ui';
 import { FileText, Plus, Target, User, Briefcase, TrendingUp, ChevronRight, Award, Clock, Sparkles, X } from 'lucide-react';
-import { AIAssistant } from '@/components/app/shared/AIAssistant';
 import { PaywallModal } from '@/components/app/shared/PaywallModal';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -31,7 +30,6 @@ export default function AccueilPage() {
   const { data: session } = useSession();
   const { profile, setProfile, setLoading } = useProfileStore();
   const { cvs } = useCvStore();
-  const { openCreateModal } = useUiStore();
   const [about, setAbout] = useState('');
   const [mounted, setMounted] = useState(false);
   const router = useRouter();

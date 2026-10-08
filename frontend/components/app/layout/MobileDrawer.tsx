@@ -119,6 +119,16 @@ export default function MobileDrawer({ open, onClose }: MobileDrawerProps) {
           })}
         </nav>
 
+        {/* Main CTA */}
+        <div className="px-4 py-4 border-t border-gray-100 bg-gray-50/50">
+          <Link 
+            href="/candidatures/nouvelle"
+            className="flex items-center justify-center w-full gap-2 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md shadow-indigo-600/20 transition-all text-sm uppercase tracking-wide"
+          >
+            Nouvelle candidature
+          </Link>
+        </div>
+
         {/* Bottom: settings + user */}
         <div className="border-t border-gray-100 px-3 py-3 space-y-0.5">
           <Link

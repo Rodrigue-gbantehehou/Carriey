@@ -1,5 +1,6 @@
 'use client';
 import config from '@/lib/config';
+import Link from 'next/link';
 
 import { useCvStore } from '@/store/cv';
 import { useUiStore } from '@/store/ui';
@@ -14,7 +15,6 @@ import { cvApi } from '@/lib/cv-api';
 import { publicPagesApi } from '@/lib/public-pages-api';
 import { PublicPage } from '@/types/public-page';
 import { PageCard } from '@/components/app/public-page/shared/PageCard';
-import { AIAssistant } from '@/components/app/shared/AIAssistant';
 import { PaywallModal } from '@/components/app/shared/PaywallModal';
 
 const TABS = [
@@ -32,7 +32,6 @@ function MesDocumentsContent() {
   const searchParams = useSearchParams();
   const { data: session } = useSession();
   const { cvs, setCvs, removeCv, setLoading, loading } = useCvStore();
-  const { openCreateModal } = useUiStore();
   const [activeTab, setActiveTab] = useState('all');
   const [mounted, setMounted] = useState(false);
 
@@ -40,8 +39,6 @@ function MesDocumentsContent() {
   const [dbThemes, setDbThemes] = useState<any[]>([]);
   const [confirmDeletePage, setConfirmDeletePage] = useState<PublicPage | null>(null);
 
-  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
-  const [isCreatingTailoredCv, setIsCreatingTailoredCv] = useState(false);
   const [showProPaywall, setShowProPaywall] = useState(false);
 
   // Vérifier s'il faut ouvrir l'éditeur de page via URL
@@ -75,28 +72,6 @@ function MesDocumentsContent() {
     };
     fetchData();
   }, [session, setCvs, setLoading]);
-
-  const handleAiSubmit = async (jobDescription: string) => {
-    if (!session?.user?.accessToken) return;
-    setIsAiModalOpen(false);
-    setIsCreatingTailoredCv(true);
-
-    try {
-      const { createTailoredCv } = await import('@/lib/cv-adaptation-service');
-      const newCv = await createTailoredCv(session.user.accessToken, jobDescription);
-      router.push(`/mes-documents/cv/${newCv.id}`);
-    } catch (err: any) {
-      console.error(err);
-      // 403 = fonctionnalité PRO → ouvrir le PaywallModal
-      if (err?.message?.startsWith('403')) {
-        setShowProPaywall(true);
-      } else {
-        alert("Erreur lors de la création du CV ciblé.");
-      }
-    } finally {
-      setIsCreatingTailoredCv(false);
-    }
-  };
 
   // CV Handlers
   const handleDeleteCv = async (e: React.MouseEvent, id: string) => {
@@ -157,25 +132,13 @@ function MesDocumentsContent() {
           </p>
         </div>
         <div className="flex gap-3">
-          <button
-            onClick={() => setIsAiModalOpen(true)}
-            disabled={isCreatingTailoredCv}
-            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-indigo-200 text-indigo-700 rounded-xl font-bold text-sm hover:bg-indigo-50 transition-all shadow-sm hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70"
-          >
-            {isCreatingTailoredCv ? (
-              <div className="w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <Sparkles className="w-4 h-4" />
-            )}
-            CV ciblé (IA)
-          </button>
-          <button
-            onClick={openCreateModal}
+          <Link
+            href="/candidatures/nouvelle"
             className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20 hover:scale-[1.02] active:scale-[0.98]"
           >
             <Plus className="w-4 h-4" />
-            Créer un document
-          </button>
+            Nouvelle candidature
+          </Link>
         </div>
       </div>
 
@@ -221,13 +184,13 @@ function MesDocumentsContent() {
               : "Cette fonctionnalité arrive très bientôt dans une prochaine mise à jour de carriey."}
           </p>
           {(activeTab === 'all' || activeTab === 'cv' || activeTab === 'pages' || activeTab === 'lettres') && (
-            <button
-              onClick={openCreateModal}
+            <Link
+              href="/candidatures/nouvelle"
               className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl font-semibold text-sm hover:bg-gray-50 transition-colors shadow-sm"
             >
               <Plus className="w-4 h-4" />
-              Créer mon premier document
-            </button>
+              Nouvelle candidature
+            </Link>
           )}
         </div>
       ) : (
@@ -395,31 +358,6 @@ function MesDocumentsContent() {
         </div>
       )}
 
-      {/* AIAssistant Modal */}
-      {isAiModalOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-md transition-opacity" onClick={() => setIsAiModalOpen(false)} />
-          <div className="relative bg-white/95 backdrop-blur-2xl border border-white/20 rounded-3xl p-6 w-full max-w-2xl shadow-2xl animate-slide-up">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-indigo-600" />
-                Créer un CV ciblé
-              </h3>
-              <button onClick={() => setIsAiModalOpen(false)} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <p className="text-sm text-gray-500 mb-6">
-              Collez l'annonce ou la description de l'offre d'emploi ci-dessous. L'IA va analyser votre Master Profile, générer une accroche et adapter vos expériences.
-            </p>
-            <AIAssistant
-              onGenerate={handleAiSubmit}
-              placeholder="Ex: Développeur React avec 5 ans d'expérience..."
-              buttonText="Générer mon CV sur-mesure"
-            />
-          </div>
-        </div>
-      )}
     </div>
   );
 }
