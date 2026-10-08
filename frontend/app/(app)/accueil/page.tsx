@@ -224,7 +224,7 @@ export default function AccueilPage() {
         <div className="space-y-3">
           {recentDocs.length > 0 ? (
             recentDocs.map((doc) => (
-              <div key={doc.id} className="group flex items-center gap-4 p-4 bg-white/60 backdrop-blur-md rounded-2xl border border-gray-200/60 shadow-sm hover:shadow-lg hover:border-indigo-100 hover:-translate-y-0.5 transition-all duration-300 cursor-pointer">
+              <Link href={`/mes-documents/cv/${doc.id}`} key={doc.id} className="group flex items-center gap-4 p-4 bg-white/60 backdrop-blur-md rounded-2xl border border-gray-200/60 shadow-sm hover:shadow-lg hover:border-indigo-100 hover:-translate-y-0.5 transition-all duration-300 cursor-pointer">
                 <div className="w-12 h-12 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center flex-shrink-0 group-hover:bg-indigo-50 transition-colors">
                   <FileText className="w-5 h-5 text-gray-400 group-hover:text-indigo-500 transition-colors" />
                 </div>
@@ -238,7 +238,7 @@ export default function AccueilPage() {
                   </div>
                 </div>
                 <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-indigo-500 transition-colors mr-1" />
-              </div>
+              </Link>
             ))
           ) : (
             <div className="flex flex-col items-center justify-center p-6 bg-gray-50 rounded-xl border border-dashed border-gray-200">
