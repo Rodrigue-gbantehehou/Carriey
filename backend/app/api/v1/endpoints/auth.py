@@ -89,7 +89,8 @@ async def login_for_access_token(
     # Créer un token d'accès
     access_token_expires = timedelta(minutes=utils.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = utils.create_access_token(
-        data={"sub": user.email}, expires_delta=access_token_expires
+        data={"sub": user.email, "token_version": user.token_version}, 
+        expires_delta=access_token_expires
     )
 
     # Log audit
@@ -163,7 +164,7 @@ async def forgot_password(request: Request, req: ForgotPasswordRequest, backgrou
     
     if user:
         reset_token = utils.create_access_token(
-            data={"sub": user.email, "purpose": "reset_password"},
+            data={"sub": user.email, "purpose": "reset_password", "token_version": user.token_version},
             expires_delta=timedelta(hours=1)
         )
         frontend_url = os.getenv("FRONTEND_URL")
@@ -192,7 +193,7 @@ async def magic_link(request: Request, req: ForgotPasswordRequest, background_ta
     
     if user:
         reset_token = utils.create_access_token(
-            data={"sub": user.email, "purpose": "reset_password"},
+            data={"sub": user.email, "purpose": "reset_password", "token_version": user.token_version},
             expires_delta=timedelta(hours=24)
         )
         frontend_url = os.getenv("FRONTEND_URL")
@@ -231,6 +232,8 @@ async def reset_password(req: ResetPasswordRequest, db: Session = Depends(get_db
             raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
             
         user.hashed_password = utils.get_password_hash(req.new_password)
+        # Invalider tous les anciens tokens
+        user.token_version = (user.token_version or 1) + 1
         db.commit()
         
         log_audit(db, user.id, "reset_password", "user", user.id, {})
@@ -252,6 +255,8 @@ async def change_password(
         raise HTTPException(status_code=400, detail="Mot de passe actuel incorrect")
     
     current_user.hashed_password = utils.get_password_hash(req.new_password)
+    # Invalider tous les anciens tokens (déconnexion de tous les autres appareils)
+    current_user.token_version = (current_user.token_version or 1) + 1
     db.commit()
     
     log_audit(db, current_user.id, "change_password", "user", current_user.id, {})

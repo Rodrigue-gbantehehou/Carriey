@@ -42,6 +42,15 @@ async def get_current_user(
     if user is None:
         raise credentials_exception
         
+    # Vérifier la version du token (révocation)
+    token_version = payload.get("token_version", 1)
+    if user.token_version and user.token_version != token_version:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Session expirée, veuillez vous reconnecter",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+        
     return user
 
 from fastapi import Depends, HTTPException, status, Request
@@ -68,7 +77,16 @@ async def get_optional_user(
         email: Optional[str] = payload.get("sub")
         if email is None:
             return None
-        return db.query(User).filter(User.email == email).first()
+        user = db.query(User).filter(User.email == email).first()
+        if user is None:
+            return None
+            
+        # Verify token_version (révocation)
+        token_version = payload.get("token_version", 1)
+        if user.token_version and user.token_version != token_version:
+            return None
+            
+        return user
     except Exception:
         return None
 

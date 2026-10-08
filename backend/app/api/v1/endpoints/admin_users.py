@@ -198,6 +198,7 @@ async def admin_reset_password(
         raise HTTPException(status_code=400, detail="Le mot de passe doit faire au moins 6 caracteres")
     from app.core.security import get_password_hash
     user.hashed_password = get_password_hash(req.new_password)
+    user.token_version = (user.token_version or 1) + 1
     db.commit()
     log_audit(db, admin.id, "admin_reset_password", "user", user.id, {"user_email": user.email})
     return {"message": f"Mot de passe de {user.email} reinitialise"}
