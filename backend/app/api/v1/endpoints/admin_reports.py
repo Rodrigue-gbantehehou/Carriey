@@ -242,6 +242,42 @@ async def get_ai_stats(
         else:
             free_cost += cost
 
+    # Breakdown par modèle
+    models_breakdown_query = db.query(
+        AILog.model_name,
+        func.count(AILog.id).label("operations"),
+        func.sum(AILog.cost_usd).label("cost"),
+        func.sum(AILog.prompt_tokens).label("prompt_tokens"),
+        func.sum(AILog.completion_tokens).label("completion_tokens")
+    ).group_by(AILog.model_name).all()
+
+    models_breakdown = [
+        {
+            "model_name": row.model_name,
+            "operations": row.operations,
+            "cost_usd": float(row.cost),
+            "prompt_tokens": int(row.prompt_tokens),
+            "completion_tokens": int(row.completion_tokens),
+        }
+        for row in models_breakdown_query
+    ]
+
+    # Breakdown par opération
+    operations_breakdown_query = db.query(
+        AILog.operation_type,
+        func.count(AILog.id).label("operations"),
+        func.sum(AILog.cost_usd).label("cost")
+    ).group_by(AILog.operation_type).all()
+
+    operations_breakdown = [
+        {
+            "operation_type": row.operation_type,
+            "operations": row.operations,
+            "cost_usd": float(row.cost)
+        }
+        for row in operations_breakdown_query
+    ]
+
     return {
         "total_operations": total_operations,
         "total_cost_usd": float(total_cost),
@@ -251,4 +287,6 @@ async def get_ai_stats(
         "avg_cost_per_user_usd": float(avg_cost_per_user),
         "free_users_cost_usd": float(free_cost),
         "paid_users_cost_usd": float(paid_cost),
+        "models_breakdown": models_breakdown,
+        "operations_breakdown": operations_breakdown,
     }

@@ -15,6 +15,18 @@ interface AIStats {
     avg_cost_per_user_usd: number
     free_users_cost_usd: number
     paid_users_cost_usd: number
+    models_breakdown: {
+        model_name: string
+        operations: number
+        cost_usd: number
+        prompt_tokens: number
+        completion_tokens: number
+    }[]
+    operations_breakdown: {
+        operation_type: string
+        operations: number
+        cost_usd: number
+    }[]
 }
 
 interface ReportStat {
@@ -170,6 +182,67 @@ export default function AdminReportsPage() {
                                     <span className="text-xs text-purple-700">Plans PRO</span>
                                     <span className="text-sm font-semibold text-purple-900">${aiStats.paid_users_cost_usd.toFixed(4)}</span>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Breakdown des Opérations & Modèles (Style Google Cloud) */}
+                    <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        {/* Répartition par Modèle */}
+                        <div>
+                            <h3 className="text-sm font-semibold text-gray-800 mb-3 uppercase tracking-wider">Coûts par Modèle</h3>
+                            <div className="overflow-hidden rounded-md border border-gray-200">
+                                <table className="w-full text-left text-sm">
+                                    <thead className="bg-gray-50">
+                                        <tr>
+                                            <th className="px-4 py-2 font-medium text-gray-500">Modèle</th>
+                                            <th className="px-4 py-2 font-medium text-gray-500 text-right">Requêtes</th>
+                                            <th className="px-4 py-2 font-medium text-gray-500 text-right">Tokens</th>
+                                            <th className="px-4 py-2 font-medium text-gray-500 text-right">Coût ($)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-100 bg-white">
+                                        {aiStats.models_breakdown?.map((item) => (
+                                            <tr key={item.model_name}>
+                                                <td className="px-4 py-3 font-medium text-gray-900">{item.model_name}</td>
+                                                <td className="px-4 py-3 text-right text-gray-600">{item.operations.toLocaleString()}</td>
+                                                <td className="px-4 py-3 text-right text-gray-500 text-xs">
+                                                    {(item.prompt_tokens + item.completion_tokens).toLocaleString()}
+                                                </td>
+                                                <td className="px-4 py-3 text-right font-semibold text-gray-900">
+                                                    {item.cost_usd.toFixed(4)}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        {/* Répartition par Type d'Opération */}
+                        <div>
+                            <h3 className="text-sm font-semibold text-gray-800 mb-3 uppercase tracking-wider">Coûts par Type d'Opération</h3>
+                            <div className="overflow-hidden rounded-md border border-gray-200">
+                                <table className="w-full text-left text-sm">
+                                    <thead className="bg-gray-50">
+                                        <tr>
+                                            <th className="px-4 py-2 font-medium text-gray-500">Service / Action</th>
+                                            <th className="px-4 py-2 font-medium text-gray-500 text-right">Requêtes</th>
+                                            <th className="px-4 py-2 font-medium text-gray-500 text-right">Coût ($)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-100 bg-white">
+                                        {aiStats.operations_breakdown?.map((item) => (
+                                            <tr key={item.operation_type}>
+                                                <td className="px-4 py-3 font-medium text-gray-900 capitalize">{item.operation_type.replace(/_/g, ' ')}</td>
+                                                <td className="px-4 py-3 text-right text-gray-600">{item.operations.toLocaleString()}</td>
+                                                <td className="px-4 py-3 text-right font-semibold text-gray-900">
+                                                    {item.cost_usd.toFixed(4)}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
