@@ -73,6 +73,7 @@ export default function RegisterForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [acceptTerms, setAcceptTerms] = useState(false);
   const [animating, setAnimating] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -110,6 +111,10 @@ export default function RegisterForm() {
     }
     if (password !== confirmPassword) {
       setError('Les mots de passe ne correspondent pas.');
+      return false;
+    }
+    if (!acceptTerms) {
+      setError('Vous devez accepter les conditions générales et la politique de confidentialité.');
       return false;
     }
     return true;
@@ -293,6 +298,20 @@ export default function RegisterForm() {
                       <Check className="w-3 h-3" /> Les mots de passe correspondent.
                     </p>
                   )}
+                </div>
+
+                <div className="flex items-start gap-2 pt-2">
+                  <input
+                    id="accept-terms"
+                    name="accept-terms"
+                    type="checkbox"
+                    checked={acceptTerms}
+                    onChange={(e) => setAcceptTerms(e.target.checked)}
+                    className="mt-1 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600 cursor-pointer"
+                  />
+                  <label htmlFor="accept-terms" className="text-xs text-gray-500 cursor-pointer">
+                    J'accepte les <Link href="/legal/cgu" className="text-indigo-600 hover:underline">Conditions Générales d'Utilisation</Link> et la <Link href="/legal/privacy" className="text-indigo-600 hover:underline">Politique de confidentialité</Link>.
+                  </label>
                 </div>
 
                 <div className="flex gap-3 pt-1">

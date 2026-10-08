@@ -59,6 +59,13 @@ export default function Footer() {
           <p className="text-gray-400 text-sm font-medium">
             © {new Date().getFullYear()} {config.appName}
           </p>
+          <div className="flex flex-wrap gap-4 text-sm text-gray-500 font-medium justify-center">
+            <Link href="/legal/cgu" className="hover:text-indigo-600 transition-colors">CGU</Link>
+            <Link href="/legal/privacy" className="hover:text-indigo-600 transition-colors">Confidentialité</Link>
+            <Link href="/legal/mentions-legales" className="hover:text-indigo-600 transition-colors">Mentions Légales</Link>
+            <Link href="/legal/data-retention" className="hover:text-indigo-600 transition-colors">Conservation</Link>
+            <Link href="/legal/data-deletion" className="hover:text-indigo-600 transition-colors">Suppression</Link>
+          </div>
         </div>
       </div>
     </footer>
