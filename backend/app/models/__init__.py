@@ -9,3 +9,4 @@ from .profile import MasterProfile, Experience, Education, Skill, Project, Certi
 from .candidature import Candidature
 from .ai_log import AILog
 from .system_config import SystemConfig
+from .contact import ContactMessage

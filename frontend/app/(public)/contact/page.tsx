@@ -5,18 +5,42 @@ import Footer from '@/components/public/Footer';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
+import config from '@/lib/config';
+
 export default function ContactPage() {
   const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    subject: '',
+    message: '',
+    honeypot: '',
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // Simuler un envoi
-    setTimeout(() => {
-      setLoading(false);
+    
+    try {
+      const res = await fetch(`${config.apiBaseUrl}/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.detail || 'Erreur lors de l\'envoi du message');
+      }
+      
       toast.success('Message envoyé avec succès ! Notre équipe vous répondra sous 24h.');
+      setFormData({ name: '', email: '', subject: '', message: '', honeypot: '' });
       (e.target as HTMLFormElement).reset();
-    }, 1500);
+    } catch (err: any) {
+      toast.error(err.message || 'Une erreur est survenue.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -79,6 +103,8 @@ export default function ContactPage() {
                   <input
                     required
                     type="text"
+                    value={formData.name}
+                    onChange={e => setFormData({...formData, name: e.target.value})}
                     placeholder="Jean Kouassi"
                     className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:border-indigo-600 focus:bg-white transition-all font-medium text-gray-900"
                   />
@@ -88,10 +114,23 @@ export default function ContactPage() {
                   <input
                     required
                     type="email"
+                    value={formData.email}
+                    onChange={e => setFormData({...formData, email: e.target.value})}
                     placeholder="jean@exemple.ci"
                     className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:border-indigo-600 focus:bg-white transition-all font-medium text-gray-900"
                   />
                 </div>
+              </div>
+
+              {/* Anti-spam Honeypot */}
+              <div style={{ display: 'none' }} aria-hidden="true">
+                <label>Ne pas remplir ce champ si vous êtes humain :</label>
+                <input
+                  type="text"
+                  tabIndex={-1}
+                  value={formData.honeypot}
+                  onChange={e => setFormData({...formData, honeypot: e.target.value})}
+                />
               </div>
 
               <div className="space-y-2">
@@ -99,6 +138,8 @@ export default function ContactPage() {
                 <input
                   required
                   type="text"
+                  value={formData.subject}
+                  onChange={e => setFormData({...formData, subject: e.target.value})}
                   placeholder="Comment adapter mon profil pour..."
                   className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:border-indigo-600 focus:bg-white transition-all font-medium text-gray-900"
                 />
@@ -109,6 +150,8 @@ export default function ContactPage() {
                 <textarea
                   required
                   rows={5}
+                  value={formData.message}
+                  onChange={e => setFormData({...formData, message: e.target.value})}
                   placeholder="Dites-nous comment nous pouvons vous aider..."
                   className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:border-indigo-600 focus:bg-white transition-all font-medium text-gray-900 resize-none"
                 ></textarea>
