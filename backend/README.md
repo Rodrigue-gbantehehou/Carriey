@@ -1,4 +1,4 @@
-﻿# Carriey
+# Carriey
 
 **Carriey** est une application complète pour générer, éditer et exporter des CV à partir de modèles personnalisables, avec une interface web moderne et une API Python.
 
@@ -13,27 +13,25 @@
 
 ## Structure du projet
 
-- `api.py` : API FastAPI pour la génération/export des CV
-- `render_cv.py` : Génération HTML à partir d’un template et de données JSON
+- `app/main.py` : Point d'entrée de l'API FastAPI
+- `app/api/` : Routeurs et points d'accès de l'API
+- `app/models/` : Modèles de base de données SQLAlchemy
 - `generate_pdf_from_html.py` : Conversion HTML → PDF via Playwright
 - `export_docx.py` : Export DOCX à partir de données JSON
-- `data/` : Exemples de données de CV
-- `templates/` : Modèles de CV (Jinja2, JSON, CSS)
-- `frontend/` : Application web (Next.js/React, TailwindCSS)
+- `mail_templates/` : Modèles d'emails
 
 ## Installation
 
 ### Prérequis
 
 - Python 3.10+
-- Node.js 18+
 - [Playwright](https://playwright.dev/python/) (pour l’export PDF)
 
 ### Backend
 
 ```sh
 python -m pip install --upgrade pip
-pip install -r [requirements.txt](http://_vscodecontentref_/0)
+pip install -r requirements.txt
 python -m playwright install chromium
-uvicorn api:app --reload
+uvicorn app.main:app --reload
 ```

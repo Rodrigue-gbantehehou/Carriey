@@ -11,16 +11,29 @@ export default function LegalConsentWrapper({ children }: { children: React.Reac
   const { data: session, update, status } = useSession();
   const [isAccepting, setIsAccepting] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [currentLegalVersion, setCurrentLegalVersion] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === 'authenticated' && session?.user) {
-      const userVersion = session.user.accepted_terms_version || '1.0';
-      const currentVersion = config.legal.currentTermsVersion;
-      if (userVersion !== currentVersion) {
-        setShowModal(true);
-      } else {
-        setShowModal(false);
-      }
+      // Fetch the actual current version from backend
+      fetch(`${config.apiBaseUrl}/legal/version`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && data.version) {
+            setCurrentLegalVersion(data.version);
+            const userVersion = session.user.accepted_terms_version || '1.0';
+            if (userVersion !== data.version) {
+              setShowModal(true);
+            } else {
+              setShowModal(false);
+            }
+          }
+        })
+        .catch(() => {
+          // Fallback en cas d'erreur réseau
+          const userVersion = session.user.accepted_terms_version || '1.0';
+          if (userVersion !== config.legal.currentTermsVersion) setShowModal(true);
+        });
     }
   }, [session, status]);
 
@@ -34,7 +47,7 @@ export default function LegalConsentWrapper({ children }: { children: React.Reac
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.user.accessToken}`,
         },
-        body: JSON.stringify({ version: config.legal.currentTermsVersion }),
+        body: JSON.stringify({ version: currentLegalVersion || config.legal.currentTermsVersion }),
       });
 
       if (!res.ok) throw new Error('Erreur lors de l\'acceptation');
@@ -44,7 +57,7 @@ export default function LegalConsentWrapper({ children }: { children: React.Reac
         ...session,
         user: {
           ...session.user,
-          accepted_terms_version: config.legal.currentTermsVersion
+          accepted_terms_version: currentLegalVersion || config.legal.currentTermsVersion
         }
       });
       

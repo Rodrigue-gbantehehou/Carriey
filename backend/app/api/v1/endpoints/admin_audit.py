@@ -26,7 +26,7 @@ class AuditLogOut:
         class Config:
             from_attributes = True
 
-@router.get("/", response_model=List[dict])
+@router.get("", response_model=List[dict])
 async def list_audit_logs(
     skip: int = 0,
     limit: int = 100,

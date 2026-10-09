@@ -41,7 +41,7 @@ export default function CandidatureDetailPage({ params }: { params: { id: string
   const fetchCandidature = async () => {
     try {
       setLoading(true);
-      const data = await candidaturesApi.get(params.id);
+      const data = await candidaturesApi.get(params.id, session.user.accessToken);
       setApp(data);
       setStatus(data.status);
     } catch (err) {
@@ -66,7 +66,7 @@ export default function CandidatureDetailPage({ params }: { params: { id: string
       const updated = await candidaturesApi.update(app.id, {
         match_score: result.score,
         analysis_result: result
-      });
+      }, session.user.accessToken);
       setApp(updated);
       toast.success('Analyse terminée !');
     } catch (err) {
@@ -77,9 +77,9 @@ export default function CandidatureDetailPage({ params }: { params: { id: string
   };
 
   const updateStatus = async (newStatus: Status) => {
-    if (!app) return;
+    if (!app || !session?.user?.accessToken) return;
     try {
-      const updated = await candidaturesApi.update(app.id, { status: newStatus });
+      const updated = await candidaturesApi.update(app.id, { status: newStatus }, session.user.accessToken);
       setApp(updated);
       setStatus(newStatus);
       toast.success('Statut mis à jour');

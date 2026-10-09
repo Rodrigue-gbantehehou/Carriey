@@ -73,8 +73,8 @@ export default function ProjectsList() {
 
       {projects.length > 0 && (
         <div className="space-y-3">
-          {projects.map(project => (
-            <div key={project.id} className="group relative rounded-xl border border-gray-100 bg-white p-5 shadow-sm hover:border-gray-300 transition-all">
+          {projects.map((project, index) => (
+            <div key={project.id || `proj-${index}`} className="group relative rounded-xl border border-gray-100 bg-white p-5 shadow-sm hover:border-gray-300 transition-all">
               <div className="flex justify-between items-start gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
@@ -95,7 +95,7 @@ export default function ProjectsList() {
                   )}
                   
                   {project.description && (
-                    <p className="mt-3 text-sm text-gray-600 leading-relaxed bg-gray-50 p-3 rounded-lg border border-gray-100 line-clamp-3">
+                    <p className="mt-3 text-sm text-gray-600 leading-relaxed bg-gray-50 p-3 rounded-lg border border-gray-100 line-clamp-3 whitespace-pre-wrap">
                       {project.description}
                     </p>
                   )}

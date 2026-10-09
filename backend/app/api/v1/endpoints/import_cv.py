@@ -8,7 +8,7 @@ from app.models.user import User
 from app.services.ai import get_ai_service
 from app.services.ai_quota_service import check_and_consume_ai_quota, log_ai_usage
 from app.utils.audit import log_audit
-import pypdf
+import fitz  # PyMuPDF
 import io
 
 logger = logging.getLogger(__name__)
@@ -25,23 +25,24 @@ async def extract_profile_from_cv(
     Extrait les informations d'un CV PDF (Expériences, Formations, etc)
     et retourne un JSON pré-formaté pour le Master Profile.
     """
-    if file.content_type != "application/pdf":
-        raise HTTPException(status_code=400, detail="Seuls les fichiers PDF sont acceptés.")
+    if file.content_type not in ("application/pdf", "application/octet-stream", ""):
+        logger.warning(f"Unexpected content type: {file.content_type}")
+        # Relaxed check
 
     content = await file.read()
     if len(content) > 5 * 1024 * 1024:
         raise HTTPException(status_code=400, detail="Fichier trop volumineux (5 Mo max).")
 
     try:
-        pdf_reader = pypdf.PdfReader(io.BytesIO(content))
+        doc = fitz.open(stream=content, filetype="pdf")
         text = ""
-        for page in pdf_reader.pages:
-            text += page.extract_text() + "\n"
+        for page in doc:
+            text += page.get_text() + "\n"
     except Exception as e:
         logger.error(f"Error reading PDF: {e}")
         raise HTTPException(status_code=400, detail="Impossible de lire le contenu de ce PDF.")
 
-    if not text.strip() or len(text) < 100:
+    if not text.strip() or len(text) < 50:
         raise HTTPException(status_code=400, detail="Le PDF semble vide ou illisible.")
 
     # Vérification quota IA

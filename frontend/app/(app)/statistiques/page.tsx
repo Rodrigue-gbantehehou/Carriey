@@ -43,7 +43,7 @@ export default function StatistiquesPage() {
 
       try {
         // Fetch Candidatures
-        const candidatures = await candidaturesApi.list();
+        const candidatures = await candidaturesApi.list(session.user.accessToken);
 
         // Fetch Resumes & Letters
         const resDocs = await fetch(`${config.apiBaseUrl}/resumes/`, {

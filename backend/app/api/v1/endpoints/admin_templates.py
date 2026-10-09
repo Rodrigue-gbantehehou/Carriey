@@ -166,7 +166,7 @@ async def upload_template_preview(
         raise HTTPException(status_code=500, detail="Une erreur interne est survenue lors de l'upload.")
 
 
-@router.get("/", response_model=List[TemplateListOut])
+@router.get("", response_model=List[TemplateListOut])
 async def list_templates(
     skip: int = 0,
     limit: int = 100,
@@ -189,7 +189,7 @@ async def get_template(
         raise HTTPException(status_code=404, detail="Template non trouvé")
     return template
 
-@router.post("/", response_model=TemplateOut, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=TemplateOut, status_code=status.HTTP_201_CREATED)
 async def create_template(
     template_in: TemplateCreate,
     db: Session = Depends(get_db),

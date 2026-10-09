@@ -216,8 +216,8 @@ class MasterProfileBase(BaseModel):
     github_url: Optional[str] = Field(None, max_length=255)
     photo_url: Optional[str] = Field(None, max_length=1024) # Empêche les gros Base64
     visibility: Visibility = Visibility.PRIVATE
-    show_email: bool = False
-    show_phone: bool = False
+    show_email: Optional[bool] = False
+    show_phone: Optional[bool] = False
 
 class MasterProfileCreate(MasterProfileBase):
     pass

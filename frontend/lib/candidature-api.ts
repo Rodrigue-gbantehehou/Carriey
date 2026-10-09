@@ -1,42 +1,32 @@
 import config from './config';
-import { getSession } from 'next-auth/react';
 
 export const candidaturesApi = {
-  async list() {
-    const session = await getSession();
-    if (!session?.user?.accessToken) return [];
-
+  async list(token: string) {
     const res = await fetch(`${config.apiBaseUrl}/candidatures/`, {
       headers: {
-        'Authorization': `Bearer ${session.user.accessToken}`
+        'Authorization': `Bearer ${token}`
       }
     });
     if (!res.ok) throw new Error('Failed to fetch candidatures');
     return res.json();
   },
 
-  async get(id: string) {
-    const session = await getSession();
-    if (!session?.user?.accessToken) return null;
-
+  async get(id: string, token: string) {
     const res = await fetch(`${config.apiBaseUrl}/candidatures/${id}`, {
       headers: {
-        'Authorization': `Bearer ${session.user.accessToken}`
+        'Authorization': `Bearer ${token}`
       }
     });
     if (!res.ok) throw new Error('Failed to fetch candidature');
     return res.json();
   },
 
-  async create(data: any) {
-    const session = await getSession();
-    if (!session?.user?.accessToken) throw new Error("Unauthorized");
-
+  async create(data: any, token: string) {
     const res = await fetch(`${config.apiBaseUrl}/candidatures/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${session.user.accessToken}`
+        'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify(data)
     });
@@ -44,15 +34,12 @@ export const candidaturesApi = {
     return res.json();
   },
 
-  async update(id: string, data: any) {
-    const session = await getSession();
-    if (!session?.user?.accessToken) throw new Error("Unauthorized");
-
+  async update(id: string, data: any, token: string) {
     const res = await fetch(`${config.apiBaseUrl}/candidatures/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${session.user.accessToken}`
+        'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify(data)
     });
@@ -60,14 +47,11 @@ export const candidaturesApi = {
     return res.json();
   },
 
-  async delete(id: string) {
-    const session = await getSession();
-    if (!session?.user?.accessToken) throw new Error("Unauthorized");
-
+  async delete(id: string, token: string) {
     const res = await fetch(`${config.apiBaseUrl}/candidatures/${id}`, {
       method: 'DELETE',
       headers: {
-        'Authorization': `Bearer ${session.user.accessToken}`
+        'Authorization': `Bearer ${token}`
       }
     });
     if (!res.ok) throw new Error('Failed to delete candidature');

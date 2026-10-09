@@ -316,7 +316,7 @@ Structure JSON attendue (ne renvoie RIEN D'AUTRE que le JSON):
       "location": "Lieu",
       "start_date": "MM/YYYY (ou YYYY)",
       "end_date": "MM/YYYY (ou 'Présent')",
-      "description": "Description des missions (html autorisé : <ul><li>...</li></ul>)"
+      "description": "Description détaillée. Sépare chaque puce par un VRAI retour à la ligne (\\n). Commence chaque ligne par '- '."
     }}
   ],
   "educations": [
@@ -326,14 +326,14 @@ Structure JSON attendue (ne renvoie RIEN D'AUTRE que le JSON):
       "location": "Lieu",
       "start_date": "YYYY",
       "end_date": "YYYY",
-      "description": "Détails"
+      "description": "Détails (sépare chaque point par un VRAI retour à la ligne \\n)"
     }}
   ],
   "skills": ["Compétence 1", "Compétence 2", "Compétence 3"],
   "projects": [
     {{
       "title": "Nom du projet",
-      "description": "Courte description",
+      "description": "Courte description (utilise \\n pour sauter des lignes si besoin)",
       "link": "URL si présente"
     }}
   ],

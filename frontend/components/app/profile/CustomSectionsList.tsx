@@ -46,8 +46,8 @@ export function CustomSectionsList() {
 
   return (
     <div className="space-y-8">
-      {customSections.map(section => (
-        <div key={section.id} className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
+      {customSections.map((section, index) => (
+        <div key={section.id || `sec-${index}`} className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
           {/* Section Header */}
           <div className="bg-gray-50 border-b border-gray-200 px-5 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -66,14 +66,14 @@ export function CustomSectionsList() {
             {!section.items || section.items.length === 0 ? (
               <p className="text-sm text-gray-400 text-center py-4">Aucun élément dans cette section.</p>
             ) : (
-              section.items.map((item: any) => (
-                <div key={item.id} className="group relative border border-gray-100 rounded-xl p-4 hover:border-gray-300 transition-all">
+              section.items.map((item: any, i: number) => (
+                <div key={item.id || `item-${i}`} className="group relative border border-gray-100 rounded-xl p-4 hover:border-gray-300 transition-all">
                   <div className="flex justify-between items-start gap-4">
                     <div className="flex-1 min-w-0">
                       <h4 className="font-semibold text-gray-900 text-base">{item.title}</h4>
                       {item.subtitle && <p className="text-sm text-indigo-600 font-medium mt-0.5">{item.subtitle}</p>}
                       {item.date && <p className="text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded-md inline-block mt-2">{item.date}</p>}
-                      {item.description && <p className="text-sm text-gray-600 mt-2 leading-relaxed">{item.description}</p>}
+                      {item.description && <p className="text-sm text-gray-600 mt-2 leading-relaxed whitespace-pre-wrap">{item.description}</p>}
                     </div>
                     <button onClick={() => removeCustomSectionItem(section.id, item.id)} className="text-gray-300 hover:text-red-500 p-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Trash2 className="w-4 h-4" />

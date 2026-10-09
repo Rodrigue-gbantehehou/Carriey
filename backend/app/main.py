@@ -15,6 +15,18 @@ logger = get_logger("carriey")
 env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
 load_dotenv(env_path)
 
+import sentry_sdk
+
+if os.getenv("SENTRY_DSN"):
+    sentry_sdk.init(
+        dsn=os.getenv("SENTRY_DSN"),
+        send_default_pii=True,
+        enable_logs=True,
+        traces_sample_rate=1.0,
+        profile_session_sample_rate=1.0,
+        profile_lifecycle="trace",
+    )
+
 # Windows asyncio fix for Playwright
 if sys.platform == 'win32':
     try:
@@ -45,11 +57,6 @@ import app.models.public_page
 import app.models.candidature
 import app.models.subscription_plan
 
-# Créer les tables manquantes au démarrage (idempotent)
-try:
-    Base.metadata.create_all(bind=engine)
-except Exception as e:
-    print(f"[WARNING] create_all failed: {e}")
 
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -72,7 +79,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version="1.0.0",
-    description=f"API Backend for {settings.PROJECT_NAME} Flutter & Web",
+    description=f"API Backend for {settings.PROJECT_NAME} Web",
     docs_url="/docs",
     redoc_url="/redoc",
     lifespan=lifespan

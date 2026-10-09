@@ -23,7 +23,7 @@ export default function UsersAdmin() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await fetch(`${config.apiBaseUrl}/admin/users/`, {
+        const res = await fetch(`${config.apiBaseUrl}/admin/users`, {
           headers: {
             'Authorization': `Bearer ${session?.user?.accessToken}`
           }

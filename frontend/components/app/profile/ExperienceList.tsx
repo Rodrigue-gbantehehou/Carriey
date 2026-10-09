@@ -85,8 +85,8 @@ export default function ExperienceList() {
 
       {experiences.length > 0 && (
         <div className="space-y-3">
-          {experiences.map(exp => (
-            <div key={exp.id} className="group relative rounded-xl border border-gray-100 bg-white p-5 shadow-sm hover:border-gray-300 transition-all">
+          {experiences.map((exp, index) => (
+            <div key={exp.id || `exp-${index}`} className="group relative rounded-xl border border-gray-100 bg-white p-5 shadow-sm hover:border-gray-300 transition-all">
               <div className="flex justify-between items-start gap-4">
                 <div className="flex-1 min-w-0">
                   <h4 className="font-bold text-gray-900 text-base">{exp.title || 'Poste sans titre'}</h4>
@@ -109,7 +109,7 @@ export default function ExperienceList() {
                   </div>
                   
                   {exp.description && (
-                    <p className="mt-3 text-sm text-gray-600 leading-relaxed bg-gray-50 p-3 rounded-lg border border-gray-100 line-clamp-3">
+                    <p className="mt-3 text-sm text-gray-600 leading-relaxed bg-gray-50 p-3 rounded-lg border border-gray-100 line-clamp-3 whitespace-pre-wrap">
                       {exp.description}
                     </p>
                   )}

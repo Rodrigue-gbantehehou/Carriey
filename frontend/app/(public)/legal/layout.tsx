@@ -20,22 +20,6 @@ export default function LegalLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-100 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link href="/" className="flex items-center gap-2 group">
-              <Image src={config.appLogo} alt={config.appName} width={28} height={28} className="object-contain" />
-              <span className="text-lg font-bold text-gray-900">{config.appName}</span>
-            </Link>
-            <span className="hidden sm:inline-block w-px h-6 bg-gray-200"></span>
-            <span className="hidden sm:inline-block text-sm font-medium text-gray-500 uppercase tracking-widest">Legal Hub</span>
-          </div>
-          <Link href="/" className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors flex items-center gap-1.5">
-            <ArrowLeft className="w-4 h-4" /> Retour au site
-          </Link>
-        </div>
-      </header>
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">

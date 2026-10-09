@@ -10,6 +10,7 @@ from app.core.limiter import limiter
 from fastapi import Request
 from app.utils.audit import log_audit
 import logging
+import sentry_sdk
 
 logger = logging.getLogger(__name__)
 
@@ -82,6 +83,7 @@ async def generate_cover_letter_endpoint(
         )
     except Exception as e:
         logger.error(f"Erreur de génération IA : {str(e)}")
+        sentry_sdk.capture_exception(e)
         raise HTTPException(status_code=500, detail="La génération de la lettre a échoué.")
 
 @router.post("/generate-public-bio", response_model=PublicBioResponse)
@@ -116,6 +118,7 @@ async def generate_public_bio_endpoint(
         )
     except Exception as e:
         logger.error(f"Erreur de génération IA : {str(e)}")
+        sentry_sdk.capture_exception(e)
         raise HTTPException(status_code=500, detail="La génération de la bio a échoué.")
 
 class SlugSuggestionsResponse(BaseModel):
@@ -155,6 +158,7 @@ async def generate_slug_suggestions_endpoint(
         raise HTTPException(status_code=500, detail="La génération des slugs a échoué.")
     except Exception as e:
         logger.error(f"Erreur de génération IA : {str(e)}")
+        sentry_sdk.capture_exception(e)
         raise HTTPException(status_code=500, detail="La génération des slugs a échoué.")
 
 class TailorCvRequest(BaseModel):
@@ -208,6 +212,7 @@ async def tailor_cv_endpoint(
         raise HTTPException(status_code=500, detail="L'adaptation du CV a échoué.")
     except Exception as e:
         logger.error(f"Erreur de génération IA : {str(e)}")
+        sentry_sdk.capture_exception(e)
         raise HTTPException(status_code=500, detail="L'adaptation du CV a échoué.")
 
 class ExtractJobRequest(BaseModel):
@@ -244,6 +249,7 @@ async def extract_job_endpoint(
         raise HTTPException(status_code=500, detail="L'extraction des détails a échoué.")
     except Exception as e:
         logger.error(f"Erreur de génération IA : {str(e)}")
+        sentry_sdk.capture_exception(e)
         raise HTTPException(status_code=500, detail="L'extraction des détails a échoué.")
 
 
@@ -294,6 +300,7 @@ async def analyze_fit_endpoint(
         raise HTTPException(status_code=500, detail="L'analyse de compatibilité a échoué.")
     except Exception as e:
         logger.error(f"Erreur analyze-fit : {str(e)}")
+        sentry_sdk.capture_exception(e)
         raise HTTPException(status_code=500, detail="L'analyse de compatibilité a échoué.")
 
 
@@ -360,4 +367,5 @@ async def generate_letter_endpoint(
         raise HTTPException(status_code=500, detail="La génération de la lettre a échoué.")
     except Exception as e:
         logger.error(f"Erreur generate-letter : {str(e)}")
+        sentry_sdk.capture_exception(e)
         raise HTTPException(status_code=500, detail="La génération de la lettre a échoué.")

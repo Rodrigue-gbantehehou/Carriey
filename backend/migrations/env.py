@@ -25,6 +25,11 @@ import app.models.audit             # noqa: F401
 import app.models.public_page       # noqa: F401
 import app.models.candidature       # noqa: F401
 import app.models.subscription_plan # noqa: F401
+import app.models.ai_log
+import app.models.contact
+import app.models.export
+import app.models.system_config
+import app.models.user_template_access
 
 
 # this is the Alembic Config object, which provides

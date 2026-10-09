@@ -18,7 +18,7 @@ class SystemConfigOut(BaseModel):
 class SystemConfigUpdate(BaseModel):
     value: str
 
-@router.get("/", response_model=List[SystemConfigOut])
+@router.get("", response_model=List[SystemConfigOut])
 def get_all_configs(
     db: Session = Depends(get_db),
     admin: User = Depends(get_current_admin)

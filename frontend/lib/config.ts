@@ -8,7 +8,7 @@ export const config = {
   backendUrl: process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000',
   
   // URL de base de l'API (ex: http://localhost:8000/api ou /api)
-  apiBaseUrl: process.env.NEXT_PUBLIC_API_URL || '/api',
+  apiBaseUrl: typeof window !== 'undefined' ? '/api' : (process.env.NEXT_PUBLIC_API_URL || '/api'),
   
   // URL pour les fichiers statiques du backend (ex: http://localhost:8000/static)
   staticBaseUrl: (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000') + '/static',

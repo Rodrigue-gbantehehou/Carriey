@@ -9,6 +9,7 @@ export const profileApi = {
   getProfile: async (token: string) => {
     const res = await fetch(`${API_BASE}/profile/me`, { headers: getHeaders(token) });
     if (res.status === 404) return null;
+    if (res.status === 401) throw new Error("Unauthorized");
     if (!res.ok) throw new Error("Failed to fetch profile");
     return res.json();
   },

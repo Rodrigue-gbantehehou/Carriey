@@ -2,7 +2,7 @@
 import config from '@/lib/config';
 
 import { useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import { useProfileStore } from '@/store/profile';
 import ExperienceList from '@/components/app/profile/ExperienceList';
 import EducationList from '@/components/app/profile/EducationList';
@@ -14,7 +14,6 @@ import Link from 'next/link';
 import PersonalInfoForm from '@/components/app/profile/PersonalInfoForm';
 import AboutMeForm from '@/components/app/profile/AboutMeForm';
 import { getPhotoUrl } from '@/lib/photo-url';
-import ImportCvModal from '@/components/app/profile/ImportCvModal';
 
 import {
   User, FileText, Briefcase, GraduationCap, Wrench,
@@ -30,7 +29,6 @@ export default function ProfilPage() {
   
   const [isEditingPersonal, setIsEditingPersonal] = useState(false);
   const [isEditingAbout, setIsEditingAbout] = useState(false);
-  const [isImportOpen, setIsImportOpen] = useState(false);
   
   const [photoUploading, setPhotoUploading] = useState(false);
   const [localPhotoPreview, setLocalPhotoPreview] = useState<string | null>(null);
@@ -46,8 +44,11 @@ export default function ProfilPage() {
           if (data) {
             setProfile(data);
           }
-        } catch (err) {
+        } catch (err: any) {
           console.error("Error fetching profile", err);
+          if (err.message === 'Unauthorized') {
+            signOut({ callbackUrl: '/login' });
+          }
         } finally {
           setLoading(false);
         }
@@ -123,36 +124,6 @@ export default function ProfilPage() {
     }
   };
 
-  const handleApplyImport = async (data: any) => {
-    try {
-      const mergedProfile = { ...profile };
-
-      if (!mergedProfile.title && data.title) mergedProfile.title = data.title;
-      if (!mergedProfile.bio && data.bio) mergedProfile.bio = data.bio;
-
-      if (data.experiences && Array.isArray(data.experiences)) {
-        mergedProfile.experiences = [...(mergedProfile.experiences || []), ...data.experiences];
-      }
-      if (data.educations && Array.isArray(data.educations)) {
-        mergedProfile.educations = [...(mergedProfile.educations || []), ...data.educations];
-      }
-      if (data.skills && Array.isArray(data.skills)) {
-        mergedProfile.skills = Array.from(new Set([...(mergedProfile.skills || []), ...data.skills]));
-      }
-      if (data.projects && Array.isArray(data.projects)) {
-        mergedProfile.projects = [...(mergedProfile.projects || []), ...data.projects];
-      }
-      if (data.certifications && Array.isArray(data.certifications)) {
-        mergedProfile.certifications = [...(mergedProfile.certifications || []), ...data.certifications];
-      }
-
-      await updateProfile(mergedProfile);
-      alert('Profil mis à jour avec succès depuis le CV !');
-    } catch (err) {
-      alert('Erreur lors de la mise à jour du profil.');
-      console.error(err);
-    }
-  };
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-8 space-y-10 pb-24 animate-fade-in">
@@ -160,13 +131,13 @@ export default function ProfilPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-slide-up" style={{ animationDelay: '0.1s' }}>
         <h1 className="text-xl font-bold text-gray-900 tracking-tight">Mon Profil</h1>
         <div className="flex gap-2">
-          <button 
-            onClick={() => setIsImportOpen(true)}
+          <Link 
+            href="/profil/import"
             className="inline-flex items-center gap-1.5 bg-white border border-indigo-200 text-indigo-700 text-sm font-semibold px-4 py-2 rounded-xl hover:bg-indigo-50 transition-colors shadow-sm"
           >
             <FileText className="w-4 h-4" />
             Importer un CV
-          </button>
+          </Link>
           <Link href={profile.username ? `/${profile.username}` : '/apercu'} target="_blank"
             className="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 text-sm font-semibold px-4 py-2 rounded-xl hover:bg-indigo-100 transition-colors shadow-sm">
             <Eye className="w-4 h-4" />
@@ -300,11 +271,7 @@ export default function ProfilPage() {
       
       <AboutMeForm isOpen={isEditingAbout} onClose={() => setIsEditingAbout(false)} />
 
-      <ImportCvModal 
-        isOpen={isImportOpen} 
-        onClose={() => setIsImportOpen(false)} 
-        onApply={handleApplyImport} 
-      />
+
     </div>
   );
 }

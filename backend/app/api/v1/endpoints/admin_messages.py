@@ -10,7 +10,7 @@ from app.api.dependencies import get_current_admin
 
 router = APIRouter()
 
-@router.get("/", response_model=List[ContactMessageOut])
+@router.get("", response_model=List[ContactMessageOut])
 def get_contact_messages(
     skip: int = 0,
     limit: int = 100,

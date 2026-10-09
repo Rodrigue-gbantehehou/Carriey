@@ -117,7 +117,7 @@ async def get_docs_stats(
     )
 
 
-@router.get("/", response_model=List[dict])
+@router.get("", response_model=List[dict])
 async def list_all_documents(
     skip: int = 0,
     limit: int = 50,

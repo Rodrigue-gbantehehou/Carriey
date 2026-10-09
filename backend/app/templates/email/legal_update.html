@@ -1,0 +1,22 @@
+<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">
+<style>body{font-family:Arial,sans-serif;color:#1c1c1c;margin:0}
+.w{max-width:600px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden}
+.h{background:linear-gradient(135deg,#4F46E5,#4338CA);padding:40px;text-align:center;color:#fff}
+.h h1{margin:0;font-size:24px;font-weight:900}.b{padding:32px}
+.det{background:#f9fafb;border-radius:12px;padding:20px;margin:20px 0}
+.btn{display:block;text-align:center;background:#4F46E5;color:#fff;text-decoration:none;padding:16px;border-radius:12px;font-weight:800;margin:24px 0}
+.f{padding:20px;background:#f9fafb;text-align:center;color:#9ca3af;font-size:12px}</style></head>
+<body><div class="w">
+<div class="h"><div style="font-size:40px;margin-bottom:8px">&#9888;&#65039;</div><h1>Mise à jour de nos conditions</h1></div>
+<div class="b">
+<p style="font-size:18px;font-weight:700">Bonjour {{ full_name }},</p>
+<p>Nous vous informons d'une mise à jour de nos documents légaux (CGU, Politique de confidentialité, etc.) vers la version <strong>{{ new_version }}</strong>.</p>
+<div class="det">
+<p><strong>Qu'est-ce qui change ?</strong></p>
+<p>{{ summary }}</p>
+</div>
+<p>Pour continuer à utiliser nos services de création de CV et d'assistance IA, nous vous invitons à lire et accepter ces nouvelles conditions lors de votre prochaine connexion.</p>
+<a href="{{ login_url }}" class="btn">Se connecter et accepter</a>
+<p style="color:#6b7280;font-size:13px">Si vous refusez ces nouvelles conditions, vous avez le droit de demander la suppression de votre compte depuis vos paramètres.</p>
+</div><div class="f"><p>{{ app_name }} - Votre carrière simplifiée</p></div>
+</div></body></html>

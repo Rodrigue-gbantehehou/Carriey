@@ -12,7 +12,7 @@ router = APIRouter()
 # In production, use Redis or a proper rate limiting library
 rate_limit_cache = {}
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post("", status_code=status.HTTP_201_CREATED)
 async def submit_contact_form(
     contact_in: ContactMessageCreate,
     request: Request,

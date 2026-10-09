@@ -53,6 +53,34 @@ export default function AdminPlansPage() {
     });
   };
 
+  const handleCreate = async () => {
+    if (!session?.user?.accessToken) return;
+    try {
+      const newPlan = {
+        name: 'Nouveau Plan',
+        code: `PLAN_${Date.now()}`,
+        price: 1000,
+        currency: 'XOF',
+        duration_days: 30,
+        is_active: true,
+        features: { features: ['Fonctionnalité 1'] }
+      };
+      const res = await fetch(`${API_BASE}/plans`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.user.accessToken}`
+        },
+        body: JSON.stringify(newPlan)
+      });
+      if (res.ok) {
+        fetchPlans();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const handleSave = async (id: string) => {
     if (!session?.user?.accessToken) return;
     
@@ -93,7 +121,12 @@ export default function AdminPlansPage() {
 
   return (
     <div className="p-8 max-w-5xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Gestion des Tarifs</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Gestion des Tarifs</h1>
+        <button onClick={handleCreate} className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 font-semibold text-sm transition-colors">
+          Créer un plan
+        </button>
+      </div>
       
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <table className="w-full text-left">

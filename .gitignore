@@ -40,7 +40,7 @@ backend/static/*
 *.tmp
 
 # Application data
-**/cvtor.db
+**/carriey.db
 **/*.db
 **/*.sqlite3
 **/*.pdf

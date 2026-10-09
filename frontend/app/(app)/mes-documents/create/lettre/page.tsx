@@ -117,7 +117,7 @@ function CreateCoverLetterWizardContent() {
             location: extractedLocation || '',
             status: 'envoyee',
             applied_date: new Date().toISOString().split('T')[0]
-          });
+          }, session.user.accessToken);
         }
       } catch (err) {
         console.error("Erreur création candidature auto:", err);

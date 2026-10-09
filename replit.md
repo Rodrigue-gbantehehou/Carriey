@@ -79,17 +79,15 @@ Carriey est un constructeur de CV moderne et intelligent qui combine :
 ```
 carriey/
 ├── frontend/          # Application Next.js
-│   ├── components/    # Composants React
-│   ├── pages/         # Pages de l'application
-│   └── styles/        # Feuilles de style
+│   ├── app/           # Pages de l'application (App Router)
+│   └── components/    # Composants React
 │
-├── backend/           # API FastAPI
-│   ├── app/           # Logique métier
-│   ├── models/        # Modèles de données
-│   ├── routes/        # Points d'API
-│   └── templates/     # Modèles de CV (Jinja2)
-│
-└── pyproject.toml     # Dépendances Python
+└── backend/           # API FastAPI
+    ├── app/           # Application FastAPI
+    │   ├── api/       # Points d'API RESTful
+    │   ├── models/    # Modèles de base de données
+    │   └── services/  # Logique métier
+    └── requirements.txt # Dépendances Python
 ```
 
 ## 🔧 Installation et Démarrage
@@ -107,7 +105,7 @@ npm install
 
 # Backend
 cd ../backend
-pip install -e .
+pip install -r requirements.txt
 ```
 
 ### Démarrage

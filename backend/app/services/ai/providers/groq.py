@@ -16,7 +16,7 @@ class GroqProvider(LLMProvider):
 
     def __init__(self, api_key: str, model_name: Optional[str] = None):
         self.client = Groq(api_key=api_key)
-        self.model = model_name if model_name else "llama-3.3-70b-versatile"
+        self.model = model_name if model_name else "openai/gpt-oss-120b"
 
     async def generate_json(self, prompt: str) -> Tuple[Dict[str, Any], Dict[str, Any]]:
         try:

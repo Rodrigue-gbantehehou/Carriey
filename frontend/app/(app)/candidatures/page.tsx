@@ -84,10 +84,13 @@ function CandidaturesContent() {
     }
   }, [searchParams]);
 
+  const { data: session } = useSession();
+
   const fetchCandidatures = async () => {
+    if (!session?.user?.accessToken) return;
     try {
       setIsLoading(true);
-      const data = await candidaturesApi.list();
+      const data = await candidaturesApi.list(session.user.accessToken);
       setApplications(data);
     } catch (e) {
       console.error(e);
@@ -142,12 +145,11 @@ function CandidaturesContent() {
     setIsModalOpen(true);
   };
 
-  const { data: session } = useSession();
-
   const handleDelete = async (id: string) => {
+    if (!session?.user?.accessToken) return;
     if (confirm("Supprimer cette candidature ?")) {
       try {
-        await candidaturesApi.delete(id);
+        await candidaturesApi.delete(id, session.user.accessToken);
         setApplications(prev => prev.filter(a => a.id !== id));
       } catch (e) {
         alert("Erreur lors de la suppression");
@@ -156,10 +158,11 @@ function CandidaturesContent() {
   };
 
   const handleUpdateStatus = async (id: string, newStatus: Status) => {
+    if (!session?.user?.accessToken) return;
     try {
       const app = applications.find(a => a.id === id);
       if (!app) return;
-      const updated = await candidaturesApi.update(id, { ...app, status: newStatus });
+      const updated = await candidaturesApi.update(id, { ...app, status: newStatus }, session.user.accessToken);
       setApplications(prev => prev.map(a => a.id === updated.id ? updated : a));
     } catch (e) {
       alert("Erreur lors de la mise à jour du statut");
@@ -210,14 +213,15 @@ function CandidaturesContent() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!session?.user?.accessToken) return;
     setIsSubmitting(true);
     try {
       if (editingApp) {
-        const updated = await candidaturesApi.update(editingApp.id, formData);
+        const updated = await candidaturesApi.update(editingApp.id, formData, session.user.accessToken);
         setApplications(prev => prev.map(a => a.id === updated.id ? updated : a));
         setIsModalOpen(false);
       } else {
-        const created = await candidaturesApi.create(formData);
+        const created = await candidaturesApi.create(formData, session.user.accessToken);
         setApplications(prev => [created, ...prev]);
         setIsModalOpen(false);
         router.push(`/candidatures/${created.id}`);

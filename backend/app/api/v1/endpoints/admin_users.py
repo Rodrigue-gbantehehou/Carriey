@@ -27,7 +27,7 @@ class AdminResetPasswordRequest(BaseModel):
 
 
 # ─── Endpoints existants ──────────────────────────────────────────────────────
-@router.get("/", response_model=List[UserOut])
+@router.get("", response_model=List[UserOut])
 async def list_users(
     db: Session = Depends(get_db),
     admin: User = Depends(get_current_admin)

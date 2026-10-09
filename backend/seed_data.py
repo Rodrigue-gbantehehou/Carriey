@@ -147,8 +147,7 @@ def seed_personas(db: Session):
 def main():
     print("🌱 Starting database seeding...")
     
-    # S'assurer que les tables existent
-    Base.metadata.create_all(bind=engine)
+
     
     db = SessionLocal()
     try:

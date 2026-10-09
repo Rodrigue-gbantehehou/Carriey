@@ -23,8 +23,8 @@ const nextConfig = {
   async rewrites() {
     return [
       {
-        // Proxy all /api/* requests EXCEPT /api/auth/* and /api/template-css/* to the FastAPI backend
-        source: '/api/:path((?!auth|template-css).*)',
+        // Proxy all /api/* requests EXCEPT NextAuth routes and /api/template-css/* to the FastAPI backend
+        source: '/api/:path((?!auth/session|auth/providers|auth/csrf|auth/signin|auth/signout|auth/callback|auth/error|_log|template-css).*)',
         destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:10000/api'}/:path*`,
       },
       {
@@ -55,4 +55,5 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+const { withSentryConfig } = require("@sentry/nextjs/config");
+module.exports = process.env.NEXT_PUBLIC_SENTRY_DSN || process.env.SENTRY_DSN ? withSentryConfig(nextConfig, { silent: true, org: "carriey", project: "frontend" }) : nextConfig;

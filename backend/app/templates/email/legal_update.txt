@@ -1,0 +1,13 @@
+Bonjour {{ full_name }},
+
+Nous vous informons d'une mise à jour de nos documents légaux (CGU, Politique de confidentialité) vers la version {{ new_version }}.
+
+Ce qui change :
+{{ summary }}
+
+Pour continuer à utiliser {{ app_name }}, merci de vous connecter pour accepter ces nouvelles conditions :
+{{ login_url }}
+
+Si vous refusez ces nouvelles conditions, vous avez le droit de demander la suppression de votre compte.
+
+L'équipe {{ app_name }}

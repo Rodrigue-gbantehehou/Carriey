@@ -208,5 +208,29 @@ class MailerService:
         )
         return self._send(msg, recipient_email)
 
+    # --- Email 5: Mise à jour Légale ---
+    def send_legal_update_notification(self, recipient_email: str, full_name: str, new_version: str, summary: str) -> bool:
+        frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5000")
+        ctx = {
+            "full_name": full_name or "Utilisateur",
+            "new_version": new_version,
+            "summary": summary,
+            "app_name": self.app_name,
+            "login_url": f"{frontend_url}/login"
+        }
+        html = self._render_template("legal_update.html", ctx)
+        text = self._render_template("legal_update.txt", ctx)
+        
+        if not html:
+            return False
+
+        msg = self._build_msg(
+            to=recipient_email,
+            subject=f"Important : Mise à jour de nos conditions d'utilisation",
+            html_body=html,
+            text_body=text
+        )
+        return self._send(msg, recipient_email)
+
 
 mailer_service = MailerService()

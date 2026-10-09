@@ -19,7 +19,7 @@ class UserRoleUpdate(BaseModel):
 class UserStatusUpdate(BaseModel):
     is_active: bool
 
-@router.get("/", response_model=List[UserOut])
+@router.get("", response_model=List[UserOut])
 async def list_users(
     skip: int = 0,
     limit: int = 100,

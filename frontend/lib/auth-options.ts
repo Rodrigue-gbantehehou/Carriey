@@ -83,7 +83,7 @@ export const authOptions: NextAuthOptions = {
     })
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.accessToken = user.accessToken;
         token.role = user.role;
@@ -91,6 +91,12 @@ export const authOptions: NextAuthOptions = {
         token.premium_until = user.premium_until;
         token.subscription_status = user.subscription_status;
         token.accepted_terms_version = user.accepted_terms_version;
+      }
+      if (trigger === "update" && session?.user) {
+        token.accepted_terms_version = session.user.accepted_terms_version;
+        token.premium_until = session.user.premium_until;
+        token.subscription_status = session.user.subscription_status;
+        if (session.user.name) token.name = session.user.name;
       }
       return token;
     },

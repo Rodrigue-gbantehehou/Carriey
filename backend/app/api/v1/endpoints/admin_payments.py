@@ -12,7 +12,7 @@ from app.api.dependencies import get_current_admin
 
 router = APIRouter()
 
-@router.get("/")
+@router.get("")
 async def list_payments(
     skip: int = 0,
     limit: int = 100,

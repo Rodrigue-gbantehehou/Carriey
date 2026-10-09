@@ -9,7 +9,7 @@ from app.models.user import User
 
 router = APIRouter()
 
-@router.get("/", response_model=List[CandidatureOut])
+@router.get("", response_model=List[CandidatureOut])
 def read_candidatures(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
@@ -37,7 +37,7 @@ def read_candidature(
         raise HTTPException(status_code=403, detail="Not enough permissions")
     return candidature
 
-@router.post("/", response_model=CandidatureOut)
+@router.post("", response_model=CandidatureOut)
 def create_candidature(
     *,
     db: Session = Depends(get_db),

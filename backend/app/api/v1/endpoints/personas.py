@@ -15,7 +15,7 @@ async def list_sectors(db: Session = Depends(get_db)):
     sectors = db.query(distinct(Persona.sector)).all()
     return [s[0] for s in sectors]
 
-@router.get("/", response_model=List[PersonaOut])
+@router.get("", response_model=List[PersonaOut])
 async def list_personas(
     sector: Optional[str] = None, 
     experience: Optional[str] = None,

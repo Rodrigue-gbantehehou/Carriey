@@ -32,7 +32,7 @@ def verify_template_access(user: User, template_id: str, db: Session) -> bool:
     # Vérifier via le service d'accès
     return TemplateAccessService.check_user_access(db, user.id, template.id)
 
-@router.get("/", response_model=List[ResumeListOut])
+@router.get("", response_model=List[ResumeListOut])
 async def list_resumes(
     skip: int = 0,
     limit: int = 100,
@@ -122,7 +122,7 @@ from fastapi import Request
 from pydantic import ValidationError
 from app.models.resume import DocType as DocTypeEnum
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post("", status_code=status.HTTP_201_CREATED)
 async def create_resume(
     request: Request,
     db: Session = Depends(get_db),

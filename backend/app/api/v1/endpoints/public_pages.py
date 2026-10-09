@@ -33,7 +33,7 @@ async def check_slug(
     return SlugCheckOut(slug=clean, available=available, suggestion=suggestion)
 
 
-@router.get("/", response_model=List[PublicPageOut])
+@router.get("", response_model=List[PublicPageOut])
 async def list_my_pages(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
@@ -44,7 +44,7 @@ async def list_my_pages(
 
 from app.models.template import Template
 
-@router.post("/", response_model=PublicPageOut, status_code=201)
+@router.post("", response_model=PublicPageOut, status_code=201)
 async def create_page(
     obj_in: PublicPageCreate,
     db: Session = Depends(get_db),

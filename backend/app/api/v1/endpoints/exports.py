@@ -13,6 +13,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
+import sentry_sdk
 
 from app.db.session import get_db
 from app.models.user import User, UserRole
@@ -239,6 +240,7 @@ async def _get_or_create_export_user(req: ExportRequest, current_user: Optional[
                         db.commit()
                 else:
                     logger.warning(f"DEBUG: 402 Error. payment_valid={payment_valid}, template={template is not None}, target_user_id={target_user_id}")
+                    sentry_sdk.capture_message(f"Paiement échoué ou invalide: {req.payment_id}", level="warning")
                     raise HTTPException(status_code=402, detail="Paiement requis ou non validé")
             else:
                 logger.warning("DEBUG: 402 Error. No payment_id.")
@@ -348,12 +350,14 @@ async def export_pdf(
                     )
             except httpx.TimeoutException as te:
                 logger.error(f"[PDF Export] ❌ Timeout lors de l'appel au service Render PDF: {te}")
+                sentry_sdk.capture_exception(te)
                 raise HTTPException(
                     status_code=504,
                     detail="Le service de génération PDF a mis trop de temps à répondre (timeout). Le serveur Render était peut-être en cours de réveil. Veuillez réessayer."
                 )
             except httpx.RequestError as re:
                 logger.error(f"[PDF Export] ❌ Erreur réseau lors de l'appel au service Render PDF: {re}")
+                sentry_sdk.capture_exception(re)
                 raise HTTPException(
                     status_code=502,
                     detail=f"Impossible de joindre le service PDF distant: {re}"
