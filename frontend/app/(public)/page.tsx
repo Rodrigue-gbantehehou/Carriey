@@ -49,17 +49,17 @@ export default function LandingPage() {
   }, [isCarouselHovered, templates]);
 
   const fallbackThemes = [
-    { name: 'Moderne' },
-    { name: 'Élégant' },
-    { name: 'Minimal' },
-    { name: 'Créatif' },
-    { name: 'Corporate' },
-    { name: 'Tokyo' }
+    { typeLabel: 'CV' },
+    { typeLabel: 'Lettre de motivation' },
+    { typeLabel: 'CV' },
+    { typeLabel: 'Page publique' },
+    { typeLabel: 'CV' },
+    { typeLabel: 'Lettre de motivation' }
   ];
 
   const carouselItems = templates.length > 0
     ? templates.map((t, i) => ({
-      name: t.name,
+      typeLabel: t.template_type === 'cover_letter' ? 'Lettre de motivation' : t.template_type === 'public_page' ? 'Page publique' : 'CV',
       originalTemplate: t
     }))
     : fallbackThemes.map(t => ({ ...t, originalTemplate: null }));
@@ -258,7 +258,7 @@ export default function LandingPage() {
                   )}
                 </div>
                 <div className="p-3 text-center text-ui-sm font-semibold text-text-primary">
-                  {theme.name}
+                  {theme.typeLabel}
                 </div>
               </div>
             ))}
