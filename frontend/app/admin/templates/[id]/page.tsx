@@ -58,10 +58,11 @@ function formatDate(dateString: string) {
     })
 }
 
-export default async function AdminTemplateDetailPage({ params }: { params: { id: string } }) {
+export default async function AdminTemplateDetailPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params
     const session = await auth()
-    const template = await getTemplate(params.id, session!.user.accessToken)
-    const assets = await getTemplateAssets(params.id, session!.user.accessToken)
+    const template = await getTemplate(id, session!.user.accessToken)
+    const assets = await getTemplateAssets(id, session!.user.accessToken)
 
     const definition = template.definition || {}
 

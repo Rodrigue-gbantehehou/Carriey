@@ -3,7 +3,7 @@ import path from 'path';
 import { CVTemplateRenderer } from '@/components/app/cv/templates';
 
 interface PrintPageProps {
-  searchParams: { id?: string };
+  searchParams: Promise<{ id?: string }>;
 }
 
 async function getPrintDataServer(id: string) {
@@ -43,7 +43,8 @@ function getTemplateCss(slug: string): string {
 }
 
 export default async function PrintPage({ searchParams }: PrintPageProps) {
-  const id = searchParams?.id;
+  const resolvedSearchParams = await searchParams;
+  const id = resolvedSearchParams?.id;
   if (!id) {
     return (
       <div className="flex items-center justify-center h-screen bg-white text-black p-4">

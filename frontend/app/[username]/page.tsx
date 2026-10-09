@@ -8,7 +8,7 @@ import {
 import config from '@/lib/config';
 
 interface Props {
-  params: { username: string };
+  params: Promise<{ username: string }>;
 }
 
 // ── Types light ───────────────────────────────────────────────────────────────
@@ -55,7 +55,8 @@ export async function generateMetadata(
   { params }: Props,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const profile = await getProfile(params.username);
+  const { username } = await params;
+  const profile = await getProfile(username);
 
   if (!profile) {
     return {
@@ -107,14 +108,15 @@ export async function generateMetadata(
 
 // ── Server Component ──────────────────────────────────────────────────────────
 export default async function PublicProfilePage({ params }: Props) {
-  const profile = await getProfile(params.username);
+  const { username } = await params;
+  const profile = await getProfile(username);
 
   if (!profile) {
     return (
       <div className="flex h-screen flex-col items-center justify-center text-center px-4">
         <p className="text-4xl mb-4">👤</p>
         <h1 className="text-xl font-bold text-gray-900">Profil introuvable</h1>
-        <p className="text-sm text-gray-500 mt-2">L'adresse <strong>carriey.com/{params.username}</strong> n'existe pas ou est privée.</p>
+        <p className="text-sm text-gray-500 mt-2">L'adresse <strong>carriey.com/{username}</strong> n'existe pas ou est privée.</p>
         <Link href="/register" className="mt-6 inline-flex items-center gap-2 bg-indigo-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-indigo-700 transition-colors">
           Créer mon profil
         </Link>
