@@ -22,10 +22,10 @@ export default function Navbar() {
   }
 
   const navLinks = [
-    { name: 'Fonctionnement', href: '/#fonctionnement' },
-    { name: 'Modèles', href: '/#modeles' },
-    { name: 'Tarifs', href: '/#tarifs' },
-    { name: 'FAQ', href: '/#faq' },
+    { name: 'Fonctionnement', href: '/fonctionnement' },
+    { name: 'Modèles', href: '/modeles' },
+    { name: 'Tarifs', href: '/tarifs' },
+    { name: 'FAQ', href: '/faq' },
   ];
 
   return (

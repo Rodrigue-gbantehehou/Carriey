@@ -22,9 +22,9 @@ export default function Footer() {
           <div>
             <h4 className="font-bold text-text-primary mb-6 text-ui-sm uppercase tracking-widest">Navigation</h4>
             <ul className="space-y-4 text-text-secondary text-ui-sm font-medium">
-              <li><Link href="/#modeles" className="hover:text-primary transition-colors">Modèles de CV</Link></li>
-              <li><Link href="/#tarifs" className="hover:text-primary transition-colors">Tarifs & Plans</Link></li>
-              <li><Link href="/#faq" className="hover:text-primary transition-colors">Foire Aux Questions</Link></li>
+              <li><Link href="/modeles" className="hover:text-primary transition-colors">Modèles de CV</Link></li>
+              <li><Link href="/tarifs" className="hover:text-primary transition-colors">Tarifs & Plans</Link></li>
+              <li><Link href="/faq" className="hover:text-primary transition-colors">Foire Aux Questions</Link></li>
               <li><Link href="/register" className="hover:text-primary transition-colors">Créer mon profil</Link></li>
             </ul>
           </div>
@@ -33,7 +33,7 @@ export default function Footer() {
             <h4 className="font-bold text-text-primary mb-6 text-ui-sm uppercase tracking-widest">Support & Contact</h4>
             <ul className="space-y-4 text-text-secondary text-ui-sm font-medium">
               <li><Link href="/contact" className="hover:text-primary transition-colors">Nous contacter</Link></li>
-              <li><Link href="/#faq" className="hover:text-primary transition-colors">Aide en ligne</Link></li>
+              <li><Link href="/faq" className="hover:text-primary transition-colors">Aide en ligne</Link></li>
             </ul>
           </div>
         </div>
