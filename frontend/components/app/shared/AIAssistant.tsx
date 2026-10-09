@@ -36,22 +36,22 @@ export function AIAssistant({
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-xs font-medium text-gray-600 mb-1.5">Instructions pour l'IA</label>
+        <label className="block text-xs font-medium text-text-secondary mb-1.5">Instructions pour l'IA</label>
         <textarea
           rows={5}
-          className="w-full text-sm px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors placeholder:text-gray-400 resize-none"
+          className="w-full text-sm px-3 py-2 bg-background-subtle border border-border rounded-lg focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors placeholder:text-text-muted resize-none"
           placeholder={placeholder}
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
         />
-        <p className="text-[10px] text-gray-400 mt-1.5">
+        <p className="text-[10px] text-text-muted mt-1.5">
           Soyez le plus précis possible pour un résultat optimal.
         </p>
       </div>
 
       {error && (
-        <div className="p-3 bg-red-50 border border-red-100 rounded-lg flex items-start gap-2">
-          <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
+        <div className="p-3 bg-danger-bg border border-red-100 rounded-lg flex items-start gap-2">
+          <AlertCircle className="w-4 h-4 text-danger-text mt-0.5 flex-shrink-0" />
           <p className="text-xs text-red-600">{error}</p>
         </div>
       )}

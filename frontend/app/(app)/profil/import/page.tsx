@@ -148,21 +148,21 @@ export default function ImportCvPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-8 space-y-8 animate-fade-in pb-24">
+    <div className="space-y-8 animate-fade-in pb-12">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Link href="/profil" className="p-2 bg-white border border-gray-200 rounded-full text-gray-500 hover:text-indigo-600 hover:border-indigo-200 hover:bg-indigo-50 transition-colors shadow-sm">
+        <Link href="/profil" className="p-2 bg-white border border-border rounded-full text-text-secondary hover:text-primary hover:border-primary/20 hover:bg-primary-subtle transition-colors shadow-sm">
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Importer depuis un CV</h1>
-          <p className="text-gray-500 text-sm mt-1">L'IA extraira vos informations et mettra automatiquement à jour votre profil.</p>
+          <h1 className="text-2xl font-bold text-text-primary tracking-tight">Importer depuis un CV</h1>
+          <p className="text-text-secondary text-sm mt-1">L'IA extraira vos informations et mettra automatiquement à jour votre profil.</p>
         </div>
       </div>
 
-      <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 max-w-2xl mx-auto mt-10">
+      <div className="bg-white rounded-3xl p-8 shadow-sm border border-border mt-10">
         <div 
-          className={`border-2 border-dashed rounded-3xl p-12 text-center transition-colors cursor-pointer flex flex-col items-center justify-center min-h-[300px] ${file ? 'border-indigo-400 bg-indigo-50/50' : 'border-gray-300 hover:border-indigo-300 bg-gray-50'}`}
+          className={`border-2 border-dashed rounded-3xl p-12 text-center transition-colors cursor-pointer flex flex-col items-center justify-center min-h-[300px] ${file ? 'border-indigo-400 bg-primary-subtle/50' : 'border-border hover:border-indigo-300 bg-background-subtle'}`}
           onClick={() => !file && fileInputRef.current?.click()}
         >
           <input 
@@ -175,35 +175,35 @@ export default function ImportCvPage() {
           
           {file ? (
             <div className="flex flex-col items-center">
-              <div className="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mb-4 shadow-inner">
+              <div className="w-16 h-16 bg-primary-subtle text-primary rounded-full flex items-center justify-center mb-4 shadow-inner">
                 <FileText className="w-8 h-8" />
               </div>
-              <p className="text-lg font-bold text-gray-900">{file.name}</p>
+              <p className="text-lg font-bold text-text-primary">{file.name}</p>
               <button 
                 onClick={(e) => { e.stopPropagation(); setFile(null); }}
-                className="text-sm font-semibold text-red-500 mt-4 hover:underline px-4 py-2 hover:bg-red-50 rounded-full transition-colors"
+                className="text-sm font-semibold text-danger-text mt-4 hover:underline px-4 py-2 hover:bg-danger-bg rounded-full transition-colors"
               >
                 Choisir un autre fichier
               </button>
             </div>
           ) : (
             <div>
-              <div className="w-20 h-20 bg-white border border-gray-200 text-gray-400 rounded-full flex items-center justify-center mb-6 shadow-sm mx-auto group-hover:scale-105 transition-transform">
+              <div className="w-20 h-20 bg-white border border-border text-text-muted rounded-full flex items-center justify-center mb-6 shadow-sm mx-auto group-hover:scale-105 transition-transform">
                 <Upload className="w-8 h-8" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Sélectionnez votre CV</h3>
-              <p className="text-sm text-gray-500">Formats acceptés : PDF (Max 5 Mo)</p>
+              <h3 className="text-xl font-bold text-text-primary mb-2">Sélectionnez votre CV</h3>
+              <p className="text-sm text-text-secondary">Formats acceptés : PDF (Max 5 Mo)</p>
             </div>
           )}
         </div>
 
-        {error && <p className="text-sm text-red-600 font-medium text-center mt-4 bg-red-50 py-2 rounded-lg">{error}</p>}
+        {error && <p className="text-sm text-red-600 font-medium text-center mt-4 bg-danger-bg py-2 rounded-lg">{error}</p>}
 
         <div className="mt-8 flex justify-end">
           <button 
             onClick={handleUploadAndSave}
             disabled={!file || loading || !profile}
-            className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-3.5 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-colors shadow-md shadow-indigo-600/20"
+            className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-3.5 bg-primary text-white font-bold rounded-panel hover:bg-primary-hover disabled:opacity-50 transition-colors shadow-md shadow-indigo-600/20"
           >
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Upload className="w-5 h-5" />}
             {loading ? 'Extraction et enregistrement...' : 'Importer mon CV'}

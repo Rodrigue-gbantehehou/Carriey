@@ -8,6 +8,8 @@ import config from '@/lib/config';
 import { useSession } from 'next-auth/react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Suspense } from 'react';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { Button } from '@/components/ui/Button';
 
 type Status = 'envoyee' | 'entretien' | 'acceptee' | 'refusee';
 
@@ -24,7 +26,7 @@ interface Application {
 
 export default function CandidaturesPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto text-indigo-600" /></div>}>
+    <Suspense fallback={<div className="p-8 text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" /></div>}>
       <CandidaturesContent />
     </Suspense>
   );
@@ -107,11 +109,11 @@ function CandidaturesContent() {
 
   const getStatusConfig = (status: Status) => {
     switch (status) {
-      case 'envoyee': return { label: 'Envoyée', className: 'bg-blue-50 text-blue-700 border-blue-200' };
-      case 'entretien': return { label: 'Entretien', className: 'bg-orange-50 text-orange-700 border-orange-200' };
-      case 'acceptee': return { label: 'Acceptée', className: 'bg-green-50 text-green-700 border-green-200' };
-      case 'refusee': return { label: 'Refusée', className: 'bg-red-50 text-red-700 border-red-200' };
-      default: return { label: 'Inconnu', className: 'bg-gray-50 text-gray-700 border-gray-200' };
+      case 'envoyee': return { label: 'Envoyée', className: 'bg-background-subtle text-text-primary border-border' };
+      case 'entretien': return { label: 'Entretien', className: 'bg-warning-bg text-warning-text border-border' };
+      case 'acceptee': return { label: 'Acceptée', className: 'bg-success-bg text-success-text border-border' };
+      case 'refusee': return { label: 'Refusée', className: 'bg-danger-bg text-danger-text border-border' };
+      default: return { label: 'Inconnu', className: 'bg-background-subtle text-text-secondary border-border' };
     }
   };
 
@@ -240,17 +242,17 @@ function CandidaturesContent() {
         key={app.id}
         draggable
         onDragStart={(e) => handleDragStart(e, app.id)}
-        className="bg-white border border-gray-200/80 rounded-lg md:rounded-xl p-1.5 md:p-2.5 shadow-sm hover:shadow-md hover:border-indigo-300 transition-all duration-200 group flex flex-col cursor-grab active:cursor-grabbing relative"
+        className="bg-white border border-border/80 rounded-lg md:rounded-panel p-1.5 md:p-2.5 shadow-sm hover:shadow-md hover:border-indigo-300 transition-all duration-200 group flex flex-col cursor-grab active:cursor-grabbing relative"
       >
         {/* Actions (on hover) */}
-        <div className="absolute top-1 right-1 flex items-center opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 backdrop-blur-md rounded shadow-sm border border-gray-100 z-10">
-          <button onClick={() => router.push(`/candidatures/${app.id}`)} className="p-1 text-gray-500 hover:text-indigo-600 transition-colors" title="Ouvrir (Parcours unique)">
+        <div className="absolute top-1 right-1 flex items-center opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 backdrop-blur-md rounded shadow-sm border border-border z-10">
+          <button onClick={() => router.push(`/candidatures/${app.id}`)} className="p-1 text-text-secondary hover:text-primary transition-colors" title="Ouvrir (Parcours unique)">
             <ExternalLink className="w-2.5 h-2.5 md:w-3 md:h-3" />
           </button>
-          <button onClick={() => openEditModal(app)} className="p-1 text-gray-500 hover:text-indigo-600 transition-colors" title="Modifier rapidement">
+          <button onClick={() => openEditModal(app)} className="p-1 text-text-secondary hover:text-primary transition-colors" title="Modifier rapidement">
             <Edit2 className="w-2.5 h-2.5 md:w-3 md:h-3" />
           </button>
-          <button onClick={() => handleDelete(app.id)} className="p-1 text-gray-500 hover:text-red-600 transition-colors" title="Supprimer">
+          <button onClick={() => handleDelete(app.id)} className="p-1 text-text-secondary hover:text-red-600 transition-colors" title="Supprimer">
             <Trash2 className="w-2.5 h-2.5 md:w-3 md:h-3" />
           </button>
         </div>
@@ -264,18 +266,18 @@ function CandidaturesContent() {
           </div>
         )}
 
-        <h3 className="font-bold text-gray-900 text-[10px] md:text-sm truncate pr-4 md:pr-10 mb-0 md:mb-1">{app.company}</h3>
-        <p className="text-[9px] md:text-xs text-gray-600 font-medium truncate md:line-clamp-2 mb-0 md:mb-3 hidden md:block">{app.role}</p>
+        <h3 className="font-bold text-text-primary text-[10px] md:text-sm truncate pr-4 md:pr-10 mb-0 md:mb-1">{app.company}</h3>
+        <p className="text-[9px] md:text-xs text-text-secondary font-medium truncate md:line-clamp-2 mb-0 md:mb-3 hidden md:block">{app.role}</p>
 
         <div className="hidden md:flex flex-wrap items-center gap-x-3 gap-y-1 mt-auto">
           {app.location && (
-            <div className="flex items-center gap-1 text-gray-400">
+            <div className="flex items-center gap-1 text-text-muted">
               <MapPin className="w-3 h-3" />
               <p className="text-[10px] truncate max-w-[80px]">{app.location}</p>
             </div>
           )}
           {app.applied_date && (
-            <div className="flex items-center gap-1 text-gray-400">
+            <div className="flex items-center gap-1 text-text-muted">
               <Calendar className="w-3 h-3" />
               <p className="text-[10px]">
                 {new Date(app.applied_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
@@ -283,7 +285,7 @@ function CandidaturesContent() {
             </div>
           )}
           {app.url && (
-            <a href={app.url} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-indigo-400 hover:text-indigo-600 ml-auto transition-colors" onDragStart={(e) => e.preventDefault()}>
+            <a href={app.url} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-indigo-400 hover:text-primary ml-auto transition-colors" onDragStart={(e) => e.preventDefault()}>
               <ExternalLink className="w-3 h-3" />
             </a>
           )}
@@ -293,61 +295,55 @@ function CandidaturesContent() {
   };
 
   const columns: { id: Status; label: string; color: string }[] = [
-    { id: 'envoyee', label: 'Envoyées', color: 'bg-blue-50/50 border-blue-100' },
-    { id: 'entretien', label: 'Entretiens', color: 'bg-orange-50/50 border-orange-100' },
-    { id: 'acceptee', label: 'Acceptées', color: 'bg-green-50/50 border-green-100' },
-    { id: 'refusee', label: 'Refusées', color: 'bg-red-50/50 border-red-100' },
+    { id: 'envoyee', label: 'Envoyées', color: 'bg-background-subtle border-border' },
+    { id: 'entretien', label: 'Entretiens', color: 'bg-warning-bg border-border' },
+    { id: 'acceptee', label: 'Acceptées', color: 'bg-success-bg border-border' },
+    { id: 'refusee', label: 'Refusées', color: 'bg-danger-bg border-border' },
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8 animate-fade-in pb-24">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10 animate-slide-up" style={{ animationDelay: '0.1s' }}>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Mes candidatures</h1>
-          <p className="text-base text-gray-500 mt-1">
-            Suivez l'avancement de vos postulations en un coup d'œil.
-          </p>
-        </div>
-        <button
-          onClick={openAddModal}
-          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20 hover:scale-[1.02] active:scale-[0.98]"
-        >
-          <Plus className="w-4 h-4" />
-          Nouvelle candidature
-        </button>
-      </div>
+    <div className="animate-fade-in pb-12">
+      <PageHeader
+        title="Mes candidatures"
+        description="Suivez l'avancement de vos postulations en un coup d'œil."
+        actions={
+          <Button onClick={openAddModal} leftIcon={<Plus className="w-4 h-4" />}>
+            Nouvelle candidature
+          </Button>
+        }
+        className="animate-slide-up mb-10"
+      />
 
       {/* Filters & Search */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8 animate-slide-up" style={{ animationDelay: '0.2s' }}>
 
         {/* Status tabs (Grid only) */}
-        <div className={`flex items-center gap-1 bg-white/60 backdrop-blur-md border border-gray-200/60 p-1.5 rounded-2xl overflow-x-auto hide-scrollbar shadow-sm w-full md:w-auto ${viewMode === 'kanban' ? 'opacity-50 pointer-events-none' : ''}`}>
-          <button onClick={() => setFilter('all')} className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${filter === 'all' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'}`}>Toutes</button>
-          <button onClick={() => setFilter('envoyee')} className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${filter === 'envoyee' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'}`}>Envoyées</button>
-          <button onClick={() => setFilter('entretien')} className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${filter === 'entretien' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'}`}>Entretiens</button>
-          <button onClick={() => setFilter('acceptee')} className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${filter === 'acceptee' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'}`}>Acceptées</button>
+        <div className={`flex items-center gap-1 bg-white/60 backdrop-blur-md border border-border/60 p-1.5 rounded-panel overflow-x-auto hide-scrollbar shadow-sm w-full md:w-auto ${viewMode === 'kanban' ? 'opacity-50 pointer-events-none' : ''}`}>
+          <button onClick={() => setFilter('all')} className={`px-4 py-2 rounded-panel text-sm font-semibold transition-all whitespace-nowrap ${filter === 'all' ? 'bg-white text-text-primary shadow-sm' : 'text-text-secondary hover:text-text-secondary hover:bg-border/50'}`}>Toutes</button>
+          <button onClick={() => setFilter('envoyee')} className={`px-4 py-2 rounded-panel text-sm font-semibold transition-all whitespace-nowrap ${filter === 'envoyee' ? 'bg-white text-text-primary shadow-sm' : 'text-text-secondary hover:text-text-secondary hover:bg-border/50'}`}>Envoyées</button>
+          <button onClick={() => setFilter('entretien')} className={`px-4 py-2 rounded-panel text-sm font-semibold transition-all whitespace-nowrap ${filter === 'entretien' ? 'bg-white text-text-primary shadow-sm' : 'text-text-secondary hover:text-text-secondary hover:bg-border/50'}`}>Entretiens</button>
+          <button onClick={() => setFilter('acceptee')} className={`px-4 py-2 rounded-panel text-sm font-semibold transition-all whitespace-nowrap ${filter === 'acceptee' ? 'bg-white text-text-primary shadow-sm' : 'text-text-secondary hover:text-text-secondary hover:bg-border/50'}`}>Acceptées</button>
         </div>
 
         {/* View Mode Toggle & Search */}
         <div className="flex items-center gap-3 w-full md:w-auto">
-          <div className="flex items-center bg-white/60 backdrop-blur-md border border-gray-200/60 p-1.5 rounded-2xl shadow-sm">
-            <button onClick={() => setViewMode('kanban')} className={`p-2 rounded-xl transition-all ${viewMode === 'kanban' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}>
+          <div className="flex items-center bg-white/60 backdrop-blur-md border border-border/60 p-1.5 rounded-panel shadow-sm">
+            <button onClick={() => setViewMode('kanban')} className={`p-2 rounded-panel transition-all ${viewMode === 'kanban' ? 'bg-white text-primary shadow-sm' : 'text-text-muted hover:text-text-secondary'}`}>
               <LayoutList className="w-4 h-4 rotate-90" />
             </button>
-            <button onClick={() => setViewMode('grid')} className={`p-2 rounded-xl transition-all ${viewMode === 'grid' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}>
+            <button onClick={() => setViewMode('grid')} className={`p-2 rounded-panel transition-all ${viewMode === 'grid' ? 'bg-white text-primary shadow-sm' : 'text-text-muted hover:text-text-secondary'}`}>
               <LayoutGrid className="w-4 h-4" />
             </button>
           </div>
 
           <div className="relative flex-1 md:w-64">
-            <Search className="w-4 h-4 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-text-muted absolute left-4 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Rechercher..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-white/60 backdrop-blur-md border border-gray-200/60 rounded-xl text-sm font-medium text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-sm"
+              className="w-full pl-10 pr-4 py-2.5 bg-white/60 backdrop-blur-md border border-border/60 rounded-panel text-sm font-medium text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-sm"
             />
           </div>
         </div>
@@ -355,11 +351,11 @@ function CandidaturesContent() {
 
       {isLoading ? (
         <div className="flex justify-center items-center py-20">
-          <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
       ) : applications.length === 0 ? (
-        <div className="text-center py-20 bg-white/50 border border-gray-100 rounded-3xl backdrop-blur-sm">
-          <p className="text-gray-500 font-medium">Aucune candidature trouvée.</p>
+        <div className="text-center py-20 bg-white/50 border border-border rounded-3xl backdrop-blur-sm">
+          <p className="text-text-secondary font-medium">Aucune candidature trouvée.</p>
         </div>
       ) : viewMode === 'grid' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-slide-up" style={{ animationDelay: '0.3s' }}>
@@ -372,20 +368,20 @@ function CandidaturesContent() {
             return (
               <div
                 key={col.id}
-                className={`flex-1 min-w-0 flex flex-col rounded-xl border p-2 md:p-3 ${col.color}`}
+                className={`flex-1 min-w-0 flex flex-col rounded-panel border p-2 md:p-3 ${col.color}`}
                 onDragOver={handleDragOver}
                 onDrop={(e) => handleDrop(e, col.id)}
               >
                 <div className="flex items-center justify-between mb-3 px-1 md:px-2">
-                  <h3 className="font-bold text-gray-900 text-xs md:text-sm truncate">{col.label}</h3>
-                  <span className="bg-white/80 backdrop-blur-sm px-1.5 md:px-2 py-0.5 md:py-1 rounded-lg text-[10px] md:text-xs font-bold text-gray-600 border border-gray-200/50 shadow-sm flex-shrink-0">
+                  <h3 className="font-bold text-text-primary text-xs md:text-sm truncate">{col.label}</h3>
+                  <span className="bg-white/80 backdrop-blur-sm px-1.5 md:px-2 py-0.5 md:py-1 rounded-lg text-[10px] md:text-xs font-bold text-text-secondary border border-border/50 shadow-sm flex-shrink-0">
                     {colApps.length}
                   </span>
                 </div>
                 <div className="flex flex-col gap-2 md:gap-3 overflow-y-auto hide-scrollbar flex-1 pb-2 px-1">
                   {colApps.map(renderCard)}
                   {colApps.length === 0 && (
-                    <div className="border-2 border-dashed border-gray-200/50 rounded-xl h-20 flex items-center justify-center text-gray-400 text-xs font-medium">
+                    <div className="border-2 border-dashed border-border/50 rounded-panel h-20 flex items-center justify-center text-text-muted text-xs font-medium">
                       Glissez ici
                     </div>
                   )}
@@ -399,19 +395,19 @@ function CandidaturesContent() {
       {/* Modal Add/Edit */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex flex-col justify-end sm:items-center sm:justify-center">
-          <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
+          <div className="absolute inset-0 bg-text-primary/40 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
 
           <div className="relative bg-white w-full sm:max-w-lg sm:rounded-3xl rounded-t-3xl shadow-2xl z-10 flex flex-col max-h-[90vh] animate-slide-up sm:animate-scale-in">
             {/* Drag handle (mobile only) */}
             <div className="flex justify-center pt-3 pb-1 sm:hidden">
-              <div className="w-10 h-1 bg-gray-200 rounded-full" />
+              <div className="w-10 h-1 bg-border rounded-full" />
             </div>
 
-            <div className="flex justify-between items-center p-5 sm:p-6 border-b border-gray-100 shrink-0">
-              <h2 className="text-xl font-bold text-gray-900">
+            <div className="flex justify-between items-center p-5 sm:p-6 border-b border-border shrink-0">
+              <h2 className="text-xl font-bold text-text-primary">
                 {editingApp ? "Modifier la candidature" : "Nouvelle candidature"}
               </h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-700 bg-gray-50 hover:bg-gray-100 p-2 rounded-full transition-colors">
+              <button onClick={() => setIsModalOpen(false)} className="text-text-muted hover:text-text-secondary bg-background-subtle hover:bg-border p-2 rounded-full transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -419,7 +415,7 @@ function CandidaturesContent() {
             <div className="overflow-y-auto overflow-x-hidden hide-scrollbar">
 
               {!editingApp && (
-                <div className="px-5 sm:px-6 pt-5 border-b border-gray-100 pb-5 bg-gradient-to-br from-indigo-50/50 to-purple-50/50">
+                <div className="px-5 sm:px-6 pt-5 border-b border-border pb-5 bg-gradient-to-br from-indigo-50/50 to-purple-50/50">
                   <AIAssistant
                     onGenerate={handleExtractJob}
                     placeholder="Collez l'annonce ou l'offre d'emploi ici. L'IA va extraire l'entreprise, le poste et la localisation automatiquement..."
@@ -431,26 +427,26 @@ function CandidaturesContent() {
 
               <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Entreprise *</label>
-                  <input required type="text" value={formData.company} onChange={e => setFormData({ ...formData, company: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
+                  <label className="block text-sm font-semibold text-text-secondary mb-1.5">Entreprise *</label>
+                  <input required type="text" value={formData.company} onChange={e => setFormData({ ...formData, company: e.target.value })} className="w-full px-4 py-2.5 bg-background-subtle/50 border border-border rounded-panel focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Poste *</label>
-                  <input required type="text" value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
+                  <label className="block text-sm font-semibold text-text-secondary mb-1.5">Poste *</label>
+                  <input required type="text" value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })} className="w-full px-4 py-2.5 bg-background-subtle/50 border border-border rounded-panel focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Localisation</label>
-                  <input type="text" value={formData.location} onChange={e => setFormData({ ...formData, location: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
+                  <label className="block text-sm font-semibold text-text-secondary mb-1.5">Localisation</label>
+                  <input type="text" value={formData.location} onChange={e => setFormData({ ...formData, location: e.target.value })} className="w-full px-4 py-2.5 bg-background-subtle/50 border border-border rounded-panel focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Texte de l'offre (Optionnel)</label>
-                  <textarea rows={4} value={formData.job_description} onChange={e => setFormData({ ...formData, job_description: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all resize-y text-sm" placeholder="Collez l'offre ici si vous ne l'avez pas déjà extraite via l'IA..."></textarea>
+                  <label className="block text-sm font-semibold text-text-secondary mb-1.5">Texte de l'offre (Optionnel)</label>
+                  <textarea rows={4} value={formData.job_description} onChange={e => setFormData({ ...formData, job_description: e.target.value })} className="w-full px-4 py-2.5 bg-background-subtle/50 border border-border rounded-panel focus:ring-2 focus:ring-indigo-500 outline-none transition-all resize-y text-sm" placeholder="Collez l'offre ici si vous ne l'avez pas déjà extraite via l'IA..."></textarea>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Statut</label>
-                    <select value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value as Status })} className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all cursor-pointer">
+                    <label className="block text-sm font-semibold text-text-secondary mb-1.5">Statut</label>
+                    <select value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value as Status })} className="w-full px-4 py-2.5 bg-background-subtle/50 border border-border rounded-panel focus:ring-2 focus:ring-indigo-500 outline-none transition-all cursor-pointer">
                       <option value="envoyee">Envoyée</option>
                       <option value="entretien">Entretien</option>
                       <option value="acceptee">Acceptée</option>
@@ -458,30 +454,27 @@ function CandidaturesContent() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Date d'envoi</label>
-                    <input type="date" value={formData.applied_date} onChange={e => setFormData({ ...formData, applied_date: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
+                    <label className="block text-sm font-semibold text-text-secondary mb-1.5">Date d'envoi</label>
+                    <input type="date" value={formData.applied_date} onChange={e => setFormData({ ...formData, applied_date: e.target.value })} className="w-full px-4 py-2.5 bg-background-subtle/50 border border-border rounded-panel focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Lien de l'offre</label>
-                    <input type="url" placeholder="https://..." value={formData.url} onChange={e => setFormData({ ...formData, url: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
+                    <label className="block text-sm font-semibold text-text-secondary mb-1.5">Lien de l'offre</label>
+                    <input type="url" placeholder="https://..." value={formData.url} onChange={e => setFormData({ ...formData, url: e.target.value })} className="w-full px-4 py-2.5 bg-background-subtle/50 border border-border rounded-panel focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Score IA (%)</label>
-                    <input type="number" min="0" max="100" placeholder="Ex: 85" value={formData.match_score || ''} onChange={e => setFormData({ ...formData, match_score: e.target.value ? parseInt(e.target.value, 10) : undefined })} className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
+                    <label className="block text-sm font-semibold text-text-secondary mb-1.5">Score IA (%)</label>
+                    <input type="number" min="0" max="100" placeholder="Ex: 85" value={formData.match_score || ''} onChange={e => setFormData({ ...formData, match_score: e.target.value ? parseInt(e.target.value, 10) : undefined })} className="w-full px-4 py-2.5 bg-background-subtle/50 border border-border rounded-panel focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Texte de l'offre (Optionnel)</label>
-                  <textarea rows={4} placeholder="Collez l'annonce ici..." value={formData.job_description} onChange={e => setFormData({ ...formData, job_description: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all resize-none"></textarea>
-                </div>
 
-                <div className="mt-8 flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-gray-100">
-                  <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-3 sm:py-2.5 text-gray-600 font-bold hover:bg-gray-100 rounded-xl w-full sm:w-auto text-center transition-colors">Annuler</button>
-                  <button type="submit" disabled={isSubmitting} className="px-5 py-3 sm:py-2.5 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 disabled:opacity-50 w-full sm:w-auto flex justify-center transition-all">
+
+                <div className="mt-8 flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-border">
+                  <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-3 sm:py-2.5 text-text-secondary font-bold hover:bg-border rounded-panel w-full sm:w-auto text-center transition-colors">Annuler</button>
+                  <button type="submit" disabled={isSubmitting} className="px-5 py-3 sm:py-2.5 bg-primary text-white font-bold rounded-panel shadow-lg shadow-indigo-600/20 hover:bg-primary-hover disabled:opacity-50 w-full sm:w-auto flex justify-center transition-all">
                     {isSubmitting ? 'Enregistrement...' : 'Enregistrer'}
                   </button>
                 </div>

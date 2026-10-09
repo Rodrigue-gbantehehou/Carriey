@@ -26,7 +26,7 @@ export function LetterTemplateRenderer({ templateName, folderName, data }: Lette
 
   if (!TemplateComponent) {
     return (
-      <div className="p-8 text-center text-red-500">
+      <div className="p-8 text-center text-danger-text">
         Template "{normalizedName}" non trouvé dans le registre généré.
       </div>
     );

@@ -61,16 +61,16 @@ export function AITailorPrompt({ cvId, currentOverrides, onOverridesGenerated }:
         description="Passez à carriey PRO pour générer un CV parfaitement ciblé sur l'offre d'emploi en 1 clic."
       />
 
-      <div className="bg-white p-5 rounded-xl border border-indigo-100 shadow-sm mb-8">
+      <div className="bg-white p-5 rounded-panel border border-indigo-100 shadow-sm mb-8">
         <h4 className="text-sm font-bold text-indigo-900 mb-2 flex items-center gap-2">
-          <Briefcase className="w-4 h-4 text-indigo-500" /> Cibler une offre d&apos;emploi
+          <Briefcase className="w-4 h-4 text-primary" /> Cibler une offre d&apos;emploi
         </h4>
-        <p className="text-xs text-gray-500 mb-3">Collez l&apos;offre d&apos;emploi. L&apos;IA va analyser les mots-clés et adapter votre accroche et vos expériences.</p>
+        <p className="text-xs text-text-secondary mb-3">Collez l&apos;offre d&apos;emploi. L&apos;IA va analyser les mots-clés et adapter votre accroche et vos expériences.</p>
         <textarea
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           placeholder="Ex: Nous recherchons un Développeur avec 3 ans d'expérience..."
-          className="w-full text-sm p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent min-h-[80px] mb-3 transition-all"
+          className="w-full text-sm p-3 border border-border rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent min-h-[80px] mb-3 transition-all"
         />
         <button
           onClick={handleGenerateAI}

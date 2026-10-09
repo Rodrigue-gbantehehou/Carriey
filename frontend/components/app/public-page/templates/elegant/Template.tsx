@@ -1,6 +1,7 @@
 import React from 'react';
 import { PublicPageData } from '@/types/public-page';
 import { getPhotoUrl } from '@/lib/photo-url';
+import { TextList } from '@/components/ui/TextList';
 
 function fmtDate(d?: string) {
   if (!d) return '';
@@ -16,7 +17,7 @@ export default function ElegantTheme({ data, accent }: { data: PublicPageData; a
 
   return (
     <div className="min-h-screen bg-amber-50" style={{ fontFamily: "'Palatino Linotype', Georgia, serif" }}>
-      <div className="max-w-2xl mx-auto px-8 py-16 space-y-10">
+      <div className="max-w-form mx-auto px-8 py-16 space-y-10">
         {/* Header */}
         <div className="text-center border-b-2 border-gray-200 pb-10">
           {photo && (
@@ -39,7 +40,7 @@ export default function ElegantTheme({ data, accent }: { data: PublicPageData; a
           </div>
         </div>
 
-        {profile.bio && <p className="text-center italic text-gray-600 text-lg leading-relaxed">&ldquo;{profile.bio}&rdquo;</p>}
+        {profile.bio && <p className="text-center italic text-gray-600 text-lg leading-relaxed whitespace-pre-line">&ldquo;{profile.bio}&rdquo;</p>}
 
         {profile.experiences?.length > 0 && (
           <section>
@@ -53,7 +54,7 @@ export default function ElegantTheme({ data, accent }: { data: PublicPageData; a
                   <div className="border-l-2 border-gray-300 pl-6">
                     <p className="font-bold text-gray-800">{e.title}</p>
                     <p className="italic" style={{ color: accent }}>{e.company}</p>
-                    {e.description && <p className="text-sm text-gray-600 mt-2 leading-relaxed">{e.description}</p>}
+                    {e.description && <TextList text={e.description} className="text-sm text-gray-600 mt-2 leading-relaxed" />}
                   </div>
                 </div>
               ))}

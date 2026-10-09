@@ -53,14 +53,14 @@ export function SlugInput({ value, onChange, token, excludeId }: {
   return (
     <div>
       <div className="flex items-center justify-between mb-1.5">
-        <label className="block text-sm font-medium text-gray-700">
-          URL publique <span className="text-red-400">*</span>
+        <label className="block text-sm font-medium text-text-secondary">
+          URL publique <span className="text-danger-text">*</span>
         </label>
         <button
           type="button"
           onClick={handleGenerateAi}
           disabled={isLoadingAi}
-          className="flex items-center gap-1 text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 disabled:opacity-50 transition-colors"
+          className="flex items-center gap-1 text-[11px] font-semibold text-primary hover:text-indigo-800 disabled:opacity-50 transition-colors"
         >
           {isLoadingAi
             ? <><span className="w-3 h-3 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin inline-block" /> Génération...</>
@@ -70,7 +70,7 @@ export function SlugInput({ value, onChange, token, excludeId }: {
       </div>
 
       <div className="relative">
-        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-medium select-none pointer-events-none">
+        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-text-muted font-medium select-none pointer-events-none">
           /p/
         </span>
         <input
@@ -81,22 +81,22 @@ export function SlugInput({ value, onChange, token, excludeId }: {
           className={`${inputClass} pl-10 pr-10`}
         />
         <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs">
-          {status === 'checking' && <span className="text-gray-400">⋯</span>}
+          {status === 'checking' && <span className="text-text-muted">⋯</span>}
           {status === 'ok' && <span className="text-emerald-500 font-bold">✓</span>}
-          {status === 'taken' && <span className="text-red-400 font-bold">✗</span>}
+          {status === 'taken' && <span className="text-danger-text font-bold">✗</span>}
         </span>
       </div>
 
       {aiError && <p className="text-[11px] text-amber-600 mt-1.5">⚠ {aiError}</p>}
       {aiSuggestions.length > 0 && (
         <div className="flex flex-wrap gap-2 mt-2">
-          <span className="text-[10px] text-gray-400 self-center">Suggestions IA :</span>
+          <span className="text-[10px] text-text-muted self-center">Suggestions IA :</span>
           {aiSuggestions.map(s => (
             <button
               key={s}
               type="button"
               onClick={() => { onChange(s); setAiSuggestions([]); }}
-              className="text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 px-2.5 py-1 rounded-lg transition-all"
+              className="text-[11px] font-semibold bg-primary-subtle text-indigo-700 border border-primary/20 hover:bg-primary-subtle px-2.5 py-1 rounded-lg transition-all"
             >
               {s}
             </button>
@@ -108,7 +108,7 @@ export function SlugInput({ value, onChange, token, excludeId }: {
         <button
           type="button"
           onClick={() => onChange(suggestion)}
-          className="text-xs text-indigo-600 hover:underline mt-1"
+          className="text-xs text-primary hover:underline mt-1"
         >
           Utiliser &ldquo;{suggestion}&rdquo; à la place
         </button>

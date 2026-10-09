@@ -1,6 +1,7 @@
 import React from 'react';
 import { PublicPageData } from '@/types/public-page';
 import { getPhotoUrl } from '@/lib/photo-url';
+import { TextList } from '@/components/ui/TextList';
 import { MapPin, Mail, Phone, Globe, Github, Linkedin, ExternalLink } from 'lucide-react';
 
 function fmtDate(d?: string) {
@@ -17,7 +18,7 @@ export default function MinimalTheme({ data, accent }: { data: PublicPageData; a
 
   return (
     <div className="min-h-screen bg-white text-gray-900 font-[Georgia,serif]">
-      <div className="max-w-2xl mx-auto px-6 py-14 space-y-10">
+      <div className="max-w-form mx-auto px-6 py-14 space-y-10">
         {/* Header */}
         <div className="border-b border-gray-200 pb-8 flex items-start gap-6">
           {photo && (
@@ -42,7 +43,7 @@ export default function MinimalTheme({ data, accent }: { data: PublicPageData; a
           </div>
         </div>
 
-        {profile.bio && <p className="text-base text-gray-700 leading-relaxed">{profile.bio}</p>}
+        {profile.bio && <p className="text-base text-gray-700 leading-relaxed whitespace-pre-line">{profile.bio}</p>}
 
         {profile.experiences?.length > 0 && (
           <section>
@@ -53,7 +54,7 @@ export default function MinimalTheme({ data, accent }: { data: PublicPageData; a
                   <p className="font-bold">{e.title}</p>
                   <p className="text-sm" style={{ color: accent }}>{e.company}</p>
                   <p className="text-xs text-gray-400 mt-0.5">{fmtDate(e.start_date)} — {e.current ? 'Présent' : fmtDate(e.end_date)}{e.location ? ` · ${e.location}` : ''}</p>
-                  {e.description && <p className="text-sm text-gray-600 mt-2 leading-relaxed">{e.description}</p>}
+                  {e.description && <TextList text={e.description} className="text-sm text-gray-600 mt-2 leading-relaxed" />}
                 </div>
               ))}
             </div>
@@ -92,7 +93,7 @@ export default function MinimalTheme({ data, accent }: { data: PublicPageData; a
                     <p className="font-bold text-sm">{p.name}</p>
                     {p.url && <a href={p.url} target="_blank" rel="noopener noreferrer" style={{ color: accent }}><ExternalLink className="w-3.5 h-3.5" /></a>}
                   </div>
-                  {p.description && <p className="text-sm text-gray-600 mt-0.5">{p.description}</p>}
+                  {p.description && <TextList text={p.description} className="text-sm text-gray-600 mt-0.5" />}
                 </div>
               ))}
             </div>
@@ -153,7 +154,7 @@ export default function MinimalTheme({ data, accent }: { data: PublicPageData; a
                     <p className="font-bold">{item.title}</p>
                     {item.subtitle && <p className="text-sm text-gray-600">{item.subtitle}</p>}
                     {item.date && <p className="text-xs text-gray-400">{item.date}</p>}
-                    {item.description && <p className="text-sm text-gray-600 mt-2">{item.description}</p>}
+                    {item.description && <TextList text={item.description} className="text-sm text-gray-600 mt-2" />}
                   </div>
                 ))}
               </div>

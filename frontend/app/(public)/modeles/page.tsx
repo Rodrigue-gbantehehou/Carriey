@@ -242,7 +242,7 @@ function ModelesPageContent() {
         {/* Glow blob */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[400px] bg-indigo-50 rounded-[100%] blur-3xl opacity-60 -z-0" />
 
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+        <div className="max-w-public mx-auto px-6 lg:px-8 relative z-10">
 
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -330,7 +330,7 @@ function ModelesPageContent() {
 
       {/* ── FILTER BAR ── */}
       <div className="sticky top-0 z-30 bg-white/90 backdrop-blur-lg border-b border-gray-100 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div className="max-w-public mx-auto px-6 py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           {/* Category filters */}
           <div className="flex items-center gap-2 overflow-x-auto pb-0.5 no-scrollbar">
             {FILTERS.map(f => {
@@ -368,7 +368,7 @@ function ModelesPageContent() {
       </div>
 
       {/* ── TEMPLATE GRID ── */}
-      <main className="max-w-7xl mx-auto px-6 lg:px-8 py-12">
+      <main className="max-w-public mx-auto px-6 lg:px-8 py-12">
         {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
             {Array.from({ length: 8 }).map((_, i) => (
@@ -414,7 +414,7 @@ function ModelesPageContent() {
 
       {/* ── ATS CALLOUT SECTION ── */}
       <section className="bg-gray-50 border-t border-gray-100 py-16">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        <div className="max-w-public mx-auto px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {[
               {
@@ -452,7 +452,7 @@ function ModelesPageContent() {
       <section className="relative py-20 overflow-hidden bg-white border-t border-gray-100">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-indigo-50 rounded-[100%] blur-3xl opacity-60" />
-        <div className="max-w-3xl mx-auto px-6 text-center relative z-10">
+        <div className="max-w-column mx-auto px-6 text-center relative z-10">
           <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 tracking-tight mb-5">
             Prêt à décrocher votre prochain poste ?
           </h2>

@@ -5,12 +5,11 @@ import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { useProfileStore } from '@/store/profile';
 import { useCvStore } from '@/store/cv';
-import { useUiStore } from '@/store/ui';
-import { FileText, Plus, Target, User, Briefcase, TrendingUp, ChevronRight, Award, Clock, Sparkles, X } from 'lucide-react';
+import { FileText, Plus, Briefcase, TrendingUp, ChevronRight, Clock } from 'lucide-react';
 import { PaywallModal } from '@/components/app/shared/PaywallModal';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { useRouter } from 'next/navigation';
+import { PageHeader } from '@/components/ui/PageHeader';
 
 function getCompletionPercent(profile: any, about: string): number {
   const checks = [
@@ -32,7 +31,6 @@ export default function AccueilPage() {
   const { cvs } = useCvStore();
   const [about, setAbout] = useState('');
   const [mounted, setMounted] = useState(false);
-  const router = useRouter();
 
   const [showProPaywall, setShowProPaywall] = useState(false);
 
@@ -68,7 +66,7 @@ export default function AccueilPage() {
   if (!mounted) return null;
 
   return (
-    <div className="px-6 py-8 space-y-10 max-w-5xl mx-auto animate-fade-in">
+    <div className="space-y-10 animate-fade-in pb-12">
 
       {/* PaywallModal — s'ouvre si l'utilisateur n'est pas PRO */}
       <PaywallModal
@@ -78,115 +76,110 @@ export default function AccueilPage() {
         description="Le ciblage de CV par IA est réservé aux abonnés carriey PRO. Passez au plan PRO pour générer un CV parfaitement ciblé sur chaque offre d'emploi en 1 clic."
       />
 
-      {/* Header compact */}
-      <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
-        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Bonjour {firstName} 👋</h1>
-        <p className="text-base text-gray-500 mt-1">
-          Voici votre tableau de bord personnel.
-        </p>
-      </div>
+      {/* Header */}
+      <PageHeader
+        title={`Bonjour ${firstName} 👋`}
+        description="Voici votre tableau de bord personnel."
+      />
 
-      {/* Completion Card (Dense) */}
-      <div className="bg-gradient-to-br from-indigo-600 to-indigo-800 rounded-3xl p-6 shadow-xl shadow-indigo-600/20 text-white relative overflow-hidden animate-slide-up hover:-translate-y-1 hover:shadow-2xl hover:shadow-indigo-600/30 transition-all duration-500" style={{ animationDelay: '0.2s' }}>
+      {/* Completion Card */}
+      <div className="bg-white rounded-panel p-6 border border-border shadow-sm relative overflow-hidden">
         <div className="relative z-10">
           <div className="flex justify-between items-end mb-4">
             <div>
-              <p className="text-indigo-200 text-xs font-bold tracking-widest mb-1.5 uppercase">Profil professionnel</p>
-              <p className="text-2xl font-bold">Complété à {completion}%</p>
+              <p className="text-text-muted text-ui-xs font-bold tracking-widest mb-1.5 uppercase">Profil professionnel</p>
+              <p className="text-text-primary text-ui-2xl font-bold">Complété à {completion}%</p>
             </div>
-            <Link href="/profil" className="bg-white/20 hover:bg-white/30 transition-colors backdrop-blur-md rounded-2xl p-3 shadow-sm">
-              <ChevronRight className="w-5 h-5 text-white" />
+            <Link href="/profil" className="p-2 border border-border rounded-panel text-text-secondary hover:text-primary hover:border-primary/20 hover:bg-primary-subtle transition-colors">
+              <ChevronRight className="w-5 h-5" />
             </Link>
           </div>
 
-          <div className="h-1.5 rounded-full bg-white/20 overflow-hidden">
+          <div className="h-2 rounded-full bg-background-subtle overflow-hidden border border-border/50">
             <div
-              className="h-full rounded-full bg-white transition-all duration-1000 ease-out"
+              className="h-full rounded-full bg-primary transition-all duration-1000 ease-out"
               style={{ width: `${completion}%` }}
             />
           </div>
         </div>
-
-        {/* Decor */}
-        <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 bg-white opacity-5 rounded-full blur-2xl pointer-events-none" />
       </div>
 
-      {/* Quick Actions (Grid 2x2) */}
-      <section className="animate-slide-up" style={{ animationDelay: '0.3s' }}>
-        <h2 className="text-xs font-bold text-gray-400 mb-4 px-1 uppercase tracking-widest">Actions rapides</h2>
+      {/* Quick Actions (Grid) */}
+      <section>
+        <h2 className="text-ui-xs font-bold text-text-muted mb-4 px-1 uppercase tracking-widest">Actions rapides</h2>
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <Link
             href="/candidatures/nouvelle"
-            className="flex flex-col items-start gap-3 p-5 rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-white shadow-sm hover:border-indigo-300 hover:shadow-xl hover:shadow-indigo-600/10 hover:-translate-y-1 transition-all duration-300 active:scale-95 group"
+            className="flex flex-col items-start gap-3 p-5 rounded-panel border border-border bg-background shadow-sm hover:bg-background-subtle transition-colors group"
           >
-            <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+            <div className="w-10 h-10 rounded-panel bg-primary-subtle text-primary border border-border flex items-center justify-center">
               <Plus className="w-5 h-5" />
             </div>
             <div className="text-left">
-              <p className="font-bold text-gray-900 text-sm">Nouvelle candidature</p>
-              <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">Adapter CV & Lettre par IA</p>
+              <p className="font-bold text-text-primary text-ui-sm">Nouvelle candidature</p>
+              <p className="text-ui-xs text-text-secondary mt-0.5 leading-relaxed">Adapter CV & Lettre par IA</p>
             </div>
           </Link>
 
           <Link
             href="/candidatures"
-            className="flex flex-col items-start gap-3 p-5 rounded-2xl border border-gray-200/60 bg-white/60 backdrop-blur-md shadow-sm hover:border-blue-300 hover:shadow-xl hover:shadow-blue-600/10 hover:-translate-y-1 transition-all duration-300 active:scale-95 group"
+            className="flex flex-col items-start gap-3 p-5 rounded-panel border border-border bg-background shadow-sm hover:bg-background-subtle transition-colors group"
           >
-            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+            <div className="w-10 h-10 rounded-panel bg-background text-primary border border-border flex items-center justify-center">
               <Briefcase className="w-5 h-5" />
             </div>
             <div className="text-left">
-              <p className="font-bold text-gray-900 text-sm">Candidatures</p>
-              <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">Suivre l'avancement</p>
+              <p className="font-bold text-text-primary text-ui-sm">Candidatures</p>
+              <p className="text-ui-xs text-text-secondary mt-0.5 leading-relaxed">Suivre l'avancement</p>
             </div>
           </Link>
 
           <Link
             href="/statistiques"
-            className="flex flex-col items-start gap-3 p-5 rounded-2xl border border-gray-200/60 bg-white/60 backdrop-blur-md shadow-sm hover:border-orange-300 hover:shadow-xl hover:shadow-orange-600/10 hover:-translate-y-1 transition-all duration-300 active:scale-95 group"
+            className="flex flex-col items-start gap-3 p-5 rounded-panel border border-border bg-background shadow-sm hover:bg-background-subtle transition-colors group"
           >
-            <div className="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+            <div className="w-10 h-10 rounded-panel bg-background text-primary border border-border flex items-center justify-center">
               <TrendingUp className="w-5 h-5" />
             </div>
             <div className="text-left">
-              <p className="font-bold text-gray-900 text-sm">Statistiques</p>
-              <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">Voir les métriques</p>
+              <p className="font-bold text-text-primary text-ui-sm">Statistiques</p>
+              <p className="text-ui-xs text-text-secondary mt-0.5 leading-relaxed">Voir les métriques</p>
             </div>
           </Link>
         </div>
       </section>
 
       {/* Recent Activity / Docs */}
-      <section className="animate-slide-up" style={{ animationDelay: '0.4s' }}>
+      <section>
         <div className="flex items-center justify-between mb-4 px-1">
-          <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Récemment modifiés</h2>
-          <Link href="/mes-documents" className="text-sm font-bold text-indigo-600 hover:text-indigo-700 transition-colors">Voir tout</Link>
+          <h2 className="text-ui-xs font-bold text-text-muted uppercase tracking-widest">Récemment modifiés</h2>
+          <Link href="/mes-documents" className="text-ui-sm font-bold text-primary hover:underline transition-colors">Voir tout</Link>
         </div>
 
         <div className="space-y-3">
           {recentDocs.length > 0 ? (
             recentDocs.map((doc) => (
-              <Link href={`/mes-documents/cv/${doc.id}`} key={doc.id} className="group flex items-center gap-4 p-4 bg-white/60 backdrop-blur-md rounded-2xl border border-gray-200/60 shadow-sm hover:shadow-lg hover:border-indigo-100 hover:-translate-y-0.5 transition-all duration-300 cursor-pointer">
-                <div className="w-12 h-12 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center flex-shrink-0 group-hover:bg-indigo-50 transition-colors">
-                  <FileText className="w-5 h-5 text-gray-400 group-hover:text-indigo-500 transition-colors" />
+              <Link href={`/mes-documents/cv/${doc.id}`} key={doc.id} className="group flex items-center gap-4 p-4 bg-background rounded-panel border border-border shadow-sm hover:bg-background-subtle transition-colors cursor-pointer">
+                <div className="w-12 h-12 rounded-panel bg-background border border-border flex items-center justify-center flex-shrink-0 group-hover:text-primary">
+                  <FileText className="w-5 h-5 text-text-muted group-hover:text-primary transition-colors" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-bold text-gray-900 text-base truncate">{doc.title}</p>
+                  <p className="font-bold text-text-primary text-ui-base truncate">{doc.title}</p>
                   <div className="flex items-center gap-1.5 mt-1">
-                    <Clock className="w-3.5 h-3.5 text-gray-400" />
-                    <p className="text-xs text-gray-500 truncate font-medium">
+                    <Clock className="w-3.5 h-3.5 text-text-muted" />
+                    <p className="text-ui-xs text-text-secondary truncate font-medium">
                       Modifié il y a {formatDistanceToNow(new Date(doc.updated_at || doc.created_at || Date.now()), { addSuffix: false, locale: fr })}
                     </p>
                   </div>
                 </div>
-                <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-indigo-500 transition-colors mr-1" />
+                <ChevronRight className="w-5 h-5 text-text-muted group-hover:text-primary transition-colors mr-1" />
               </Link>
             ))
           ) : (
-            <div className="flex flex-col items-center justify-center p-6 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-              <FileText className="w-6 h-6 text-gray-300 mb-2" />
-              <p className="text-xs font-medium text-gray-500">Aucun document récent</p>
+            <div className="flex flex-col items-center justify-center p-6 bg-background-subtle rounded-panel border border-dashed border-border">
+              <FileText className="w-6 h-6 text-text-muted mb-2" />
+              <p className="text-ui-xs font-medium text-text-secondary">Aucun document récent</p>
             </div>
           )}
         </div>

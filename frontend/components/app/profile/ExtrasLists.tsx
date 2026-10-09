@@ -6,10 +6,11 @@ import { Globe, Award, X, ExternalLink, Trash2, Plus } from 'lucide-react';
 
 import { ProfileLanguage, ProfileCertification } from '@/types/profile';
 import BottomSheet from '@/components/app/shared/BottomSheet';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
 
 const LANGUAGE_LEVELS = ['Notions', 'Intermédiaire', 'Courant', 'Bilingue', 'Langue maternelle'];
-
-const inputClass = "block w-full rounded-xl border border-gray-200 bg-white py-3 px-4 text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none text-sm transition-all";
 
 // ---------- Languages ----------
 export function LanguagesList() {
@@ -30,17 +31,17 @@ export function LanguagesList() {
   return (
     <div className="space-y-4">
       {languages.length === 0 && (
-        <EmptyState icon={<Globe className="w-8 h-8 text-gray-400" />} text="Aucune langue ajoutée" sub="Français, Anglais, Espagnol…" />
+        <EmptyState icon={<Globe className="w-8 h-8 text-text-muted" />} text="Aucune langue ajoutée" sub="Français, Anglais, Espagnol…" />
       )}
 
       {languages.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {languages.map(l => (
-            <div key={l.id} className="group flex items-center gap-2 bg-white border border-gray-200 rounded-full px-4 py-1.5 text-sm hover:border-gray-300 transition-all shadow-sm">
-              <span className="font-medium text-gray-800">{l.name}</span>
-              <span className="text-xs text-gray-400">·</span>
-              <span className="text-xs text-gray-500">{l.level}</span>
-              <button onClick={() => remove(l.id)} className="ml-1 text-gray-300 hover:text-red-400 transition-all focus:outline-none">
+            <div key={l.id} className="group flex items-center gap-2 bg-background border border-border rounded-full px-4 py-1.5 text-ui-sm hover:border-primary transition-colors shadow-sm">
+              <span className="font-medium text-text-primary">{l.name}</span>
+              <span className="text-ui-xs text-text-muted">·</span>
+              <span className="text-ui-xs text-text-secondary">{l.level}</span>
+              <button onClick={() => remove(l.id)} className="ml-1 text-text-muted hover:text-danger-text transition-colors focus:outline-none">
                 <X className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -49,33 +50,37 @@ export function LanguagesList() {
       )}
 
       {!isAdding && (
-        <button onClick={() => setIsAdding(true)} className="flex items-center gap-2 text-sm font-semibold text-indigo-600 hover:text-indigo-700 transition-colors w-full justify-center py-3 rounded-xl border border-dashed border-indigo-200 hover:bg-indigo-50">
-          <Plus className="w-4 h-4" /> Ajouter une langue
-        </button>
+        <Button variant="ghost" fullWidth leftIcon={<Plus className="w-4 h-4" />} onClick={() => setIsAdding(true)} className="border border-dashed border-border">
+          Ajouter une langue
+        </Button>
       )}
 
       <BottomSheet isOpen={isAdding} onClose={() => setIsAdding(false)} title="Ajouter une langue">
         <div className="space-y-5 pb-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Langue <span className="text-red-400">*</span></label>
-            <input type="text" autoFocus value={form.name || ''} onChange={e => setForm({...form, name: e.target.value})} placeholder="Ex : Anglais, Espagnol…" className={inputClass} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Niveau <span className="text-red-400">*</span></label>
-            <select value={form.level || ''} onChange={e => setForm({...form, level: e.target.value})} className={inputClass}>
-              <option value="">Sélectionner…</option>
-              {LANGUAGE_LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
-            </select>
-          </div>
+          <Input
+            label="Langue *"
+            value={form.name || ''}
+            onChange={e => setForm({...form, name: e.target.value})}
+            placeholder="Ex : Anglais, Espagnol…"
+            autoFocus
+          />
+          <Select
+            label="Niveau *"
+            value={form.level || ''}
+            onChange={e => setForm({...form, level: e.target.value})}
+          >
+            <option value="">Sélectionner…</option>
+            {LANGUAGE_LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
+          </Select>
           
-          <div className="pt-2">
-            <button
+          <div className="pt-4">
+            <Button
+              fullWidth
               onClick={handleAdd}
               disabled={!form.name || !form.level}
-              className="w-full bg-indigo-600 text-white font-semibold py-3.5 px-4 rounded-xl hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-indigo-600/20"
             >
               Enregistrer
-            </button>
+            </Button>
           </div>
         </div>
       </BottomSheet>
@@ -103,63 +108,77 @@ export function CertificationsList() {
   return (
     <div className="space-y-4">
       {certifications.length === 0 && (
-        <EmptyState icon={<Award className="w-8 h-8 text-gray-400" />} text="Aucune certification ajoutée" sub="Diplômes professionnels, formations, licences…" />
+        <EmptyState icon={<Award className="w-8 h-8 text-text-muted" />} text="Aucune certification ajoutée" sub="Diplômes professionnels, formations, licences…" />
       )}
 
-      {certifications.map(cert => (
-        <div key={cert.id} className="group flex items-start justify-between gap-4 rounded-xl border border-gray-100 bg-white p-5 hover:border-gray-300 transition-all shadow-sm">
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-gray-900">{cert.name}</p>
-            <p className="text-sm text-indigo-600 font-medium mt-0.5">{cert.issuer}</p>
-            {cert.date && <p className="text-xs text-gray-400 mt-0.5">{cert.date}</p>}
-            {cert.url && (
-              <a href={cert.url} target="_blank" rel="noreferrer" className="text-xs text-indigo-500 hover:text-indigo-700 transition-colors mt-1.5 inline-flex items-center gap-1 bg-indigo-50 px-2 py-1 rounded-md w-max">
-                Voir le certificat
-                <ExternalLink className="w-3 h-3" />
-              </a>
-            )}
-          </div>
-          <button onClick={() => remove(cert.id)} className="p-1.5 rounded-md text-gray-300 hover:bg-red-50 hover:text-red-500 transition-all">
-            <Trash2 className="w-4 h-4" />
-          </button>
+      {certifications.length > 0 && (
+        <div className="space-y-3">
+          {certifications.map(cert => (
+            <div key={cert.id} className="group flex items-start justify-between gap-4 rounded-panel border border-border bg-background p-5 hover:border-primary transition-colors shadow-sm">
+              <div className="flex-1 min-w-0">
+                <p className="text-ui-sm font-semibold text-text-primary">{cert.name}</p>
+                <p className="text-ui-sm text-primary font-medium mt-0.5">{cert.issuer}</p>
+                {cert.date && <p className="text-ui-xs text-text-secondary mt-0.5">{cert.date}</p>}
+                {cert.url && (
+                  <a href={cert.url} target="_blank" rel="noreferrer" className="text-ui-xs text-primary hover:text-primary-hover transition-colors mt-1.5 inline-flex items-center gap-1 bg-background-subtle border border-border px-2 py-1 rounded-button w-max">
+                    Voir le certificat
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                )}
+              </div>
+              <button onClick={() => remove(cert.id)} className="p-1.5 rounded-button text-text-muted hover:bg-danger-bg hover:text-danger-text transition-colors">
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          ))}
         </div>
-      ))}
+      )}
 
       {!isAdding && (
-        <button onClick={() => setIsAdding(true)} className="flex items-center gap-2 text-sm font-semibold text-indigo-600 hover:text-indigo-700 transition-colors w-full justify-center py-3 rounded-xl border border-dashed border-indigo-200 hover:bg-indigo-50">
-          <Plus className="w-4 h-4" /> Ajouter une certification
-        </button>
+        <Button variant="ghost" fullWidth leftIcon={<Plus className="w-4 h-4" />} onClick={() => setIsAdding(true)} className="border border-dashed border-border">
+          Ajouter une certification
+        </Button>
       )}
 
       <BottomSheet isOpen={isAdding} onClose={() => setIsAdding(false)} title="Ajouter une certification">
         <div className="space-y-5 pb-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Intitulé <span className="text-red-400">*</span></label>
-            <input type="text" autoFocus value={form.name || ''} onChange={e => setForm({...form, name: e.target.value})} placeholder="Ex : Permis B, TOEIC, AWS Certified…" className={inputClass} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Organisme <span className="text-red-400">*</span></label>
-            <input type="text" value={form.issuer || ''} onChange={e => setForm({...form, issuer: e.target.value})} placeholder="Ex : CERFA, ETS, Amazon…" className={inputClass} />
-          </div>
+          <Input
+            label="Intitulé *"
+            value={form.name || ''}
+            onChange={e => setForm({...form, name: e.target.value})}
+            placeholder="Ex : Permis B, TOEIC, AWS Certified…"
+            autoFocus
+          />
+          <Input
+            label="Organisme *"
+            value={form.issuer || ''}
+            onChange={e => setForm({...form, issuer: e.target.value})}
+            placeholder="Ex : CERFA, ETS, Amazon…"
+          />
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Date d'obtention</label>
-              <input type="month" value={form.date || ''} onChange={e => setForm({...form, date: e.target.value})} className={inputClass} />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Lien (optionnel)</label>
-              <input type="url" value={form.url || ''} onChange={e => setForm({...form, url: e.target.value})} placeholder="https://..." className={inputClass} />
-            </div>
+            <Input
+              type="month"
+              label="Date d'obtention"
+              value={form.date || ''}
+              onChange={e => setForm({...form, date: e.target.value})}
+            />
+            <Input
+              type="url"
+              label="Lien (optionnel)"
+              value={form.url || ''}
+              onChange={e => setForm({...form, url: e.target.value})}
+              placeholder="https://..."
+            />
           </div>
           
-          <div className="pt-2">
-            <button
+          <div className="pt-4">
+            <Button
+              fullWidth
               onClick={handleAdd}
               disabled={!form.name || !form.issuer}
-              className="w-full bg-indigo-600 text-white font-semibold py-3.5 px-4 rounded-xl hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-indigo-600/20"
             >
               Enregistrer
-            </button>
+            </Button>
           </div>
         </div>
       </BottomSheet>
@@ -170,22 +189,10 @@ export function CertificationsList() {
 // ---------- Shared components ----------
 function EmptyState({ icon, text, sub }: { icon: React.ReactNode; text: string; sub: string }) {
   return (
-    <div className="rounded-xl border-2 border-dashed border-gray-200 p-10 text-center flex flex-col items-center">
-      <div className="mb-3">{icon}</div>
-      <p className="text-sm font-medium text-gray-500">{text}</p>
-      <p className="text-xs text-gray-400 mt-1">{sub}</p>
+    <div className="rounded-panel border-2 border-dashed border-border bg-background-subtle p-8 text-center flex flex-col items-center">
+      <div className="mb-3 bg-background rounded-full p-3 border border-border">{icon}</div>
+      <p className="text-ui-sm font-semibold text-text-primary">{text}</p>
+      <p className="text-ui-xs text-text-secondary mt-1">{sub}</p>
     </div>
-  );
-}
-
-function AddButton({ onClick, label }: { onClick: () => void; label: string }) {
-  return (
-    <button
-      onClick={onClick}
-      className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-200 py-3 text-sm font-medium text-gray-400 hover:border-indigo-300 hover:text-indigo-600 transition-all"
-    >
-      <Plus className="w-4 h-4" />
-      {label}
-    </button>
   );
 }

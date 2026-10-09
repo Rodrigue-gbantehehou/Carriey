@@ -16,6 +16,7 @@ import { publicPagesApi } from '@/lib/public-pages-api';
 import { PublicPage } from '@/types/public-page';
 import { PageCard } from '@/components/app/public-page/shared/PageCard';
 import { PaywallModal } from '@/components/app/shared/PaywallModal';
+import { PageHeader } from '@/components/ui/PageHeader';
 
 const TABS = [
   { id: 'all', label: 'Tous' },
@@ -114,7 +115,7 @@ function MesDocumentsContent() {
   if (!mounted) return null;
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-8 animate-fade-in">
+    <div className="animate-fade-in pb-12">
 
       {/* PaywallModal — s'ouvre si l'utilisateur n'est pas PRO */}
       <PaywallModal
@@ -124,34 +125,31 @@ function MesDocumentsContent() {
         description="Le ciblage de CV par IA est réservé aux abonnés carriey PRO. Passez au plan PRO pour générer un CV parfaitement ciblé sur chaque offre d'emploi en 1 clic."
       />
 
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10 animate-slide-up" style={{ animationDelay: '0.1s' }}>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Mes documents</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Gérez tous les documents générés à partir de votre profil.
-          </p>
-        </div>
-        <div className="flex gap-3">
+      <PageHeader
+        title="Mes documents"
+        description="Gérez tous les documents générés à partir de votre profil."
+        actions={
           <Link
             href="/candidatures/nouvelle"
-            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20 hover:scale-[1.02] active:scale-[0.98]"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-primary text-white rounded-button font-medium text-ui-sm hover:bg-primary-hover transition-colors shadow-sm"
           >
             <Plus className="w-4 h-4" />
-            Nouvelle candidature
+            Nouveau document
           </Link>
-        </div>
-      </div>
+        }
+        className="animate-slide-up mb-10"
+      />
 
       {/* Toolbar & Tabs */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 animate-slide-up" style={{ animationDelay: '0.2s' }}>
-        <div className="flex items-center gap-1 bg-white/60 backdrop-blur-md border border-gray-200/60 p-1.5 rounded-2xl overflow-x-auto hide-scrollbar shadow-sm">
+        <div className="flex items-center gap-1 bg-white/60 backdrop-blur-md border border-border/60 p-1.5 rounded-panel overflow-x-auto hide-scrollbar shadow-sm">
           {TABS.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`px-4 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${activeTab === tab.id
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
+                ? 'bg-white text-text-primary shadow-sm'
+                : 'text-text-secondary hover:text-text-secondary hover:bg-border/50'
                 }`}
             >
               {tab.label}
@@ -161,24 +159,24 @@ function MesDocumentsContent() {
 
         {/* Search placeholder */}
         <div className="relative">
-          <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-text-muted absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Rechercher..."
-            className="pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 w-full sm:w-64"
+            className="pl-9 pr-4 py-2 bg-white border border-border rounded-panel text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary w-full sm:w-64"
           />
         </div>
       </div>
 
       {isEmpty ? (
-        <div className="rounded-2xl border-2 border-dashed border-gray-200 p-12 text-center bg-gray-50/50 mt-10">
+        <div className="rounded-panel border-2 border-dashed border-border p-12 text-center bg-background-subtle/50 mt-10">
           <div className="mx-auto w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center mb-4">
-            <FileText className="w-6 h-6 text-gray-400" />
+            <FileText className="w-6 h-6 text-text-muted" />
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-1">
+          <h3 className="text-lg font-semibold text-text-primary mb-1">
             {activeTab === 'all' ? 'Aucun document' : `Aucun document de type "${TABS.find(t => t.id === activeTab)?.label}"`}
           </h3>
-          <p className="text-sm text-gray-500 max-w-sm mx-auto mb-6">
+          <p className="text-sm text-text-secondary max-w-sm mx-auto mb-6">
             {activeTab === 'all' || activeTab === 'cv' || activeTab === 'pages' || activeTab === 'lettres'
               ? "Vous n'avez pas encore généré de document de ce type. Créez-en un maintenant depuis votre profil !"
               : "Cette fonctionnalité arrive très bientôt dans une prochaine mise à jour de carriey."}
@@ -186,7 +184,7 @@ function MesDocumentsContent() {
           {(activeTab === 'all' || activeTab === 'cv' || activeTab === 'pages' || activeTab === 'lettres') && (
             <Link
               href="/candidatures/nouvelle"
-              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl font-semibold text-sm hover:bg-gray-50 transition-colors shadow-sm"
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-border text-text-secondary rounded-panel font-semibold text-sm hover:bg-background-subtle transition-colors shadow-sm"
             >
               <Plus className="w-4 h-4" />
               Nouvelle candidature
@@ -200,11 +198,11 @@ function MesDocumentsContent() {
           {filteredCvs.map((cv: any) => (
             <div
               key={cv.id}
-              className="group bg-white/60 backdrop-blur-md rounded-3xl border border-gray-200/60 overflow-hidden hover:shadow-xl hover:shadow-indigo-600/10 hover:-translate-y-1 hover:border-indigo-300 transition-all duration-300 cursor-pointer flex flex-col"
+              className="group bg-white/60 backdrop-blur-md rounded-panel border border-border/60 overflow-hidden hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 hover:border-primary/30 transition-all duration-300 cursor-pointer flex flex-col"
               onClick={() => router.push(`/mes-documents/cv/${cv.id}`)}
             >
-              <div className="aspect-[1/1.4] bg-gray-100 border-b border-gray-100 relative overflow-hidden flex items-center justify-center p-4">
-                <div className="w-full h-full bg-white shadow-sm rounded-sm p-0 relative border border-gray-100 transition-transform group-hover:scale-[1.02] overflow-hidden">
+              <div className="aspect-[1/1.4] bg-border border-b border-border relative overflow-hidden flex items-center justify-center p-4">
+                <div className="w-full h-full bg-white shadow-sm rounded-sm p-0 relative border border-border transition-transform group-hover:scale-[1.02] overflow-hidden">
                   {dbThemes.find(t => t.slug === cv.template_id || t.id === cv.template_id)?.preview_image ? (
                     <img
                       src={dbThemes.find(t => t.slug === cv.template_id || t.id === cv.template_id)?.preview_image.startsWith('http')
@@ -219,8 +217,8 @@ function MesDocumentsContent() {
                 </div>
 
                 {/* Overlay with edit button */}
-                <div className="absolute inset-0 bg-gray-900/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[1px]">
-                  <span className="px-4 py-2 bg-white text-gray-900 rounded-full text-sm font-semibold shadow-lg flex items-center gap-2 transform translate-y-4 group-hover:translate-y-0 transition-all">
+                <div className="absolute inset-0 bg-text-primary/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[1px]">
+                  <span className="px-4 py-2 bg-white text-text-primary rounded-full text-sm font-semibold shadow-lg flex items-center gap-2 transform translate-y-4 group-hover:translate-y-0 transition-all">
                     <Edit2 className="w-4 h-4" />
                     Éditer
                   </span>
@@ -229,12 +227,12 @@ function MesDocumentsContent() {
 
               <div className="p-4 flex flex-col flex-1">
                 <div className="flex items-start justify-between gap-3 mb-2">
-                  <h3 className="font-semibold text-gray-900 line-clamp-1 flex-1" title={cv.title}>
+                  <h3 className="font-semibold text-text-primary line-clamp-1 flex-1" title={cv.title}>
                     {cv.title}
                   </h3>
                   <button
                     onClick={(e) => handleDeleteCv(e, cv.id)}
-                    className="text-gray-400 hover:text-red-500 p-1.5 -mr-1.5 rounded-lg hover:bg-red-50 transition-colors"
+                    className="text-text-muted hover:text-danger-text p-1.5 -mr-1.5 rounded-lg hover:bg-danger-bg transition-colors"
                     title="Supprimer"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -242,10 +240,10 @@ function MesDocumentsContent() {
                 </div>
 
                 <div className="flex items-center gap-4 text-xs font-medium mt-auto">
-                  <div className="flex items-center gap-1.5 text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md">
+                  <div className="flex items-center gap-1.5 text-primary bg-background-subtle px-2 py-1 rounded-md">
                     <span className="uppercase tracking-wider text-[10px] font-bold">CV</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-gray-400">
+                  <div className="flex items-center gap-1.5 text-text-muted">
                     <Clock className="w-3.5 h-3.5" />
                     {formatDistanceToNow(new Date(cv.updated_at || cv.created_at), { addSuffix: true, locale: fr })}
                   </div>
@@ -258,11 +256,11 @@ function MesDocumentsContent() {
           {filteredLetters.map((lettre: any) => (
             <div
               key={lettre.id}
-              className="group bg-white/60 backdrop-blur-md rounded-3xl border border-gray-200/60 overflow-hidden hover:shadow-xl hover:shadow-violet-600/10 hover:-translate-y-1 hover:border-violet-300 transition-all duration-300 cursor-pointer flex flex-col"
+              className="group bg-white/60 backdrop-blur-md rounded-panel border border-border/60 overflow-hidden hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 hover:border-primary/30 transition-all duration-300 cursor-pointer flex flex-col"
               onClick={() => router.push(`/mes-documents/lettre/${lettre.id}`)}
             >
-              <div className="aspect-[1/1.4] bg-gray-100 border-b border-gray-100 relative overflow-hidden flex items-center justify-center p-4">
-                <div className="w-full h-full bg-white shadow-sm rounded-sm p-0 relative border border-gray-100 transition-transform group-hover:scale-[1.02] flex flex-col overflow-hidden">
+              <div className="aspect-[1/1.4] bg-border border-b border-border relative overflow-hidden flex items-center justify-center p-4">
+                <div className="w-full h-full bg-white shadow-sm rounded-sm p-0 relative border border-border transition-transform group-hover:scale-[1.02] flex flex-col overflow-hidden">
                   {dbThemes.find(t => t.slug === lettre.template_id || t.id === lettre.template_id)?.preview_image ? (
                     <img
                       src={dbThemes.find(t => t.slug === lettre.template_id || t.id === lettre.template_id)?.preview_image.startsWith('http')
@@ -274,21 +272,21 @@ function MesDocumentsContent() {
                   ) : (
                     <div className="w-full h-full p-4 flex flex-col">
                       {/* Miniature abstraite de lettre */}
-                      <div className="w-1/3 h-1.5 bg-gray-200 rounded-full mb-6 ml-auto" />
-                      <div className="w-1/4 h-1.5 bg-gray-200 rounded-full mb-8" />
-                      <div className="w-full h-1 bg-gray-100 rounded-full mb-2" />
-                      <div className="w-full h-1 bg-gray-100 rounded-full mb-2" />
-                      <div className="w-5/6 h-1 bg-gray-100 rounded-full mb-2" />
-                      <div className="w-4/6 h-1 bg-gray-100 rounded-full mb-6" />
-                      <div className="w-full h-1 bg-gray-100 rounded-full mb-2" />
-                      <div className="w-5/6 h-1 bg-gray-100 rounded-full mb-2" />
+                      <div className="w-1/3 h-1.5 bg-border rounded-full mb-6 ml-auto" />
+                      <div className="w-1/4 h-1.5 bg-border rounded-full mb-8" />
+                      <div className="w-full h-1 bg-border rounded-full mb-2" />
+                      <div className="w-full h-1 bg-border rounded-full mb-2" />
+                      <div className="w-5/6 h-1 bg-border rounded-full mb-2" />
+                      <div className="w-4/6 h-1 bg-border rounded-full mb-6" />
+                      <div className="w-full h-1 bg-border rounded-full mb-2" />
+                      <div className="w-5/6 h-1 bg-border rounded-full mb-2" />
                     </div>
                   )}
                 </div>
 
                 {/* Overlay with edit button */}
-                <div className="absolute inset-0 bg-gray-900/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[1px]">
-                  <span className="px-4 py-2 bg-white text-gray-900 rounded-full text-sm font-semibold shadow-lg flex items-center gap-2 transform translate-y-4 group-hover:translate-y-0 transition-all">
+                <div className="absolute inset-0 bg-text-primary/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[1px]">
+                  <span className="px-4 py-2 bg-white text-text-primary rounded-full text-sm font-semibold shadow-lg flex items-center gap-2 transform translate-y-4 group-hover:translate-y-0 transition-all">
                     <Edit2 className="w-4 h-4" />
                     Éditer
                   </span>
@@ -297,12 +295,12 @@ function MesDocumentsContent() {
 
               <div className="p-4 flex flex-col flex-1">
                 <div className="flex items-start justify-between gap-3 mb-2">
-                  <h3 className="font-semibold text-gray-900 line-clamp-1 flex-1" title={lettre.title}>
+                  <h3 className="font-semibold text-text-primary line-clamp-1 flex-1" title={lettre.title}>
                     {lettre.title}
                   </h3>
                   <button
                     onClick={(e) => handleDeleteCv(e, lettre.id)}
-                    className="text-gray-400 hover:text-red-500 p-1.5 -mr-1.5 rounded-lg hover:bg-red-50 transition-colors"
+                    className="text-text-muted hover:text-danger-text p-1.5 -mr-1.5 rounded-lg hover:bg-danger-bg transition-colors"
                     title="Supprimer"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -310,10 +308,10 @@ function MesDocumentsContent() {
                 </div>
 
                 <div className="flex items-center gap-4 text-xs font-medium mt-auto">
-                  <div className="flex items-center gap-1.5 text-violet-600 bg-violet-50 px-2 py-1 rounded-md">
+                  <div className="flex items-center gap-1.5 text-primary bg-background-subtle px-2 py-1 rounded-md">
                     <span className="uppercase tracking-wider text-[10px] font-bold">LETTRE</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-gray-400">
+                  <div className="flex items-center gap-1.5 text-text-muted">
                     <Clock className="w-3.5 h-3.5" />
                     {formatDistanceToNow(new Date(lettre.updated_at || lettre.created_at), { addSuffix: true, locale: fr })}
                   </div>
@@ -341,16 +339,16 @@ function MesDocumentsContent() {
       {confirmDeletePage && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40" onClick={() => setConfirmDeletePage(null)} />
-          <div className="relative bg-white rounded-3xl p-6 w-full max-w-sm shadow-xl">
-            <h3 className="text-lg font-bold text-gray-900 mb-2">Supprimer la page ?</h3>
-            <p className="text-sm text-gray-500 mb-6">
+          <div className="relative bg-white rounded-panel p-6 w-full max-w-sm shadow-xl">
+            <h3 className="text-lg font-bold text-text-primary mb-2">Supprimer la page ?</h3>
+            <p className="text-sm text-text-secondary mb-6">
               Voulez-vous vraiment supprimer &quot;{confirmDeletePage.title}&quot; ? Cette action est irréversible.
             </p>
             <div className="flex gap-3">
-              <button onClick={() => setConfirmDeletePage(null)} className="flex-1 py-3 text-sm font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors">
+              <button onClick={() => setConfirmDeletePage(null)} className="flex-1 py-3 text-sm font-bold text-text-secondary bg-border hover:bg-border rounded-panel transition-colors">
                 Annuler
               </button>
-              <button onClick={doDeletePage} className="flex-1 py-3 text-sm font-bold text-white bg-red-500 hover:bg-red-600 rounded-xl transition-colors">
+              <button onClick={doDeletePage} className="flex-1 py-3 text-sm font-bold text-white bg-danger-bg0 hover:bg-danger-text rounded-panel transition-colors">
                 Supprimer
               </button>
             </div>
@@ -364,7 +362,7 @@ function MesDocumentsContent() {
 
 export default function MesDocumentsPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-center text-gray-500">Chargement de vos documents...</div>}>
+    <Suspense fallback={<div className="p-8 text-center text-text-secondary">Chargement de vos documents...</div>}>
       <MesDocumentsContent />
     </Suspense>
   );

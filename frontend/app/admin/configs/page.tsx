@@ -102,7 +102,7 @@ export default function AdminConfigsPage() {
     }
 
     return (
-        <div className="space-y-6 max-w-4xl">
+        <div className="space-y-6 max-w-column">
             <div>
                 <h1 className="text-xl font-semibold text-gray-900 mb-1">Configurations Système</h1>
                 <p className="text-sm text-gray-500">Gérez les paramètres globaux de l'application.</p>

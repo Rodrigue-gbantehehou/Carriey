@@ -69,7 +69,7 @@ export default async function AdminTemplateDetailPage({ params }: { params: { id
         <div className="min-h-screen bg-gray-50">
             {/* Header */}
             <div className="bg-white shadow-sm border-b">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="max-w-dashboard mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between h-16">
                         <div className="flex items-center space-x-4">
                             <Link 
@@ -104,7 +104,7 @@ export default async function AdminTemplateDetailPage({ params }: { params: { id
                 </div>
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="max-w-dashboard mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Colonne principale - Prévisualisation et détails */}
                     <div className="lg:col-span-2 space-y-8">

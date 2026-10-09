@@ -69,7 +69,7 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
 
   if (!data) {
     return (
-      <div className="text-sm text-[#777777] p-4">
+      <div className="text-sm text-text-secondary p-4">
         Chargez des données pour commencer l&apos;édition
       </div>
     )
@@ -311,9 +311,9 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
                   if (wizardStep === undefined) setActiveTab(tab as typeof activeTab)
                 }}
                 disabled={wizardStep !== undefined}
-                className={`flex flex-col items-center gap-1.5 p-2 rounded-xl text-[10px] font-bold transition-all border min-w-[70px] ${activeTab === tab
-                    ? 'bg-[#00C896]/10 text-[#00C896] border-[#00C896]/20 shadow-sm'
-                    : 'bg-white text-[#777777] border-transparent hover:bg-gray-50 hover:text-[#1c1c1c]'
+                className={`flex flex-col items-center gap-1.5 p-2 rounded-panel text-[10px] font-bold transition-all border min-w-[70px] ${activeTab === tab
+                    ? 'bg-primary/10 text-primary border-primary/20 shadow-sm'
+                    : 'bg-white text-text-secondary border-transparent hover:bg-background-subtle hover:text-text-primary'
                   }`}
               >
                 {getTabIcon(tab)}
@@ -330,9 +330,9 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
                   if (wizardStep === undefined) setActiveTab(tab as typeof activeTab)
                 }}
                 disabled={wizardStep !== undefined}
-                className={`flex flex-col items-center gap-1.5 p-2 rounded-xl text-[10px] font-bold transition-all border min-w-[70px] ${activeTab === tab
-                    ? 'bg-[#00C896]/10 text-[#00C896] border-[#00C896]/20 shadow-sm'
-                    : 'bg-white text-[#777777] border-transparent hover:bg-gray-50 hover:text-[#1c1c1c]'
+                className={`flex flex-col items-center gap-1.5 p-2 rounded-panel text-[10px] font-bold transition-all border min-w-[70px] ${activeTab === tab
+                    ? 'bg-primary/10 text-primary border-primary/20 shadow-sm'
+                    : 'bg-white text-text-secondary border-transparent hover:bg-background-subtle hover:text-text-primary'
                   }`}
               >
                 {tab === 'profile' && <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>}
@@ -352,7 +352,7 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
           <div className="space-y-4">
             <div className="flex items-center gap-4 mb-6">
               <div className="relative group">
-                <div className="w-20 h-20 rounded-2xl bg-gray-50 border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden transition-all group-hover:border-[#00C896]">
+                <div className="w-20 h-20 rounded-panel bg-background-subtle border-2 border-dashed border-border flex items-center justify-center overflow-hidden transition-all group-hover:border-primary">
                   {data.profile?.photo ? (
                     <Image
                       src={data.profile.photo}
@@ -361,7 +361,7 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
                       className="object-cover"
                     />
                   ) : (
-                    <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-8 h-8 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                   )}
@@ -371,107 +371,107 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
                 </label>
               </div>
               <div>
-                <h4 className="text-xs font-bold text-[#1c1c1c] mb-1">Photo de profil</h4>
-                <p className="text-[10px] text-[#777777] leading-tight">Cliquez sur le cadre pour uploader.<br />Format JPG, PNG (max 2Mo).</p>
+                <h4 className="text-xs font-bold text-text-primary mb-1">Photo de profil</h4>
+                <p className="text-[10px] text-text-secondary leading-tight">Cliquez sur le cadre pour uploader.<br />Format JPG, PNG (max 2Mo).</p>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="col-span-2">
-                <label className="text-[10px] uppercase font-bold text-[#777777] block mb-1">Nom complet</label>
+                <label className="text-[10px] uppercase font-bold text-text-secondary block mb-1">Nom complet</label>
                 <input
                   type="text"
                   value={data.profile?.name || ''}
                   onChange={(e) => updateProfile('name', e.target.value)}
-                  className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-[#1c1c1c] text-sm focus:ring-2 focus:ring-[#00C896] outline-none"
+                  className="w-full bg-white border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:ring-2 focus:ring-primary outline-none"
                 />
               </div>
               <div className="col-span-2">
-                <label className="text-[10px] uppercase font-bold text-[#777777] block mb-1">Titre du profil</label>
+                <label className="text-[10px] uppercase font-bold text-text-secondary block mb-1">Titre du profil</label>
                 <input
                   type="text"
                   value={data.profile?.title || ''}
                   onChange={(e) => updateProfile('title', e.target.value)}
                   placeholder="ex: Comptable Senior"
-                  className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-[#1c1c1c] text-sm focus:ring-2 focus:ring-[#00C896] outline-none"
+                  className="w-full bg-white border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:ring-2 focus:ring-primary outline-none"
                 />
               </div>
 
               {/* Champs Spécifiques Afrique de l'Ouest */}
-              <div className="col-span-2 mt-2 pt-2 border-t border-gray-200">
-                <p className="text-[10px] font-bold text-[#00C896] mb-2 uppercase tracking-tight">Détails (Marché Africain)</p>
+              <div className="col-span-2 mt-2 pt-2 border-t border-border">
+                <p className="text-[10px] font-bold text-primary mb-2 uppercase tracking-tight">Détails (Marché Africain)</p>
               </div>
               <div>
-                <label className="text-[10px] uppercase font-bold text-[#777777] block mb-1">Âge</label>
+                <label className="text-[10px] uppercase font-bold text-text-secondary block mb-1">Âge</label>
                 <input
                   type="text"
                   value={data.profile?.age || ''}
                   onChange={(e) => updateProfile('age', e.target.value)}
                   placeholder="32 ans"
-                  className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-[#1c1c1c] text-sm focus:ring-2 focus:ring-[#00C896] outline-none"
+                  className="w-full bg-white border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:ring-2 focus:ring-primary outline-none"
                 />
               </div>
               <div>
-                <label className="text-[10px] uppercase font-bold text-[#777777] block mb-1">Nationalité</label>
+                <label className="text-[10px] uppercase font-bold text-text-secondary block mb-1">Nationalité</label>
                 <input
                   type="text"
                   value={data.profile?.nationality || ''}
                   onChange={(e) => updateProfile('nationality', e.target.value)}
                   placeholder="Sénégalaise"
-                  className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-[#1c1c1c] text-sm focus:ring-2 focus:ring-[#00C896] outline-none"
+                  className="w-full bg-white border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:ring-2 focus:ring-primary outline-none"
                 />
               </div>
               <div className="col-span-2">
-                <label className="text-[10px] uppercase font-bold text-[#777777] block mb-1">État Civil</label>
+                <label className="text-[10px] uppercase font-bold text-text-secondary block mb-1">État Civil</label>
                 <input
                   type="text"
                   value={data.profile?.marital_status || ''}
                   onChange={(e) => updateProfile('marital_status', e.target.value)}
                   placeholder="Marié, 2 enfants"
-                  className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-[#1c1c1c] text-sm focus:ring-2 focus:ring-[#00C896] outline-none"
+                  className="w-full bg-white border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:ring-2 focus:ring-primary outline-none"
                 />
               </div>
 
-              <div className="col-span-2 mt-2 pt-2 border-t border-gray-200">
-                <p className="text-[10px] font-bold text-[#777777] mb-2 uppercase tracking-tight">Coordonnées</p>
+              <div className="col-span-2 mt-2 pt-2 border-t border-border">
+                <p className="text-[10px] font-bold text-text-secondary mb-2 uppercase tracking-tight">Coordonnées</p>
               </div>
 
               <div>
-                <label className="text-[10px] uppercase font-bold text-[#777777] block mb-1">Email</label>
+                <label className="text-[10px] uppercase font-bold text-text-secondary block mb-1">Email</label>
                 <input
                   type="email"
                   value={data.profile?.email || ''}
                   onChange={(e) => updateProfile('email', e.target.value)}
-                  className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-[#1c1c1c] text-sm focus:ring-2 focus:ring-[#00C896] outline-none"
+                  className="w-full bg-white border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:ring-2 focus:ring-primary outline-none"
                 />
               </div>
               <div>
-                <label className="text-[10px] uppercase font-bold text-[#777777] block mb-1">Téléphone</label>
+                <label className="text-[10px] uppercase font-bold text-text-secondary block mb-1">Téléphone</label>
                 <input
                   type="text"
                   value={data.profile?.phone || ''}
                   onChange={(e) => updateProfile('phone', e.target.value)}
-                  className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-[#1c1c1c] text-sm focus:ring-2 focus:ring-[#00C896] outline-none"
+                  className="w-full bg-white border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:ring-2 focus:ring-primary outline-none"
                 />
               </div>
               <div className="col-span-2">
-                <label className="text-[10px] uppercase font-bold text-[#777777] block mb-1">Localisation</label>
+                <label className="text-[10px] uppercase font-bold text-text-secondary block mb-1">Localisation</label>
                 <input
                   type="text"
                   value={data.profile?.location || ''}
                   onChange={(e) => updateProfile('location', e.target.value)}
                   placeholder="Dakar, Sénégal"
-                  className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-[#1c1c1c] text-sm focus:ring-2 focus:ring-[#00C896] outline-none"
+                  className="w-full bg-white border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:ring-2 focus:ring-primary outline-none"
                 />
               </div>
               <div className="col-span-2">
-                <label className="text-[10px] uppercase font-bold text-[#777777] block mb-1">LinkedIn</label>
+                <label className="text-[10px] uppercase font-bold text-text-secondary block mb-1">LinkedIn</label>
                 <input
                   type="text"
                   value={data.profile?.linkedin || ''}
                   onChange={(e) => updateProfile('linkedin', e.target.value)}
                   placeholder="linkedin.com/in/profil"
-                  className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-[#1c1c1c] text-sm focus:ring-2 focus:ring-[#00C896] outline-none"
+                  className="w-full bg-white border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:ring-2 focus:ring-primary outline-none"
                 />
               </div>
             </div>
@@ -481,7 +481,7 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
         {activeTab === 'summary' && (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <label className="text-[10px] uppercase font-bold text-[#777777]">Résumé professionnel (Profil)</label>
+              <label className="text-[10px] uppercase font-bold text-text-secondary">Résumé professionnel (Profil)</label>
               <button
                 type="button"
                 onClick={handleGenerateSummary}
@@ -502,10 +502,10 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
               value={data.summary || ''}
               onChange={(e) => updateSummary(e.target.value)}
               rows={8}
-              className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-[#1c1c1c] text-sm focus:ring-2 focus:ring-[#00C896] outline-none resize-none"
+              className="w-full bg-white border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:ring-2 focus:ring-primary outline-none resize-none"
               placeholder="Décrivez votre parcours et vos points forts, ou cliquez sur 'Rédiger avec l'IA' pour générer un texte captivant..."
             />
-            <p className="text-[11px] text-gray-400 italic">
+            <p className="text-[11px] text-text-muted italic">
               💡 Astuce : Renseignez au préalable votre titre de profil dans l&apos;onglet Profil pour une suggestion encore plus ciblée.
             </p>
           </div>
@@ -516,17 +516,17 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
             <MasterProfileSelector type="experience" />
             <button
               onClick={addExperience}
-              className="w-full px-3 py-2 rounded-lg bg-[#00C896] hover:bg-[#66E1B5] text-white text-xs font-bold transition-colors"
+              className="w-full px-3 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-xs font-bold transition-colors"
             >
               + AJOUTER UNE EXPÉRIENCE
             </button>
             {(data.experience || []).map((exp: any, idx: number) => (
-              <div key={idx} className="bg-white rounded-xl p-4 space-y-3 border border-gray-200 shadow-sm">
-                <div className="flex justify-between items-center border-b border-gray-200 pb-2 mb-2">
-                  <span className="text-[10px] font-bold text-[#00C896] uppercase">Expérience #{idx + 1}</span>
+              <div key={idx} className="bg-white rounded-panel p-4 space-y-3 border border-border shadow-sm">
+                <div className="flex justify-between items-center border-b border-border pb-2 mb-2">
+                  <span className="text-[10px] font-bold text-primary uppercase">Expérience #{idx + 1}</span>
                   <button
                     onClick={() => deleteExperience(idx)}
-                    className="text-red-400 hover:text-red-500 transition-colors p-1"
+                    className="text-danger-text hover:text-danger-text transition-colors p-1"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -535,57 +535,57 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
                 </div>
                 <div className="space-y-3">
                   <div>
-                    <label className="text-[10px] font-bold text-[#777777] uppercase">Entreprise</label>
+                    <label className="text-[10px] font-bold text-text-secondary uppercase">Entreprise</label>
                     <input
                       type="text"
                       value={exp.company || ''}
                       onChange={(e) => updateExperience(idx, 'company', e.target.value)}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-[#1c1c1c] text-sm focus:ring-1 focus:ring-[#00C896] outline-none"
+                      className="w-full bg-background-subtle border border-border rounded-lg px-2 py-1.5 text-text-primary text-sm focus:ring-1 focus:ring-primary outline-none"
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] font-bold text-[#777777] uppercase">Poste occupé</label>
+                    <label className="text-[10px] font-bold text-text-secondary uppercase">Poste occupé</label>
                     <input
                       type="text"
                       value={exp.role || exp.position || ''}
                       onChange={(e) => updateExperience(idx, 'role', e.target.value)}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-[#1c1c1c] text-sm focus:ring-1 focus:ring-[#00C896] outline-none"
+                      className="w-full bg-background-subtle border border-border rounded-lg px-2 py-1.5 text-text-primary text-sm focus:ring-1 focus:ring-primary outline-none"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="text-[10px] font-bold text-[#777777] uppercase">Début</label>
+                      <label className="text-[10px] font-bold text-text-secondary uppercase">Début</label>
                       <input
                         type="text"
                         value={exp.start || ''}
                         onChange={(e) => updateExperience(idx, 'start', e.target.value)}
                         placeholder="MM/AAAA"
-                        className="w-full bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-[#1c1c1c] text-sm focus:ring-1 focus:ring-[#00C896] outline-none"
+                        className="w-full bg-background-subtle border border-border rounded-lg px-2 py-1.5 text-text-primary text-sm focus:ring-1 focus:ring-primary outline-none"
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] font-bold text-[#777777] uppercase">Fin</label>
+                      <label className="text-[10px] font-bold text-text-secondary uppercase">Fin</label>
                       <input
                         type="text"
                         value={exp.end || ''}
                         onChange={(e) => updateExperience(idx, 'end', e.target.value)}
                         placeholder="Présent"
-                        className="w-full bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-[#1c1c1c] text-sm focus:ring-1 focus:ring-[#00C896] outline-none"
+                        className="w-full bg-background-subtle border border-border rounded-lg px-2 py-1.5 text-text-primary text-sm focus:ring-1 focus:ring-primary outline-none"
                       />
                     </div>
                   </div>
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
-                      <label className="text-[10px] font-bold text-[#777777] uppercase">Missions &amp; Réalisations</label>
+                      <label className="text-[10px] font-bold text-text-secondary uppercase">Missions &amp; Réalisations</label>
                       <button
                         type="button"
                         onClick={() => handleEnhanceExperience(idx)}
                         disabled={generatingExpIndex === idx}
-                        className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 hover:text-emerald-700 hover:underline transition-colors disabled:opacity-50"
+                        className="inline-flex items-center gap-1 text-[10px] font-bold text-success-text hover:text-emerald-700 hover:underline transition-colors disabled:opacity-50"
                       >
                         {generatingExpIndex === idx ? (
                           <>
-                            <span className="w-2 h-2 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+                            <span className="w-2 h-2 border-2 border-success-text border-t-transparent rounded-full animate-spin" />
                             Génération IA...
                           </>
                         ) : (
@@ -598,7 +598,7 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
                       onChange={(e) => updateExperience(idx, 'bullets', e.target.value.split('\n'))}
                       placeholder="Une réalisation par ligne..."
                       rows={3}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-[#1c1c1c] text-sm focus:ring-1 focus:ring-[#00C896] outline-none resize-none"
+                      className="w-full bg-background-subtle border border-border rounded-lg px-2 py-1.5 text-text-primary text-sm focus:ring-1 focus:ring-primary outline-none resize-none"
                     />
                   </div>
                 </div>
@@ -612,17 +612,17 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
             <MasterProfileSelector type="education" />
             <button
               onClick={addEducation}
-              className="w-full px-3 py-2 rounded-lg bg-[#00C896] hover:bg-[#66E1B5] text-white text-xs font-bold transition-colors"
+              className="w-full px-3 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-xs font-bold transition-colors"
             >
               + AJOUTER UNE FORMATION
             </button>
             {(data.education || []).map((edu: any, idx: number) => (
-              <div key={idx} className="bg-white rounded-xl p-4 space-y-3 border border-gray-200 shadow-sm">
-                <div className="flex justify-between items-center border-b border-gray-200 pb-2 mb-2">
-                  <span className="text-[10px] font-bold text-[#00C896] uppercase">Diplôme #{idx + 1}</span>
+              <div key={idx} className="bg-white rounded-panel p-4 space-y-3 border border-border shadow-sm">
+                <div className="flex justify-between items-center border-b border-border pb-2 mb-2">
+                  <span className="text-[10px] font-bold text-primary uppercase">Diplôme #{idx + 1}</span>
                   <button
                     onClick={() => deleteEducation(idx)}
-                    className="text-red-400 hover:text-red-500 transition-colors p-1"
+                    className="text-danger-text hover:text-danger-text transition-colors p-1"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -631,42 +631,42 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
                 </div>
                 <div className="space-y-3">
                   <div>
-                    <label className="text-[10px] font-bold text-[#777777] uppercase">Institution / École</label>
+                    <label className="text-[10px] font-bold text-text-secondary uppercase">Institution / École</label>
                     <input
                       type="text"
                       value={edu.institution || edu.school || ''}
                       onChange={(e) => updateEducation(idx, 'institution', e.target.value)}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-[#1c1c1c] text-sm focus:ring-1 focus:ring-[#00C896] outline-none"
+                      className="w-full bg-background-subtle border border-border rounded-lg px-2 py-1.5 text-text-primary text-sm focus:ring-1 focus:ring-primary outline-none"
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] font-bold text-[#777777] uppercase">Diplôme obtenu</label>
+                    <label className="text-[10px] font-bold text-text-secondary uppercase">Diplôme obtenu</label>
                     <input
                       type="text"
                       value={edu.degree || ''}
                       onChange={(e) => updateEducation(idx, 'degree', e.target.value)}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-[#1c1c1c] text-sm focus:ring-1 focus:ring-[#00C896] outline-none"
+                      className="w-full bg-background-subtle border border-border rounded-lg px-2 py-1.5 text-text-primary text-sm focus:ring-1 focus:ring-primary outline-none"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="text-[10px] font-bold text-[#777777] uppercase">Début</label>
+                      <label className="text-[10px] font-bold text-text-secondary uppercase">Début</label>
                       <input
                         type="text"
                         value={edu.start || ''}
                         onChange={(e) => updateEducation(idx, 'start', e.target.value)}
                         placeholder="2020"
-                        className="w-full bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-[#1c1c1c] text-sm focus:ring-1 focus:ring-[#00C896] outline-none"
+                        className="w-full bg-background-subtle border border-border rounded-lg px-2 py-1.5 text-text-primary text-sm focus:ring-1 focus:ring-primary outline-none"
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] font-bold text-[#777777] uppercase">Fin</label>
+                      <label className="text-[10px] font-bold text-text-secondary uppercase">Fin</label>
                       <input
                         type="text"
                         value={edu.end || ''}
                         onChange={(e) => updateEducation(idx, 'end', e.target.value)}
                         placeholder="2023"
-                        className="w-full bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-[#1c1c1c] text-sm focus:ring-1 focus:ring-[#00C896] outline-none"
+                        className="w-full bg-background-subtle border border-border rounded-lg px-2 py-1.5 text-text-primary text-sm focus:ring-1 focus:ring-primary outline-none"
                       />
                     </div>
                   </div>
@@ -680,17 +680,17 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
           <div className="space-y-4">
             <button
               onClick={addSkillGroup}
-              className="w-full px-3 py-2 rounded-lg bg-[#00C896] hover:bg-[#66E1B5] text-white text-xs font-bold transition-colors"
+              className="w-full px-3 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-xs font-bold transition-colors"
             >
               + AJOUTER UNE CATÉGORIE
             </button>
             {(data.skills?.groups || []).map((group: any, idx: number) => (
-              <div key={idx} className="bg-white rounded-xl p-4 space-y-3 border border-gray-200 shadow-sm">
-                <div className="flex justify-between items-center border-b border-gray-200 pb-2 mb-2">
-                  <span className="text-[10px] font-bold text-[#00C896] uppercase">Compétences #{idx + 1}</span>
+              <div key={idx} className="bg-white rounded-panel p-4 space-y-3 border border-border shadow-sm">
+                <div className="flex justify-between items-center border-b border-border pb-2 mb-2">
+                  <span className="text-[10px] font-bold text-primary uppercase">Compétences #{idx + 1}</span>
                   <button
                     onClick={() => deleteSkillGroup(idx)}
-                    className="text-red-400 hover:text-red-500 transition-colors p-1"
+                    className="text-danger-text hover:text-danger-text transition-colors p-1"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -702,14 +702,14 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
                   value={group.label || ''}
                   onChange={(e) => updateSkillGroup(idx, 'label', e.target.value)}
                   placeholder="ex: Langages de programmation"
-                  className="w-full bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-[#1c1c1c] text-sm focus:ring-1 focus:ring-[#00C896] outline-none"
+                  className="w-full bg-background-subtle border border-border rounded-lg px-2 py-1.5 text-text-primary text-sm focus:ring-1 focus:ring-primary outline-none"
                 />
                 <textarea
                   value={(group.items || []).join('\n')}
                   onChange={(e) => updateSkillGroup(idx, 'items', e.target.value.split('\n').filter(s => s.trim()))}
                   placeholder="Une par ligne (ex: React)"
                   rows={4}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-[#1c1c1c] text-sm focus:ring-1 focus:ring-[#00C896] outline-none resize-none"
+                  className="w-full bg-background-subtle border border-border rounded-lg px-2 py-1.5 text-text-primary text-sm focus:ring-1 focus:ring-primary outline-none resize-none"
                 />
               </div>
             ))}
@@ -720,35 +720,35 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
           <div className="space-y-4">
             <button
               onClick={addLanguage}
-              className="w-full px-3 py-2 rounded-lg bg-[#00C896] hover:bg-[#66E1B5] text-white text-xs font-bold transition-colors"
+              className="w-full px-3 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-xs font-bold transition-colors"
             >
               + AJOUTER UNE LANGUE
             </button>
             {(data.languages || []).map((lang: any, idx: number) => (
-              <div key={idx} className="bg-white rounded-xl p-3 flex gap-3 border border-gray-200 shadow-sm items-end">
+              <div key={idx} className="bg-white rounded-panel p-3 flex gap-3 border border-border shadow-sm items-end">
                 <div className="flex-1 space-y-2">
-                  <label className="text-[10px] font-bold text-[#777777] uppercase">Langue</label>
+                  <label className="text-[10px] font-bold text-text-secondary uppercase">Langue</label>
                   <input
                     type="text"
                     value={lang.name || ''}
                     onChange={(e) => updateLanguage(idx, 'name', e.target.value)}
                     placeholder="ex: Français"
-                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-[#1c1c1c] text-sm focus:ring-1 focus:ring-[#00C896] outline-none"
+                    className="w-full bg-background-subtle border border-border rounded-lg px-2 py-1.5 text-text-primary text-sm focus:ring-1 focus:ring-primary outline-none"
                   />
                 </div>
                 <div className="flex-1 space-y-2">
-                  <label className="text-[10px] font-bold text-[#777777] uppercase">Niveau</label>
+                  <label className="text-[10px] font-bold text-text-secondary uppercase">Niveau</label>
                   <input
                     type="text"
                     value={lang.level || ''}
                     onChange={(e) => updateLanguage(idx, 'level', e.target.value)}
                     placeholder="ex: Natif"
-                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-[#1c1c1c] text-sm focus:ring-1 focus:ring-[#00C896] outline-none"
+                    className="w-full bg-background-subtle border border-border rounded-lg px-2 py-1.5 text-text-primary text-sm focus:ring-1 focus:ring-primary outline-none"
                   />
                 </div>
                 <button
                   onClick={() => deleteLanguage(idx)}
-                  className="text-red-400 hover:text-red-500 transition-colors p-2 mb-0.5"
+                  className="text-danger-text hover:text-danger-text transition-colors p-2 mb-0.5"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -765,19 +765,19 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
                 useEditorStore.getState().toggleSection('projects', true);
                 setData({ ...data, projects: [...(data.projects || []), { name: 'Nouveau Projet', description: 'Description...', link: '' }] });
               }}
-              className="w-full px-3 py-2 rounded-lg bg-[#00C896] hover:bg-[#66E1B5] text-white text-xs font-bold transition-colors"
+              className="w-full px-3 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-xs font-bold transition-colors"
             >
               + AJOUTER UN PROJET
             </button>
             {(data.projects || []).map((p: any, idx: number) => (
-              <div key={idx} className="bg-white rounded-xl p-4 space-y-3 border border-gray-200 shadow-sm">
-                <div className="flex justify-between items-center border-b border-gray-200 pb-2 mb-2">
-                  <span className="text-[10px] font-bold text-[#00C896] uppercase">Projet #{idx + 1}</span>
+              <div key={idx} className="bg-white rounded-panel p-4 space-y-3 border border-border shadow-sm">
+                <div className="flex justify-between items-center border-b border-border pb-2 mb-2">
+                  <span className="text-[10px] font-bold text-primary uppercase">Projet #{idx + 1}</span>
                   <button
                     onClick={() => {
                       const projects = [...(data.projects || [])]; projects.splice(idx, 1); setData({ ...data, projects });
                     }}
-                    className="text-red-400 hover:text-red-500 transition-colors p-1"
+                    className="text-danger-text hover:text-danger-text transition-colors p-1"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -792,7 +792,7 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
                       const projects = [...(data.projects || [])]; projects[idx].name = e.target.value; setData({ ...data, projects });
                     }}
                     placeholder="Nom du projet"
-                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-[#1c1c1c] text-sm focus:ring-1 focus:ring-[#00C896] outline-none"
+                    className="w-full bg-background-subtle border border-border rounded-lg px-2 py-1.5 text-text-primary text-sm focus:ring-1 focus:ring-primary outline-none"
                   />
                   <input
                     type="text"
@@ -801,7 +801,7 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
                       const projects = [...(data.projects || [])]; projects[idx].link = e.target.value; setData({ ...data, projects });
                     }}
                     placeholder="Lien (optionnel)"
-                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-[#1c1c1c] text-xs focus:ring-1 focus:ring-[#00C896] outline-none"
+                    className="w-full bg-background-subtle border border-border rounded-lg px-2 py-1.5 text-text-primary text-xs focus:ring-1 focus:ring-primary outline-none"
                   />
                   <textarea
                     value={p.description || ''}
@@ -810,7 +810,7 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
                     }}
                     placeholder="Description du projet..."
                     rows={3}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-[#1c1c1c] text-sm focus:ring-1 focus:ring-[#00C896] outline-none resize-none"
+                    className="w-full bg-background-subtle border border-border rounded-lg px-2 py-1.5 text-text-primary text-sm focus:ring-1 focus:ring-primary outline-none resize-none"
                   />
                 </div>
               </div>
@@ -822,23 +822,23 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
           <div className="space-y-4">
             <button
               onClick={addInterest}
-              className="w-full px-3 py-2 rounded-lg bg-[#00C896] hover:bg-[#66E1B5] text-white text-xs font-bold transition-colors"
+              className="w-full px-3 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-xs font-bold transition-colors"
             >
               + AJOUTER UN CENTRE D&apos;INTÉRÊT
             </button>
             <div className="grid grid-cols-1 gap-2">
               {(data.interests || []).map((interest: string, idx: number) => (
-                <div key={idx} className="bg-white rounded-xl p-3 flex gap-3 border border-gray-200 shadow-sm items-center">
+                <div key={idx} className="bg-white rounded-panel p-3 flex gap-3 border border-border shadow-sm items-center">
                   <input
                     type="text"
                     value={interest || ''}
                     onChange={(e) => updateInterest(idx, e.target.value)}
                     placeholder="ex: Photographie"
-                    className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-[#1c1c1c] text-sm focus:ring-1 focus:ring-[#00C896] outline-none"
+                    className="flex-1 bg-background-subtle border border-border rounded-lg px-2 py-1.5 text-text-primary text-sm focus:ring-1 focus:ring-primary outline-none"
                   />
                   <button
                     onClick={() => deleteInterest(idx)}
-                    className="text-red-400 hover:text-red-500 transition-colors p-1"
+                    className="text-danger-text hover:text-danger-text transition-colors p-1"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -852,16 +852,16 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
 
         {activeTab === 'sections' && (
           <div className="space-y-6">
-            <div className="p-4 bg-green-50/50 border border-[#00C896]/20 rounded-xl">
-              <h4 className="text-xs font-bold text-[#00C896] uppercase mb-3 flex items-center gap-2">
+            <div className="p-4 bg-green-50/50 border border-primary/20 rounded-panel">
+              <h4 className="text-xs font-bold text-primary uppercase mb-3 flex items-center gap-2">
                 <i className="fas fa-layer-group"></i> Visibilité & Titres
               </h4>
               <div className="space-y-3">
                 {(template?.sections || []).map((section: any) => (
-                  <div key={section.type} className="flex items-center gap-3 bg-white p-3 rounded-lg border border-gray-200">
+                  <div key={section.type} className="flex items-center gap-3 bg-white p-3 rounded-lg border border-border">
                     <button
                       onClick={() => useEditorStore.getState().toggleSection(section.type, !section.enabled)}
-                      className={`w-10 h-5 rounded-full relative transition-colors ${section.enabled ? 'bg-[#00C896]' : 'bg-gray-300'}`}
+                      className={`w-10 h-5 rounded-full relative transition-colors ${section.enabled ? 'bg-primary' : 'bg-gray-300'}`}
                     >
                       <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${section.enabled ? 'left-6' : 'left-1'}`} />
                     </button>
@@ -870,25 +870,25 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
                         type="text"
                         value={section.label}
                         onChange={(e) => useEditorStore.getState().updateSectionLabel(section.type, e.target.value)}
-                        className={`bg-transparent text-sm font-medium w-full text-[#1c1c1c] focus:ring-1 focus:ring-[#00C896] rounded px-1 -ml-1 transition-all ${!section.enabled ? 'opacity-50 grayscale' : ''}`}
+                        className={`bg-transparent text-sm font-medium w-full text-text-primary focus:ring-1 focus:ring-primary rounded px-1 -ml-1 transition-all ${!section.enabled ? 'opacity-50 grayscale' : ''}`}
                       />
-                      <div className="text-[9px] text-[#777777] uppercase mt-0.5">{section.type}</div>
+                      <div className="text-[9px] text-text-secondary uppercase mt-0.5">{section.type}</div>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="p-4 bg-white border border-gray-200 rounded-xl">
-              <h4 className="text-xs font-bold text-[#1c1c1c] uppercase mb-4">+ Ajouter une section personnalisée</h4>
+            <div className="p-4 bg-white border border-border rounded-panel">
+              <h4 className="text-xs font-bold text-text-primary uppercase mb-4">+ Ajouter une section personnalisée</h4>
               <div className="space-y-3">
                 <input
                   id="new-section-title"
                   type="text"
                   placeholder="Titre de la section (ex: Certifications)"
-                  className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-[#1c1c1c] text-sm outline-none focus:ring-1 focus:ring-[#00C896]"
+                  className="w-full bg-background-subtle border border-border rounded-lg px-3 py-2 text-text-primary text-sm outline-none focus:ring-1 focus:ring-primary"
                 />
-                <select id="new-section-type" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-[#1c1c1c] text-sm outline-none focus:ring-1 focus:ring-[#00C896]">
+                <select id="new-section-type" className="w-full bg-background-subtle border border-border rounded-lg px-3 py-2 text-text-primary text-sm outline-none focus:ring-1 focus:ring-primary">
                   <option value="text">Texte libre (paragraphes)</option>
                   <option value="list">Liste à puces (une par ligne)</option>
                 </select>
@@ -905,7 +905,7 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
                     });
                     titleInput.value = '';
                   }}
-                  className="w-full py-2 bg-[#00C896] hover:bg-[#66E1B5] text-white rounded-lg text-xs font-bold transition-all"
+                  className="w-full py-2 bg-primary hover:bg-primary-hover text-white rounded-lg text-xs font-bold transition-all"
                 >
                   CRÉER LA SECTION
                 </button>
@@ -914,15 +914,15 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
 
             {/* Editing Custom Sections Content */}
             {(data.custom_sections || []).length > 0 && (
-              <div className="space-y-4 pt-4 border-t border-gray-200">
-                <h4 className="text-[10px] font-bold text-[#777777] uppercase">Contenu des Sections Personnalisées</h4>
+              <div className="space-y-4 pt-4 border-t border-border">
+                <h4 className="text-[10px] font-bold text-text-secondary uppercase">Contenu des Sections Personnalisées</h4>
                 {data.custom_sections?.map((cs: any, idx: number) => (
-                  <div key={cs.id} className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                  <div key={cs.id} className="bg-background-subtle p-4 rounded-panel border border-border">
                     <div className="flex justify-between items-center mb-2">
-                      <span className="text-xs font-bold text-[#1c1c1c]">{cs.title}</span>
+                      <span className="text-xs font-bold text-text-primary">{cs.title}</span>
                       <button onClick={() => {
                         const cs_list = [...(data.custom_sections || [])]; cs_list.splice(idx, 1); setData({ ...data, custom_sections: cs_list });
-                      }} className="text-red-500 hover:scale-110 transition-transform"><i className="fas fa-trash"></i></button>
+                      }} className="text-danger-text hover:scale-110 transition-transform"><i className="fas fa-trash"></i></button>
                     </div>
                     <textarea
                       value={cs.content}
@@ -930,7 +930,7 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
                         const cs_list = [...(data.custom_sections || [])]; cs_list[idx].content = e.target.value; setData({ ...data, custom_sections: cs_list });
                       }}
                       rows={4}
-                      className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-[#1c1c1c] text-sm outline-none resize-none focus:ring-1 focus:ring-[#00C896]"
+                      className="w-full bg-white border border-border rounded-lg px-3 py-2 text-text-primary text-sm outline-none resize-none focus:ring-1 focus:ring-primary"
                       placeholder={cs.type === 'list' ? "Une puce par ligne..." : "Saisissez votre texte..."}
                     />
                   </div>
@@ -942,43 +942,43 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
         {activeTab === 'recipient' && (
           <div className="space-y-4">
             <div className="col-span-2">
-              <label className="text-[10px] uppercase font-bold text-[#777777] block mb-1">Nom de l'entreprise</label>
+              <label className="text-[10px] uppercase font-bold text-text-secondary block mb-1">Nom de l'entreprise</label>
               <input
                 type="text"
                 value={data.recipient?.company_name || ''}
                 onChange={(e) => setData({ ...data, recipient: { ...data.recipient, company_name: e.target.value } })}
                 placeholder="ex: Tech Solutions SAS"
-                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-[#1c1c1c] text-sm focus:ring-2 focus:ring-[#00C896] outline-none"
+                className="w-full bg-white border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:ring-2 focus:ring-primary outline-none"
               />
             </div>
             <div className="col-span-2">
-              <label className="text-[10px] uppercase font-bold text-[#777777] block mb-1">Nom du contact</label>
+              <label className="text-[10px] uppercase font-bold text-text-secondary block mb-1">Nom du contact</label>
               <input
                 type="text"
                 value={data.recipient?.contact_name || ''}
                 onChange={(e) => setData({ ...data, recipient: { ...data.recipient, contact_name: e.target.value } })}
                 placeholder="ex: M. Jean Dupont"
-                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-[#1c1c1c] text-sm focus:ring-2 focus:ring-[#00C896] outline-none"
+                className="w-full bg-white border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:ring-2 focus:ring-primary outline-none"
               />
             </div>
             <div className="col-span-2">
-              <label className="text-[10px] uppercase font-bold text-[#777777] block mb-1">Titre du contact (optionnel)</label>
+              <label className="text-[10px] uppercase font-bold text-text-secondary block mb-1">Titre du contact (optionnel)</label>
               <input
                 type="text"
                 value={data.recipient?.contact_title || ''}
                 onChange={(e) => setData({ ...data, recipient: { ...data.recipient, contact_title: e.target.value } })}
                 placeholder="ex: DRH"
-                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-[#1c1c1c] text-sm focus:ring-2 focus:ring-[#00C896] outline-none"
+                className="w-full bg-white border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:ring-2 focus:ring-primary outline-none"
               />
             </div>
             <div className="col-span-2">
-              <label className="text-[10px] uppercase font-bold text-[#777777] block mb-1">Adresse de l'entreprise</label>
+              <label className="text-[10px] uppercase font-bold text-text-secondary block mb-1">Adresse de l'entreprise</label>
               <textarea
                 value={data.recipient?.address || ''}
                 onChange={(e) => setData({ ...data, recipient: { ...data.recipient, address: e.target.value } })}
                 placeholder="ex: 123 Rue de la République..."
                 rows={3}
-                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-[#1c1c1c] text-sm focus:ring-2 focus:ring-[#00C896] outline-none resize-none"
+                className="w-full bg-white border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:ring-2 focus:ring-primary outline-none resize-none"
               />
             </div>
           </div>
@@ -987,53 +987,53 @@ export default function ContentEditor({ wizardStep }: { wizardStep?: number }) {
         {activeTab === 'letter_body' && (
           <div className="space-y-4">
             <div className="col-span-2">
-              <label className="text-[10px] uppercase font-bold text-[#777777] block mb-1">Objet</label>
+              <label className="text-[10px] uppercase font-bold text-text-secondary block mb-1">Objet</label>
               <input
                 type="text"
                 value={data.letter_body?.subject || ''}
                 onChange={(e) => setData({ ...data, letter_body: { ...data.letter_body, subject: e.target.value } })}
                 placeholder="ex: Candidature au poste de Développeur Frontend"
-                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-[#1c1c1c] text-sm focus:ring-2 focus:ring-[#00C896] outline-none"
+                className="w-full bg-white border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:ring-2 focus:ring-primary outline-none"
               />
             </div>
             <div className="col-span-2">
-              <label className="text-[10px] uppercase font-bold text-[#777777] block mb-1">Date et Lieu (optionnel)</label>
+              <label className="text-[10px] uppercase font-bold text-text-secondary block mb-1">Date et Lieu (optionnel)</label>
               <input
                 type="text"
                 value={data.letter_body?.date_location || ''}
                 onChange={(e) => setData({ ...data, letter_body: { ...data.letter_body, date_location: e.target.value } })}
                 placeholder="ex: Cotonou, le 15 Septembre 2026"
-                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-[#1c1c1c] text-sm focus:ring-2 focus:ring-[#00C896] outline-none"
+                className="w-full bg-white border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:ring-2 focus:ring-primary outline-none"
               />
             </div>
             <div className="col-span-2">
-              <label className="text-[10px] uppercase font-bold text-[#777777] block mb-1">Formule d'appel</label>
+              <label className="text-[10px] uppercase font-bold text-text-secondary block mb-1">Formule d'appel</label>
               <input
                 type="text"
                 value={data.letter_body?.opening || ''}
                 onChange={(e) => setData({ ...data, letter_body: { ...data.letter_body, opening: e.target.value } })}
                 placeholder="ex: Madame, Monsieur,"
-                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-[#1c1c1c] text-sm focus:ring-2 focus:ring-[#00C896] outline-none"
+                className="w-full bg-white border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:ring-2 focus:ring-primary outline-none"
               />
             </div>
             <div className="col-span-2">
-              <label className="text-[10px] uppercase font-bold text-[#777777] block mb-1">Corps de la lettre</label>
+              <label className="text-[10px] uppercase font-bold text-text-secondary block mb-1">Corps de la lettre</label>
               <textarea
                 value={data.letter_body?.body || ''}
                 onChange={(e) => setData({ ...data, letter_body: { ...data.letter_body, body: e.target.value } })}
                 placeholder="Rédigez le contenu de votre lettre de motivation..."
                 rows={12}
-                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-[#1c1c1c] text-sm focus:ring-2 focus:ring-[#00C896] outline-none resize-none leading-relaxed"
+                className="w-full bg-white border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:ring-2 focus:ring-primary outline-none resize-none leading-relaxed"
               />
             </div>
             <div className="col-span-2">
-              <label className="text-[10px] uppercase font-bold text-[#777777] block mb-1">Formule de politesse (Clôture)</label>
+              <label className="text-[10px] uppercase font-bold text-text-secondary block mb-1">Formule de politesse (Clôture)</label>
               <input
                 type="text"
                 value={data.letter_body?.closing || ''}
                 onChange={(e) => setData({ ...data, letter_body: { ...data.letter_body, closing: e.target.value } })}
                 placeholder="ex: Je vous prie d'agréer..."
-                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-[#1c1c1c] text-sm focus:ring-2 focus:ring-[#00C896] outline-none"
+                className="w-full bg-white border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:ring-2 focus:ring-primary outline-none"
               />
             </div>
           </div>

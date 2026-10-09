@@ -5,7 +5,7 @@ import { useCvStore } from '@/store/cv';
 import { useProfileStore } from '@/store/profile';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, use } from 'react';
 import { ArrowLeft, Download, Save, Loader2, ZoomIn, ZoomOut, CheckCircle2, PenTool, Palette, Settings2, Check, Sparkles, Briefcase, AlignLeft, FileText, X } from 'lucide-react';
 import { cvApi } from '@/lib/cv-api';
 import { API_BASE } from '@/lib/api';
@@ -17,7 +17,8 @@ import { AILetterGenerator } from '@/components/app/letter/editor/AILetterGenera
 
 
 
-export default function CoverLetterEditorPage({ params }: { params: { id: string } }) {
+export default function CoverLetterEditorPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = use(params);
   const router = useRouter();
   const cvs = useCvStore(state => state.cvs);
   const updateCv = useCvStore(state => state.updateCv);
@@ -48,7 +49,7 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
       .catch(() => {});
   }, []);
   
-  const cv = cvs.find(c => c.id === params.id);
+  const cv = cvs.find(c => c.id === resolvedParams.id);
   const { data: session, status } = useSession();
 
   // Form State
@@ -79,7 +80,7 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
       if (!cv && session?.user?.accessToken) {
         setLocalLoading(true);
         try {
-          const res = await fetch(`${API_BASE}/resumes/${params.id}`, {
+          const res = await fetch(`${API_BASE}/resumes/${resolvedParams.id}`, {
             headers: { Authorization: `Bearer ${session.user.accessToken}` },
           });
           if (res.ok) {
@@ -115,7 +116,7 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
       }
     };
     fetchProfile();
-  }, [cv, profile, session, params.id]);
+  }, [cv, profile, session, resolvedParams.id]);
 
   useEffect(() => {
     if (cv) {
@@ -251,7 +252,7 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
   if (!mounted || localLoading || status === 'loading') {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -259,8 +260,8 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
   if (!cv) {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-8 text-center">
-        <h2 className="text-xl font-bold text-gray-900 mb-2">Lettre introuvable</h2>
-        <button onClick={() => router.push('/mes-documents')} className="text-indigo-600 font-semibold hover:underline">
+        <h2 className="text-xl font-bold text-text-primary mb-2">Lettre introuvable</h2>
+        <button onClick={() => router.push('/mes-documents')} className="text-primary font-semibold hover:underline">
           Retour à mes documents
         </button>
       </div>
@@ -290,15 +291,15 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
   const DesignContent = () => (
     <div className="space-y-6">
       <div>
-        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Choix du modèle</h3>
+        <h3 className="text-xs font-bold text-text-muted uppercase tracking-widest mb-3">Choix du modèle</h3>
         <div className="grid grid-cols-2 gap-3">
           {dbThemes.map(t => (
             <button
               key={t.slug || t.id}
               onClick={() => handleSelectTheme(t.slug || t.id)}
-              className={`relative aspect-[1/1.2] rounded-xl border-2 overflow-hidden flex flex-col transition-all bg-white group ${currentTemplate === (t.slug || t.id) ? 'border-indigo-600 shadow-md shadow-indigo-100' : 'border-gray-100 hover:border-indigo-300'}`}
+              className={`relative aspect-[1/1.2] rounded-panel border-2 overflow-hidden flex flex-col transition-all bg-white group ${currentTemplate === (t.slug || t.id) ? 'border-indigo-600 shadow-md shadow-indigo-100' : 'border-border hover:border-indigo-300'}`}
             >
-              <div className="flex-1 bg-gray-50/50 p-2 border-b border-gray-50 flex items-center justify-center">
+              <div className="flex-1 bg-background-subtle/50 p-2 border-b border-gray-50 flex items-center justify-center">
                 {t.preview_image ? (
                   <img 
                     src={t.preview_image.startsWith('http') ? t.preview_image : `${config.staticBaseUrl}/previews/${t.preview_image.split('/').pop()}`}
@@ -307,25 +308,25 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
                   />
                 ) : (
                   <>
-                    {(t.slug === 'classique' || t.slug === 'classic') && <div className="w-full h-full bg-white border border-gray-200 shadow-sm rounded flex flex-col p-1.5"><div className="w-1/2 h-1 bg-gray-300 mb-2"/><div className="w-1/3 h-1 bg-gray-300 ml-auto mb-2"/><div className="w-full h-1 bg-gray-200 mb-0.5"/><div className="w-full h-1 bg-gray-200 mb-0.5"/><div className="w-3/4 h-1 bg-gray-200"/></div>}
-                    {(t.slug === 'moderne' || t.slug === 'modern') && <div className="w-full h-full bg-white border border-gray-200 shadow-sm rounded flex flex-col p-1.5 border-l-4 border-l-indigo-500"><div className="w-1/2 h-1 bg-gray-800 mb-2"/><div className="w-1/3 h-1 bg-gray-400 ml-auto mb-2"/><div className="w-full h-1 bg-gray-200 mb-0.5"/><div className="w-full h-1 bg-gray-200 mb-0.5"/><div className="w-3/4 h-1 bg-gray-200"/></div>}
-                    {(t.slug === 'minimal') && <div className="w-full h-full bg-white border border-gray-200 shadow-sm rounded flex flex-col p-1.5 items-center justify-center"><div className="w-1/2 h-1 bg-gray-400 mb-3"/><div className="w-full h-1 bg-gray-100 mb-0.5"/><div className="w-full h-1 bg-gray-100 mb-0.5"/><div className="w-3/4 h-1 bg-gray-100"/></div>}
-                    {!['classique', 'classic', 'moderne', 'modern', 'minimal'].includes(t.slug) && <div className="w-full h-full bg-white border border-gray-200 shadow-sm rounded flex flex-col p-1.5"><div className="w-1/2 h-1 bg-gray-400 mb-2"/><div className="w-full h-1 bg-gray-200 mb-0.5"/><div className="w-full h-1 bg-gray-200 mb-0.5"/><div className="w-3/4 h-1 bg-gray-200"/></div>}
+                    {(t.slug === 'classique' || t.slug === 'classic') && <div className="w-full h-full bg-white border border-border shadow-sm rounded flex flex-col p-1.5"><div className="w-1/2 h-1 bg-gray-300 mb-2"/><div className="w-1/3 h-1 bg-gray-300 ml-auto mb-2"/><div className="w-full h-1 bg-border mb-0.5"/><div className="w-full h-1 bg-border mb-0.5"/><div className="w-3/4 h-1 bg-border"/></div>}
+                    {(t.slug === 'moderne' || t.slug === 'modern') && <div className="w-full h-full bg-white border border-border shadow-sm rounded flex flex-col p-1.5 border-l-4 border-l-indigo-500"><div className="w-1/2 h-1 bg-gray-800 mb-2"/><div className="w-1/3 h-1 bg-gray-400 ml-auto mb-2"/><div className="w-full h-1 bg-border mb-0.5"/><div className="w-full h-1 bg-border mb-0.5"/><div className="w-3/4 h-1 bg-border"/></div>}
+                    {(t.slug === 'minimal') && <div className="w-full h-full bg-white border border-border shadow-sm rounded flex flex-col p-1.5 items-center justify-center"><div className="w-1/2 h-1 bg-gray-400 mb-3"/><div className="w-full h-1 bg-border mb-0.5"/><div className="w-full h-1 bg-border mb-0.5"/><div className="w-3/4 h-1 bg-border"/></div>}
+                    {!['classique', 'classic', 'moderne', 'modern', 'minimal'].includes(t.slug) && <div className="w-full h-full bg-white border border-border shadow-sm rounded flex flex-col p-1.5"><div className="w-1/2 h-1 bg-gray-400 mb-2"/><div className="w-full h-1 bg-border mb-0.5"/><div className="w-full h-1 bg-border mb-0.5"/><div className="w-3/4 h-1 bg-border"/></div>}
                   </>
                 )}
               </div>
               {currentTemplate === (t.slug || t.id) && (
-                <div className="absolute top-1.5 right-1.5 w-4 h-4 bg-indigo-600 rounded-full flex items-center justify-center text-white shadow-sm z-10">
+                <div className="absolute top-1.5 right-1.5 w-4 h-4 bg-primary rounded-full flex items-center justify-center text-white shadow-sm z-10">
                   <Check className="w-2.5 h-2.5" />
                 </div>
               )}
               <div className="p-2 text-center bg-white">
-                <span className="text-xs font-semibold text-gray-900">{t.name || t.label}</span>
+                <span className="text-xs font-semibold text-text-primary">{t.name || t.label}</span>
               </div>
             </button>
           ))}
           {dbThemes.length === 0 && (
-            <div className="col-span-2 p-4 text-center text-gray-500 text-sm border-2 border-dashed border-gray-200 rounded-xl">
+            <div className="col-span-2 p-4 text-center text-text-secondary text-sm border-2 border-dashed border-border rounded-panel">
               Aucun modèle disponible pour le moment.
             </div>
           )}
@@ -352,18 +353,18 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
     if (!isOpen) return null;
     return (
       <div className="fixed inset-0 z-[100] flex flex-col sm:items-center sm:justify-center p-0 sm:p-4">
-        <div className="hidden sm:block absolute inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity" onClick={onClose} />
-        <div className="relative bg-white w-full h-[100dvh] sm:h-auto sm:w-[600px] sm:max-h-[90vh] flex flex-col sm:rounded-2xl shadow-2xl z-10 overflow-hidden animate-in fade-in sm:zoom-in duration-200">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-white flex-shrink-0">
-            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+        <div className="hidden sm:block absolute inset-0 bg-text-primary/40 backdrop-blur-sm transition-opacity" onClick={onClose} />
+        <div className="relative bg-white w-full h-[100dvh] sm:h-auto sm:w-[600px] sm:max-h-[90vh] flex flex-col sm:rounded-panel shadow-2xl z-10 overflow-hidden animate-in fade-in sm:zoom-in duration-200">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-white flex-shrink-0">
+            <h3 className="text-lg font-bold text-text-primary flex items-center gap-2">
               {icon}
               {title}
             </h3>
-            <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
+            <button onClick={onClose} className="p-2 text-text-muted hover:text-text-secondary hover:bg-border rounded-full transition-colors">
               <X className="w-5 h-5" />
             </button>
           </div>
-          <div className="p-6 overflow-y-auto bg-gray-50 flex-1 custom-scrollbar">
+          <div className="p-6 overflow-y-auto bg-background-subtle flex-1 custom-scrollbar">
             {children}
           </div>
         </div>
@@ -376,15 +377,15 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
       {/* Design Button */}
       <button 
         onClick={() => setIsDesignModalOpen(true)}
-        className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl transition-colors group"
+        className="w-full flex items-center justify-between p-4 bg-background-subtle hover:bg-border border border-border rounded-panel transition-colors group"
       >
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-white text-indigo-600 shadow-sm border border-gray-200 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full bg-white text-primary shadow-sm border border-border flex items-center justify-center">
             <Palette className="w-4 h-4" />
           </div>
           <div className="text-left">
-            <p className="text-sm font-bold text-gray-900">Choix du modèle</p>
-            <p className="text-xs text-gray-500 font-medium group-hover:underline">{currentThemeObj?.name || 'Classique'}</p>
+            <p className="text-sm font-bold text-text-primary">Choix du modèle</p>
+            <p className="text-xs text-text-secondary font-medium group-hover:underline">{currentThemeObj?.name || 'Classique'}</p>
           </div>
         </div>
       </button>
@@ -392,15 +393,15 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
       {/* Edit Button */}
       <button 
         onClick={() => setIsFormModalOpen(true)}
-        className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl transition-colors group"
+        className="w-full flex items-center justify-between p-4 bg-background-subtle hover:bg-border border border-border rounded-panel transition-colors group"
       >
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-white text-indigo-600 shadow-sm border border-gray-200 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full bg-white text-primary shadow-sm border border-border flex items-center justify-center">
             <PenTool className="w-4 h-4" />
           </div>
           <div className="text-left">
-            <p className="text-sm font-bold text-gray-900">Éditer la lettre</p>
-            <p className="text-xs text-gray-500 font-medium group-hover:underline">Modifier le contenu</p>
+            <p className="text-sm font-bold text-text-primary">Éditer la lettre</p>
+            <p className="text-xs text-text-secondary font-medium group-hover:underline">Modifier le contenu</p>
           </div>
         </div>
       </button>
@@ -408,15 +409,15 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
       {/* AI Button */}
       <button 
         onClick={() => setIsAIModalOpen(true)}
-        className="w-full flex items-center justify-between p-4 bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 rounded-xl transition-colors group"
+        className="w-full flex items-center justify-between p-4 bg-primary-subtle hover:bg-primary-subtle border border-indigo-100 rounded-panel transition-colors group"
       >
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-white text-indigo-600 shadow-sm border border-indigo-200 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full bg-white text-primary shadow-sm border border-primary/20 flex items-center justify-center">
             <Sparkles className="w-4 h-4" />
           </div>
           <div className="text-left">
             <p className="text-sm font-bold text-indigo-900">Assistant IA</p>
-            <p className="text-xs text-indigo-600 font-medium group-hover:underline">Générer avec l'IA</p>
+            <p className="text-xs text-primary font-medium group-hover:underline">Générer avec l'IA</p>
           </div>
         </div>
       </button>
@@ -424,7 +425,7 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
   );
 
   return (
-    <div className="py-6 sm:py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto font-sans min-h-screen selection:bg-indigo-100 selection:text-indigo-900">
+    <div className="font-sans animate-fade-in pb-12 selection:bg-primary-subtle selection:text-indigo-900">
       <style dangerouslySetInnerHTML={{__html: `
         @media print {
           body * { visibility: hidden; }
@@ -451,18 +452,18 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 print:hidden">
         <div>
-          <button onClick={() => router.push('/mes-documents')} className="text-sm font-medium text-gray-500 hover:text-gray-900 flex items-center gap-2 mb-3 transition-colors">
+          <button onClick={() => router.push('/mes-documents')} className="text-sm font-medium text-text-secondary hover:text-text-primary flex items-center gap-2 mb-3 transition-colors">
             <ArrowLeft className="w-4 h-4" /> Retour aux documents
           </button>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center">
-              <FileText className="w-5 h-5 text-indigo-600" />
+            <div className="w-10 h-10 rounded-panel bg-primary-subtle flex items-center justify-center">
+              <FileText className="w-5 h-5 text-primary" />
             </div>
             <input
               type="text"
               value={formData.title}
               onChange={(e) => setFormData({...formData, title: e.target.value})}
-              className="text-2xl font-bold text-gray-900 bg-transparent focus:outline-none focus:ring-2 focus:ring-indigo-100 rounded px-2 py-1 w-full max-w-xs sm:max-w-md hover:bg-gray-50 transition-colors placeholder:text-gray-400"
+              className="text-2xl font-bold text-text-primary bg-transparent focus:outline-none focus:ring-2 focus:ring-indigo-100 rounded px-2 py-1 w-full max-w-xs sm:max-w-md hover:bg-background-subtle transition-colors placeholder:text-text-muted"
               placeholder="Titre de la lettre..."
             />
           </div>
@@ -470,21 +471,21 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
         <div className="flex items-center gap-3 mt-2 md:mt-0">
           <button
             onClick={() => setIsSettingsOpen(true)}
-            className="lg:hidden inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-full font-semibold text-sm hover:bg-gray-200 transition-colors"
+            className="lg:hidden inline-flex items-center gap-2 px-4 py-2 bg-border text-text-secondary rounded-full font-semibold text-sm hover:bg-border transition-colors"
           >
             <Settings2 className="w-4 h-4" /> Options
           </button>
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="hidden lg:inline-flex items-center gap-2 px-6 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-full font-semibold text-sm hover:bg-gray-50 transition-all shadow-sm disabled:opacity-50 active:scale-95"
+            className="hidden lg:inline-flex items-center gap-2 px-6 py-2.5 bg-white border border-border text-text-secondary rounded-full font-semibold text-sm hover:bg-background-subtle transition-all shadow-sm disabled:opacity-50 active:scale-95"
           >
             {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : savedSuccess ? <CheckCircle2 className="w-4 h-4 text-emerald-500" /> : <Save className="w-4 h-4" />}
             {savedSuccess ? 'Sauvegardé' : 'Enregistrer'}
           </button>
           <button
             onClick={() => setIsExportModalOpen(true)}
-            className="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white rounded-full font-semibold text-sm hover:bg-indigo-700 transition-all shadow-md shadow-indigo-600/20 active:scale-95"
+            className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-full font-semibold text-sm hover:bg-primary-hover transition-all shadow-md shadow-indigo-600/20 active:scale-95"
           >
             <Download className="w-4 h-4" />
             Télécharger
@@ -496,9 +497,9 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
         
         {/* Desktop Sidebar */}
         <div className="hidden lg:block lg:col-span-4 space-y-6 relative z-[60]">
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 sticky top-6 z-[60]">
-            <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
-              <Settings2 className="w-5 h-5 text-indigo-600" />
+          <div className="bg-white rounded-panel p-6 shadow-sm border border-border sticky top-6 z-[60]">
+            <h2 className="text-lg font-bold text-text-primary mb-6 flex items-center gap-2">
+              <Settings2 className="w-5 h-5 text-primary" />
               Personnalisation
             </h2>
             {renderSidebarMenu()}
@@ -507,22 +508,22 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
 
         {/* Canvas Area */}
         <div className="lg:col-span-8">
-          <div className="rounded-3xl p-4 sm:p-8 flex flex-col items-center min-h-[600px] border border-gray-200 relative overflow-auto custom-scrollbar" style={{ background: 'radial-gradient(circle, #d1d5db 1px, #f8f9fa 1px)', backgroundSize: '20px 20px' }}>
+          <div className="rounded-3xl p-4 sm:p-8 flex flex-col items-center min-h-[600px] border border-border relative overflow-auto custom-scrollbar" style={{ background: 'radial-gradient(circle, #d1d5db 1px, #f8f9fa 1px)', backgroundSize: '20px 20px' }}>
             
             {/* Zoom Controls */}
-            <div className="absolute top-4 right-4 z-10 bg-white/90 backdrop-blur-sm rounded-full shadow-sm border border-gray-200 flex items-center p-1">
+            <div className="absolute top-4 right-4 z-10 bg-white/90 backdrop-blur-sm rounded-full shadow-sm border border-border flex items-center p-1">
               <button
                 onClick={() => setScale(s => Math.max(0.3, s - 0.1))}
-                className="p-1.5 hover:bg-gray-100 rounded-full transition-colors focus:outline-none text-gray-500"
+                className="p-1.5 hover:bg-border rounded-full transition-colors focus:outline-none text-text-secondary"
               >
                 <ZoomOut className="w-4 h-4" />
               </button>
-              <span className="text-xs font-bold text-gray-900 w-12 text-center cursor-default select-none">
+              <span className="text-xs font-bold text-text-primary w-12 text-center cursor-default select-none">
                 {Math.round(scale * 100)}%
               </span>
               <button
                 onClick={() => setScale(s => Math.min(2, s + 0.1))}
-                className="p-1.5 hover:bg-gray-100 rounded-full transition-colors focus:outline-none text-gray-500"
+                className="p-1.5 hover:bg-border rounded-full transition-colors focus:outline-none text-text-secondary"
               >
                 <ZoomIn className="w-4 h-4" />
               </button>
@@ -537,7 +538,7 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
               }}
             >
               <div
-                className="a4-print-container origin-top-left transition-transform duration-200 bg-white shadow-xl border border-gray-200 absolute top-0 left-0 overflow-hidden"
+                className="a4-print-container origin-top-left transition-transform duration-200 bg-white shadow-xl border border-border absolute top-0 left-0 overflow-hidden"
                 style={{
                   width: '210mm',
                   height: '297mm',
@@ -556,11 +557,11 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
       {isSettingsOpen && (
         <div className="lg:hidden fixed inset-0 z-[100] flex flex-col p-0">
           <div className="relative bg-white w-full h-[100dvh] flex flex-col z-10 overflow-hidden animate-in fade-in duration-200">
-            <div className="h-14 flex items-center justify-between px-6 border-b border-gray-100 flex-shrink-0">
-              <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
-                <Settings2 className="w-5 h-5 text-indigo-600" /> Personnalisation
+            <div className="h-14 flex items-center justify-between px-6 border-b border-border flex-shrink-0">
+              <h2 className="text-base font-bold text-text-primary flex items-center gap-2">
+                <Settings2 className="w-5 h-5 text-primary" /> Personnalisation
               </h2>
-              <button onClick={() => setIsSettingsOpen(false)} className="p-2 hover:bg-gray-100 rounded-full text-gray-500 transition-colors">
+              <button onClick={() => setIsSettingsOpen(false)} className="p-2 hover:bg-border rounded-full text-text-secondary transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -572,9 +573,9 @@ export default function CoverLetterEditorPage({ params }: { params: { id: string
       )}
 
       {/* Tool Modals */}
-      {renderModal(isDesignModalOpen, () => setIsDesignModalOpen(false), "Choix du modèle", <Palette className="w-5 h-5 text-indigo-600" />, DesignContent())}
-      {renderModal(isFormModalOpen, () => setIsFormModalOpen(false), "Éditer la lettre", <PenTool className="w-5 h-5 text-indigo-600" />, FormContent())}
-      {renderModal(isAIModalOpen, () => setIsAIModalOpen(false), "Assistant IA", <Sparkles className="w-5 h-5 text-indigo-600" />, AIContent())}
+      {renderModal(isDesignModalOpen, () => setIsDesignModalOpen(false), "Choix du modèle", <Palette className="w-5 h-5 text-primary" />, DesignContent())}
+      {renderModal(isFormModalOpen, () => setIsFormModalOpen(false), "Éditer la lettre", <PenTool className="w-5 h-5 text-primary" />, FormContent())}
+      {renderModal(isAIModalOpen, () => setIsAIModalOpen(false), "Assistant IA", <Sparkles className="w-5 h-5 text-primary" />, AIContent())}
 
       {cv && (
         <ExportModal 

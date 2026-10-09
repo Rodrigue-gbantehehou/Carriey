@@ -73,7 +73,7 @@ export default function MobileDrawer({ open, onClose }: MobileDrawerProps) {
         `}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border">
           <Link href="/accueil" className="flex items-center gap-2.5 select-none">
             <Image
               src={config.appLogo}
@@ -83,14 +83,14 @@ export default function MobileDrawer({ open, onClose }: MobileDrawerProps) {
               className="object-contain"
               priority
             />
-            <span className="text-lg font-bold tracking-tight text-indigo-600">
+            <span className="text-lg font-bold tracking-tight text-primary">
               {config.appName}
             </span>
           </Link>
           <button
             onClick={onClose}
             aria-label="Fermer le menu"
-            className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all"
+            className="p-1.5 rounded-lg text-text-muted hover:text-text-secondary hover:bg-border transition-all"
           >
             <X className="w-5 h-5" />
           </button>
@@ -104,13 +104,13 @@ export default function MobileDrawer({ open, onClose }: MobileDrawerProps) {
               <Link
                 key={href}
                 href={href}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group ${active
-                    ? 'bg-indigo-50 text-indigo-700'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-panel text-sm font-medium transition-all group ${active
+                    ? 'bg-primary-subtle text-indigo-700'
+                    : 'text-text-secondary hover:bg-background-subtle hover:text-text-primary'
                   }`}
               >
                 <Icon
-                  className={`w-4.5 h-4.5 flex-shrink-0 ${active ? 'text-indigo-600' : 'text-gray-400 group-hover:text-gray-600'
+                  className={`w-4.5 h-4.5 flex-shrink-0 ${active ? 'text-primary' : 'text-text-muted group-hover:text-text-secondary'
                     }`}
                 />
                 {label}
@@ -120,38 +120,38 @@ export default function MobileDrawer({ open, onClose }: MobileDrawerProps) {
         </nav>
 
         {/* Main CTA */}
-        <div className="px-4 py-4 border-t border-gray-100 bg-gray-50/50">
+        <div className="px-4 py-4 border-t border-border bg-background-subtle/50">
           <Link 
             href="/candidatures/nouvelle"
-            className="flex items-center justify-center w-full gap-2 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md shadow-indigo-600/20 transition-all text-sm uppercase tracking-wide"
+            className="flex items-center justify-center w-full gap-2 px-4 py-3 bg-primary hover:bg-primary-hover text-white font-bold rounded-panel shadow-md shadow-indigo-600/20 transition-all text-sm uppercase tracking-wide"
           >
             Nouvelle candidature
           </Link>
         </div>
 
         {/* Bottom: settings + user */}
-        <div className="border-t border-gray-100 px-3 py-3 space-y-0.5">
+        <div className="border-t border-border px-3 py-3 space-y-0.5">
           <Link
             href="/parametres"
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group ${pathname === '/parametres'
-                ? 'bg-indigo-50 text-indigo-700'
-                : 'text-gray-600 hover:bg-gray-50'
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-panel text-sm font-medium transition-all group ${pathname === '/parametres'
+                ? 'bg-primary-subtle text-indigo-700'
+                : 'text-text-secondary hover:bg-background-subtle'
               }`}
           >
-            <Settings className="w-4 h-4 text-gray-400 group-hover:text-gray-600" />
+            <Settings className="w-4 h-4 text-text-muted group-hover:text-text-secondary" />
             Paramètres
           </Link>
 
           <div className="flex items-center gap-3 px-3 py-2.5 mt-1">
-            <div className="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
+            <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
               {initial}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-gray-900 truncate">{name}</p>
+              <p className="text-xs font-semibold text-text-primary truncate">{name}</p>
             </div>
             <button
               onClick={() => signOut({ callbackUrl: '/login' })}
-              className="p-1 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all"
+              className="p-1 rounded-md text-text-muted hover:text-danger-text hover:bg-danger-bg transition-all"
               title="Déconnexion"
             >
               <LogOut className="w-3.5 h-3.5" />

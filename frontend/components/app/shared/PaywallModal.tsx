@@ -50,25 +50,25 @@ export function PaywallModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden relative animate-in fade-in zoom-in duration-200">
+    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-text-primary/40 backdrop-blur-sm">
+      <div className="bg-white rounded-panel shadow-xl w-full max-w-md overflow-hidden relative animate-in fade-in zoom-in duration-200">
 
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full p-1 transition-colors"
+          className="absolute top-4 right-4 text-text-muted hover:text-text-secondary bg-border hover:bg-border rounded-full p-1 transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
 
-        <div className="p-8 pb-6 flex flex-col items-center text-center border-b border-gray-100 bg-gradient-to-br from-indigo-50/50 to-white">
-          <div className="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center mb-4 shadow-sm">
+        <div className="p-8 pb-6 flex flex-col items-center text-center border-b border-border bg-gradient-to-br from-indigo-50/50 to-white">
+          <div className="w-16 h-16 bg-primary-subtle text-primary rounded-panel flex items-center justify-center mb-4 shadow-sm">
             <Crown className="w-8 h-8" />
           </div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">{title}</h2>
-          <p className="text-sm text-gray-500">{description}</p>
+          <h2 className="text-xl font-bold text-text-primary mb-2">{title}</h2>
+          <p className="text-sm text-text-secondary">{description}</p>
         </div>
 
-        <div className="p-6 bg-gray-50/50">
+        <div className="p-6 bg-background-subtle/50">
           <ul className="space-y-3 mb-6">
             {[
               "Modèles de CV Premium illimités",
@@ -76,7 +76,7 @@ export function PaywallModal({
               "Profil Public Avancé (Portfolio)",
               "Ciblage des offres d'emploi par IA"
             ].map((feature, i) => (
-              <li key={i} className="flex items-center text-sm font-medium text-gray-700">
+              <li key={i} className="flex items-center text-sm font-medium text-text-secondary">
                 <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center mr-3 shrink-0">
                   <div className="w-2 h-2 rounded-full bg-emerald-500" />
                 </div>
@@ -91,7 +91,7 @@ export function PaywallModal({
                 if (onSubscribe) onSubscribe();
                 else window.location.href = '/pricing';
               }}
-              className="w-full py-3 px-4 bg-gradient-to-r from-indigo-600 to-indigo-500 text-white font-bold rounded-xl hover:from-indigo-700 hover:to-indigo-600 transition-all shadow-md shadow-indigo-600/20 flex items-center justify-center gap-2"
+              className="w-full py-3 px-4 bg-gradient-to-r from-indigo-600 to-indigo-500 text-white font-bold rounded-panel hover:from-indigo-700 hover:to-indigo-600 transition-all shadow-md shadow-indigo-600/20 flex items-center justify-center gap-2"
             >
               Pass carriey PRO (Dès {proPrice} {proCurrency}) <Crown className="w-4 h-4" />
             </button>
@@ -99,10 +99,10 @@ export function PaywallModal({
             {singleItemPrice && (
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-200"></div>
+                  <div className="w-full border-t border-border"></div>
                 </div>
                 <div className="relative flex justify-center text-xs">
-                  <span className="bg-gray-50 px-2 text-gray-500">ou</span>
+                  <span className="bg-background-subtle px-2 text-text-secondary">ou</span>
                 </div>
               </div>
             )}
@@ -116,7 +116,7 @@ export function PaywallModal({
                     window.location.href = url;
                   }
                 }}
-                className="w-full py-3 px-4 bg-white text-gray-700 font-bold rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+                className="w-full py-3 px-4 bg-white text-text-secondary font-bold rounded-panel border border-border hover:bg-background-subtle transition-colors flex items-center justify-center gap-2"
               >
                 Acheter {singleItemTitle} ({singleItemPrice} {proCurrency})
               </button>
@@ -124,7 +124,7 @@ export function PaywallModal({
           </div>
 
           {!singleItemPrice && (
-            <p className="text-center text-xs text-gray-400 mt-4">
+            <p className="text-center text-xs text-text-muted mt-4">
               Pass à partir de {proPrice} {proCurrency}
             </p>
           )}

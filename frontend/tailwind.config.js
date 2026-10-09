@@ -10,33 +10,64 @@ module.exports = {
       screens: {
         'xs': '300px',
       },
+      fontFamily: {
+        sans: ['var(--font-inter)', 'sans-serif'],
+      },
+      fontSize: {
+        'ui-xs': ['12px', '16px'],
+        'ui-sm': ['14px', '20px'],
+        'ui-base': ['16px', '24px'],
+        'ui-lg': ['18px', '26px'],
+        'ui-xl': ['20px', '28px'],
+        'ui-2xl': ['24px', '32px'],
+        'ui-3xl': ['30px', '38px'],
+        'ui-4xl': ['40px', '48px'],
+      },
       colors: {
-        brand: {
-          bg: 'var(--bg-main)',
-          text: 'var(--text-main)',
-          muted: 'var(--text-muted)',
-          cta: 'var(--color-cta)',
-          'cta-hover': 'var(--color-cta-hover)',
+        background: {
+          DEFAULT: '#FFFFFF',
+          subtle: '#F8FAFC',
         },
-        // Surcharge globale de la couleur indigo pour adopter la couleur du logo (Bleu dominant #0771ea) partout
-        indigo: {
-          50: '#f0f7ff',
-          100: '#e0effe',
-          200: '#b9deff',
-          300: '#7cc2fe',
-          400: '#36a3fa',
-          500: '#0c87f2',
-          600: '#0771ea',
-          700: '#0055bd',
-          800: '#054898',
-          900: '#0b3e79',
-          950: '#072753',
+        text: {
+          primary: '#0F172A',
+          secondary: '#475569',
+          muted: '#64748B',
+        },
+        border: {
+          DEFAULT: '#E2E8F0',
+        },
+        primary: {
+          DEFAULT: '#1D4ED8',
+          hover: '#1E40AF',
+        },
+        success: {
+          text: '#166534',
+          bg: '#F0FDF4',
+        },
+        warning: {
+          text: '#92400E',
+          bg: '#FFFBEB',
+        },
+        danger: {
+          text: '#B91C1C',
+          bg: '#FEF2F2',
         },
       },
+      borderRadius: {
+        'button': '6px',
+        'field': '6px',
+        'panel': '8px',
+        'modal': '12px',
+      },
+      maxWidth: {
+        'public': '1200px',
+        'dashboard': '1280px',
+        'form': '640px',
+        'column': '720px',
+      },
       animation: {
-        'fade-in': 'fadeIn 0.8s ease-out forwards',
-        'slide-up': 'slideUp 1s ease-out forwards',
-        'bounce-slow': 'bounceSlow 3s ease-in-out infinite',
+        'fade-in': 'fadeIn 0.2s ease-out forwards',
+        'slide-up': 'slideUp 0.3s ease-out forwards',
       },
       keyframes: {
         fadeIn: {
@@ -44,12 +75,8 @@ module.exports = {
           '100%': { opacity: '1' },
         },
         slideUp: {
-          '0%': { opacity: '0', transform: 'translateY(20px)' },
+          '0%': { opacity: '0', transform: 'translateY(10px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
-        },
-        bounceSlow: {
-          '0%, 100%': { transform: 'translateY(0)' },
-          '50%': { transform: 'translateY(-15px)' },
         },
       }
     }

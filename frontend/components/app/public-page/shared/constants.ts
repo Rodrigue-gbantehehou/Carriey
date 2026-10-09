@@ -1,10 +1,10 @@
 import { Theme, SectionsConfig } from '@/types/public-page';
 
 export const THEMES: { id: Theme; label: string; desc: string; preview: string }[] = [
-  { id: 'modern', label: 'Modern', desc: 'Dégradé coloré, cartes', preview: 'bg-gradient-to-br from-indigo-500 to-purple-500' },
-  { id: 'minimal', label: 'Minimal', desc: 'Blanc, sobre, élégant', preview: 'bg-white border-2 border-gray-200' },
-  { id: 'bold', label: 'Bold', desc: 'Fond sombre, fort impact', preview: 'bg-gray-950' },
-  { id: 'elegant', label: 'Élégant', desc: 'Crème, style portfolio', preview: 'bg-amber-50 border border-amber-200' },
+  { id: 'modern', label: 'Modern', desc: 'Dégradé coloré, cartes', preview: 'bg-gradient-to-br from-primary to-purple-500' },
+  { id: 'minimal', label: 'Minimal', desc: 'Blanc, sobre, élégant', preview: 'bg-background border-2 border-border' },
+  { id: 'bold', label: 'Bold', desc: 'Fond sombre, fort impact', preview: 'bg-text-primary' },
+  { id: 'elegant', label: 'Élégant', desc: 'Crème, style portfolio', preview: 'bg-background-subtle border border-border' },
 ];
 
 export const SECTION_LABELS: Record<keyof SectionsConfig, string> = {
@@ -40,4 +40,4 @@ export function getExpiresAt(option: string): string | null {
   return d.toISOString();
 }
 
-export const inputClass = "block w-full rounded-xl border border-gray-200 bg-white py-2.5 px-3.5 text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none text-sm transition-all";
+export const inputClass = "block w-full rounded-panel border border-border bg-background py-2.5 px-3.5 text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:border-transparent text-sm transition-all";

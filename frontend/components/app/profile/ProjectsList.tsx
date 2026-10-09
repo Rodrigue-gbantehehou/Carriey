@@ -5,8 +5,10 @@ import { useProfileStore } from '@/store/profile';
 import { ProfileProject } from '@/types/profile';
 import { FolderKanban, ExternalLink, Pencil, Trash2, Plus } from 'lucide-react';
 import BottomSheet from '@/components/app/shared/BottomSheet';
-
-const inputClass = "block w-full rounded-xl border border-gray-200 bg-white py-3 px-4 text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none text-sm transition-all";
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Textarea } from '@/components/ui/Textarea';
+import { TextList } from '@/components/ui/TextList';
 
 const emptyProject: Partial<ProfileProject> = {};
 
@@ -27,7 +29,6 @@ export default function ProjectsList() {
       updateProject(editingId, { ...form, start_date: fmtDate(form.start_date), end_date: fmtDate(form.end_date) });
     } else {
       addProject({
-        // id removed
         name: form.name,
         description: form.description,
         url: form.url,
@@ -62,113 +63,123 @@ export default function ProjectsList() {
   return (
     <div className="space-y-4">
       {projects.length === 0 && (
-        <div className="rounded-xl border-2 border-dashed border-gray-200 p-8 text-center flex flex-col items-center">
-          <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-3">
-            <Plus className="w-6 h-6 text-gray-300" />
+        <div className="rounded-panel border-2 border-dashed border-border bg-background-subtle p-8 text-center flex flex-col items-center">
+          <div className="w-12 h-12 bg-background rounded-full flex items-center justify-center mb-3 border border-border">
+            <FolderKanban className="w-6 h-6 text-text-muted" />
           </div>
-          <p className="text-sm font-medium text-gray-600">Aucun projet ajouté</p>
-          <p className="text-xs text-gray-400 mt-1">Vos réalisations, travaux ou projets personnels.</p>
+          <p className="text-ui-sm font-semibold text-text-primary">Aucun projet ajouté</p>
+          <p className="text-ui-xs text-text-secondary mt-1 mb-4">Vos réalisations, travaux ou projets personnels.</p>
+          <Button variant="secondary" leftIcon={<Plus className="w-4 h-4" />} onClick={startAdd}>
+            Ajouter
+          </Button>
         </div>
       )}
 
       {projects.length > 0 && (
         <div className="space-y-3">
           {projects.map((project, index) => (
-            <div key={project.id || `proj-${index}`} className="group relative rounded-xl border border-gray-100 bg-white p-5 shadow-sm hover:border-gray-300 transition-all">
+            <div key={project.id || `proj-${index}`} className="group relative rounded-panel border border-border bg-background p-5 shadow-sm hover:border-primary transition-colors">
               <div className="flex justify-between items-start gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <h4 className="font-bold text-gray-900 text-base">{project.name}</h4>
+                    <h4 className="font-bold text-text-primary text-ui-base">{project.name}</h4>
                     {project.url && (
-                      <a href={project.url} target="_blank" rel="noreferrer" className="text-indigo-500 hover:text-indigo-700 transition-colors bg-indigo-50 p-1.5 rounded-lg">
-                        <ExternalLink className="w-4 h-4" />
+                      <a href={project.url} target="_blank" rel="noreferrer" className="text-primary hover:text-primary-hover transition-colors bg-background-subtle border border-border p-1.5 rounded-button">
+                        <ExternalLink className="w-3.5 h-3.5" />
                       </a>
                     )}
                   </div>
                   
                   {(project.start_date || project.end_date) && (
-                    <div className="flex items-center gap-2 mt-1 text-xs text-gray-500 font-medium">
-                      <span>{project.start_date || '?'}</span>
+                    <div className="flex items-center gap-2 mt-2 text-ui-xs text-text-secondary font-medium">
+                      <span>{project.start_date ? project.start_date.substring(0, 7) : '?'}</span>
                       <span>—</span>
-                      <span>{project.end_date || 'En cours'}</span>
+                      <span>{project.end_date ? project.end_date.substring(0, 7) : 'En cours'}</span>
                     </div>
                   )}
                   
                   {project.description && (
-                    <p className="mt-3 text-sm text-gray-600 leading-relaxed bg-gray-50 p-3 rounded-lg border border-gray-100 line-clamp-3 whitespace-pre-wrap">
-                      {project.description}
-                    </p>
+                    <TextList text={project.description} className="mt-3 text-ui-sm text-text-secondary leading-relaxed" />
                   )}
                 </div>
                 
-                <div className="flex items-center gap-1">
-                  <button onClick={() => startEdit(project)} className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
+                <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                  <button onClick={() => startEdit(project)} className="p-2 text-text-muted hover:text-primary hover:bg-background-subtle rounded-button transition-colors">
                     <Pencil className="w-4 h-4" />
                   </button>
-                  <button onClick={() => { if(confirm("Supprimer ce projet ?")) removeProject(project.id); }} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                  <button onClick={() => { if(confirm("Supprimer ce projet ?")) removeProject(project.id); }} className="p-2 text-text-muted hover:text-danger-text hover:bg-danger-bg rounded-button transition-colors">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
               </div>
             </div>
           ))}
+          
+          <Button variant="ghost" fullWidth leftIcon={<Plus className="w-4 h-4" />} onClick={startAdd} className="mt-2 border border-dashed border-border">
+            Ajouter un projet
+          </Button>
         </div>
       )}
-
-      <button onClick={startAdd} className="flex items-center gap-2 text-sm font-semibold text-indigo-600 hover:text-indigo-700 transition-colors w-full justify-center py-3.5 rounded-xl border border-dashed border-indigo-200 hover:bg-indigo-50">
-        <Plus className="w-4 h-4" /> Ajouter un projet
-      </button>
 
       <BottomSheet isOpen={isAdding || !!editingId} onClose={closeSheet} title={editingId ? "Modifier le projet" : "Ajouter un projet"}>
         <div className="space-y-5 pb-6">
           <div className="grid grid-cols-1 gap-5">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Nom du projet <span className="text-red-400">*</span></label>
-              <input type="text" autoFocus value={form.name || ''} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Ex : Portfolio personnel, App mobile…" className={inputClass} />
-            </div>
+            <Input
+              label="Nom du projet *"
+              value={form.name || ''}
+              onChange={e => setForm({ ...form, name: e.target.value })}
+              placeholder="Ex : Portfolio personnel, App mobile…"
+              autoFocus
+            />
             
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Lien du projet</label>
-              <input type="url" value={form.url || ''} onChange={e => setForm({ ...form, url: e.target.value })} placeholder="https://mon-projet.com" className={inputClass} />
-            </div>
+            <Input
+              type="url"
+              label="Lien du projet"
+              value={form.url || ''}
+              onChange={e => setForm({ ...form, url: e.target.value })}
+              placeholder="https://mon-projet.com"
+            />
             
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Date de début</label>
-                <input type="month" value={form.start_date || ''} onChange={e => setForm({ ...form, start_date: e.target.value })} className={inputClass} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Date de fin</label>
-                <input type="month" value={form.end_date || ''} onChange={e => setForm({ ...form, end_date: e.target.value })} className={inputClass} />
-              </div>
+              <Input
+                type="month"
+                label="Date de début"
+                value={form.start_date || ''}
+                onChange={e => setForm({ ...form, start_date: e.target.value })}
+              />
+              <Input
+                type="month"
+                label="Date de fin"
+                value={form.end_date || ''}
+                onChange={e => setForm({ ...form, end_date: e.target.value })}
+              />
             </div>
 
             {showDetails ? (
-              <div className="animate-in fade-in slide-in-from-top-4 duration-300">
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Description (optionnel)</label>
-                <textarea
+              <div className="animate-fade-in duration-300">
+                <Textarea
+                  label="Description (optionnel)"
                   rows={4}
                   value={form.description || ''}
                   onChange={e => setForm({ ...form, description: e.target.value })}
                   placeholder="Contexte, technos utilisées, résultats…"
-                  className={`${inputClass} resize-y`}
                 />
               </div>
             ) : (
-              <button type="button" onClick={() => setShowDetails(true)} className="text-sm font-medium text-indigo-600 hover:text-indigo-700 text-left">
+              <button type="button" onClick={() => setShowDetails(true)} className="text-ui-sm font-medium text-primary hover:text-primary-hover text-left">
                 + Ajouter une description
               </button>
             )}
           </div>
           
           <div className="pt-4">
-            <button
+            <Button
+              fullWidth
               onClick={handleSave}
               disabled={!form.name}
-              className="w-full bg-indigo-600 text-white font-semibold py-3.5 px-4 rounded-xl hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-indigo-600/20"
             >
               Enregistrer
-            </button>
+            </Button>
           </div>
         </div>
       </BottomSheet>

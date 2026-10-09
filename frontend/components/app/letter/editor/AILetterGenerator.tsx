@@ -16,7 +16,7 @@ export function AILetterGenerator({ session, cv, formData, setFormData, updateCv
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Assistant IA</h3>
+        <h3 className="text-xs font-bold text-text-muted uppercase tracking-widest mb-3">Assistant IA</h3>
         
         <AIAssistant 
           placeholder="Ex: Je postule pour un poste de Développeur chez Google. Voici l'offre : ..."

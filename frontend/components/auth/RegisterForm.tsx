@@ -5,13 +5,11 @@ import { signIn } from 'next-auth/react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Loader2, Eye, EyeOff, ArrowRight, ArrowLeft, Check, Mail, Lock } from 'lucide-react';
+import { Eye, EyeOff, ArrowRight, ArrowLeft, Check, Mail, Lock } from 'lucide-react';
 import config from '@/lib/config';
-
-const STEPS = [
-  { id: 1, label: 'Email', icon: Mail },
-  { id: 2, label: 'Mot de passe', icon: Lock },
-];
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
+import { Alert } from '@/components/ui/Alert';
 
 function PasswordStrength({ password }: { password: string }) {
   const checks = [
@@ -20,7 +18,7 @@ function PasswordStrength({ password }: { password: string }) {
     { label: 'Un chiffre', pass: /\d/.test(password) },
   ];
   const score = checks.filter(c => c.pass).length;
-  const colors = ['bg-red-400', 'bg-orange-400', 'bg-yellow-400', 'bg-green-500'];
+  const colors = ['bg-danger-text', 'bg-warning-text', 'bg-yellow-400', 'bg-success-text'];
   const labels = ['', 'Faible', 'Moyen', 'Fort'];
 
   if (!password) return null;
@@ -33,13 +31,13 @@ function PasswordStrength({ password }: { password: string }) {
           <div
             key={i}
             className={`h-1 flex-1 rounded-full transition-all duration-300 ${
-              i <= score ? colors[score] : 'bg-gray-200'
+              i <= score ? colors[score] : 'bg-background-subtle border border-border'
             }`}
           />
         ))}
         {score > 0 && (
-          <span className={`text-xs font-medium ml-1 ${
-            score === 3 ? 'text-green-600' : score === 2 ? 'text-yellow-600' : 'text-red-500'
+          <span className={`text-ui-xs font-medium ml-1 ${
+            score === 3 ? 'text-success-text' : score === 2 ? 'text-warning-text' : 'text-danger-text'
           }`}>
             {labels[score]}
           </span>
@@ -50,11 +48,11 @@ function PasswordStrength({ password }: { password: string }) {
         {checks.map((c, i) => (
           <div key={i} className="flex items-center gap-2">
             <div className={`w-3.5 h-3.5 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${
-              c.pass ? 'bg-green-500' : 'bg-gray-200'
+              c.pass ? 'bg-success-text' : 'bg-background-subtle border border-border'
             }`}>
               {c.pass && <Check className="w-2 h-2 text-white stroke-[3]" />}
             </div>
-            <span className={`text-xs transition-colors ${c.pass ? 'text-green-700' : 'text-gray-400'}`}>
+            <span className={`text-ui-xs transition-colors ${c.pass ? 'text-success-text' : 'text-text-muted'}`}>
               {c.label}
             </span>
           </div>
@@ -164,88 +162,85 @@ export default function RegisterForm() {
   };
 
   return (
-    <div className="flex min-h-screen bg-white">
+    <div className="flex min-h-screen bg-background">
       {/* Left panel */}
-      <div className="relative hidden w-0 flex-1 lg:block bg-gray-50 border-r border-gray-100 overflow-hidden">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
-        <div className="absolute inset-0 flex flex-col items-center justify-center p-12 text-center">
-          <div className="bg-white/60 backdrop-blur-md rounded-2xl border border-gray-200 p-12 max-w-lg shadow-xl shadow-gray-200/50">
-            <Image src={config.appLogo} alt={config.appName} width={64} height={64} className="object-contain mb-6 mx-auto drop-shadow-md" />
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">Gérez votre carrière depuis un seul endroit.</h3>
-            <p className="text-gray-500">Centralisez vos expériences, générez des CV sur-mesure et publiez un profil web en un clic.</p>
-          </div>
+      <div className="relative hidden w-0 flex-1 lg:flex bg-primary items-center justify-center p-12 text-center text-white">
+        <div className="max-w-lg">
+          <Image src={config.appLogo} alt={config.appName} width={64} height={64} className="object-contain mb-6 mx-auto brightness-0 invert" />
+          <h2 className="text-ui-2xl font-bold mb-4">Gérez votre carrière depuis un seul endroit.</h2>
+          <p className="text-ui-base text-white/80">Centralisez vos expériences, générez des CV sur-mesure et publiez un profil web en un clic.</p>
         </div>
       </div>
 
       {/* Right panel */}
       <div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
         <div className="mx-auto w-full max-w-sm lg:w-96">
-
           {/* Logo */}
           <div className="mb-8">
             <Link href="/" className="inline-flex items-center gap-2.5">
               <Image src={config.appLogo} alt={config.appName} width={32} height={32} className="object-contain" priority />
-              <span className="text-2xl font-bold text-black-600">{config.appName}</span>
+              <span className="text-ui-2xl font-bold text-text-primary">{config.appName}</span>
             </Link>
-            <h2 className="mt-8 text-2xl font-bold tracking-tight text-gray-900">Créer un compte</h2>
-            <p className="mt-2 text-sm text-gray-500">Commencez à centraliser votre parcours en quelques secondes.</p>
+            <h1 className="mt-8 text-ui-2xl font-bold tracking-tight text-text-primary">Créer un compte</h1>
+            <p className="mt-2 text-ui-sm text-text-secondary">Commencez à centraliser votre parcours en quelques secondes.</p>
           </div>
-
-
 
           {/* Error */}
           {error && (
-            <div className="mb-4 rounded-md border border-red-200 bg-red-50 p-4">
-              <p className="text-sm font-medium text-red-800">{error}</p>
-            </div>
+            <Alert variant="danger" className="mb-6">
+              {error}
+            </Alert>
           )}
 
           {/* Steps */}
           <div className={`transition-all duration-200 ${animating ? 'opacity-0 translate-x-2' : 'opacity-100 translate-x-0'}`}>
-
             {/* STEP 1 — Email */}
             {currentStep === 1 && (
               <div className="space-y-6">
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-900">
-                    Adresse email
-                  </label>
-                  <div className="mt-2">
-                    <input
-                      id="email"
-                      name="email"
-                      type="email"
-                      autoComplete="email"
-                      autoFocus
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && handleNext()}
-                      placeholder="vous@exemple.com"
-                      className="block w-full rounded-md border border-gray-200 bg-white py-2.5 px-3 text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none sm:text-sm transition-all"
-                    />
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleNext}
-                  className="flex w-full items-center justify-center gap-2 rounded-md bg-indigo-600 px-3 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors"
-                >
-                  Continuer <ArrowRight className="w-4 h-4" />
-                </button>
+                <Input
+                  label="Adresse email"
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  autoFocus
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleNext()}
+                  placeholder="vous@exemple.com"
+                />
+                <Button fullWidth onClick={handleNext} rightIcon={<ArrowRight className="w-4 h-4" />}>
+                  Continuer
+                </Button>
               </div>
             )}
 
             {/* STEP 2 — Mot de passe */}
             {currentStep === 2 && (
               <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="rounded-panel bg-background-subtle border border-border px-3 py-2.5 flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-ui-sm">
+                    <Mail className="w-4 h-4 text-text-muted flex-shrink-0" />
+                    <span className="text-text-primary truncate">{email}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => goToStep(1)}
+                    className="text-ui-xs text-primary hover:text-primary-hover font-medium ml-2 flex-shrink-0"
+                  >
+                    Modifier
+                  </button>
+                </div>
+
                 <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-900">
-                    Mot de passe
-                  </label>
-                  <div className="mt-2 relative">
-                    <input
+                  <div className="mb-2">
+                    <label htmlFor="password" className="block text-ui-sm font-medium text-text-primary">
+                      Mot de passe
+                    </label>
+                  </div>
+                  <div className="relative">
+                    <Input
                       id="password"
                       name="password"
                       type={showPassword ? 'text' : 'password'}
@@ -254,12 +249,12 @@ export default function RegisterForm() {
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="block w-full rounded-md border border-gray-200 bg-white py-2.5 pl-3 pr-10 text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none sm:text-sm transition-all"
+                      className="pr-10"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-text-muted hover:text-text-primary"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -268,11 +263,13 @@ export default function RegisterForm() {
                 </div>
 
                 <div>
-                  <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-900">
-                    Confirmer le mot de passe
-                  </label>
-                  <div className="mt-2 relative">
-                    <input
+                  <div className="mb-2">
+                    <label htmlFor="confirm-password" className="block text-ui-sm font-medium text-text-primary">
+                      Confirmer le mot de passe
+                    </label>
+                  </div>
+                  <div className="relative">
+                    <Input
                       id="confirm-password"
                       name="confirm-password"
                       type={showConfirmPassword ? 'text' : 'password'}
@@ -280,21 +277,21 @@ export default function RegisterForm() {
                       required
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="block w-full rounded-md border border-gray-200 bg-white py-2.5 pl-3 pr-10 text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none sm:text-sm transition-all"
+                      className="pr-10"
                     />
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-text-muted hover:text-text-primary"
                     >
                       {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
                   {confirmPassword && password !== confirmPassword && (
-                    <p className="mt-1 text-xs text-red-500">Les mots de passe ne correspondent pas.</p>
+                    <p className="mt-1 text-ui-xs text-danger-text">Les mots de passe ne correspondent pas.</p>
                   )}
                   {confirmPassword && password === confirmPassword && (
-                    <p className="mt-1 text-xs text-green-600 flex items-center gap-1">
+                    <p className="mt-1 text-ui-xs text-success-text flex items-center gap-1">
                       <Check className="w-3 h-3" /> Les mots de passe correspondent.
                     </p>
                   )}
@@ -307,36 +304,38 @@ export default function RegisterForm() {
                     type="checkbox"
                     checked={acceptTerms}
                     onChange={(e) => setAcceptTerms(e.target.checked)}
-                    className="mt-1 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600 cursor-pointer"
+                    className="mt-1 h-4 w-4 rounded border-border text-primary focus:ring-primary cursor-pointer"
                   />
-                  <label htmlFor="accept-terms" className="text-xs text-gray-500 cursor-pointer">
-                    J'accepte les <Link href="/legal/cgu" className="text-indigo-600 hover:underline">Conditions Générales d'Utilisation</Link> et la <Link href="/legal/privacy" className="text-indigo-600 hover:underline">Politique de confidentialité</Link>.
+                  <label htmlFor="accept-terms" className="text-ui-xs text-text-secondary cursor-pointer">
+                    J'accepte les <Link href="/legal/cgu" className="text-primary hover:underline">Conditions Générales d'Utilisation</Link> et la <Link href="/legal/privacy" className="text-primary hover:underline">Politique de confidentialité</Link>.
                   </label>
                 </div>
 
                 <div className="flex gap-3 pt-1">
-                  <button
+                  <Button
                     type="button"
+                    variant="secondary"
                     onClick={() => goToStep(1)}
-                    className="flex items-center gap-1.5 rounded-md border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                    leftIcon={<ArrowLeft className="w-4 h-4" />}
                   >
-                    <ArrowLeft className="w-4 h-4" /> Retour
-                  </button>
-                  <button
+                    Retour
+                  </Button>
+                  <Button
                     type="submit"
-                    disabled={isLoading}
-                    className="flex flex-1 items-center justify-center gap-2 rounded-md bg-indigo-600 px-3 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition-colors disabled:opacity-50"
+                    fullWidth
+                    isLoading={isLoading}
+                    rightIcon={!isLoading ? <Check className="w-4 h-4" /> : undefined}
                   >
-                    {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Créer mon compte <Check className="w-4 h-4" /></>}
-                  </button>
+                    Créer mon compte
+                  </Button>
                 </div>
               </form>
             )}
           </div>
 
-          <p className="mt-8 text-center text-sm text-gray-500">
+          <p className="mt-8 text-center text-ui-sm text-text-secondary">
             Déjà un compte ?{' '}
-            <Link href="/login" className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500">
+            <Link href="/login" className="font-semibold text-primary hover:text-primary-hover">
               Se connecter
             </Link>
           </p>
@@ -345,3 +344,4 @@ export default function RegisterForm() {
     </div>
   );
 }
+

@@ -47,8 +47,8 @@ function ScoreRing({ score }: { score: number }) {
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-4xl font-bold text-gray-900">{score}</span>
-          <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">/ 100</span>
+          <span className="text-4xl font-bold text-text-primary">{score}</span>
+          <span className="text-xs font-bold text-text-muted uppercase tracking-wide">/ 100</span>
         </div>
       </div>
       <span className="text-sm font-bold px-3 py-1 rounded-full" style={{ backgroundColor: `${color}20`, color }}>
@@ -172,75 +172,75 @@ export default function NouvelleCandidaturePage() {
 
   return (
     <>
-      <div className="min-h-screen bg-gray-50/50 font-sans">
-        <div className="max-w-4xl mx-auto px-6 py-10">
+      <div className="font-sans animate-fade-in pb-12">
+        <div className="space-y-6">
 
           {/* Header */}
           <div className="mb-10">
-            <div className="flex items-center gap-2 text-xs text-gray-400 font-semibold mb-4">
-              <Link href="/accueil" className="hover:text-indigo-600 transition-colors">Accueil</Link>
+            <div className="flex items-center gap-2 text-xs text-text-muted font-semibold mb-4">
+              <Link href="/accueil" className="hover:text-primary transition-colors">Accueil</Link>
               <ChevronRight className="w-3 h-3" />
-              <Link href="/candidatures" className="hover:text-indigo-600 transition-colors">Candidatures</Link>
+              <Link href="/candidatures" className="hover:text-primary transition-colors">Candidatures</Link>
               <ChevronRight className="w-3 h-3" />
-              <span className="text-gray-700">Nouvelle</span>
+              <span className="text-text-secondary">Nouvelle</span>
             </div>
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center">
-                <Target className="w-5 h-5 text-indigo-600" />
+              <div className="w-10 h-10 rounded-panel bg-primary-subtle flex items-center justify-center">
+                <Target className="w-5 h-5 text-primary" />
               </div>
-              <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Nouvelle candidature</h1>
+              <h1 className="text-2xl font-bold text-text-primary tracking-tight">Nouvelle candidature</h1>
             </div>
-            <p className="text-gray-500 font-medium text-sm max-w-xl">
+            <p className="text-text-secondary font-medium text-sm max-w-xl">
               Démarrez une nouvelle candidature en collant l'offre visée. Carriey analyse votre profil et vous prépare un CV et une lettre sur-mesure.
             </p>
           </div>
 
           {/* Input */}
-          <div className="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-6 mb-6">
-            <label className="block text-sm font-bold text-gray-700 mb-3">Offre d'emploi</label>
+          <div className="bg-white rounded-panel border border-border/60 shadow-sm p-6 mb-6">
+            <label className="block text-sm font-bold text-text-secondary mb-3">Offre d'emploi</label>
             <textarea
               value={jobText}
               onChange={e => setJobText(e.target.value)}
               placeholder="Collez ici le texte complet de l'offre d'emploi (titre, description, compétences requises, etc.)..."
-              className="w-full h-48 resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-all font-medium"
+              className="w-full h-48 resize-none rounded-panel border border-border bg-background-subtle px-4 py-3 text-sm text-text-secondary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-all font-medium"
             />
             <div className="mt-4 flex items-center justify-between">
-              <p className="text-xs text-gray-400">{jobText.length} caractères</p>
+              <p className="text-xs text-text-muted">{jobText.length} caractères</p>
               <button
                 onClick={handleAnalyze}
                 disabled={loading || jobText.trim().length < 50}
-                className="inline-flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-xl text-sm font-bold hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5 transition-all shadow-lg shadow-indigo-600/20"
+                className="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-button text-sm font-bold hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5 transition-all shadow-sm"
               >
                 {loading ? (
                   <><Loader2 className="w-4 h-4 animate-spin" /> Analyse en cours...</>
                 ) : (
-                  <><Target className="w-4 h-4" /> Analyser ma correspondance</>
+                  <><Target className="w-4 h-4" /> Analyser</>
                 )}
               </button>
             </div>
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700 font-medium mb-6 flex items-center gap-2">
+            <div className="bg-danger-bg border border-red-200 rounded-panel px-4 py-3 text-sm text-red-700 font-medium mb-6 flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" /> {error}
             </div>
           )}
 
           {/* Missing Info Warning */}
           {result?.missing_info && result.missing_info.length > 0 && (
-            <div className="bg-amber-50 border border-amber-200 rounded-2xl px-6 py-5 mb-6">
+            <div className="bg-warning-bg border border-warning-text/20 rounded-panel px-6 py-5 mb-6">
               <div className="flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                <AlertCircle className="w-5 h-5 text-warning-text shrink-0 mt-0.5" />
                 <div>
-                  <h3 className="text-amber-800 font-bold text-sm mb-1">
+                  <h3 className="text-warning-text font-bold text-sm mb-1">
                     Profil incomplet pour une analyse optimale
                   </h3>
-                  <p className="text-amber-700 text-sm mb-3">
+                  <p className="text-warning-text text-sm mb-3 opacity-90">
                     Pour améliorer la précision de l'IA et lui permettre de générer un CV sur-mesure, vous devez renseigner : <span className="font-semibold">{result.missing_info.join(', ')}</span>.
                   </p>
                   <Link 
                     href="/profil" 
-                    className="inline-flex items-center gap-1.5 text-sm font-bold text-amber-700 hover:text-amber-900 bg-amber-100/50 hover:bg-amber-200/50 px-3 py-1.5 rounded-lg transition-colors"
+                    className="inline-flex items-center gap-1.5 text-sm font-bold text-warning-text hover:opacity-80 bg-warning-text/10 px-3 py-1.5 rounded-button transition-colors"
                   >
                     <FileText className="w-4 h-4" />
                     Compléter mon profil (ou Importer mon CV)
@@ -255,37 +255,37 @@ export default function NouvelleCandidaturePage() {
             <div className="space-y-5 animate-fade-in">
 
               {/* Score + Verdict */}
-              <div className="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-8">
+              <div className="bg-white rounded-panel border border-border/60 shadow-sm p-8">
                 <div className="flex flex-col sm:flex-row items-center gap-8">
                   <ScoreRing score={result.score} />
                   <div className="flex-1 text-center sm:text-left">
-                    <h2 className="text-lg font-bold text-gray-900 mb-3">Résultat de l'analyse</h2>
-                    <p className="text-gray-600 text-sm leading-relaxed font-medium">{result.verdict}</p>
+                    <h2 className="text-lg font-bold text-text-primary mb-3">Résultat de l'analyse</h2>
+                    <p className="text-text-secondary text-sm leading-relaxed font-medium">{result.verdict}</p>
                   </div>
                 </div>
               </div>
 
               {/* ✨ Actions IA */}
-              <div className="bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-2xl shadow-xl shadow-indigo-600/25 p-6">
+              <div className="bg-white rounded-panel border border-border shadow-sm p-6">
                 <div className="flex items-center gap-2 mb-1">
-                  <Zap className="w-4 h-4 text-indigo-200" />
-                  <p className="text-xs font-bold text-indigo-200 uppercase tracking-widest">Actions recommandées</p>
+                  <Zap className="w-4 h-4 text-primary" />
+                  <p className="text-xs font-bold text-primary uppercase tracking-widest">Actions recommandées</p>
                 </div>
-                <h3 className="text-white font-bold text-base mb-5">Passez à l'action sur cette offre</h3>
+                <h3 className="text-text-primary font-bold text-base mb-5">Passez à l'action sur cette offre</h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {/* Adapter le CV */}
                   <button
                     onClick={handleTailorCv}
                     disabled={tailoringCv || generatingLetter}
-                    className="flex flex-col items-start gap-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl p-4 text-left transition-all hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed group"
+                    className="flex flex-col items-start gap-2 bg-background-subtle hover:bg-border border border-border rounded-button p-4 text-left transition-all hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed group"
                   >
-                    <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                      {tailoringCv ? <Loader2 className="w-4 h-4 text-white animate-spin" /> : <FileText className="w-4 h-4 text-white" />}
+                    <div className="w-8 h-8 bg-white border border-border rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform text-primary">
+                      {tailoringCv ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-white">Adapter mon CV</p>
-                      <p className="text-xs text-indigo-200 mt-0.5">Génère un CV ciblé par IA</p>
+                      <p className="text-sm font-bold text-text-primary">Adapter mon CV</p>
+                      <p className="text-xs text-text-secondary mt-0.5">Génère un CV ciblé par IA</p>
                     </div>
                   </button>
 
@@ -293,14 +293,14 @@ export default function NouvelleCandidaturePage() {
                   <button
                     onClick={handleGenerateLetter}
                     disabled={tailoringCv || generatingLetter}
-                    className="flex flex-col items-start gap-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl p-4 text-left transition-all hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed group"
+                    className="flex flex-col items-start gap-2 bg-background-subtle hover:bg-border border border-border rounded-button p-4 text-left transition-all hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed group"
                   >
-                    <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                      {generatingLetter ? <Loader2 className="w-4 h-4 text-white animate-spin" /> : <Mail className="w-4 h-4 text-white" />}
+                    <div className="w-8 h-8 bg-white border border-border rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform text-primary">
+                      {generatingLetter ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-white">Rédiger ma lettre</p>
-                      <p className="text-xs text-indigo-200 mt-0.5">Lettre adaptée à l'offre</p>
+                      <p className="text-sm font-bold text-text-primary">Rédiger ma lettre</p>
+                      <p className="text-xs text-text-secondary mt-0.5">Lettre adaptée à l'offre</p>
                     </div>
                   </button>
 
@@ -308,14 +308,14 @@ export default function NouvelleCandidaturePage() {
                   <Link
                     href={`/candidatures?new=1&score=${result.score}&company=${encodeURIComponent(result.company || '')}&role=${encodeURIComponent(result.role || '')}&location=${encodeURIComponent(result.location || '')}`}
                     onClick={() => sessionStorage.setItem('tempJobDescription', jobText)}
-                    className="flex flex-col items-start gap-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl p-4 text-left transition-all hover:-translate-y-0.5 group"
+                    className="flex flex-col items-start gap-2 bg-background-subtle hover:bg-border border border-border rounded-button p-4 text-left transition-all hover:-translate-y-0.5 group"
                   >
-                    <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Bookmark className="w-4 h-4 text-white" />
+                    <div className="w-8 h-8 bg-white border border-border rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform text-primary">
+                      <Bookmark className="w-4 h-4" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-white">Suivre la candidature</p>
-                      <p className="text-xs text-indigo-200 mt-0.5">Score {result.score}% pré-rempli</p>
+                      <p className="text-sm font-bold text-text-primary">Suivre la candidature</p>
+                      <p className="text-xs text-text-secondary mt-0.5">Score {result.score}% pré-rempli</p>
                     </div>
                   </Link>
                 </div>
@@ -323,17 +323,17 @@ export default function NouvelleCandidaturePage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {/* Strengths */}
-                <div className="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-6">
+                <div className="bg-white rounded-panel border border-border shadow-sm p-6">
                   <div className="flex items-center gap-2 mb-4">
-                    <div className="w-8 h-8 bg-emerald-100 rounded-xl flex items-center justify-center">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    <div className="w-8 h-8 bg-success-bg rounded-panel flex items-center justify-center">
+                      <CheckCircle2 className="w-4 h-4 text-success-text" />
                     </div>
-                    <h3 className="text-sm font-bold text-gray-900">Points forts</h3>
+                    <h3 className="text-sm font-bold text-text-primary">Points forts</h3>
                   </div>
                   <ul className="space-y-3">
                     {result.strengths.map((s, i) => (
-                      <li key={i} className="flex items-start gap-2.5 text-sm text-gray-600 font-medium">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
+                      <li key={i} className="flex items-start gap-2.5 text-sm text-text-secondary font-medium">
+                        <CheckCircle2 className="w-4 h-4 text-success-text mt-0.5 shrink-0" />
                         {s}
                       </li>
                     ))}
@@ -341,17 +341,17 @@ export default function NouvelleCandidaturePage() {
                 </div>
 
                 {/* Gaps */}
-                <div className="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-6">
+                <div className="bg-white rounded-panel border border-border shadow-sm p-6">
                   <div className="flex items-center gap-2 mb-4">
-                    <div className="w-8 h-8 bg-amber-100 rounded-xl flex items-center justify-center">
-                      <AlertCircle className="w-4 h-4 text-amber-600" />
+                    <div className="w-8 h-8 bg-warning-bg rounded-panel flex items-center justify-center">
+                      <AlertCircle className="w-4 h-4 text-warning-text" />
                     </div>
-                    <h3 className="text-sm font-bold text-gray-900">À améliorer</h3>
+                    <h3 className="text-sm font-bold text-text-primary">À améliorer</h3>
                   </div>
                   <ul className="space-y-3">
                     {result.gaps.map((g, i) => (
-                      <li key={i} className="flex items-start gap-2.5 text-sm text-gray-600 font-medium">
-                        <AlertCircle className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
+                      <li key={i} className="flex items-start gap-2.5 text-sm text-text-secondary font-medium">
+                        <AlertCircle className="w-4 h-4 text-warning-text mt-0.5 shrink-0" />
                         {g}
                       </li>
                     ))}
@@ -360,28 +360,28 @@ export default function NouvelleCandidaturePage() {
               </div>
 
               {/* Angle recommandé */}
-              <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-6">
+              <div className="bg-primary-subtle border border-primary/20 rounded-panel p-6">
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="w-8 h-8 bg-indigo-100 rounded-xl flex items-center justify-center">
-                    <Lightbulb className="w-4 h-4 text-indigo-600" />
+                  <div className="w-8 h-8 bg-white rounded-panel border border-border flex items-center justify-center">
+                    <Lightbulb className="w-4 h-4 text-primary" />
                   </div>
-                  <h3 className="text-sm font-bold text-gray-900">Angle de profil recommandé</h3>
+                  <h3 className="text-sm font-bold text-text-primary">Angle de profil recommandé</h3>
                 </div>
-                <p className="text-base font-bold text-indigo-700 mb-2">{result.angle.title}</p>
-                <p className="text-sm text-indigo-600/80 leading-relaxed font-medium">{result.angle.advice}</p>
+                <p className="text-base font-bold text-primary mb-2">{result.angle.title}</p>
+                <p className="text-sm text-text-secondary leading-relaxed font-medium">{result.angle.advice}</p>
               </div>
 
               {/* Mots-clés */}
-              <div className="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-6">
+              <div className="bg-white rounded-panel border border-border/60 shadow-sm p-6">
                 <div className="flex items-center gap-2 mb-4">
-                  <div className="w-8 h-8 bg-gray-100 rounded-xl flex items-center justify-center">
-                    <Tag className="w-4 h-4 text-gray-600" />
+                  <div className="w-8 h-8 bg-border rounded-panel flex items-center justify-center">
+                    <Tag className="w-4 h-4 text-text-secondary" />
                   </div>
-                  <h3 className="text-sm font-bold text-gray-900">Mots-clés à inclure dans vos documents</h3>
+                  <h3 className="text-sm font-bold text-text-primary">Mots-clés à inclure dans vos documents</h3>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {result.keywords_to_use.map((kw, i) => (
-                    <span key={i} className="px-3 py-1.5 bg-indigo-50 text-indigo-700 text-xs font-bold rounded-xl border border-indigo-100">
+                    <span key={i} className="px-3 py-1.5 bg-background-subtle text-text-primary text-xs font-bold rounded-panel border border-border">
                       {kw}
                     </span>
                   ))}

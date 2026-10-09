@@ -32,7 +32,7 @@ export default function FAQPage() {
       {/* Decorative Header Background */}
       <div className="relative overflow-hidden bg-gray-50/50 border-b border-gray-100 pt-16 pb-24">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-indigo-50 rounded-[100%] blur-3xl opacity-50 -z-10"></div>
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 text-center relative z-10">
+        <div className="max-w-public mx-auto px-6 lg:px-8 text-center relative z-10">
           <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 tracking-tight mb-4">
             Questions <span className="text-indigo-600">Fréquentes</span>
           </h1>
@@ -43,7 +43,7 @@ export default function FAQPage() {
       </div>
 
       <main className="pb-24 -mt-12 relative z-20">
-        <div className="max-w-4xl mx-auto px-6 lg:px-8">
+        <div className="max-w-column mx-auto px-6 lg:px-8">
 
           <div className="space-y-4">
             {faqs.map((faq, idx) => (

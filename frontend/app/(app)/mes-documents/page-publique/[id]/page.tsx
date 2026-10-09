@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { ArrowLeft, Loader2 } from 'lucide-react';
@@ -8,7 +8,8 @@ import { PageEditor } from '@/components/app/public-page/editor/PageEditor';
 import { publicPagesApi } from '@/lib/public-pages-api';
 import { PublicPage } from '@/types/public-page';
 
-export default function EditPublicPage({ params }: { params: { id: string } }) {
+export default function EditPublicPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = use(params);
   const router = useRouter();
   const { data: session, status } = useSession();
   const [page, setPage] = useState<PublicPage | null>(null);
@@ -23,7 +24,7 @@ export default function EditPublicPage({ params }: { params: { id: string } }) {
       if (session?.user?.accessToken) {
         try {
           const pages = await publicPagesApi.list(session.user.accessToken);
-          const found = pages.find(p => p.id === params.id);
+          const found = pages.find(p => p.id === resolvedParams.id);
           if (found) {
             setPage(found);
           } else {
@@ -38,32 +39,32 @@ export default function EditPublicPage({ params }: { params: { id: string } }) {
       }
     };
     fetchPage();
-  }, [session, status, params.id, router]);
+  }, [session, status, resolvedParams.id, router]);
 
   if (loading || status === 'loading') {
     return (
       <div className="flex h-screen items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="py-6 sm:py-10 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto font-sans">
+    <div className="font-sans animate-fade-in pb-12">
       <div className="flex items-center gap-4 mb-8">
         <button
           onClick={() => router.back()}
-          className="p-2 hover:bg-gray-100 rounded-full text-gray-500 transition-colors"
+          className="p-2 hover:bg-border rounded-full text-text-secondary transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Éditer ma Page Publique</h1>
-          <p className="text-sm text-gray-500 mt-1">Modifiez les informations et le design de votre profil.</p>
+          <h1 className="text-2xl font-bold text-text-primary">Éditer ma Page Publique</h1>
+          <p className="text-sm text-text-secondary mt-1">Modifiez les informations et le design de votre profil.</p>
         </div>
       </div>
 
-      <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-100">
+      <div className="bg-white p-6 sm:p-8 rounded-panel shadow-sm border border-border">
         {page && (
           <PageEditor
             initialPage={page}

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Settings2, Layout, Palette, Sparkles, Check } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 import { publicPagesApi } from '@/lib/public-pages-api';
 import { PublicPage, PublicPageCreate, SectionsConfig, Theme } from '@/types/public-page';
 import { SlugInput } from '../shared/SlugInput';
@@ -125,10 +126,10 @@ export function PageEditor({ initialPage, initialTheme, token, onSave, onClose }
   return (
     <div className="space-y-4 pb-6">
       {/* Tabs */}
-      <div className="flex bg-gray-100 rounded-xl p-1 gap-1">
+      <div className="flex bg-border rounded-panel p-1 gap-1">
         {tabs.map(t => (
           <button key={t.id} onClick={() => setTab(t.id)}
-            className={`flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold py-2 rounded-lg transition-all ${tab === t.id ? 'bg-white text-indigo-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+            className={`flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold py-2 rounded-lg transition-all ${tab === t.id ? 'bg-white text-primary shadow-sm' : 'text-text-secondary hover:text-text-primary'}`}>
             {t.icon}{t.label}
           </button>
         ))}
@@ -139,20 +140,20 @@ export function PageEditor({ initialPage, initialTheme, token, onSave, onClose }
         <div className="space-y-4">
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-sm font-medium text-gray-700">Nom interne <span className="text-red-400">*</span></label>
+              <label className="block text-sm font-medium text-text-secondary">Nom interne <span className="text-danger-text">*</span></label>
               <button type="button" onClick={handleGenerateTitleAndSlug}
-                className="flex items-center gap-1 text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 transition-colors">
+                className="flex items-center gap-1 text-[11px] font-semibold text-primary hover:text-primary-hover transition-colors">
                 <Sparkles className="w-3 h-3" /> Suggérer avec l'IA
               </button>
             </div>
             <input type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="Ex: CV Dev Senior, Portfolio Freelance…" className={inputClass} autoFocus />
             {titleSuggestions.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-2">
-                <span className="text-[10px] text-gray-400 self-center">Suggestions :</span>
+                <span className="text-[10px] text-text-muted self-center">Suggestions :</span>
                 {titleSuggestions.map(s => (
                   <button key={s} type="button"
                     onClick={() => { setTitle(s); setTitleSuggestions([]); }}
-                    className="text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 px-2.5 py-1 rounded-lg transition-all">
+                    className="text-[11px] font-semibold bg-primary-subtle text-primary border border-primary/20 hover:bg-primary/20 px-2.5 py-1 rounded-lg transition-all">
                     {s}
                   </button>
                 ))}
@@ -161,17 +162,17 @@ export function PageEditor({ initialPage, initialTheme, token, onSave, onClose }
           </div>
           <SlugInput value={slug} onChange={setSlug} token={token} excludeId={initialPage?.id} />
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Durée de vie</label>
+            <label className="block text-sm font-medium text-text-secondary mb-1.5">Durée de vie</label>
             <div className="grid grid-cols-4 gap-2">
               {initialPage?.expires_at && (
                 <button key="keep" onClick={() => setExpiry('keep')}
-                  className={`text-xs font-semibold py-2 rounded-xl border transition-all col-span-4 ${expiry === 'keep' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-200 text-gray-600 hover:border-indigo-300'}`}>
+                  className={`text-xs font-semibold py-2 rounded-panel border transition-all col-span-4 ${expiry === 'keep' ? 'bg-primary text-white border-primary' : 'border-border text-text-secondary hover:border-primary/50'}`}>
                   Garder la date d'expiration actuelle
                 </button>
               )}
               {EXPIRY_OPTIONS.map(opt => (
                 <button key={opt.value} onClick={() => setExpiry(opt.value)}
-                  className={`text-xs font-semibold py-2 rounded-xl border transition-all ${expiry === opt.value ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-200 text-gray-600 hover:border-indigo-300'}`}>
+                  className={`text-xs font-semibold py-2 rounded-panel border transition-all ${expiry === opt.value ? 'bg-primary text-white border-primary' : 'border-border text-text-secondary hover:border-primary/50'}`}>
                   {opt.label}
                 </button>
               ))}
@@ -183,17 +184,17 @@ export function PageEditor({ initialPage, initialTheme, token, onSave, onClose }
       {/* ── Tab: Sections ── */}
       {tab === 'sections' && (
         <div className="space-y-3">
-          <div className="flex items-center justify-between pb-1 border-b border-gray-100">
-            <span className="text-xs text-gray-500">Activer/désactiver les sections à afficher</span>
+          <div className="flex items-center justify-between pb-1 border-b border-border">
+            <span className="text-xs text-text-secondary">Activer/désactiver les sections à afficher</span>
             <div className="flex gap-2">
-              <button onClick={() => setSections(Object.fromEntries(Object.keys(sections).map(k => [k, true])) as unknown as SectionsConfig)} className="text-[10px] font-bold text-indigo-600 hover:underline">Tout</button>
-              <button onClick={() => setSections(Object.fromEntries(Object.keys(sections).map(k => [k, false])) as unknown as SectionsConfig)} className="text-[10px] font-bold text-gray-400 hover:underline">Aucun</button>
+              <button onClick={() => setSections(Object.fromEntries(Object.keys(sections).map(k => [k, true])) as unknown as SectionsConfig)} className="text-[10px] font-bold text-primary hover:underline">Tout</button>
+              <button onClick={() => setSections(Object.fromEntries(Object.keys(sections).map(k => [k, false])) as unknown as SectionsConfig)} className="text-[10px] font-bold text-text-muted hover:underline">Aucun</button>
             </div>
           </div>
           {(Object.entries(sections) as [keyof SectionsConfig, boolean][]).map(([key, val]) => (
-            <label key={key} className="flex items-center justify-between p-3 rounded-xl border border-gray-100 hover:border-indigo-200 cursor-pointer transition-all group">
-              <span className="text-sm font-medium text-gray-700 group-hover:text-indigo-700">{SECTION_LABELS[key]}</span>
-              <div className={`relative w-10 h-5.5 rounded-full transition-colors ${val ? 'bg-indigo-600' : 'bg-gray-200'}`}
+            <label key={key} className="flex items-center justify-between p-3 rounded-panel border border-border hover:border-primary/20 cursor-pointer transition-all group">
+              <span className="text-sm font-medium text-text-secondary group-hover:text-primary-hover">{SECTION_LABELS[key]}</span>
+              <div className={`relative w-10 h-5.5 rounded-full transition-colors ${val ? 'bg-primary' : 'bg-border'}`}
                 style={{ width: 40, height: 22 }}
                 onClick={() => setSections({ ...sections, [key]: !val })}>
                 <div className={`absolute top-0.5 w-4.5 h-4.5 bg-white rounded-full shadow transition-all ${val ? 'left-[18px]' : 'left-[2px]'}`}
@@ -201,16 +202,16 @@ export function PageEditor({ initialPage, initialTheme, token, onSave, onClose }
               </div>
             </label>
           ))}
-          <div className="border-t border-gray-100 pt-3 space-y-2">
-            <label className="flex items-center justify-between p-3 rounded-xl border border-gray-100 cursor-pointer" onClick={() => setShowPhoto(!showPhoto)}>
-              <span className="text-sm font-medium text-gray-700">Afficher ma photo</span>
-              <div className={`relative rounded-full transition-colors ${showPhoto ? 'bg-indigo-600' : 'bg-gray-200'}`} style={{ width: 40, height: 22 }}>
+          <div className="border-t border-border pt-3 space-y-2">
+            <label className="flex items-center justify-between p-3 rounded-panel border border-border cursor-pointer" onClick={() => setShowPhoto(!showPhoto)}>
+              <span className="text-sm font-medium text-text-secondary">Afficher ma photo</span>
+              <div className={`relative rounded-full transition-colors ${showPhoto ? 'bg-primary' : 'bg-border'}`} style={{ width: 40, height: 22 }}>
                 <div className="absolute bg-white rounded-full shadow transition-all" style={{ width: 18, height: 18, top: 2, left: showPhoto ? 20 : 2 }} />
               </div>
             </label>
-            <label className="flex items-center justify-between p-3 rounded-xl border border-gray-100 cursor-pointer" onClick={() => setShowContact(!showContact)}>
-              <span className="text-sm font-medium text-gray-700">Afficher mes coordonnées</span>
-              <div className={`relative rounded-full transition-colors ${showContact ? 'bg-indigo-600' : 'bg-gray-200'}`} style={{ width: 40, height: 22 }}>
+            <label className="flex items-center justify-between p-3 rounded-panel border border-border cursor-pointer" onClick={() => setShowContact(!showContact)}>
+              <span className="text-sm font-medium text-text-secondary">Afficher mes coordonnées</span>
+              <div className={`relative rounded-full transition-colors ${showContact ? 'bg-primary' : 'bg-border'}`} style={{ width: 40, height: 22 }}>
                 <div className="absolute bg-white rounded-full shadow transition-all" style={{ width: 18, height: 18, top: 2, left: showContact ? 20 : 2 }} />
               </div>
             </label>
@@ -221,50 +222,50 @@ export function PageEditor({ initialPage, initialTheme, token, onSave, onClose }
       {/* ── Tab: AI & SEO ── */}
       {tab === 'ai' && (
         <div className="space-y-4">
-          <div className="bg-indigo-50 p-4 rounded-xl border border-indigo-100 flex flex-col gap-3">
-            <h3 className="text-sm font-bold text-indigo-900 flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-indigo-600" />
+          <div className="bg-primary-subtle p-4 rounded-panel border border-primary/20 flex flex-col gap-3">
+            <h3 className="text-sm font-bold text-primary-hover flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-primary" />
               Super-pouvoirs IA
             </h3>
-            <p className="text-xs text-indigo-700 leading-relaxed">
+            <p className="text-xs text-text-secondary leading-relaxed">
               L'IA analyse votre profil complet pour rédiger une bio d'accroche ("Elevator Pitch") percutante qui s'affichera sur votre page, et génère le texte optimisé pour le référencement Google.
             </p>
-            <button 
+            <Button 
               onClick={handleGenerateAi}
               disabled={isGeneratingAi}
-              className="mt-1 bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 transition-all text-sm w-full flex items-center justify-center gap-2 disabled:opacity-60"
+              isLoading={isGeneratingAi}
+              variant="primary"
+              fullWidth
+              className="mt-1"
+              leftIcon={!isGeneratingAi && <Sparkles className="w-4 h-4" />}
             >
-              {isGeneratingAi ? (
-                <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Génération...</>
-              ) : (
-                <><Sparkles className="w-4 h-4" /> Générer avec l'IA</>
-              )}
-            </button>
+              Générer avec l'IA
+            </Button>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Bio d'accroche (Pitch)</label>
+            <label className="block text-sm font-medium text-text-secondary mb-1.5">Bio d'accroche (Pitch)</label>
             <textarea 
               value={customBio} 
               onChange={e => setCustomBio(e.target.value)} 
               placeholder="Texte d'introduction affiché en haut de la page..." 
-              className="w-full text-sm border-gray-200 border rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none h-28"
+              className="w-full text-sm border-border border rounded-panel p-3 focus:ring-2 focus:ring-primary focus:border-primary resize-none h-28"
             />
-            <p className="text-[10px] text-gray-400 mt-1 text-right">Laissez vide pour utiliser la bio par défaut du profil.</p>
+            <p className="text-[10px] text-text-muted mt-1 text-right">Laissez vide pour utiliser la bio par défaut du profil.</p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Description SEO (Google)</label>
+            <label className="block text-sm font-medium text-text-secondary mb-1.5">Description SEO (Google)</label>
             <textarea 
               value={seoDescription} 
               onChange={e => setSeoDescription(e.target.value)} 
               placeholder="Description courte de votre profil (max 160 caractères)..." 
-              className="w-full text-sm border-gray-200 border rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none h-16"
+              className="w-full text-sm border-border border rounded-panel p-3 focus:ring-2 focus:ring-primary focus:border-primary resize-none h-16"
               maxLength={160}
             />
             <div className="flex justify-between items-center mt-1">
-              <span className="text-[10px] text-gray-400">Invisible sur la page, utilisé par les moteurs de recherche.</span>
-              <span className={`text-[10px] font-medium ${seoDescription.length > 155 ? 'text-red-500' : 'text-gray-400'}`}>
+              <span className="text-[10px] text-text-muted">Invisible sur la page, utilisé par les moteurs de recherche.</span>
+              <span className={`text-[10px] font-medium ${seoDescription.length > 155 ? 'text-danger-text' : 'text-text-muted'}`}>
                 {seoDescription.length}/160
               </span>
             </div>
@@ -276,15 +277,15 @@ export function PageEditor({ initialPage, initialTheme, token, onSave, onClose }
       {tab === 'design' && (
         <div className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">Thème</label>
+            <label className="block text-sm font-medium text-text-secondary mb-3">Thème</label>
             <div className="grid grid-cols-2 gap-3 max-h-[400px] overflow-y-auto custom-scrollbar p-1">
               {dbThemes.map(t => (
                 <button
                   key={t.slug || t.id}
                   onClick={() => setTheme(t.slug || t.id)}
-                  className={`relative aspect-[1/1.4] rounded-xl border-2 overflow-hidden flex flex-col transition-all bg-white group ${theme === (t.slug || t.id) ? 'border-indigo-600 shadow-md shadow-indigo-100' : 'border-gray-100 hover:border-indigo-300'}`}
+                  className={`relative aspect-[1/1.4] rounded-panel border-2 overflow-hidden flex flex-col transition-all bg-white group ${theme === (t.slug || t.id) ? 'border-primary shadow-md shadow-primary/20' : 'border-border hover:border-primary/50'}`}
                 >
-                  <div className="flex-1 p-2 flex items-center justify-center border-b border-gray-50 bg-gray-50/50 w-full relative">
+                  <div className="flex-1 p-2 flex items-center justify-center border-b border-gray-50 bg-background-subtle/50 w-full relative">
                     {t.preview_image ? (
                       <img 
                         src={t.preview_image.startsWith('http') ? t.preview_image : `${config.staticBaseUrl}/previews/${t.preview_image.split('/').pop()}`}
@@ -292,36 +293,36 @@ export function PageEditor({ initialPage, initialTheme, token, onSave, onClose }
                         className="w-full h-full object-contain"
                       />
                     ) : (
-                      <div className="w-full h-full bg-gray-100 rounded flex flex-col p-2 space-y-2">
-                        <div className="w-full h-2 bg-gray-200 rounded" />
-                        <div className="w-3/4 h-2 bg-gray-200 rounded" />
-                        <div className="w-1/2 h-2 bg-gray-200 rounded" />
+                      <div className="w-full h-full bg-border rounded flex flex-col p-2 space-y-2">
+                        <div className="w-full h-2 bg-border rounded" />
+                        <div className="w-3/4 h-2 bg-border rounded" />
+                        <div className="w-1/2 h-2 bg-border rounded" />
                       </div>
                     )}
                   </div>
                   {theme === (t.slug || t.id) && (
-                    <div className="absolute top-2 right-2 w-5 h-5 bg-indigo-600 rounded-full flex items-center justify-center text-white shadow-sm z-10">
+                    <div className="absolute top-2 right-2 w-5 h-5 bg-primary rounded-full flex items-center justify-center text-white shadow-sm z-10">
                       <Check className="w-3 h-3" />
                     </div>
                   )}
                   <div className="p-2 text-center bg-white flex flex-col w-full">
-                    <span className="text-xs font-semibold text-gray-900 truncate">{t.name || t.label}</span>
-                    <span className="text-[10px] text-gray-400 font-medium truncate mt-0.5">{t.description || t.desc || 'Template standard'}</span>
+                    <span className="text-xs font-semibold text-text-primary truncate">{t.name || t.label}</span>
+                    <span className="text-[10px] text-text-muted font-medium truncate mt-0.5">{t.description || t.desc || 'Template standard'}</span>
                   </div>
                 </button>
               ))}
               {dbThemes.length === 0 && (
-                <div className="col-span-2 p-4 text-center text-gray-500 text-sm border-2 border-dashed border-gray-200 rounded-xl">
+                <div className="col-span-2 p-4 text-center text-text-secondary text-sm border-2 border-dashed border-border rounded-panel">
                   Aucun thème disponible pour le moment.
                 </div>
               )}
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Couleur d&apos;accent</label>
+            <label className="block text-sm font-medium text-text-secondary mb-2">Couleur d&apos;accent</label>
             <div className="flex items-center gap-3">
               <input type="color" value={accent} onChange={e => setAccent(e.target.value)}
-                className="w-12 h-10 rounded-xl border border-gray-200 cursor-pointer p-0.5" />
+                className="w-12 h-10 rounded-panel border border-border cursor-pointer p-0.5" />
               <div className="flex gap-2 flex-wrap">
                 {['#6366f1','#8b5cf6','#ec4899','#ef4444','#f59e0b','#10b981','#3b82f6','#1f2937'].map(c => (
                   <button key={c} onClick={() => setAccent(c)}
@@ -335,17 +336,16 @@ export function PageEditor({ initialPage, initialTheme, token, onSave, onClose }
       )}
 
       {/* Save button */}
-      <div className="pt-2 border-t border-gray-100">
+      <div className="pt-2 border-t border-border">
         {saveError && (
-          <div className="mb-3 p-3 bg-red-50 text-red-600 text-sm rounded-xl border border-red-100">
+          <div className="mb-3 p-3 bg-danger-bg text-red-600 text-sm rounded-panel border border-red-100">
             {saveError}
           </div>
         )}
-        <button onClick={handleSave} disabled={saving || !title || !slug}
-          className="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-          {saving ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Sparkles className="w-4 h-4" />}
+        <Button onClick={handleSave} disabled={saving || !title || !slug} isLoading={saving}
+          fullWidth variant="primary" className="py-3.5" leftIcon={!saving && <Sparkles className="w-4 h-4" />}>
           {isEdit ? 'Enregistrer les modifications' : 'Créer la page'}
-        </button>
+        </Button>
       </div>
     </div>
   );

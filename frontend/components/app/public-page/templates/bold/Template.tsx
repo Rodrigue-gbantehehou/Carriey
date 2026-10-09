@@ -1,6 +1,7 @@
 import React from 'react';
 import { PublicPageData } from '@/types/public-page';
 import { getPhotoUrl } from '@/lib/photo-url';
+import { TextList } from '@/components/ui/TextList';
 import { User, MapPin, Github, Linkedin, ExternalLink } from 'lucide-react';
 
 function fmtDate(d?: string) {
@@ -17,7 +18,7 @@ export default function BoldTheme({ data, accent }: { data: PublicPageData; acce
 
   return (
     <div className="min-h-screen bg-gray-950 text-white" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
-      <div className="max-w-3xl mx-auto px-6 py-12 space-y-8">
+      <div className="max-w-column mx-auto px-6 py-12 space-y-8">
         {/* Header */}
         <div className="flex items-center gap-6">
           {photo ? (
@@ -44,7 +45,7 @@ export default function BoldTheme({ data, accent }: { data: PublicPageData; acce
           </div>
         </div>
 
-        {profile.bio && <p className="text-gray-300 leading-relaxed text-lg border-l-4 pl-4" style={{ borderColor: accent }}>{profile.bio}</p>}
+        {profile.bio && <p className="text-gray-300 leading-relaxed text-lg border-l-4 pl-4 whitespace-pre-line" style={{ borderColor: accent }}>{profile.bio}</p>}
 
         {profile.skills?.length > 0 && (
           <section>
@@ -70,7 +71,7 @@ export default function BoldTheme({ data, accent }: { data: PublicPageData; acce
                     </div>
                     <span className="text-xs text-gray-500 font-mono">{fmtDate(e.start_date)} — {e.current ? 'now' : fmtDate(e.end_date)}</span>
                   </div>
-                  {e.description && <p className="text-gray-400 text-sm mt-3 leading-relaxed">{e.description}</p>}
+                  {e.description && <TextList text={e.description} className="text-gray-400 text-sm mt-3 leading-relaxed" />}
                 </div>
               ))}
             </div>
@@ -87,7 +88,7 @@ export default function BoldTheme({ data, accent }: { data: PublicPageData; acce
                     <p className="font-bold">{p.name}</p>
                     {p.url && <a href={p.url} target="_blank" rel="noopener noreferrer" style={{ color: accent }}><ExternalLink className="w-4 h-4" /></a>}
                   </div>
-                  {p.description && <p className="text-gray-400 text-sm mt-1.5">{p.description}</p>}
+                  {p.description && <TextList text={p.description} className="text-gray-400 text-sm mt-1.5" />}
                 </div>
               ))}
             </div>

@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import BottomSheet from '@/components/app/shared/BottomSheet';
 import { useProfileStore } from '@/store/profile';
-
-const inputClass = "block w-full rounded-xl border border-gray-200 bg-white py-3 px-4 text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none text-sm transition-all";
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
 
 interface PersonalInfoFormProps {
   isOpen: boolean;
@@ -44,53 +45,56 @@ export default function PersonalInfoForm({ isOpen, onClose }: PersonalInfoFormPr
     <BottomSheet isOpen={isOpen} onClose={onClose} title="Modifier mes informations">
         <div className="space-y-5 pb-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Prénom</label><input type="text" value={personalForm.first_name || ''} onChange={e => setPersonalForm({...personalForm, first_name: e.target.value})} placeholder="Jean" className={inputClass} /></div>
-            <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Nom</label><input type="text" value={personalForm.last_name || ''} onChange={e => setPersonalForm({...personalForm, last_name: e.target.value})} placeholder="Dupont" className={inputClass} /></div>
+            <Input label="Prénom" value={personalForm.first_name || ''} onChange={e => setPersonalForm({...personalForm, first_name: e.target.value})} placeholder="Jean" />
+            <Input label="Nom" value={personalForm.last_name || ''} onChange={e => setPersonalForm({...personalForm, last_name: e.target.value})} placeholder="Dupont" />
           </div>
           
-          <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Métier ou titre</label><input type="text" value={personalForm.title || ''} onChange={e => setPersonalForm({...personalForm, title: e.target.value})} placeholder="Ex : Infirmière, Développeur…" className={inputClass} /></div>
+          <Input label="Métier ou titre" value={personalForm.title || ''} onChange={e => setPersonalForm({...personalForm, title: e.target.value})} placeholder="Ex : Infirmière, Développeur…" />
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Email de contact</label><input type="email" value={personalForm.contact_email || ''} onChange={e => setPersonalForm({...personalForm, contact_email: e.target.value})} className={inputClass} /></div>
-            <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Téléphone</label><input type="tel" value={personalForm.contact_phone || ''} onChange={e => setPersonalForm({...personalForm, contact_phone: e.target.value})} className={inputClass} /></div>
-            <div className="sm:col-span-2"><label className="block text-sm font-medium text-gray-700 mb-1.5">Ville / Pays</label><input type="text" value={personalForm.location || ''} onChange={e => setPersonalForm({...personalForm, location: e.target.value})} placeholder="Paris, France" className={inputClass} /></div>
-          </div>
-          
-          <div className="border-t border-gray-100 pt-5 mt-5">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Liens professionnels</p>
-            <div className="space-y-4">
-              <div><label className="block text-sm font-medium text-gray-700 mb-1.5">LinkedIn</label><input type="url" value={personalForm.linkedin_url || ''} onChange={e => setPersonalForm({...personalForm, linkedin_url: e.target.value})} placeholder="https://linkedin.com/in/..." className={inputClass} /></div>
-              <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Portfolio / Site web</label><input type="url" value={personalForm.website || ''} onChange={e => setPersonalForm({...personalForm, website: e.target.value})} placeholder="https://..." className={inputClass} /></div>
-              <div><label className="block text-sm font-medium text-gray-700 mb-1.5">GitHub</label><input type="url" value={personalForm.github_url || ''} onChange={e => setPersonalForm({...personalForm, github_url: e.target.value})} placeholder="https://github.com/..." className={inputClass} /></div>
+            <Input type="email" label="Email de contact" value={personalForm.contact_email || ''} onChange={e => setPersonalForm({...personalForm, contact_email: e.target.value})} />
+            <Input type="tel" label="Téléphone" value={personalForm.contact_phone || ''} onChange={e => setPersonalForm({...personalForm, contact_phone: e.target.value})} />
+            <div className="sm:col-span-2">
+              <Input label="Ville / Pays" value={personalForm.location || ''} onChange={e => setPersonalForm({...personalForm, location: e.target.value})} placeholder="Paris, France" />
             </div>
           </div>
           
-          <div className="border-t border-gray-100 pt-5 mt-5">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Confidentialité</p>
+          <div className="border-t border-border pt-5 mt-5">
+            <p className="text-[10px] font-bold text-text-muted uppercase tracking-wide mb-3">Liens professionnels</p>
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Visibilité du profil public</label>
-                <select value={personalForm.visibility || 'private'} onChange={e => setPersonalForm({...personalForm, visibility: e.target.value})} className={inputClass}>
-                  <option value="private">Privé (Désactivé)</option>
-                  <option value="public">Public (Indexable par les moteurs de recherche)</option>
-                  <option value="link_only">Lien uniquement (Non indexable)</option>
-                </select>
+              <Input type="url" label="LinkedIn" value={personalForm.linkedin_url || ''} onChange={e => setPersonalForm({...personalForm, linkedin_url: e.target.value})} placeholder="https://linkedin.com/in/..." />
+              <Input type="url" label="Portfolio / Site web" value={personalForm.website || ''} onChange={e => setPersonalForm({...personalForm, website: e.target.value})} placeholder="https://..." />
+              <Input type="url" label="GitHub" value={personalForm.github_url || ''} onChange={e => setPersonalForm({...personalForm, github_url: e.target.value})} placeholder="https://github.com/..." />
+            </div>
+          </div>
+          
+          <div className="border-t border-border pt-5 mt-5">
+            <p className="text-[10px] font-bold text-text-muted uppercase tracking-wide mb-3">Confidentialité</p>
+            <div className="space-y-4">
+              <Select
+                label="Visibilité du profil public"
+                value={personalForm.visibility || 'private'}
+                onChange={e => setPersonalForm({...personalForm, visibility: e.target.value})}
+              >
+                <option value="private">Privé (Désactivé)</option>
+                <option value="public">Public (Indexable par les moteurs de recherche)</option>
+                <option value="link_only">Lien uniquement (Non indexable)</option>
+              </Select>
+              <div className="flex items-center gap-3">
+                <input type="checkbox" id="show_email" checked={personalForm.show_email || false} onChange={e => setPersonalForm({...personalForm, show_email: e.target.checked})} className="w-4 h-4 text-primary rounded focus:ring-primary border-border" />
+                <label htmlFor="show_email" className="text-ui-sm text-text-primary">Afficher mon adresse email sur mon profil public</label>
               </div>
               <div className="flex items-center gap-3">
-                <input type="checkbox" id="show_email" checked={personalForm.show_email || false} onChange={e => setPersonalForm({...personalForm, show_email: e.target.checked})} className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300" />
-                <label htmlFor="show_email" className="text-sm text-gray-700">Afficher mon adresse email sur mon profil public</label>
-              </div>
-              <div className="flex items-center gap-3">
-                <input type="checkbox" id="show_phone" checked={personalForm.show_phone || false} onChange={e => setPersonalForm({...personalForm, show_phone: e.target.checked})} className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300" />
-                <label htmlFor="show_phone" className="text-sm text-gray-700">Afficher mon numéro de téléphone sur mon profil public</label>
+                <input type="checkbox" id="show_phone" checked={personalForm.show_phone || false} onChange={e => setPersonalForm({...personalForm, show_phone: e.target.checked})} className="w-4 h-4 text-primary rounded focus:ring-primary border-border" />
+                <label htmlFor="show_phone" className="text-ui-sm text-text-primary">Afficher mon numéro de téléphone sur mon profil public</label>
               </div>
             </div>
           </div>
           
           <div className="pt-4">
-            <button onClick={handleSave} className="w-full bg-indigo-600 text-white font-semibold py-3.5 px-4 rounded-xl hover:bg-indigo-700 shadow-md shadow-indigo-600/20 transition-all">
+            <Button fullWidth onClick={handleSave}>
               Enregistrer
-            </button>
+            </Button>
           </div>
         </div>
     </BottomSheet>

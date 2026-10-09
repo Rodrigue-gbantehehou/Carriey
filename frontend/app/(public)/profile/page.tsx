@@ -110,7 +110,7 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-brand-bg">
 
-      <div className="max-w-2xl mx-auto px-4 pt-24 pb-16">
+      <div className="max-w-form mx-auto px-4 pt-24 pb-16">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-4">

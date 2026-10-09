@@ -60,7 +60,7 @@ export default function MasterProfileSelector({ type }: { type: 'experience' | '
           IMPORTER DEPUIS MON PROFIL MASTER
         </button>
       ) : (
-        <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
+        <div className="bg-blue-50 rounded-panel p-4 border border-blue-100">
           <div className="flex justify-between items-center mb-3">
             <h4 className="text-xs font-bold text-blue-800 uppercase">Sélectionner un élément</h4>
             <button onClick={() => setIsOpen(false)} className="text-blue-500 hover:text-blue-700">Fermer</button>
@@ -72,8 +72,8 @@ export default function MasterProfileSelector({ type }: { type: 'experience' | '
                 onClick={() => handleImport(item)}
                 className="bg-white p-3 rounded shadow-sm cursor-pointer hover:border-blue-500 border border-transparent transition-all"
               >
-                <p className="font-bold text-sm text-gray-900">{type === 'experience' ? item.title : item.degree}</p>
-                <p className="text-xs text-gray-500">{type === 'experience' ? item.company : item.school}</p>
+                <p className="font-bold text-sm text-text-primary">{type === 'experience' ? item.title : item.degree}</p>
+                <p className="text-xs text-text-secondary">{type === 'experience' ? item.company : item.school}</p>
               </div>
             ))}
           </div>

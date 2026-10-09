@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import config from '@/lib/config'
 import { toast } from 'react-hot-toast'
+import { PageHeader } from '@/components/ui/PageHeader'
+import { PageContainer } from '@/components/ui/PageContainer'
+import { Button } from '@/components/ui/Button'
 
 interface User {
   id: string
@@ -93,42 +96,42 @@ export default function UsersAdmin() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold text-gray-900 mb-1">Gestion des Utilisateurs</h1>
-        <p className="text-sm text-gray-500">Gérez les accès, les rôles et le statut des utilisateurs de la plateforme.</p>
-      </div>
+    <PageContainer variant="dashboard" className="space-y-6 py-6">
+      <PageHeader 
+        title="Gestion des Utilisateurs" 
+        description="Gérez les accès, les rôles et le statut des utilisateurs de la plateforme." 
+      />
 
-      <div className="bg-white rounded-md shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-background rounded-panel border border-border overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
+          <table className="w-full text-left text-ui-sm">
             <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Utilisateur</th>
-                <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Rôle</th>
-                <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Statut</th>
-                <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Actions</th>
+              <tr className="bg-background-subtle border-b border-border">
+                <th className="px-6 py-3 text-ui-xs font-semibold text-text-muted uppercase tracking-wider">Utilisateur</th>
+                <th className="px-6 py-3 text-ui-xs font-semibold text-text-muted uppercase tracking-wider">Rôle</th>
+                <th className="px-6 py-3 text-ui-xs font-semibold text-text-muted uppercase tracking-wider">Statut</th>
+                <th className="px-6 py-3 text-ui-xs font-semibold text-text-muted uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-border">
               {users.map(user => (
-                <tr key={user.id} className="hover:bg-gray-50 transition-colors">
+                <tr key={user.id} className="hover:bg-background-subtle transition-colors">
                   <td className="px-6 py-4">
-                    <div className="font-semibold text-gray-900">{user.full_name || 'Sans nom'}</div>
-                    <div className="text-sm text-gray-500">{user.email}</div>
+                    <div className="font-medium text-text-primary">{user.full_name || 'Sans nom'}</div>
+                    <div className="text-text-muted">{user.email}</div>
                   </td>
                   <td className="px-6 py-4">
                     <select 
                       value={user.role} 
                       onChange={(e) => handleUpdateRole(user.id, e.target.value)}
                       disabled={updatingId === user.id}
-                      className="text-xs font-medium py-1 px-2 rounded-md bg-gray-50 border border-gray-200 outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
+                      className="text-ui-sm font-medium py-1.5 px-3 rounded-field bg-background border border-border outline-none focus:ring-2 focus:ring-primary text-text-primary"
                     >
                       <option value="user">USER</option>
                       <option value="admin">ADMIN</option>
@@ -136,31 +139,29 @@ export default function UsersAdmin() {
                     </select>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
-                      user.is_active ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'
+                    <span className={`inline-flex px-2 py-1 rounded-full text-ui-xs font-medium ${
+                      user.is_active ? 'bg-success-bg text-success-text border border-success-text/20' : 'bg-danger-bg text-danger-text border border-danger-text/20'
                     }`}>
                       {user.is_active ? 'Actif' : 'Désactivé'}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                        <a 
-                            href={`/admin/users/${user.id}`}
-                            className="text-xs font-medium px-3 py-1.5 bg-gray-50 text-gray-700 rounded-md hover:bg-gray-100 transition-all border border-gray-200 inline-block"
+                    <div className="flex items-center justify-end gap-3">
+                        <Button 
+                          variant="secondary" 
+                          size="sm" 
+                          onClick={() => window.location.href = `/admin/users/${user.id}`}
                         >
                             Profil
-                        </a>
-                        <button 
-                        onClick={() => handleToggleActive(user)}
-                        disabled={updatingId === user.id}
-                        className={`text-xs font-medium px-3 py-1.5 rounded-md transition-all border ${
-                            user.is_active 
-                            ? 'text-red-700 bg-red-50 border-red-200 hover:bg-red-100' 
-                            : 'text-emerald-700 bg-emerald-50 border-emerald-200 hover:bg-emerald-100'
-                        }`}
+                        </Button>
+                        <Button
+                          variant={user.is_active ? 'danger' : 'primary'}
+                          size="sm"
+                          onClick={() => handleToggleActive(user)}
+                          isLoading={updatingId === user.id}
                         >
-                        {user.is_active ? 'Désactiver' : 'Activer'}
-                        </button>
+                          {user.is_active ? 'Désactiver' : 'Activer'}
+                        </Button>
                     </div>
                   </td>
                 </tr>
@@ -169,6 +170,7 @@ export default function UsersAdmin() {
           </table>
         </div>
       </div>
-    </div>
+    </PageContainer>
   )
 }
+

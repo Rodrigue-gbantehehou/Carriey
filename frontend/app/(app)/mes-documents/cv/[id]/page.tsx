@@ -4,7 +4,7 @@ import { useCvStore } from '@/store/cv';
 import { useProfileStore } from '@/store/profile';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, useRef, Suspense } from 'react';
+import { useEffect, useState, useRef, Suspense, use } from 'react';
 import { ArrowLeft, Download, LayoutTemplate, Palette, Check, Settings2, ZoomIn, ZoomOut, X, SlidersHorizontal, ListOrdered, Loader2 } from 'lucide-react';
 import { PageFlow, PageNumberPlugin, mmToPx } from 'pageflow-js';
 import ExportModal from '@/components/app/shared/ExportModal';
@@ -20,7 +20,8 @@ import { ColorPicker } from '@/components/app/cv/editor/ColorPicker';
 import { CVPreview } from '@/components/app/cv/editor/CVPreview';
 import { ContentSelectorModal } from '@/components/app/cv/editor/ContentSelectorModal';
 
-export default function CvEditorPage({ params }: { params: { id: string } }) {
+export default function CvEditorPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = use(params);
   const router = useRouter();
   const cvs = useCvStore(state => state.cvs);
   const updateCv = useCvStore(state => state.updateCv);
@@ -35,7 +36,7 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
   const { getLabel: getTemplateLabel } = useTemplates('cv');
 
 
-  const cv = cvs.find(c => c.id === params.id);
+  const cv = cvs.find(c => c.id === resolvedParams.id);
   const sourceRef = useRef<HTMLDivElement>(null);
   const targetRef = useRef<HTMLDivElement>(null);
 
@@ -60,7 +61,7 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
       if (!cv && session?.user?.accessToken) {
         setLocalLoading(true);
         try {
-          const res = await fetch(`${API_BASE}/resumes/${params.id}`, {
+          const res = await fetch(`${API_BASE}/resumes/${resolvedParams.id}`, {
             headers: { Authorization: `Bearer ${session.user.accessToken}` },
           });
           if (res.ok) {
@@ -97,7 +98,7 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
       }
     };
     fetchProfile();
-  }, [cv, profile, session, params.id]);
+  }, [cv, profile, session, resolvedParams.id]);
 
   // --- Computed values (safe with null cv) ---
   const displayName = profile?.first_name || profile?.last_name
@@ -315,17 +316,17 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
 
   if (!mounted || localLoading || status === 'loading') {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-600 mb-4" />
+      <div className="flex flex-col items-center justify-center h-screen bg-background-subtle">
+        <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
       </div>
     );
   }
 
   if (!cv) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">CV introuvable</h1>
-        <button onClick={() => router.push('/mes-documents')} className="text-indigo-600 hover:underline">
+      <div className="flex flex-col items-center justify-center h-screen bg-background-subtle">
+        <h1 className="text-2xl font-bold text-text-primary mb-2">CV introuvable</h1>
+        <button onClick={() => router.push('/mes-documents')} className="text-primary hover:underline">
           Retour à mes documents
         </button>
       </div>
@@ -409,16 +410,16 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
       ) : (
         <div className="flex flex-col">
           {/* Tabs */}
-          <div className="flex p-1 bg-gray-100/80 rounded-xl mb-6">
+          <div className="flex p-1 bg-border/80 rounded-panel mb-6">
             <button
               onClick={() => setActiveTab('design')}
-              className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium rounded-lg transition-all ${activeTab === 'design' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
+              className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium rounded-lg transition-all ${activeTab === 'design' ? 'bg-white text-primary shadow-sm' : 'text-text-secondary hover:text-text-primary'}`}
             >
               <Palette className="w-4 h-4" /> Design
             </button>
             <button
               onClick={() => setActiveTab('content')}
-              className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium rounded-lg transition-all ${activeTab === 'content' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
+              className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium rounded-lg transition-all ${activeTab === 'content' ? 'bg-white text-primary shadow-sm' : 'text-text-secondary hover:text-text-primary'}`}
             >
               <Settings2 className="w-4 h-4" /> Contenu
             </button>
@@ -430,21 +431,21 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
               <div className="space-y-6">
                 {/* Modèle */}
                 <div>
-                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Modèle actuel</h3>
-                  <div className="p-3 border border-gray-200 rounded-xl flex items-center gap-4 bg-gray-50/50 hover:border-indigo-200 transition-colors cursor-pointer group" onClick={() => setShowThemeSelector(true)}>
-                    <div className="w-12 h-16 bg-white shadow-sm border border-gray-200 rounded-md overflow-hidden p-1 flex-shrink-0">
+                  <h3 className="text-xs font-bold text-text-muted uppercase tracking-widest mb-3">Modèle actuel</h3>
+                  <div className="p-3 border border-border rounded-panel flex items-center gap-4 bg-background-subtle/50 hover:border-primary/20 transition-colors cursor-pointer group" onClick={() => setShowThemeSelector(true)}>
+                    <div className="w-12 h-16 bg-white shadow-sm border border-border rounded-md overflow-hidden p-1 flex-shrink-0">
                       <ThemeThumbnail templateId={cv.template_id} />
                     </div>
                     <div className="flex-1 text-left">
-                      <p className="text-sm font-bold text-gray-900">{getTemplateLabel(cv.template_id) || 'Classique'}</p>
-                      <p className="text-xs font-medium text-indigo-600 mt-1 group-hover:underline">Changer de modèle</p>
+                      <p className="text-sm font-bold text-text-primary">{getTemplateLabel(cv.template_id) || 'Classique'}</p>
+                      <p className="text-xs font-medium text-primary mt-1 group-hover:underline">Changer de modèle</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Couleurs */}
                 <div>
-                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Couleur (Bientôt)</h3>
+                  <h3 className="text-xs font-bold text-text-muted uppercase tracking-widest mb-3">Couleur (Bientôt)</h3>
                   <ColorPicker />
                 </div>
               </div>
@@ -454,35 +455,35 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
                 <div>
                   <button 
                     onClick={() => setIsOrderModalOpen(true)}
-                    className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl transition-colors group"
+                    className="w-full flex items-center justify-between p-4 bg-background-subtle hover:bg-border border border-border rounded-panel transition-colors group"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-white text-gray-700 shadow-sm border border-gray-200 flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-full bg-white text-text-secondary shadow-sm border border-border flex items-center justify-center">
                         <ListOrdered className="w-4 h-4" />
                       </div>
                       <div className="text-left">
-                        <p className="text-sm font-bold text-gray-900">Ordre des Sections</p>
-                        <p className="text-xs text-gray-500 font-medium group-hover:underline">Réorganiser les blocs</p>
+                        <p className="text-sm font-bold text-text-primary">Ordre des Sections</p>
+                        <p className="text-xs text-text-secondary font-medium group-hover:underline">Réorganiser les blocs</p>
                       </div>
                     </div>
                   </button>
 
                   {isOrderModalOpen && (
                     <div className="fixed inset-0 z-[100] flex flex-col sm:items-center sm:justify-center p-0 sm:p-4">
-                      <div className="hidden sm:block absolute inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity" onClick={() => setIsOrderModalOpen(false)} />
-                      <div className="relative bg-white w-full h-[100dvh] sm:h-auto sm:max-w-md sm:max-h-[90vh] flex flex-col sm:rounded-2xl shadow-2xl z-10 overflow-hidden animate-in fade-in sm:zoom-in duration-200">
+                      <div className="hidden sm:block absolute inset-0 bg-text-primary/40 backdrop-blur-sm transition-opacity" onClick={() => setIsOrderModalOpen(false)} />
+                      <div className="relative bg-white w-full h-[100dvh] sm:h-auto sm:max-w-md sm:max-h-[90vh] flex flex-col sm:rounded-panel shadow-2xl z-10 overflow-hidden animate-in fade-in sm:zoom-in duration-200">
                         
-                        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-white flex-shrink-0">
-                          <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                            <ListOrdered className="w-5 h-5 text-indigo-600" />
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-white flex-shrink-0">
+                          <h3 className="text-lg font-bold text-text-primary flex items-center gap-2">
+                            <ListOrdered className="w-5 h-5 text-primary" />
                             Réorganiser les sections
                           </h3>
-                          <button onClick={() => setIsOrderModalOpen(false)} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
+                          <button onClick={() => setIsOrderModalOpen(false)} className="p-2 text-text-muted hover:text-text-secondary hover:bg-border rounded-full transition-colors">
                             <X className="w-5 h-5" />
                           </button>
                         </div>
-                        <div className="p-6 overflow-y-auto bg-gray-50">
-                          <p className="text-sm text-gray-500 mb-6">
+                        <div className="p-6 overflow-y-auto bg-background-subtle">
+                          <p className="text-sm text-text-secondary mb-6">
                             Glissez-déposez pour réorganiser. L'ordre peut être ajusté différemment selon le modèle choisi.
                           </p>
                           <DndList 
@@ -505,23 +506,23 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
   );
 
   return (
-    <div className="py-6 sm:py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto font-sans">
+    <div className="font-sans animate-fade-in pb-12">
 
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-          <button onClick={() => router.push('/mes-documents')} className="text-sm font-medium text-gray-500 hover:text-gray-900 flex items-center gap-2 mb-3 transition-colors">
+          <button onClick={() => router.push('/mes-documents')} className="text-sm font-medium text-text-secondary hover:text-text-primary flex items-center gap-2 mb-3 transition-colors">
             <ArrowLeft className="w-4 h-4" /> Retour aux documents
           </button>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center">
-              <LayoutTemplate className="w-5 h-5 text-indigo-600" />
+            <div className="w-10 h-10 rounded-panel bg-background-subtle flex items-center justify-center">
+              <LayoutTemplate className="w-5 h-5 text-primary" />
             </div>
             <input
               type="text"
               value={cv.title}
               onChange={(e) => updateCv(cv.id, { title: e.target.value })}
-              className="text-2xl font-bold text-gray-900 bg-transparent focus:outline-none focus:ring-2 focus:ring-indigo-100 rounded px-2 py-1 w-full max-w-xs sm:max-w-md hover:bg-gray-50 transition-colors placeholder:text-gray-400"
+              className="text-2xl font-bold text-text-primary bg-transparent focus:outline-none focus:ring-2 focus:ring-indigo-100 rounded px-2 py-1 w-full max-w-xs sm:max-w-md hover:bg-background-subtle transition-colors placeholder:text-text-muted"
               placeholder="Titre du document..."
             />
           </div>
@@ -529,13 +530,13 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
         <div className="flex items-center gap-3 mt-2 md:mt-0">
           <button
             onClick={() => setIsSettingsOpen(true)}
-            className="lg:hidden inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-full font-semibold text-sm hover:bg-gray-200 transition-colors"
+            className="lg:hidden inline-flex items-center gap-2 px-4 py-2 bg-border text-text-secondary rounded-full font-semibold text-sm hover:bg-border transition-colors"
           >
             <SlidersHorizontal className="w-4 h-4" /> Options
           </button>
           <button
             onClick={() => setIsExportModalOpen(true)}
-            className="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white rounded-full font-semibold text-sm hover:bg-indigo-700 transition-all shadow-md shadow-indigo-600/20 active:scale-95"
+            className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-full font-semibold text-sm hover:bg-primary-hover transition-all shadow-md shadow-indigo-600/20 active:scale-95"
           >
             <Download className="w-4 h-4" />
             Télécharger PDF
@@ -546,9 +547,9 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Desktop Sidebar */}
         <div className="hidden lg:block lg:col-span-4 space-y-6 relative z-[60]">
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 sticky top-6 z-[60]">
-            <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
-              <Settings2 className="w-5 h-5 text-indigo-600" />
+          <div className="bg-white rounded-panel p-6 shadow-sm border border-border sticky top-6 z-[60]">
+            <h2 className="text-lg font-bold text-text-primary mb-6 flex items-center gap-2">
+              <Settings2 className="w-5 h-5 text-primary" />
               Personnalisation
             </h2>
             {renderSidebarContent()}
@@ -573,13 +574,13 @@ export default function CvEditorPage({ params }: { params: { id: string } }) {
       {isSettingsOpen && (
         <div className="lg:hidden fixed inset-0 z-[100] flex flex-col p-0">
           <div className="relative bg-white w-full h-[100dvh] flex flex-col z-10 overflow-hidden animate-in fade-in duration-200">
-            <div className="h-14 flex items-center justify-between px-6 border-b border-gray-100 flex-shrink-0">
-              <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
-                <Settings2 className="w-5 h-5 text-indigo-600" /> Personnalisation
+            <div className="h-14 flex items-center justify-between px-6 border-b border-border flex-shrink-0">
+              <h2 className="text-base font-bold text-text-primary flex items-center gap-2">
+                <Settings2 className="w-5 h-5 text-primary" /> Personnalisation
               </h2>
               <button
                 onClick={() => setIsSettingsOpen(false)}
-                className="p-2 hover:bg-gray-100 rounded-full text-gray-500 transition-colors"
+                className="p-2 hover:bg-border rounded-full text-text-secondary transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>

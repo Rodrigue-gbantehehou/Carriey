@@ -7,10 +7,11 @@ import { AlertTriangle, Clock, Eye } from 'lucide-react';
 import config from '@/lib/config';
 
 interface Props {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params;
   try {
     const data = await publicPagesApi.getPublic(params.slug);
     const name = [data.profile.first_name, data.profile.last_name].filter(Boolean).join(' ') || data.profile.username || 'Profil';
@@ -71,7 +72,8 @@ function ErrorPage({ status, message }: { status: number; message: string }) {
   );
 }
 
-export default async function PublicProfilePage({ params }: Props) {
+export default async function PublicProfilePage(props: Props) {
+  const params = await props.params;
   let data: PublicPageData;
 
   try {

@@ -39,22 +39,22 @@ export function CVPreview({
   }, [targetRef]);
 
   return (
-    <div className="rounded-3xl p-4 sm:p-8 flex flex-col items-center h-full min-h-[600px] border border-gray-200 relative overflow-auto custom-scrollbar" style={{ background: 'radial-gradient(circle, #d1d5db 1px, #f8f9fa 1px)', backgroundSize: '20px 20px' }}>
+    <div className="rounded-3xl p-4 sm:p-8 flex flex-col items-center h-full min-h-[600px] border border-border relative overflow-auto custom-scrollbar" style={{ background: 'radial-gradient(circle, #d1d5db 1px, #f8f9fa 1px)', backgroundSize: '20px 20px' }}>
 
       {/* Zoom Controls */}
-      <div className="absolute top-4 right-4 z-10 bg-white/90 backdrop-blur-sm rounded-full shadow-sm border border-gray-200 flex items-center p-1">
+      <div className="absolute top-4 right-4 z-10 bg-white/90 backdrop-blur-sm rounded-full shadow-sm border border-border flex items-center p-1">
         <button
           onClick={() => setScale(s => Math.max(0.3, s - 0.1))}
-          className="p-1.5 hover:bg-gray-100 rounded-full transition-colors focus:outline-none text-gray-500"
+          className="p-1.5 hover:bg-border rounded-full transition-colors focus:outline-none text-text-secondary"
         >
           <ZoomOut className="w-4 h-4" />
         </button>
-        <span className="text-xs font-bold text-gray-900 w-12 text-center cursor-default select-none">
+        <span className="text-xs font-bold text-text-primary w-12 text-center cursor-default select-none">
           {Math.round(scale * 100)}%
         </span>
         <button
           onClick={() => setScale(s => Math.min(2, s + 0.1))}
-          className="p-1.5 hover:bg-gray-100 rounded-full transition-colors focus:outline-none text-gray-500"
+          className="p-1.5 hover:bg-border rounded-full transition-colors focus:outline-none text-text-secondary"
         >
           <ZoomIn className="w-4 h-4" />
         </button>
@@ -83,7 +83,7 @@ export function CVPreview({
             className="print-container absolute opacity-0 pointer-events-none"
             style={{ width: '210mm', left: '-9999px', top: 0 }}
           >
-            <Suspense fallback={<div className="h-full w-full flex items-center justify-center text-gray-500 font-semibold bg-white">Chargement du modèle...</div>}>
+            <Suspense fallback={<div className="h-full w-full flex items-center justify-center text-text-secondary font-semibold bg-white">Chargement du modèle...</div>}>
               <CVTemplateRenderer
                 templateName={templateId}
                 data={adapterData}

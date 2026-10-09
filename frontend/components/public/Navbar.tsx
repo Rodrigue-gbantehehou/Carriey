@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import config from '@/lib/config';
 import { useSession, signOut } from 'next-auth/react';
 import { useState } from 'react';
+import { Button } from '@/components/ui/Button';
 
 export default function Navbar() {
   const { data: session } = useSession();
@@ -23,19 +24,19 @@ export default function Navbar() {
   const navLinks = [
     { name: 'Fonctionnement', href: '/#fonctionnement' },
     { name: 'Modèles', href: '/#modeles' },
-    { name: 'Tarifs', href: '/pricing' },
+    { name: 'Tarifs', href: '/#tarifs' },
     { name: 'FAQ', href: '/#faq' },
   ];
 
   return (
-    <nav className="bg-white/80 backdrop-blur-xl border-b border-gray-100 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+    <nav className="bg-background/80 backdrop-blur-xl border-b border-border sticky top-0 z-50">
+      <div className="max-w-public mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         
         {/* Left: Logo */}
         <div className="flex flex-1 items-center justify-start">
           <Link href="/" className="flex items-center gap-2.5 group">
             <Image src={config.appLogo} alt={config.appName} width={36} height={36} className="object-contain transition-transform group-hover:scale-105" priority />
-            <span className="text-xl font-bold text-gray-900 tracking-tight">{config.appName}</span>
+            <span className="text-ui-xl font-bold text-text-primary tracking-tight">{config.appName}</span>
           </Link>
         </div>
 
@@ -45,8 +46,8 @@ export default function Navbar() {
             <Link
               key={link.name}
               href={link.href}
-              className={`text-sm font-semibold transition-colors ${
-                pathname === link.href ? 'text-indigo-600' : 'text-gray-500 hover:text-gray-900'
+              className={`text-ui-sm font-semibold transition-colors ${
+                pathname === link.href ? 'text-primary' : 'text-text-secondary hover:text-text-primary'
               }`}
             >
               {link.name}
@@ -55,7 +56,7 @@ export default function Navbar() {
           {user?.role && ['ADMIN', 'SUPER_ADMIN', 'admin', 'super_admin'].includes(user.role) && (
             <Link
               href="/admin"
-              className="text-sm font-semibold text-amber-600 hover:text-amber-700 transition-colors"
+              className="text-ui-sm font-semibold text-text-secondary hover:text-text-primary transition-colors"
             >
               Admin
             </Link>
@@ -66,37 +67,17 @@ export default function Navbar() {
         <div className="hidden md:flex flex-1 items-center justify-end gap-3">
           {user ? (
             <div className="flex items-center gap-4">
-              {/*
-              <div className="flex flex-col items-end">
-                <span className="text-sm font-semibold text-gray-900">{user.name || user.email?.split('@')[0]}</span>
-                <div className="flex items-center gap-2 mt-0.5">
-                 
-                  <span className="text-gray-300 text-xs">•</span>
-                  <button onClick={logout} className="text-xs font-medium text-red-500 hover:text-red-600 transition-colors">
-                    Déconnexion
-                  </button>
-                </div>
-              </div>*/}
-              <Link
-                href="/profil"
-                className="px-5 py-2.5 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-600 transition-all text-sm"
-              >
-                Mon Profil
+              <Link href="/profil" passHref>
+                <Button>Mon Profil</Button>
               </Link>
             </div>
           ) : (
             <div className="flex items-center gap-3">
-              <Link
-                href="/login"
-                className="px-5 py-2.5 text-gray-600 font-semibold rounded-xl hover:bg-gray-50 hover:text-gray-900 transition-all text-sm"
-              >
-                Se connecter
+              <Link href="/login" passHref>
+                <Button variant="ghost">Se connecter</Button>
               </Link>
-              <Link
-                href="/register"
-                className="px-5 py-2.5 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 shadow-sm transition-all text-sm"
-              >
-                Commencer gratuitement
+              <Link href="/register" passHref>
+                <Button>Commencer gratuitement</Button>
               </Link>
             </div>
           )}
@@ -106,7 +87,7 @@ export default function Navbar() {
         <div className="flex md:hidden flex-1 justify-end">
           <button 
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 text-text-muted hover:bg-background-subtle rounded-lg transition-colors"
             aria-label="Menu"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -122,29 +103,29 @@ export default function Navbar() {
 
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white border-b border-gray-100 px-4 py-6 shadow-xl absolute w-full left-0">
+        <div className="md:hidden bg-background border-b border-border px-4 py-6 shadow-xl absolute w-full left-0">
           <div className="flex flex-col space-y-4">
             {navLinks.map((link) => (
               <Link 
                 key={link.name} 
                 href={link.href} 
-                className="block text-lg font-semibold text-gray-900"
+                className="block text-ui-lg font-semibold text-text-primary"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {link.name}
               </Link>
             ))}
             
-            <div className="pt-6 border-t border-gray-100 flex flex-col gap-3">
+            <div className="pt-6 border-t border-border flex flex-col gap-3">
               {user ? (
                 <>
-                  <Link href="/profil" className="w-full py-3 bg-indigo-50 text-indigo-700 text-center font-semibold rounded-xl">Mon Profil</Link>
-                  <button onClick={logout} className="w-full py-3 bg-red-50 text-red-600 text-center font-semibold rounded-xl">Déconnexion</button>
+                  <Link href="/profil" passHref><Button fullWidth>Mon Profil</Button></Link>
+                  <Button variant="danger" fullWidth onClick={logout}>Déconnexion</Button>
                 </>
               ) : (
                 <>
-                  <Link href="/login" className="w-full py-3 bg-white text-gray-900 text-center font-semibold rounded-xl border border-gray-200">Connexion</Link>
-                  <Link href="/register" className="w-full py-3 bg-indigo-600 text-white text-center font-semibold rounded-xl">Commencer</Link>
+                  <Link href="/login" passHref><Button variant="secondary" fullWidth>Connexion</Button></Link>
+                  <Link href="/register" passHref><Button fullWidth>Commencer</Button></Link>
                 </>
               )}
             </div>
@@ -154,3 +135,4 @@ export default function Navbar() {
     </nav>
   );
 }
+

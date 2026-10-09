@@ -137,7 +137,7 @@ export default async function PublicProfilePage({ params }: Props) {
         </Link>
       </header>
 
-      <div className="max-w-2xl mx-auto px-4 py-10">
+      <div className="max-w-form mx-auto px-4 py-10">
 
         {/* ── Hero card ── */}
         <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden mb-5">

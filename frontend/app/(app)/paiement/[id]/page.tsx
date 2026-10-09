@@ -1,11 +1,12 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, use } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import config from '@/lib/config'
 
-export default function PaymentPage({ params }: { params: { id: string } }) {
+export default function PaymentPage({ params }: { params: Promise<{ id: string }> }) {
+    const resolvedParams = use(params)
     const { data: session } = useSession()
     const router = useRouter()
     const [template, setTemplate] = useState<any>(null)
@@ -16,13 +17,13 @@ export default function PaymentPage({ params }: { params: { id: string } }) {
             const res = await fetch(`${config.apiBaseUrl}/templates`)
             if (res.ok) {
                 const templates = await res.json()
-                const found = templates.find((t: any) => t.id === params.id)
+                const found = templates.find((t: any) => t.id === resolvedParams.id)
                 if (found) setTemplate(found)
             }
         } catch (e) {
             console.error(e)
         }
-    }, [params.id])
+    }, [resolvedParams.id])
 
     useEffect(() => {
         if (!session) {
@@ -42,7 +43,7 @@ export default function PaymentPage({ params }: { params: { id: string } }) {
                     Authorization: `Bearer ${session?.user.accessToken}`
                 },
                 body: JSON.stringify({
-                    template_id: params.id,
+                    template_id: resolvedParams.id,
                     amount: parseFloat(template.price), // ou int selon API
                     currency: template.currency
                 })
@@ -71,40 +72,40 @@ export default function PaymentPage({ params }: { params: { id: string } }) {
     if (!template) return <div className="p-10 text-center">Chargement...</div>
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
-            <div className="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden">
-                <div className="bg-indigo-600 p-6 text-center">
+        <div className="min-h-screen bg-background-subtle flex flex-col items-center justify-center p-4">
+            <div className="max-w-md w-full bg-white rounded-panel shadow-xl overflow-hidden">
+                <div className="bg-primary p-6 text-center">
                     <h1 className="text-white text-2xl font-bold">Paiement Sécurisé</h1>
                 </div>
 
                 <div className="p-8">
                     <div className="mb-6 text-center">
-                        <p className="text-gray-500 mb-2">Vous allez acheter le modèle</p>
-                        <h2 className="text-3xl font-bold text-gray-800">{template.name}</h2>
+                        <p className="text-text-secondary mb-2">Vous allez acheter le modèle</p>
+                        <h2 className="text-3xl font-bold text-text-primary">{template.name}</h2>
                     </div>
 
-                    <div className="bg-gray-50 p-4 rounded-xl mb-8 flex justify-between items-center bg-indigo-50 border border-indigo-100">
+                    <div className="bg-background-subtle p-4 rounded-panel mb-8 flex justify-between items-center bg-primary-subtle border border-indigo-100">
                         <span className="font-medium text-indigo-900">Montant à payer</span>
-                        <span className="text-2xl font-bold text-indigo-600">{template.price} {template.currency}</span>
+                        <span className="text-2xl font-bold text-primary">{template.price} {template.currency}</span>
                     </div>
 
                     <button
                         onClick={handlePayment}
                         disabled={isLoading}
-                        className="w-full py-4 bg-green-500 hover:bg-green-600 text-white text-lg font-bold rounded-xl transition-colors shadow-lg shadow-green-200 flex items-center justify-center gap-2"
+                        className="w-full py-4 bg-primary hover:bg-primary-hover text-white text-lg font-bold rounded-button transition-colors shadow-sm flex items-center justify-center gap-2 disabled:opacity-50"
                     >
                         {isLoading ? 'Initialisation...' : `Payer avec KkiaPay`}
                     </button>
 
                     <button
                         onClick={() => router.back()}
-                        className="w-full mt-4 py-2 text-gray-500 hover:text-gray-700"
+                        className="w-full mt-4 py-2 text-text-secondary hover:text-text-secondary"
                     >
                         Annuler
                     </button>
                 </div>
 
-                <div className="bg-gray-50 p-4 text-center text-xs text-gray-400">
+                <div className="bg-background-subtle p-4 text-center text-xs text-text-muted">
                     Paiement sécurisé par KkiaPay. Aucun frais caché.
                 </div>
             </div>

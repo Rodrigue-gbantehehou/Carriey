@@ -35,7 +35,7 @@ export default function MainLayout({
     <div className="min-h-screen bg-gray-50">
       {/* Barre de navigation */}
       <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-public mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex">
               <div className="flex-shrink-0 flex items-center">
@@ -98,7 +98,7 @@ export default function MainLayout({
       </nav>
 
       {/* Contenu principal */}
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      <main className="max-w-public mx-auto py-6 sm:px-6 lg:px-8">
         {children}
       </main>
     </div>

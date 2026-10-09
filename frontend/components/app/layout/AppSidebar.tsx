@@ -10,6 +10,7 @@ import {
 import { signOut, useSession } from 'next-auth/react';
 import { useProfileStore } from '@/store/profile';
 import { useEffect } from 'react';
+import { Button } from '@/components/ui/Button';
 
 const NAV = [
   { href: '/accueil', label: 'Accueil', icon: Home },
@@ -34,29 +35,29 @@ export default function AppSidebar() {
   const initial = name.charAt(0).toUpperCase();
 
   return (
-    <aside className="hidden lg:flex flex-col w-60 flex-shrink-0 bg-white border-r border-gray-200 h-screen sticky top-0">
+    <aside className="hidden lg:flex flex-col w-64 flex-shrink-0 bg-background border-r border-border h-screen sticky top-0">
       {/* Logo */}
-      <div className="px-6 py-5 border-b border-gray-100">
+      <div className="px-6 py-5 border-b border-border">
         <Link href="/accueil" className="flex items-center gap-2.5 group select-none">
           <Image src={config.appLogo} alt={config.appName} width={32} height={32} className="object-contain" priority />
-          <span className="text-xl font-bold tracking-tight text-indigo-600">{config.appName}</span>
+          <span className="text-ui-lg font-bold tracking-tight text-text-primary">{config.appName}</span>
         </Link>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+      <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
         {NAV.map(({ href, label, icon: Icon }) => {
           const active = pathname === href || pathname.startsWith(href + '/');
           return (
             <Link
               key={href}
               href={href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group ${active
-                  ? 'bg-indigo-50 text-indigo-700'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-panel text-ui-sm font-medium transition-colors group ${active
+                  ? 'bg-background-subtle text-primary border border-border shadow-sm'
+                  : 'text-text-secondary hover:bg-background-subtle hover:text-text-primary'
                 }`}
             >
-              <Icon className={`w-4.5 h-4.5 flex-shrink-0 ${active ? 'text-indigo-600' : 'text-gray-400 group-hover:text-gray-600'}`} />
+              <Icon className={`w-4 h-4 flex-shrink-0 ${active ? 'text-primary' : 'text-text-muted group-hover:text-text-secondary'}`} />
               {label}
             </Link>
           );
@@ -64,40 +65,37 @@ export default function AppSidebar() {
       </nav>
 
       {/* Main CTA */}
-      <div className="px-4 py-4 border-t border-gray-100 bg-gray-50/50">
-        <Link 
-          href="/candidatures/nouvelle"
-          className="flex items-center justify-center w-full gap-2 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md shadow-indigo-600/20 transition-all text-sm uppercase tracking-wide"
-        >
-          Nouvelle candidature
+      <div className="px-4 py-4 border-t border-border bg-background">
+        <Link href="/candidatures/nouvelle" passHref>
+          <Button fullWidth>Nouvelle candidature</Button>
         </Link>
       </div>
 
       {/* Bottom: settings + user */}
-      <div className="border-t border-gray-100 px-3 py-3 space-y-0.5">
+      <div className="border-t border-border px-4 py-4 space-y-1">
         <Link
           href="/parametres"
-          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group ${pathname === '/parametres' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50'
+          className={`flex items-center gap-3 px-3 py-2.5 rounded-panel text-ui-sm font-medium transition-colors group ${pathname === '/parametres' ? 'bg-background-subtle text-primary border border-border shadow-sm' : 'text-text-secondary hover:bg-background-subtle hover:text-text-primary'
             }`}
         >
-          <Settings className="w-4 h-4 text-gray-400 group-hover:text-gray-600" />
+          <Settings className="w-4 h-4 text-text-muted group-hover:text-text-secondary" />
           Paramètres
         </Link>
 
         {/* User */}
-        <div className="flex items-center gap-3 px-3 py-2.5 mt-1">
-          <div className="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
+        <div className="flex items-center gap-3 px-3 py-2.5 mt-2">
+          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-ui-xs font-bold text-white flex-shrink-0">
             {initial}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold text-gray-900 truncate">{name}</p>
+            <p className="text-ui-xs font-semibold text-text-primary truncate">{name}</p>
           </div>
           <button
             onClick={() => signOut({ callbackUrl: '/login' })}
-            className="p-1 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all"
+            className="p-1.5 rounded-md text-text-muted hover:text-danger-text hover:bg-background-subtle transition-colors"
             title="Déconnexion"
           >
-            <LogOut className="w-3.5 h-3.5" />
+            <LogOut className="w-4 h-4" />
           </button>
         </div>
       </div>

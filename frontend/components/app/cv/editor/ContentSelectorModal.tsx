@@ -89,12 +89,12 @@ export function ContentSelectorModal({ cvId }: ContentSelectorModalProps) {
   const renderSectionHeader = (title: string, sectionKey: string) => {
     const isHidden = disabledSections.includes(sectionKey);
     return (
-      <div className="flex items-center justify-between py-2 border-b border-gray-100 mb-3">
-        <h4 className="font-bold text-sm text-gray-900">{title}</h4>
+      <div className="flex items-center justify-between py-2 border-b border-border mb-3">
+        <h4 className="font-bold text-sm text-text-primary">{title}</h4>
         <button
           onClick={() => toggleSection(sectionKey)}
           className={`px-3 py-1 text-xs font-bold rounded-lg flex items-center gap-1.5 transition-colors ${
-            isHidden ? 'bg-gray-100 text-gray-500 hover:bg-gray-200' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+            isHidden ? 'bg-border text-text-secondary hover:bg-border' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
           }`}
         >
           {isHidden ? <><EyeOff className="w-3 h-3" /> Masqué</> : <><Eye className="w-3 h-3" /> Visible</>}
@@ -108,16 +108,16 @@ export function ContentSelectorModal({ cvId }: ContentSelectorModalProps) {
     const isSectionHidden = disabledSections.includes(type);
     
     return (
-      <div key={id} className={`flex items-center justify-between p-3 border border-gray-100 rounded-xl mb-2 transition-opacity ${isHidden ? 'bg-gray-50 opacity-60' : 'bg-white hover:border-gray-200'}`}>
+      <div key={id} className={`flex items-center justify-between p-3 border border-border rounded-panel mb-2 transition-opacity ${isHidden ? 'bg-background-subtle opacity-60' : 'bg-white hover:border-border'}`}>
         <div className="min-w-0 pr-4">
-          <p className="text-sm font-semibold text-gray-900 truncate">{title}</p>
-          {subtitle && <p className="text-xs text-gray-500 truncate mt-0.5">{subtitle}</p>}
+          <p className="text-sm font-semibold text-text-primary truncate">{title}</p>
+          {subtitle && <p className="text-xs text-text-secondary truncate mt-0.5">{subtitle}</p>}
         </div>
         <button
           onClick={() => !isSectionHidden && toggleItem(type, id)}
           disabled={isSectionHidden}
           className={`p-2 rounded-lg flex-shrink-0 transition-colors ${
-            isHidden ? 'text-gray-400 bg-gray-100' : 'text-emerald-600 bg-emerald-50 hover:bg-emerald-100'
+            isHidden ? 'text-text-muted bg-border' : 'text-success-text bg-emerald-50 hover:bg-emerald-100'
           }`}
         >
           {isHidden ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -130,67 +130,67 @@ export function ContentSelectorModal({ cvId }: ContentSelectorModalProps) {
     <>
       <button 
         onClick={() => setIsOpen(true)}
-        className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl transition-colors group mt-4"
+        className="w-full flex items-center justify-between p-4 bg-background-subtle hover:bg-border border border-border rounded-panel transition-colors group mt-4"
       >
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-white text-gray-700 shadow-sm border border-gray-200 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full bg-white text-text-secondary shadow-sm border border-border flex items-center justify-center">
             <Filter className="w-4 h-4" />
           </div>
           <div className="text-left">
-            <p className="text-sm font-bold text-gray-900">Sélection du contenu</p>
-            <p className="text-xs text-gray-500 font-medium group-hover:underline">Afficher ou masquer des éléments</p>
+            <p className="text-sm font-bold text-text-primary">Sélection du contenu</p>
+            <p className="text-xs text-text-secondary font-medium group-hover:underline">Afficher ou masquer des éléments</p>
           </div>
         </div>
       </button>
 
       {isOpen && (
         <div className="fixed inset-0 z-[100] flex flex-col sm:items-center sm:justify-center p-0 sm:p-4">
-          <div className="hidden sm:block absolute inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity" onClick={() => setIsOpen(false)} />
-          <div className="relative bg-white w-full h-[100dvh] sm:h-auto sm:max-w-2xl sm:max-h-[90vh] flex flex-col sm:rounded-2xl shadow-2xl z-10 overflow-hidden animate-in fade-in sm:zoom-in duration-200">
+          <div className="hidden sm:block absolute inset-0 bg-text-primary/40 backdrop-blur-sm transition-opacity" onClick={() => setIsOpen(false)} />
+          <div className="relative bg-white w-full h-[100dvh] sm:h-auto sm:max-w-form sm:max-h-[90vh] flex flex-col sm:rounded-panel shadow-2xl z-10 overflow-hidden animate-in fade-in sm:zoom-in duration-200">
             
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-white flex-shrink-0">
-              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                <Filter className="w-5 h-5 text-indigo-600" />
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-white flex-shrink-0">
+              <h3 className="text-lg font-bold text-text-primary flex items-center gap-2">
+                <Filter className="w-5 h-5 text-primary" />
                 Sélection du contenu
               </h3>
               <div className="flex items-center gap-3">
                 <button
                   onClick={handleSave}
                   disabled={isSaving}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-bold rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-colors shadow-sm"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-bold rounded-panel hover:bg-primary-hover disabled:opacity-50 transition-colors shadow-sm"
                 >
                   {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                   Valider
                 </button>
-                <button onClick={() => setIsOpen(false)} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
+                <button onClick={() => setIsOpen(false)} className="p-2 text-text-muted hover:text-text-secondary hover:bg-border rounded-full transition-colors">
                   <X className="w-5 h-5" />
                 </button>
               </div>
             </div>
 
-            <div className="p-6 overflow-y-auto bg-gray-50/50 space-y-6">
+            <div className="p-6 overflow-y-auto bg-background-subtle/50 space-y-6">
               
-              <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+              <div className="bg-white p-5 rounded-panel border border-border shadow-sm">
                 {renderSectionHeader("Profil / Accroche", "about")}
                 {!disabledSections.includes('about') && (
                   <div className="mt-4 space-y-4">
                     <div>
-                      <label className="block text-xs font-bold text-gray-700 mb-1">Titre du profil (sur le CV)</label>
+                      <label className="block text-xs font-bold text-text-secondary mb-1">Titre du profil (sur le CV)</label>
                       <input
                         type="text"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         placeholder={profile.title || "Titre du poste ciblé..."}
-                        className="w-full text-sm p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:border-transparent bg-gray-50 focus:bg-white transition-colors"
+                        className="w-full text-sm p-3 border border-border rounded-panel focus:ring-2 focus:ring-indigo-600 focus:border-transparent bg-background-subtle focus:bg-white transition-colors"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-gray-700 mb-1">Accroche (Résumé)</label>
+                      <label className="block text-xs font-bold text-text-secondary mb-1">Accroche (Résumé)</label>
                       <textarea
                         value={summary}
                         onChange={(e) => setSummary(e.target.value)}
                         placeholder={profile.bio || "Votre accroche..."}
-                        className="w-full text-sm p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:border-transparent min-h-[100px] bg-gray-50 focus:bg-white transition-colors"
+                        className="w-full text-sm p-3 border border-border rounded-panel focus:ring-2 focus:ring-indigo-600 focus:border-transparent min-h-[100px] bg-background-subtle focus:bg-white transition-colors"
                       />
                     </div>
                   </div>
@@ -198,7 +198,7 @@ export function ContentSelectorModal({ cvId }: ContentSelectorModalProps) {
               </div>
 
               {(profile.experiences?.length || 0) > 0 && (
-                <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                <div className="bg-white p-5 rounded-panel border border-border shadow-sm">
                   {renderSectionHeader("Expériences", "experiences")}
                   <div className="mt-4 space-y-4">
                     {profile.experiences!.map(exp => (
@@ -206,11 +206,11 @@ export function ContentSelectorModal({ cvId }: ContentSelectorModalProps) {
                         {renderItemToggle("experiences", exp.id, exp.title, exp.company)}
                         {!disabledSections.includes('experiences') && !(disabledItems['experiences'] || []).includes(exp.id) && (
                           <div className="mt-2 pl-4 border-l-2 border-indigo-100">
-                            <label className="block text-xs font-bold text-gray-700 mb-1">Description personnalisée (optionnelle)</label>
+                            <label className="block text-xs font-bold text-text-secondary mb-1">Description personnalisée (optionnelle)</label>
                             <textarea
                               value={experiences[exp.id]?.description ?? exp.description}
                               onChange={(e) => handleExpChange(exp.id, e.target.value)}
-                              className="w-full text-sm p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:border-transparent min-h-[100px] bg-gray-50 focus:bg-white transition-colors"
+                              className="w-full text-sm p-3 border border-border rounded-panel focus:ring-2 focus:ring-indigo-600 focus:border-transparent min-h-[100px] bg-background-subtle focus:bg-white transition-colors"
                             />
                           </div>
                         )}
@@ -221,7 +221,7 @@ export function ContentSelectorModal({ cvId }: ContentSelectorModalProps) {
               )}
 
               {(profile.educations?.length || 0) > 0 && (
-                <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                <div className="bg-white p-5 rounded-panel border border-border shadow-sm">
                   {renderSectionHeader("Formations", "educations")}
                   <div className="mt-4">
                     {profile.educations!.map(edu => 
@@ -232,7 +232,7 @@ export function ContentSelectorModal({ cvId }: ContentSelectorModalProps) {
               )}
 
               {(profile.projects?.length || 0) > 0 && (
-                <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                <div className="bg-white p-5 rounded-panel border border-border shadow-sm">
                   {renderSectionHeader("Projets", "projects")}
                   <div className="mt-4">
                     {profile.projects!.map(proj => 
@@ -243,7 +243,7 @@ export function ContentSelectorModal({ cvId }: ContentSelectorModalProps) {
               )}
 
               {(profile.certifications?.length || 0) > 0 && (
-                <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                <div className="bg-white p-5 rounded-panel border border-border shadow-sm">
                   {renderSectionHeader("Certifications", "certifications")}
                   <div className="mt-4">
                     {profile.certifications!.map(cert => 
@@ -254,7 +254,7 @@ export function ContentSelectorModal({ cvId }: ContentSelectorModalProps) {
               )}
 
               {(profile.languages?.length || 0) > 0 && (
-                <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                <div className="bg-white p-5 rounded-panel border border-border shadow-sm">
                   {renderSectionHeader("Langues", "languages")}
                   <div className="mt-4">
                     {profile.languages!.map(lang => 
@@ -265,7 +265,7 @@ export function ContentSelectorModal({ cvId }: ContentSelectorModalProps) {
               )}
 
               {(profile.skills?.length || 0) > 0 && (
-                <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                <div className="bg-white p-5 rounded-panel border border-border shadow-sm">
                   {renderSectionHeader("Compétences", "skills")}
                   <div className="mt-4">
                     {profile.skills!.map(skill => 
@@ -276,7 +276,7 @@ export function ContentSelectorModal({ cvId }: ContentSelectorModalProps) {
               )}
 
               {profile.custom_sections?.map(cs => (
-                <div key={cs.id} className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                <div key={cs.id} className="bg-white p-5 rounded-panel border border-border shadow-sm">
                   {renderSectionHeader(cs.title, `custom_${cs.id}`)}
                   {(cs.items?.length || 0) > 0 && (
                     <div className="mt-4">

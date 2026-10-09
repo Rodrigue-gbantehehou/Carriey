@@ -34,7 +34,7 @@ export default function BottomSheet({ isOpen, onClose, title, children }: Bottom
     <>
       {/* Backdrop */}
       <div 
-        className={`fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-[60] transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        className={`fixed inset-0 bg-text-primary/40 backdrop-blur-sm z-[60] transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         onClick={onClose}
       />
       
@@ -47,11 +47,11 @@ export default function BottomSheet({ isOpen, onClose, title, children }: Bottom
           <div className="w-12 h-1.5 bg-gray-300 rounded-full" />
         </div>
         
-        <div className="px-6 pb-4 flex items-center justify-between border-b border-gray-100">
-          <h2 className="text-xl font-bold text-gray-900 tracking-tight">{title}</h2>
+        <div className="px-6 pb-4 flex items-center justify-between border-b border-border">
+          <h2 className="text-xl font-bold text-text-primary tracking-tight">{title}</h2>
           <button 
             onClick={onClose}
-            className="p-2 bg-gray-100 text-gray-500 rounded-full hover:bg-gray-200 transition-colors"
+            className="p-2 bg-border text-text-secondary rounded-full hover:bg-border transition-colors"
           >
             <X className="w-5 h-5" />
           </button>

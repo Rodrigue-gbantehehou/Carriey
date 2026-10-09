@@ -1,10 +1,11 @@
 import AppSidebar from '@/components/app/layout/AppSidebar';
 import MobileHeader from '@/components/app/layout/MobileHeader';
 import CreateDocumentModal from '@/components/app/shared/CreateDocumentModal';
+import { PageContainer } from '@/components/ui/PageContainer';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex h-screen bg-[#FDFDFD] overflow-hidden">
+    <div className="flex h-screen bg-background overflow-hidden">
       {/* Desktop sidebar */}
       <AppSidebar />
 
@@ -16,10 +17,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <MobileHeader />
         </div>
 
-        <main className="flex-1 overflow-y-auto scroll-smooth relative z-10">
-          <div className="w-full max-w-4xl mx-auto">
+        <main className="flex-1 overflow-y-auto scroll-smooth relative z-10 py-6">
+          <PageContainer variant="dashboard">
             {children}
-          </div>
+          </PageContainer>
         </main>
       </div>
 

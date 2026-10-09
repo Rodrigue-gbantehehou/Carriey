@@ -39,7 +39,7 @@ export default function MobileHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 bg-white/70 backdrop-blur-xl border-b border-gray-100 px-4 py-3 flex items-center justify-between safe-area-top">
+      <header className="sticky top-0 z-40 bg-background/70 backdrop-blur-xl border-b border-border px-4 py-3 flex items-center justify-between safe-area-top">
         {/* Left: hamburger + title */}
         <div className="flex items-center gap-3">
           <button
@@ -47,18 +47,18 @@ export default function MobileHeader() {
             aria-label="Ouvrir le menu"
             aria-expanded={drawerOpen}
             onClick={() => setDrawerOpen(true)}
-            className="p-1.5 -ml-1 rounded-lg text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 transition-all"
+            className="p-1.5 -ml-1 rounded-lg text-text-secondary hover:text-primary hover:bg-primary-subtle transition-all"
           >
             <Menu className="w-5 h-5" />
           </button>
-          <h1 className="text-lg font-bold text-gray-900 tracking-tight">{title}</h1>
+          <h1 className="text-lg font-bold text-text-primary tracking-tight">{title}</h1>
         </div>
 
         {/* Right: actions */}
         <div className="flex items-center gap-3">
           <button
             aria-label="Notifications"
-            className="text-gray-500 hover:text-indigo-600 transition-colors"
+            className="text-text-secondary hover:text-primary transition-colors"
           >
             <Bell className="w-5 h-5" />
           </button>

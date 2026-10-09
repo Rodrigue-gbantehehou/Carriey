@@ -2,6 +2,7 @@ import React from 'react';
 import { PublicPageData } from '@/types/public-page';
 import { getPhotoUrl } from '@/lib/photo-url';
 import { User, MapPin, Mail, Phone, Globe, Briefcase, GraduationCap, Wrench, FolderOpen, Award, Github, Linkedin, ExternalLink } from 'lucide-react';
+import { TextList } from '@/components/ui/TextList';
 
 function fmtDate(d?: string) {
   if (!d) return '';
@@ -20,7 +21,7 @@ export default function ModernTheme({ data, accent }: { data: PublicPageData; ac
       {/* Hero */}
       <div className="relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${accent}ee, ${accent}99)` }}>
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, white 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
-        <div className="max-w-3xl mx-auto px-6 py-12 relative">
+        <div className="max-w-column mx-auto px-6 py-12 relative">
           <div className="flex items-center gap-6">
             {photo ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -51,10 +52,10 @@ export default function ModernTheme({ data, accent }: { data: PublicPageData; ac
       </div>
 
       {/* Content */}
-      <div className="max-w-3xl mx-auto px-6 py-8 space-y-6">
+      <div className="max-w-column mx-auto px-6 py-8 space-y-6">
         {profile.bio && (
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <p className="text-gray-700 leading-relaxed">{profile.bio}</p>
+            <p className="text-gray-700 leading-relaxed whitespace-pre-line">{profile.bio}</p>
           </div>
         )}
 
@@ -68,7 +69,7 @@ export default function ModernTheme({ data, accent }: { data: PublicPageData; ac
                   <p className="font-bold text-gray-900">{e.title}</p>
                   <p className="text-sm font-semibold" style={{ color: accent }}>{e.company}</p>
                   <p className="text-xs text-gray-400 mt-0.5">{fmtDate(e.start_date)} — {e.current ? 'Présent' : fmtDate(e.end_date)}</p>
-                  {e.description && <p className="text-sm text-gray-600 mt-2 leading-relaxed">{e.description}</p>}
+                  {e.description && <TextList text={e.description} className="text-sm text-gray-600 mt-2 leading-relaxed" />}
                 </div>
               ))}
             </div>
@@ -127,7 +128,7 @@ export default function ModernTheme({ data, accent }: { data: PublicPageData; ac
                     <p className="font-bold text-sm text-gray-900">{p.name}</p>
                     {p.url && <a href={p.url} target="_blank" rel="noopener noreferrer" style={{ color: accent }}><ExternalLink className="w-3.5 h-3.5" /></a>}
                   </div>
-                  {p.description && <p className="text-xs text-gray-500 mt-1.5">{p.description}</p>}
+                  {p.description && <TextList text={p.description} className="text-xs text-gray-500 mt-1.5" />}
                 </div>
               ))}
             </div>

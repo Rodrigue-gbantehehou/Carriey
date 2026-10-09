@@ -18,11 +18,11 @@ export default function TarifsPage() {
       <div className="relative overflow-hidden bg-[#FDFDFD] border-b border-gray-100 pt-24 pb-24">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-indigo-50 rounded-[100%] blur-3xl opacity-60 -z-10"></div>
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 text-center relative z-10">
+        <div className="max-w-public mx-auto px-6 lg:px-8 text-center relative z-10">
           <h1 className="text-4xl  font-bold text-gray-900 tracking-tight mb-5 leading-[1.15]">
             Des tarifs <span className="text-indigo-600">simples et transparents</span>
           </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto font-relative">
+          <p className="text-lg text-gray-600 max-w-form mx-auto font-relative">
             Boostez votre carrière avec nos outils premium accessibles à tous.
             Aucun frais caché, annulez quand vous voulez.
           </p>
@@ -30,13 +30,13 @@ export default function TarifsPage() {
       </div>
 
       <main className="pb-24 -mt-12 relative z-20 flex-1">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        <div className="max-w-public mx-auto px-6 lg:px-8">
           {loading ? (
             <div className="flex justify-center items-center py-20">
               <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-public mx-auto">
             {/* Gratuit */}
             <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-200 flex flex-col hover:shadow-md transition-shadow">
               <h3 className="text-xl font-bold text-gray-900 mb-2">Gratuit</h3>

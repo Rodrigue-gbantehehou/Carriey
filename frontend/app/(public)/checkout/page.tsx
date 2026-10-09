@@ -187,7 +187,7 @@ function CheckoutContent() {
       <Script src="https://cdn.kkiapay.me/k.js" strategy="lazyOnload" />
 
       <main className="flex-1 py-12 px-4 sm:px-6">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-column mx-auto">
 
           <div className="text-center mb-10">
             <h1 className="text-3xl font-bold text-gray-900 mb-4">Finaliser votre commande</h1>
