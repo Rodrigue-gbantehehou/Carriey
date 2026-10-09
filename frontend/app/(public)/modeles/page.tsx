@@ -388,7 +388,7 @@ function ModelesPageContent() {
               {
                 icon: Sparkles,
                 title: 'IA Intégrée',
-                desc: 'Avec carriey PRO, l\\'IA adapte automatiquement votre profil à chaque opportunité en ciblant les mots-clés.',
+                desc: "Avec carriey PRO, l'IA adapte automatiquement votre profil à chaque opportunité en ciblant les mots-clés.",
               },
               {
                 icon: Zap,
