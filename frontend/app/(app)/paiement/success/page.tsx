@@ -82,10 +82,10 @@ function PaymentSuccessContent() {
           Accéder à mon tableau de bord
         </Link>
         <Link
-          href="/editor"
+          href={`/mes-documents/create/cv${templateName !== 'votre modèle' ? `?template=${templateName}` : ''}`}
           className="block w-full py-4 bg-primary text-white font-bold rounded-button hover:bg-primary-hover transition-all shadow-sm text-center"
         >
-          Créer mon CV maintenant →
+          Créer mon document maintenant →
         </Link>
 
         <p className="text-xs text-text-muted mt-6">

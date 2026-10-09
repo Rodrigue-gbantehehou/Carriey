@@ -276,7 +276,7 @@ export default function TemplatesPage() {
                     <td className="px-6 py-4 text-right whitespace-nowrap">
                       <div className="inline-flex items-center gap-2">
                         <Link
-                          href={`/editor?template=${template.slug}`}
+                          href={`/mes-documents/create/${template.template_type === 'cover_letter' ? 'lettre' : template.template_type === 'public_page' ? 'page-publique' : 'cv'}?template=${template.slug}`}
                           target="_blank"
                           className="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
                           title="Tester directement dans l'éditeur"

@@ -257,7 +257,7 @@ export default function EditTemplatePage() {
         {/* Action buttons */}
         <div className="flex items-center gap-3">
           <a
-            href={`/editor?template=${formData.slug || template.slug}`}
+            href={`/mes-documents/create/${formData.template_type === 'cover_letter' ? 'lettre' : formData.template_type === 'public_page' ? 'page-publique' : 'cv'}?template=${formData.slug || template.slug}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-md transition-colors"
@@ -507,7 +507,7 @@ export default function EditTemplatePage() {
               {/* Overlay hover action */}
               <div className="absolute inset-0 bg-gray-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                 <a
-                  href={`/editor?template=${formData.slug || template.slug}`}
+                  href={`/mes-documents/create/${formData.template_type === 'cover_letter' ? 'lettre' : formData.template_type === 'public_page' ? 'page-publique' : 'cv'}?template=${formData.slug || template.slug}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-3 py-2 bg-white text-gray-900 rounded-md text-xs font-semibold shadow-lg hover:bg-gray-50 transition-colors"
