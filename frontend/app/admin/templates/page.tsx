@@ -20,6 +20,7 @@ interface Template {
   created_at: string
   updated_at: string
   folder_name: string
+  template_type?: string
 }
 
 export default function TemplatesPage() {
@@ -203,6 +204,7 @@ export default function TemplatesPage() {
                 <th className="px-6 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Slug / Dossier</th>
                 <th className="px-6 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Tarification</th>
                 <th className="px-6 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Statut</th>
+                <th className="px-6 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Type</th>
                 <th className="px-6 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Rôle</th>
                 <th className="px-6 py-3.5 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
@@ -248,6 +250,21 @@ export default function TemplatesPage() {
                       >
                         {template.is_active ? 'En ligne' : 'Désactivé'}
                       </button>
+                    </td>
+                    <td className="px-6 py-4">
+                      {template.template_type === 'cover_letter' ? (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                          Lettre
+                        </span>
+                      ) : template.template_type === 'public_page' ? (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-teal-100 text-teal-800">
+                          Page Web
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                          CV
+                        </span>
+                      )}
                     </td>
                     <td className="px-6 py-4 text-xs font-medium text-gray-500">
                       {template.is_system ? (

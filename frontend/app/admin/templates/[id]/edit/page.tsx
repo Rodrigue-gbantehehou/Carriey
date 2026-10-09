@@ -32,6 +32,7 @@ export default function EditTemplatePage() {
     currency: 'XOF',
     preview_image: '',
     folder_name: '',
+    template_type: 'cv',
     is_active: true
   })
 
@@ -54,6 +55,7 @@ export default function EditTemplatePage() {
           currency: data.currency || 'XOF',
           preview_image: data.preview_image || '',
           folder_name: data.folder_name || '',
+          template_type: data.template_type || 'cv',
           is_active: data.is_active !== false
         })
       } catch (err: any) {
@@ -107,6 +109,7 @@ export default function EditTemplatePage() {
           currency: formData.currency,
           preview_image: formData.preview_image || null,
           folder_name: formData.folder_name || null,
+          template_type: formData.template_type,
           is_active: formData.is_active
         })
       })
@@ -353,6 +356,22 @@ export default function EditTemplatePage() {
                 <p className="text-[11px] text-gray-400 mt-1">
                   Correspond au composant React <code className="text-gray-600 font-mono">@/components/app/.../templates/{formData.folder_name || formData.slug || 'dossier'}</code>
                 </p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  Type de document <span className="text-red-500">*</span>
+                </label>
+                <select
+                  name="template_type"
+                  value={formData.template_type}
+                  onChange={handleInputChange}
+                  className="w-full bg-gray-50 border border-gray-200 rounded-md px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-200"
+                >
+                  <option value="cv">CV</option>
+                  <option value="cover_letter">Lettre de motivation</option>
+                  <option value="public_page">Profil Public (Page Web)</option>
+                </select>
               </div>
 
               <div>
