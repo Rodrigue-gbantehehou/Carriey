@@ -49,7 +49,7 @@ class MailerService:
             return False
         try:
             context_ssl = ssl.create_default_context()
-            with smtplib.SMTP_SSL(self.smtp_server, self.smtp_port, context=context_ssl) as server:
+            with smtplib.SMTP_SSL(self.smtp_server, self.smtp_port, context=context_ssl, timeout=5) as server:
                 server.login(self.smtp_user, self.smtp_password)
                 server.send_message(msg)
             logger.info(f"[Mailer] Email sent to {recipient}")

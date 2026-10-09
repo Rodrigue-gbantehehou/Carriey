@@ -105,7 +105,7 @@ async def read_users_me(current_user: User = Depends(get_current_active_user)):
 
 @router.post("/register", response_model=schemas.UserOut)
 @limiter.limit("5/minute")
-async def register_user(request: Request, user_in: schemas.UserCreate, db: Session = Depends(get_db)):
+async def register_user(request: Request, user_in: schemas.UserCreate, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     """Endpoint pour enregistrer un nouvel utilisateur"""
     # Vérifier que l'email n'est pas déjà utilisé
     existing_user = db.query(User).filter(User.email == user_in.email).first()
@@ -137,12 +137,13 @@ async def register_user(request: Request, user_in: schemas.UserCreate, db: Sessi
     # Email de bienvenue (non-bloquant)
     try:
         from app.services.mailer_service import mailer_service
-        mailer_service.send_welcome_register(
+        background_tasks.add_task(
+            mailer_service.send_welcome_register,
             recipient_email=new_user.email,
             full_name=new_user.full_name or new_user.email
         )
     except Exception as e:
-        logger.error(f"[Register] Email de bienvenue échoué: {e}")
+        logger.error(f"[Register] Échec de l'ajout en background task: {e}")
     
     return new_user
 
