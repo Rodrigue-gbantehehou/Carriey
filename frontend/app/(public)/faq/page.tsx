@@ -1,6 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import { PageContainer } from '@/components/ui/PageContainer';
+import { Button } from '@/components/ui/Button';
 
 const faqs = [
   {
@@ -27,59 +29,49 @@ const faqs = [
 
 export default function FAQPage() {
   return (
-    <div className="w-full bg-white">
-
-      {/* Decorative Header Background */}
-      <div className="relative overflow-hidden bg-gray-50/50 border-b border-gray-100 pt-16 pb-24">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-indigo-50 rounded-[100%] blur-3xl opacity-50 -z-10"></div>
-        <div className="max-w-public mx-auto px-6 lg:px-8 text-center relative z-10">
-          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 tracking-tight mb-4">
-            Questions <span className="text-indigo-600">Fréquentes</span>
+    <div className="w-full bg-background min-h-screen">
+      <div className="border-b border-border bg-background-subtle pt-16 pb-16">
+        <PageContainer variant="public" className="text-center">
+          <h1 className="text-ui-4xl font-bold text-text-primary mb-4">
+            Questions Fréquentes
           </h1>
-          <p className="text-lg text-gray-500 max-w-xl mx-auto">
+          <p className="text-ui-base text-text-secondary max-w-column mx-auto">
             Tout ce que vous devez savoir pour exploiter pleinement le potentiel de la plateforme.
           </p>
-        </div>
+        </PageContainer>
       </div>
 
-      <main className="pb-24 -mt-12 relative z-20">
-        <div className="max-w-column mx-auto px-6 lg:px-8">
-
-          <div className="space-y-4">
+      <main className="py-16">
+        <PageContainer variant="form-long">
+          <div className="space-y-6">
             {faqs.map((faq, idx) => (
               <div
                 key={idx}
-                className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-200/60 hover:shadow-md transition-shadow"
+                className="bg-background rounded-panel p-6 border border-border"
               >
-                <h3 className="text-lg font-bold text-gray-900 mb-2">
+                <h3 className="text-ui-lg font-bold text-text-primary mb-2">
                   {faq.question}
                 </h3>
-                <p className="text-gray-500 leading-relaxed text-sm">
+                <p className="text-ui-base text-text-secondary leading-relaxed">
                   {faq.answer}
                 </p>
               </div>
             ))}
           </div>
 
-          <div className="mt-20 bg-gray-900 rounded-3xl p-10 sm:p-12 text-center text-white relative overflow-hidden shadow-2xl shadow-gray-900/10">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500 opacity-20 blur-3xl rounded-full -mr-20 -mt-20"></div>
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500 opacity-10 blur-3xl rounded-full -ml-20 -mb-20"></div>
-
-            <h2 className="text-2xl sm:text-3xl font-bold mb-4 relative z-10 tracking-tight">Vous avez d&apos;autres questions ?</h2>
-            <p className="text-gray-400 mb-8 relative z-10 max-w-lg mx-auto text-lg">
-              Notre équipe est là pour vous accompagner dans votre recherche d&apos;emploi.
+          <div className="mt-16 bg-background-subtle rounded-panel p-8 sm:p-12 text-center border border-border">
+            <h2 className="text-ui-2xl font-bold mb-4 text-text-primary">Vous avez d'autres questions ?</h2>
+            <p className="text-text-secondary mb-8 max-w-column mx-auto text-ui-base">
+              Notre équipe est là pour vous accompagner dans votre recherche d'emploi.
             </p>
-            <Link
-              href="/contact"
-              className="inline-block px-8 py-3.5 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-500 transition-all relative z-10 shadow-lg shadow-indigo-600/20 hover:-translate-y-0.5"
-            >
-              Nous contacter
+            <Link href="/contact" passHref>
+              <Button size="lg" variant="primary">
+                Nous contacter
+              </Button>
             </Link>
           </div>
-
-        </div>
+        </PageContainer>
       </main>
-
     </div>
   );
 }

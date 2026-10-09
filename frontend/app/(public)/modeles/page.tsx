@@ -7,6 +7,8 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import config from '@/lib/config'
 import { useEditorStore } from '@/store/editor'
 import TemplatePreview from '@/components/public/TemplatePreview'
+import { PageContainer } from '@/components/ui/PageContainer'
+import { Button } from '@/components/ui/Button'
 import {
   ChevronRight, Sparkles, CheckCircle2, Filter,
   FileText, Mail, Globe, Zap, Shield, ArrowRight, Clock
@@ -66,9 +68,6 @@ function TemplateCard({ template, onSelect, selectedSector, previewData, index }
   previewData?: any
   index: number
 }) {
-  const meta = TEMPLATE_META[template.slug] || { tags: [] }
-  const isRecommended = selectedSector && meta.tags?.includes(selectedSector)
-  const isFree = !template.price || parseFloat(template.price) === 0
   const ttype = template.template_type || 'cv'
 
   // Aspect ratio: pages publiques sont en 16/9 (landscape), CV et lettres en A4 portrait
@@ -78,46 +77,29 @@ function TemplateCard({ template, onSelect, selectedSector, previewData, index }
   const typeLabel = ttype === 'cover_letter' ? 'Lettre de motivation'
     : ttype === 'public_page' ? 'Page publique'
       : 'CV'
-  const typeBgClass = ttype === 'cover_letter' ? 'bg-violet-100 text-violet-700'
-    : ttype === 'public_page' ? 'bg-sky-100 text-sky-700'
-      : 'bg-indigo-100 text-indigo-700'
-
-  const ctaText = ttype === 'cover_letter' ? 'Créer cette lettre'
-    : ttype === 'public_page' ? 'Créer cette page'
-      : 'Utiliser ce modèle'
-  const ctaSub = ttype === 'cover_letter' ? 'Générée par IA en 30 secondes'
-    : ttype === 'public_page' ? 'Publiez votre profil en ligne'
-      : 'CV prêt en 2 minutes'
 
   return (
     <div
-      className="group relative flex flex-col bg-white rounded-2xl overflow-hidden border border-gray-200/60 hover:border-indigo-400/50 hover:shadow-[0_20px_60px_rgba(79,70,229,0.12)] hover:-translate-y-2 transition-all duration-500 cursor-pointer"
+      className="group relative flex flex-col bg-background rounded-panel overflow-hidden border border-border hover:border-primary/50 cursor-pointer transition-colors"
       onClick={() => onSelect(template)}
-      style={{ animationDelay: `${index * 0.07}s` }}
     >
-      {/* Badge type */}
       <div className="absolute top-2 left-2 z-20">
-        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${typeBgClass}`}>{typeLabel}</span>
+        <span className="text-[10px] font-bold px-2 py-0.5 rounded border border-border bg-background text-text-secondary">{typeLabel}</span>
       </div>
 
-      {/* Aperçu pleine hauteur */}
-      <div className={`relative ${aspectClass} overflow-hidden bg-gray-50/50`}>
+      <div className={`relative ${aspectClass} overflow-hidden bg-background-subtle border-b border-border`}>
         <TemplatePreview template={template} data={previewData} sector={selectedSector} />
+      </div>
 
-        {/* Overlay au survol */}
-        <div className="absolute inset-0 bg-gray-900/50 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center z-10 gap-3">
-          <div className="px-7 py-3 bg-white text-gray-900 text-sm font-bold rounded-xl shadow-2xl transform translate-y-3 group-hover:translate-y-0 transition-all duration-300">
-            {ctaText}
-          </div>
-          <p className="text-white/75 text-xs font-medium translate-y-3 group-hover:translate-y-0 transition-all duration-400 delay-75">
-            {ctaSub}
-          </p>
-        </div>
+      <div className="p-3 bg-background flex justify-between items-center">
+        <span className="text-ui-sm font-semibold text-text-primary">{template.name}</span>
+        <span className="text-primary text-ui-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+          Choisir →
+        </span>
       </div>
     </div>
   )
 }
-
 
 // ─── Main Content ────────────────────────────────────────────────────────────
 
@@ -233,60 +215,47 @@ function ModelesPageContent() {
   const freeCount = templates.filter(t => !t.price || parseFloat(t.price) === 0).length
 
   return (
-    <div className="min-h-screen bg-[#FDFDFD] font-sans selection:bg-indigo-200">
-
+    <div className="min-h-screen bg-background font-sans">
       {/* ── HERO ── */}
-      <section className="relative pt-24 pb-16 overflow-hidden border-b border-gray-100">
-        {/* Grid background (same as homepage) */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
-        {/* Glow blob */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[400px] bg-indigo-50 rounded-[100%] blur-3xl opacity-60 -z-0" />
-
-        <div className="max-w-public mx-auto px-6 lg:px-8 relative z-10">
-
-
+      <section className="pt-24 pb-16 border-b border-border bg-background-subtle">
+        <PageContainer variant="public">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Left: Copy */}
             <div>
-
-
-              <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 tracking-tight leading-[1.15] mb-5">
+              <h1 className="text-ui-4xl font-bold text-text-primary mb-5">
                 Votre profil.{' '}
-                <span className="text-indigo-600">Plusieurs présentations.</span>
+                <span className="text-primary">Plusieurs présentations.</span>
               </h1>
-
-              <p className="text-lg text-gray-600 mb-8 leading-relaxed font-medium">
+              <p className="text-ui-base text-text-secondary mb-8 font-medium leading-relaxed">
                 Un Profil Master, des dizaines de façons de le présenter. Choisissez le modèle adapté à votre prochain objectif.
               </p>
 
               {/* Stats row */}
               <div className="flex flex-wrap gap-6 mb-8">
                 {[
-                  { icon: Shield, label: 'Tous optimisés ATS', color: 'text-indigo-600' },
-                  { icon: Clock, label: 'Prêt en 2 minutes', color: 'text-amber-600' },
-                ].map(({ icon: Icon, label, color }) => (
+                  { icon: Shield, label: 'Tous optimisés ATS' },
+                  { icon: Clock, label: 'Prêt en 2 minutes' },
+                ].map(({ icon: Icon, label }) => (
                   <div key={label} className="flex items-center gap-2">
-                    <Icon className={`w-4 h-4 ${color}`} />
-                    <span className="text-sm font-semibold text-gray-700">{label}</span>
+                    <Icon className="w-4 h-4 text-primary" />
+                    <span className="text-ui-sm font-semibold text-text-secondary">{label}</span>
                   </div>
                 ))}
               </div>
 
-              <Link
-                href="/register"
-                className="inline-flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-xl text-sm font-medium shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 hover:-translate-y-0.5 transition-all"
-              >
-                Créer mon profil gratuitement
-                <ArrowRight className="w-4 h-4" />
+              <Link href="/register" passHref>
+                <Button size="lg" rightIcon={<ArrowRight className="w-4 h-4" />}>
+                  Créer mon profil gratuitement
+                </Button>
               </Link>
             </div>
 
             {/* Right: Interactive Preview Config */}
-            <div className="bg-white/80 backdrop-blur-xl p-8 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-gray-100">
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-5">Personnalisez l'aperçu</p>
+            <div className="bg-background p-8 rounded-panel border border-border shadow-sm">
+              <p className="text-ui-xs font-bold text-text-muted uppercase tracking-widest mb-5">Personnalisez l'aperçu</p>
               <div className="space-y-5">
                 <div>
-                  <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2 ml-0.5">
+                  <label className="block text-ui-xs font-bold text-text-muted uppercase tracking-widest mb-2 ml-0.5">
                     Votre nom sur le CV
                   </label>
                   <input
@@ -294,30 +263,27 @@ function ModelesPageContent() {
                     placeholder="ex: Jean Dupont"
                     value={namePreview}
                     onChange={e => setNamePreview(e.target.value)}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 outline-none transition-all text-sm font-medium"
+                    className="w-full px-4 py-2.5 bg-background border border-border rounded-md text-text-primary focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-ui-sm font-medium"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2 ml-0.5">
+                  <label className="block text-ui-xs font-bold text-text-muted uppercase tracking-widest mb-2 ml-0.5">
                     Votre secteur
                   </label>
                   <div className="relative">
                     <select
                       value={selectedSector}
                       onChange={e => setSelectedSector(e.target.value)}
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 outline-none transition-all text-sm font-medium appearance-none cursor-pointer"
+                      className="w-full px-4 py-2.5 bg-background border border-border rounded-md text-text-primary focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-ui-sm font-medium appearance-none cursor-pointer"
                     >
                       {sectors.map(s => <option key={s} value={s}>{s}</option>)}
                     </select>
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                    </div>
                   </div>
                 </div>
                 {selectedSector && (
-                  <div className="bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-3 flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-indigo-500 shrink-0" />
-                    <p className="text-xs text-indigo-700 font-semibold">
+                  <div className="bg-background-subtle border border-border rounded-md px-4 py-3 flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
+                    <p className="text-ui-xs text-text-primary font-semibold">
                       Les modèles recommandés pour <strong>{selectedSector}</strong> sont mis en avant.
                     </p>
                   </div>
@@ -325,155 +291,143 @@ function ModelesPageContent() {
               </div>
             </div>
           </div>
-        </div>
+        </PageContainer>
       </section>
 
       {/* ── FILTER BAR ── */}
-      <div className="sticky top-0 z-30 bg-white/90 backdrop-blur-lg border-b border-gray-100 shadow-sm">
-        <div className="max-w-public mx-auto px-6 py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          {/* Category filters */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-0.5 no-scrollbar">
-            {FILTERS.map(f => {
-              const Icon = f.icon
-              return (
-                <button
-                  key={f.id}
-                  onClick={() => setFilter(f.id as any)}
-                  className={`inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-xl whitespace-nowrap border transition-all ${filter === f.id
-                      ? 'bg-indigo-600 text-white border-indigo-600 shadow-md'
-                      : 'bg-white text-gray-500 border-gray-200 hover:border-indigo-300 hover:text-indigo-600'
-                    }`}
-                >
-                  <Icon className="w-3.5 h-3.5" />
-                  {f.label}
-                </button>
-              )
-            })}
-          </div>
+      <div className="sticky top-0 z-30 bg-background border-b border-border shadow-sm">
+        <PageContainer variant="public">
+          <div className="py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            {/* Category filters */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-0.5 no-scrollbar">
+              {FILTERS.map(f => {
+                const Icon = f.icon
+                return (
+                  <button
+                    key={f.id}
+                    onClick={() => setFilter(f.id as any)}
+                    className={`inline-flex items-center gap-1.5 px-4 py-2 text-ui-sm font-bold rounded-md border transition-all ${filter === f.id
+                        ? 'bg-primary text-white border-primary'
+                        : 'bg-background text-text-secondary border-border hover:border-primary/50 hover:text-primary'
+                      }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    {f.label}
+                  </button>
+                )
+              })}
+            </div>
 
-          {/* Right controls */}
-          <div className="flex items-center gap-4 shrink-0">
-            <label className="flex items-center gap-2 cursor-pointer group">
-              <div className={`relative w-9 h-5 rounded-full transition-colors ${showFreeOnly ? 'bg-emerald-500' : 'bg-gray-200'}`}>
-                <div className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${showFreeOnly ? 'translate-x-4' : ''}`} />
-              </div>
-              <input type="checkbox" className="sr-only" checked={showFreeOnly} onChange={e => setShowFreeOnly(e.target.checked)} />
-              <span className="text-xs font-bold text-gray-600 group-hover:text-emerald-600 transition-colors">Gratuits seulement</span>
-            </label>
-            <span className="text-[11px] font-bold text-gray-400 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100 whitespace-nowrap">
-              {filtered.length} modèle{filtered.length > 1 ? 's' : ''}
-            </span>
+            {/* Right controls */}
+            <div className="flex items-center gap-4 shrink-0">
+              <label className="flex items-center gap-2 cursor-pointer group">
+                <input type="checkbox" className="w-4 h-4 border-border text-primary rounded focus:ring-primary" checked={showFreeOnly} onChange={e => setShowFreeOnly(e.target.checked)} />
+                <span className="text-ui-sm font-semibold text-text-secondary">Gratuits seulement</span>
+              </label>
+              <span className="text-ui-xs font-bold text-text-muted bg-background-subtle px-3 py-1.5 rounded border border-border whitespace-nowrap">
+                {filtered.length} modèle{filtered.length > 1 ? 's' : ''}
+              </span>
+            </div>
           </div>
-        </div>
+        </PageContainer>
       </div>
 
       {/* ── TEMPLATE GRID ── */}
-      <main className="max-w-public mx-auto px-6 lg:px-8 py-12">
-        {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="bg-white border border-gray-100 rounded-2xl overflow-hidden animate-pulse">
-                <div className="aspect-[1/1.414] bg-gray-100" />
-                <div className="p-4 space-y-3">
-                  <div className="h-4 bg-gray-100 rounded w-2/3" />
-                  <div className="h-3 bg-gray-50 rounded w-full" />
-                  <div className="h-3 bg-gray-50 rounded w-4/5" />
+      <main className="py-12">
+        <PageContainer variant="public">
+          {isLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="bg-background border border-border rounded-panel overflow-hidden animate-pulse">
+                  <div className="aspect-[1/1.414] bg-background-subtle" />
+                  <div className="p-4 space-y-3">
+                    <div className="h-4 bg-border rounded w-2/3" />
+                    <div className="h-3 bg-background-subtle rounded w-full" />
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 text-center">
-            <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mb-4">
-              <Filter className="w-7 h-7 text-gray-300" />
+              ))}
             </div>
-            <h3 className="text-lg font-bold text-gray-700 mb-2">Aucun modèle trouvé</h3>
-            <p className="text-sm text-gray-400 mb-6">Essayez de modifier les filtres.</p>
-            <button
-              onClick={() => { setFilter('all'); setShowFreeOnly(false) }}
-              className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-bold rounded-xl hover:bg-indigo-700 transition-colors"
-            >
-              Réinitialiser les filtres
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filtered.map((t, i) => (
-              <TemplateCard
-                key={t.id}
-                template={t}
-                onSelect={handleSelect}
-                selectedSector={selectedSector}
-                previewData={previewData}
-                index={i}
-              />
-            ))}
-          </div>
-        )}
+          ) : filtered.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-24 text-center">
+              <div className="w-16 h-16 bg-background-subtle border border-border rounded-panel flex items-center justify-center mb-4">
+                <Filter className="w-8 h-8 text-text-muted" />
+              </div>
+              <h3 className="text-ui-lg font-bold text-text-primary mb-2">Aucun modèle trouvé</h3>
+              <p className="text-ui-sm text-text-secondary mb-6">Essayez de modifier les filtres.</p>
+              <Button onClick={() => { setFilter('all'); setShowFreeOnly(false) }} variant="primary">
+                Réinitialiser les filtres
+              </Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filtered.map((t, i) => (
+                <TemplateCard
+                  key={t.id}
+                  template={t}
+                  onSelect={handleSelect}
+                  selectedSector={selectedSector}
+                  previewData={previewData}
+                  index={i}
+                />
+              ))}
+            </div>
+          )}
+        </PageContainer>
       </main>
 
       {/* ── ATS CALLOUT SECTION ── */}
-      <section className="bg-gray-50 border-t border-gray-100 py-16">
-        <div className="max-w-public mx-auto px-6 lg:px-8">
+      <section className="bg-background-subtle border-t border-border py-16">
+        <PageContainer variant="public">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {[
               {
                 icon: Shield,
-                color: 'bg-indigo-100 text-indigo-600',
                 title: 'Optimisés ATS',
                 desc: 'Nos modèles passent les filtres automatiques des entreprises Fortune 500 et des grandes multinationales africaines.',
               },
               {
                 icon: Sparkles,
-                color: 'bg-purple-100 text-purple-600',
                 title: 'IA Intégrée',
-                desc: 'Avec carriey PRO, l\'IA adapte automatiquement votre profil à chaque opportunité en ciblant les mots-clés.',
+                desc: 'Avec carriey PRO, l\\'IA adapte automatiquement votre profil à chaque opportunité en ciblant les mots-clés.',
               },
               {
                 icon: Zap,
-                color: 'bg-amber-100 text-amber-600',
                 title: 'Export instantané',
                 desc: 'Téléchargez vos documents en PDF haute définition ou partagez votre lien public en un seul clic.',
               },
-            ].map(({ icon: Icon, color, title, desc }) => (
-              <div key={title} className="bg-white border border-gray-200/60 rounded-2xl p-6 hover:shadow-md transition-shadow">
-                <div className={`w-12 h-12 ${color} rounded-xl flex items-center justify-center mb-4`}>
+            ].map(({ icon: Icon, title, desc }) => (
+              <div key={title} className="bg-background border border-border rounded-panel p-6 hover:border-primary/30 transition-colors">
+                <div className="w-12 h-12 bg-background-subtle border border-border rounded flex items-center justify-center mb-4 text-primary">
                   <Icon className="w-6 h-6" />
                 </div>
-                <h3 className="font-bold text-gray-900 mb-2">{title}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">{desc}</p>
+                <h3 className="font-bold text-text-primary mb-2">{title}</h3>
+                <p className="text-ui-sm text-text-secondary leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
-        </div>
+        </PageContainer>
       </section>
 
       {/* ── CTA BOTTOM ── */}
-      <section className="relative py-20 overflow-hidden bg-white border-t border-gray-100">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-indigo-50 rounded-[100%] blur-3xl opacity-60" />
-        <div className="max-w-column mx-auto px-6 text-center relative z-10">
-          <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 tracking-tight mb-5">
-            Prêt à décrocher votre prochain poste ?
-          </h2>
-          <p className="text-lg text-gray-600 mb-8 font-medium leading-relaxed">
-            Rejoignez des milliers de professionnels qui utilisent carriey pour construire leur carrière.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/register"
-              className="inline-flex items-center justify-center gap-2 bg-indigo-600 text-white px-8 py-4 rounded-xl text-base font-medium shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 hover:-translate-y-0.5 transition-all"
-            >
-              Créer mon profil gratuitement <ArrowRight className="w-5 h-5" />
-            </Link>
-            <Link
-              href="/tarifs"
-              className="inline-flex items-center justify-center gap-2 bg-white text-gray-700 px-8 py-4 rounded-xl text-base font-bold border border-gray-200 hover:border-indigo-300 hover:text-indigo-600 transition-all"
-            >
-              Voir les tarifs PRO
-            </Link>
+      <section className="py-20 bg-background border-t border-border">
+        <PageContainer variant="form-long">
+          <div className="text-center">
+            <h2 className="text-ui-3xl font-bold text-text-primary tracking-tight mb-5">
+              Prêt à décrocher votre prochain poste ?
+            </h2>
+            <p className="text-ui-base text-text-secondary mb-8">
+              Rejoignez des milliers de professionnels qui utilisent carriey pour construire leur carrière.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/register" passHref>
+                <Button size="lg" rightIcon={<ArrowRight className="w-5 h-5" />}>Créer mon profil gratuitement</Button>
+              </Link>
+              <Link href="/tarifs" passHref>
+                <Button variant="secondary" size="lg">Voir les tarifs PRO</Button>
+              </Link>
+            </div>
           </div>
-        </div>
+        </PageContainer>
       </section>
     </div>
   )
@@ -482,10 +436,10 @@ function ModelesPageContent() {
 export default function ModelesPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#FDFDFD] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm text-gray-400 font-medium">Chargement des modèles...</p>
+          <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-ui-sm text-text-muted font-medium">Chargement des modèles...</p>
         </div>
       </div>
     }>
