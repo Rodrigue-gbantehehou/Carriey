@@ -338,7 +338,7 @@ export default function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <Link href="/pricing" passHref>
+              <Link href="/tarifs" passHref>
                 <Button variant="primary" fullWidth>Découvrir</Button>
               </Link>
             </div>
@@ -357,7 +357,7 @@ export default function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <Link href="/pricing" passHref>
+              <Link href="/tarifs" passHref>
                 <Button variant="secondary" fullWidth>Découvrir</Button>
               </Link>
             </div>
