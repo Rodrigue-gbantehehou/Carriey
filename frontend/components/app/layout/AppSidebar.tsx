@@ -81,23 +81,33 @@ export default function AppSidebar() {
 
       {/* CTA Card (Like Mockup) */}
       <div className="px-4 pb-6">
-        <div className="bg-gradient-to-b from-[#2e4099] to-[#121c54] rounded-2xl p-5 border border-white/5 relative overflow-hidden shadow-xl">
+        <div className="bg-gradient-to-b from-[#2e4099] to-[#121c54] rounded-2xl border border-white/5 relative overflow-hidden shadow-xl flex flex-col">
+          {/* Background glow */}
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
           
-          {/* Illustration placeholder (to match mockup requirement) */}
-          <div className="w-full flex justify-center mb-3 relative z-10">
-              <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center">
-                  <Image src="/img/illustration-cta.png" alt="Illustration" width={64} height={64} className="object-contain opacity-50" unoptimized />
-              </div>
+          {/* Full-width illustration */}
+          <div className="w-full h-24 relative z-10 mb-2">
+            {/* L'image doit être placée dans public/img/sidebar-cta.jpg */}
+            <Image 
+                src="/img/sidebar-cta.jpg" 
+                alt="Illustration Carriey" 
+                fill 
+                className="object-cover object-top opacity-90 mix-blend-lighten" 
+                unoptimized 
+            />
+            {/* Dégradé pour fondre l'image vers le bas */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#2e4099] to-transparent"></div>
           </div>
 
-          <h4 className="text-white font-bold text-[13px] mb-2 relative z-10 leading-tight">Construis la carrière qui te ressemble</h4>
-          <p className="text-[#a5b4fc] text-[10px] mb-4 relative z-10 leading-relaxed font-medium">
-            Structure ton identité, développe tes compétences, prépare tes candidatures et progresse à ton rythme.
-          </p>
-          <Link href="/candidatures/nouvelle" className="block text-center bg-white text-[#1e1b4b] text-[11px] font-bold py-2.5 rounded-full hover:bg-slate-50 transition-colors relative z-10">
-            Découvrir Carriey &rarr;
-          </Link>
+          <div className="px-5 pb-5 relative z-10">
+            <h4 className="text-white font-bold text-[13px] mb-2 leading-tight">Construis la carrière qui te ressemble</h4>
+            <p className="text-[#a5b4fc] text-[10px] mb-4 leading-relaxed font-medium">
+              Structure ton identité, développe tes compétences, prépare tes candidatures et progresse à ton rythme.
+            </p>
+            <Link href="/candidatures/nouvelle" className="block text-center bg-white text-[#1e1b4b] text-[11px] font-bold py-2.5 rounded-full hover:bg-slate-50 transition-colors shadow-md">
+              Découvrir Carriey &rarr;
+            </Link>
+          </div>
         </div>
       </div>
     </aside>

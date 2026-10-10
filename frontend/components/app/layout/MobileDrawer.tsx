@@ -139,20 +139,36 @@ export default function MobileDrawer({ open, onClose }: MobileDrawerProps) {
         </nav>
 
         {/* CTA Card (Like Mockup) */}
-        <div className="px-4 pb-4">
-          <div className="bg-gradient-to-br from-primary/80 to-indigo-900 rounded-2xl p-5 border border-white/10 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl -mr-10 -mt-10"></div>
-            <h4 className="text-white font-bold text-sm mb-2 relative z-10">Construis la carrière qui te ressemble</h4>
-            <p className="text-indigo-100 text-[11px] mb-4 relative z-10 leading-relaxed">
-              Structure ton identité, développe tes compétences et progresse à ton rythme.
-            </p>
-            <Link 
-              href="/candidatures/nouvelle" 
-              onClick={onClose}
-              className="block text-center bg-white text-primary text-xs font-bold py-2.5 rounded-lg hover:bg-slate-50 transition-colors relative z-10"
-            >
-              Nouvelle candidature &rarr;
-            </Link>
+        <div className="px-4 pb-6 mt-4">
+          <div className="bg-gradient-to-b from-[#2e4099] to-[#121c54] rounded-2xl border border-white/5 relative overflow-hidden shadow-xl flex flex-col">
+            {/* Background glow */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
+            
+            {/* Full-width illustration */}
+            <div className="w-full h-24 relative z-10 mb-2">
+              <Image 
+                  src="/img/sidebar-cta.jpg" 
+                  alt="Illustration Carriey" 
+                  fill 
+                  className="object-cover object-top opacity-90 mix-blend-lighten" 
+                  unoptimized 
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#2e4099] to-transparent"></div>
+            </div>
+
+            <div className="px-5 pb-5 relative z-10">
+              <h4 className="text-white font-bold text-[13px] mb-2 leading-tight">Construis la carrière qui te ressemble</h4>
+              <p className="text-[#a5b4fc] text-[10px] mb-4 leading-relaxed font-medium">
+                Structure ton identité, développe tes compétences, prépare tes candidatures et progresse à ton rythme.
+              </p>
+              <Link 
+                href="/candidatures/nouvelle" 
+                onClick={onClose}
+                className="block text-center bg-white text-[#1e1b4b] text-[11px] font-bold py-2.5 rounded-full hover:bg-slate-50 transition-colors shadow-md relative z-10"
+              >
+                Découvrir Carriey &rarr;
+              </Link>
+            </div>
           </div>
         </div>
 
