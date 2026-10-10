@@ -67,7 +67,7 @@ export default function MobileDrawer({ open, onClose }: MobileDrawerProps) {
         aria-modal="true"
         role="dialog"
         aria-label="Menu de navigation"
-        className={`lg:hidden fixed top-0 left-0 z-50 h-full w-72 bg-[#0A0D1E] flex flex-col shadow-2xl font-sans
+        className={`lg:hidden fixed top-0 left-0 z-50 h-full w-[260px] bg-[#0B0F24] flex flex-col shadow-2xl font-sans
           transition-transform duration-300 ease-in-out
           ${open ? 'translate-x-0' : '-translate-x-full'}
         `}
@@ -98,22 +98,22 @@ export default function MobileDrawer({ open, onClose }: MobileDrawerProps) {
         </div>
 
         {/* Navigation links */}
-        <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+        <nav className="flex-1 px-4 py-5 space-y-0.5 overflow-y-auto">
           {NAV.map(({ href, label, icon: Icon }) => {
-            const active = pathname === href || pathname.startsWith(href + '/');
+            const active = pathname === href || (href !== '#' && pathname.startsWith(href + '/'));
             return (
               <Link
-                key={href}
+                key={label}
                 href={href}
                 onClick={onClose}
-                className={`flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all group ${
+                className={`flex items-center gap-3.5 px-4 py-2.5 rounded-full text-[13px] font-medium transition-all group ${
                   active
-                    ? 'bg-primary text-white shadow-[0_4px_12px_rgba(79,70,229,0.3)]'
+                    ? 'bg-[#3b82f6] text-white shadow-[0_4px_12px_rgba(59,130,246,0.3)]'
                     : 'text-slate-300 hover:bg-white/5 hover:text-white'
                 }`}
               >
                 <Icon
-                  className={`w-5 h-5 flex-shrink-0 ${
+                  className={`w-4 h-4 flex-shrink-0 ${
                     active ? 'text-white' : 'text-slate-400 group-hover:text-white'
                   }`}
                 />
@@ -121,6 +121,21 @@ export default function MobileDrawer({ open, onClose }: MobileDrawerProps) {
               </Link>
             );
           })}
+          
+          <div className="pt-2 pb-1">
+            <Link
+              href="/parametres"
+              onClick={onClose}
+              className={`flex items-center gap-3.5 px-4 py-2.5 rounded-full text-[13px] font-medium transition-all group ${
+                pathname === '/parametres'
+                  ? 'bg-[#3b82f6] text-white shadow-[0_4px_12px_rgba(59,130,246,0.3)]'
+                  : 'text-slate-300 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <Settings className={`w-4 h-4 flex-shrink-0 ${pathname === '/parametres' ? 'text-white' : 'text-slate-400 group-hover:text-white'}`} />
+              Paramètres
+            </Link>
+          </div>
         </nav>
 
         {/* CTA Card (Like Mockup) */}
