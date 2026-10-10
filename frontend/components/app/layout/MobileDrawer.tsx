@@ -73,7 +73,7 @@ export default function MobileDrawer({ open, onClose }: MobileDrawerProps) {
         `}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-6 border-b border-white/5">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/5">
           <Link href="/accueil" className="flex items-center gap-3 select-none">
             <Image
               src={config.appLogo}
@@ -83,10 +83,7 @@ export default function MobileDrawer({ open, onClose }: MobileDrawerProps) {
               className="object-contain"
               priority
             />
-            <div>
-              <span className="text-xl font-bold tracking-tight text-white block leading-none">{config.appName}</span>
-              <span className="text-[10px] text-slate-400 font-medium tracking-wide mt-1 block">Votre identité. Votre avenir.</span>
-            </div>
+            <span className="text-xl font-bold tracking-tight text-white block leading-none">{config.appName}</span>
           </Link>
           <button
             onClick={onClose}
@@ -98,7 +95,7 @@ export default function MobileDrawer({ open, onClose }: MobileDrawerProps) {
         </div>
 
         {/* Navigation links */}
-        <nav className="flex-1 px-4 py-5 space-y-0.5 overflow-y-auto">
+        <nav className="flex-1 px-4 py-2 space-y-0.5 overflow-y-auto">
           {NAV.map(({ href, label, icon: Icon }) => {
             const active = pathname === href || (href !== '#' && pathname.startsWith(href + '/'));
             return (
@@ -122,87 +119,22 @@ export default function MobileDrawer({ open, onClose }: MobileDrawerProps) {
             );
           })}
           
-          <div className="pt-2 pb-1">
+          <div>
             <Link
               href="/parametres"
               onClick={onClose}
-              className={`flex items-center gap-3.5 px-4 py-2.5 rounded-full text-[13px] font-medium transition-all group ${
+              className={`flex items-center gap-3 px-4 py-2 rounded-full text-xs font-semibold transition-all group ${
                 pathname === '/parametres'
                   ? 'bg-[#3b82f6] text-white shadow-[0_4px_12px_rgba(59,130,246,0.3)]'
                   : 'text-slate-300 hover:bg-white/5 hover:text-white'
               }`}
             >
-              <Settings className={`w-4 h-4 flex-shrink-0 ${pathname === '/parametres' ? 'text-white' : 'text-slate-400 group-hover:text-white'}`} />
+              <Settings className={`w-3.5 h-3.5 flex-shrink-0 ${pathname === '/parametres' ? 'text-white' : 'text-slate-400 group-hover:text-white'}`} />
               Paramètres
             </Link>
           </div>
         </nav>
 
-        {/* CTA Card (Like Mockup) */}
-        <div className="px-4 pb-6 mt-4">
-          <div className="bg-gradient-to-b from-[#2e4099] to-[#121c54] rounded-2xl border border-white/5 relative overflow-hidden shadow-xl flex flex-col">
-            {/* Background glow */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
-            
-            {/* Full-width illustration */}
-            <div className="w-full h-24 relative z-10 mb-2">
-              <Image 
-                  src="/img/sidebar-cta.jpg" 
-                  alt="Illustration Carriey" 
-                  fill 
-                  className="object-cover object-top opacity-90 mix-blend-lighten" 
-                  unoptimized 
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#2e4099] to-transparent"></div>
-            </div>
-
-            <div className="px-5 pb-5 relative z-10">
-              <h4 className="text-white font-bold text-[13px] mb-2 leading-tight">Construis la carrière qui te ressemble</h4>
-              <p className="text-[#a5b4fc] text-[10px] mb-4 leading-relaxed font-medium">
-                Structure ton identité, développe tes compétences, prépare tes candidatures et progresse à ton rythme.
-              </p>
-              <Link 
-                href="/candidatures/nouvelle" 
-                onClick={onClose}
-                className="block text-center bg-white text-[#1e1b4b] text-[11px] font-bold py-2.5 rounded-full hover:bg-slate-50 transition-colors shadow-md relative z-10"
-              >
-                Découvrir Carriey &rarr;
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom: settings + user */}
-        <div className="border-t border-white/5 px-4 py-4 space-y-2 bg-[#0A0D1E]">
-          <Link
-            href="/parametres"
-            onClick={onClose}
-            className={`flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all group ${
-              pathname === '/parametres'
-                ? 'bg-white/10 text-white'
-                : 'text-slate-300 hover:bg-white/5 hover:text-white'
-            }`}
-          >
-            <Settings className="w-5 h-5 text-slate-400 group-hover:text-white" />
-            Paramètres
-          </Link>
-
-          <div className="flex items-center gap-3 px-4 py-3 mt-2 rounded-xl bg-white/5 border border-white/5">
-            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
-              {initial}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-white truncate">{name}</p>
-            </div>
-            <button
-              onClick={() => signOut({ callbackUrl: '/login' })}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-red-400 hover:bg-white/5 transition-colors"
-              title="Déconnexion"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
       </aside>
     </>,
     document.body
