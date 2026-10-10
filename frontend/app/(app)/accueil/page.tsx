@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useSession } from 'next-auth/react';
 import { useProfileStore } from '@/store/profile';
 import { useCvStore } from '@/store/cv';
-import { FileText, Plus, Briefcase, TrendingUp, ChevronRight, Clock } from 'lucide-react';
+import { FileText, Plus, Briefcase, TrendingUp, ChevronRight, Clock, CheckCircle2, Circle } from 'lucide-react';
 import { PaywallModal } from '@/components/app/shared/PaywallModal';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { PageHeader } from '@/components/ui/PageHeader';
 
 function getCompletionPercent(profile: any, about: string): number {
   const checks = [
@@ -66,9 +66,7 @@ export default function AccueilPage() {
   if (!mounted) return null;
 
   return (
-    <div className="space-y-10 animate-fade-in pb-12">
-
-      {/* PaywallModal — s'ouvre si l'utilisateur n'est pas PRO */}
+    <div className="space-y-6 animate-fade-in pb-12">
       <PaywallModal
         isOpen={showProPaywall}
         onClose={() => setShowProPaywall(false)}
@@ -76,115 +74,157 @@ export default function AccueilPage() {
         description="Le ciblage de CV par IA est réservé aux abonnés carriey PRO. Passez au plan PRO pour générer un CV parfaitement ciblé sur chaque offre d'emploi en 1 clic."
       />
 
-      {/* Header */}
-      <PageHeader
-        title={`Bonjour ${firstName} 👋`}
-        description="Voici votre tableau de bord personnel."
-      />
-
-      {/* Completion Card */}
-      <div className="bg-white rounded-panel p-6 border border-border shadow-sm relative overflow-hidden">
-        <div className="relative z-10">
-          <div className="flex justify-between items-end mb-4">
-            <div>
-              <p className="text-text-muted text-ui-xs font-bold tracking-widest mb-1.5 uppercase">Profil professionnel</p>
-              <p className="text-text-primary text-ui-2xl font-bold">Complété à {completion}%</p>
-            </div>
-            <Link href="/profil" className="p-2 border border-border rounded-panel text-text-secondary hover:text-primary hover:border-primary/20 hover:bg-primary-subtle transition-colors">
-              <ChevronRight className="w-5 h-5" />
-            </Link>
-          </div>
-
-          <div className="h-2 rounded-full bg-background-subtle overflow-hidden border border-border/50">
-            <div
-              className="h-full rounded-full bg-primary transition-all duration-1000 ease-out"
-              style={{ width: `${completion}%` }}
-            />
-          </div>
+      {/* Hero Banner */}
+      <div className="relative w-full rounded-3xl overflow-hidden shadow-sm border border-white/5 flex flex-col justify-center px-8 md:px-12 py-12 bg-[#F8F9FE]">
+        {/* L'image de fond doit être placée dans public/img/hero-banner.jpg */}
+        <Image 
+          src="/img/hero-banner.jpg" 
+          alt="Hero Banner" 
+          fill 
+          className="object-cover object-right" 
+          priority 
+          unoptimized
+        />
+        <div className="relative z-10 max-w-lg">
+          <h1 className="text-[28px] md:text-[32px] font-extrabold text-[#111827] mb-2 tracking-tight leading-tight">
+            Bonjour {firstName} 👋
+          </h1>
+          <p className="text-[#6B7280] text-[15px] mb-6 font-medium">
+            Heureux de te revoir, voici le résumé de tes avancements.
+          </p>
+          <Link href="/candidatures/nouvelle" className="inline-flex items-center justify-center bg-white text-[#111827] text-sm font-bold px-6 py-3 rounded-full shadow-sm border border-gray-100 hover:bg-gray-50 transition-colors">
+            Continuer de postuler
+          </Link>
         </div>
       </div>
 
-      {/* Quick Actions (Grid) */}
-      <section>
-        <h2 className="text-ui-xs font-bold text-text-muted mb-4 px-1 uppercase tracking-widest">Actions rapides</h2>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* Left Column: Progression */}
+        <div className="lg:col-span-1">
+          
+          <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-[0_2px_20px_rgba(0,0,0,0.02)] h-full">
+            <h3 className="text-[17px] font-bold text-[#111827] mb-6">Ma progression</h3>
+            
+            <div className="flex items-center gap-4 mb-8">
+              <div className="w-16 h-16 rounded-full border-4 border-indigo-100 border-t-indigo-600 flex items-center justify-center">
+                <span className="text-lg font-extrabold text-[#111827]">{completion}%</span>
+              </div>
+              <div>
+                <p className="text-[#111827] font-bold text-sm">Profil complété</p>
+                <p className="text-[#6B7280] text-xs mt-0.5">Continuez pour atteindre 100%</p>
+              </div>
+            </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <Link
-            href="/candidatures/nouvelle"
-            className="flex flex-col items-start gap-3 p-5 rounded-panel border border-border bg-background shadow-sm hover:bg-background-subtle transition-colors group"
-          >
-            <div className="w-10 h-10 rounded-panel bg-primary-subtle text-primary border border-border flex items-center justify-center">
-              <Plus className="w-5 h-5" />
-            </div>
-            <div className="text-left">
-              <p className="font-bold text-text-primary text-ui-sm">Nouvelle candidature</p>
-              <p className="text-ui-xs text-text-secondary mt-0.5 leading-relaxed">Adapter CV & Lettre par IA</p>
-            </div>
-          </Link>
-
-          <Link
-            href="/candidatures"
-            className="flex flex-col items-start gap-3 p-5 rounded-panel border border-border bg-background shadow-sm hover:bg-background-subtle transition-colors group"
-          >
-            <div className="w-10 h-10 rounded-panel bg-background text-primary border border-border flex items-center justify-center">
-              <Briefcase className="w-5 h-5" />
-            </div>
-            <div className="text-left">
-              <p className="font-bold text-text-primary text-ui-sm">Candidatures</p>
-              <p className="text-ui-xs text-text-secondary mt-0.5 leading-relaxed">Suivre l'avancement</p>
-            </div>
-          </Link>
-
-          <Link
-            href="/statistiques"
-            className="flex flex-col items-start gap-3 p-5 rounded-panel border border-border bg-background shadow-sm hover:bg-background-subtle transition-colors group"
-          >
-            <div className="w-10 h-10 rounded-panel bg-background text-primary border border-border flex items-center justify-center">
-              <TrendingUp className="w-5 h-5" />
-            </div>
-            <div className="text-left">
-              <p className="font-bold text-text-primary text-ui-sm">Statistiques</p>
-              <p className="text-ui-xs text-text-secondary mt-0.5 leading-relaxed">Voir les métriques</p>
-            </div>
-          </Link>
-        </div>
-      </section>
-
-      {/* Recent Activity / Docs */}
-      <section>
-        <div className="flex items-center justify-between mb-4 px-1">
-          <h2 className="text-ui-xs font-bold text-text-muted uppercase tracking-widest">Récemment modifiés</h2>
-          <Link href="/mes-documents" className="text-ui-sm font-bold text-primary hover:underline transition-colors">Voir tout</Link>
-        </div>
-
-        <div className="space-y-3">
-          {recentDocs.length > 0 ? (
-            recentDocs.map((doc) => (
-              <Link href={`/mes-documents/cv/${doc.id}`} key={doc.id} className="group flex items-center gap-4 p-4 bg-background rounded-panel border border-border shadow-sm hover:bg-background-subtle transition-colors cursor-pointer">
-                <div className="w-12 h-12 rounded-panel bg-background border border-border flex items-center justify-center flex-shrink-0 group-hover:text-primary">
-                  <FileText className="w-5 h-5 text-text-muted group-hover:text-primary transition-colors" />
+            <div className="space-y-4">
+              <div className="flex gap-4">
+                <div className={`mt-0.5 flex-shrink-0 ${profile?.title ? 'text-indigo-600' : 'text-gray-300'}`}>
+                  <CheckCircle2 className="w-5 h-5" fill="currentColor" stroke="white" />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-text-primary text-ui-base truncate">{doc.title}</p>
-                  <div className="flex items-center gap-1.5 mt-1">
-                    <Clock className="w-3.5 h-3.5 text-text-muted" />
-                    <p className="text-ui-xs text-text-secondary truncate font-medium">
-                      Modifié il y a {formatDistanceToNow(new Date(doc.updated_at || doc.created_at || Date.now()), { addSuffix: false, locale: fr })}
-                    </p>
-                  </div>
+                <div>
+                  <p className={`text-sm font-bold ${profile?.title ? 'text-[#111827]' : 'text-gray-400'}`}>Titre professionnel</p>
+                  <p className="text-xs text-gray-400 mt-0.5">Défini le poste recherché</p>
                 </div>
-                <ChevronRight className="w-5 h-5 text-text-muted group-hover:text-primary transition-colors mr-1" />
-              </Link>
-            ))
-          ) : (
-            <div className="flex flex-col items-center justify-center p-6 bg-background-subtle rounded-panel border border-dashed border-border">
-              <FileText className="w-6 h-6 text-text-muted mb-2" />
-              <p className="text-ui-xs font-medium text-text-secondary">Aucun document récent</p>
-            </div>
-          )}
-        </div>
-      </section>
+              </div>
 
+              <div className="flex gap-4">
+                <div className={`mt-0.5 flex-shrink-0 ${about ? 'text-indigo-600' : 'text-gray-300'}`}>
+                  <CheckCircle2 className="w-5 h-5" fill="currentColor" stroke="white" />
+                </div>
+                <div>
+                  <p className={`text-sm font-bold ${about ? 'text-[#111827]' : 'text-gray-400'}`}>À propos de vous</p>
+                  <p className="text-xs text-gray-400 mt-0.5">Rédigez une courte bio</p>
+                </div>
+              </div>
+
+              <div className="flex gap-4">
+                <div className={`mt-0.5 flex-shrink-0 ${(profile?.experiences?.length || 0) > 0 ? 'text-indigo-600' : 'text-gray-300'}`}>
+                  <CheckCircle2 className="w-5 h-5" fill="currentColor" stroke="white" />
+                </div>
+                <div>
+                  <p className={`text-sm font-bold ${(profile?.experiences?.length || 0) > 0 ? 'text-[#111827]' : 'text-gray-400'}`}>Expériences ajoutées</p>
+                  <p className="text-xs text-gray-400 mt-0.5">Votre parcours pro</p>
+                </div>
+              </div>
+            </div>
+
+            <Link href="/profil" className="mt-8 block text-center w-full bg-[#F3F4F6] text-[#374151] text-sm font-bold py-3.5 rounded-full hover:bg-gray-200 transition-colors">
+              Compléter mon profil
+            </Link>
+          </div>
+        </div>
+
+        {/* Right Column: Docs & Stats */}
+        <div className="lg:col-span-2 space-y-6">
+          
+          <h3 className="text-[17px] font-bold text-[#111827]">Mes documents</h3>
+          
+          {/* Docs Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-[#EEF2FF] rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between min-h-[160px] group cursor-pointer border border-transparent hover:border-indigo-100 transition-colors">
+              <div className="absolute -right-4 -bottom-4 w-32 h-32 bg-indigo-100 rounded-full blur-3xl opacity-50"></div>
+              <div className="relative z-10 flex justify-between items-start">
+                <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm">
+                  <FileText className="w-6 h-6 text-indigo-600" />
+                </div>
+                <span className="bg-white/60 text-indigo-800 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider backdrop-blur-sm">En cours</span>
+              </div>
+              <div className="relative z-10 mt-6">
+                <h4 className="text-lg font-extrabold text-[#111827]">CV Simple</h4>
+                <p className="text-sm text-[#6B7280] font-medium mt-1 group-hover:text-indigo-600 transition-colors">Générer avec l'IA &rarr;</p>
+              </div>
+            </div>
+
+            <div className="bg-[#FDF4FF] rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between min-h-[160px] group cursor-pointer border border-transparent hover:border-fuchsia-100 transition-colors">
+              <div className="absolute -right-4 -bottom-4 w-32 h-32 bg-fuchsia-100 rounded-full blur-3xl opacity-50"></div>
+              <div className="relative z-10 flex justify-between items-start">
+                <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm">
+                  <FileText className="w-6 h-6 text-fuchsia-600" />
+                </div>
+                <span className="bg-white/60 text-fuchsia-800 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider backdrop-blur-sm">À créer</span>
+              </div>
+              <div className="relative z-10 mt-6">
+                <h4 className="text-lg font-extrabold text-[#111827]">Lettre de motivation</h4>
+                <p className="text-sm text-[#6B7280] font-medium mt-1 group-hover:text-fuchsia-600 transition-colors">Générer avec l'IA &rarr;</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom stats: Score IA & Candidatures */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+            
+            {/* Score IA */}
+            <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-[0_2px_20px_rgba(0,0,0,0.02)] flex items-center justify-between group">
+              <div>
+                <h4 className="text-[15px] font-bold text-[#111827] mb-1">Mon score IA</h4>
+                <p className="text-[#6B7280] text-xs font-medium">Analysé par Carriey</p>
+                <div className="mt-4 flex items-baseline gap-1">
+                  <span className="text-3xl font-black text-[#111827]">{completion}</span>
+                  <span className="text-sm font-bold text-gray-400">/100</span>
+                </div>
+              </div>
+              <div className="w-16 h-16 rounded-2xl bg-[#EEF2FF] flex items-center justify-center text-indigo-600 font-black text-xl group-hover:scale-110 transition-transform">
+                IA
+              </div>
+            </div>
+
+            {/* Candidatures */}
+            <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-[0_2px_20px_rgba(0,0,0,0.02)] flex items-center justify-between group cursor-pointer hover:border-gray-200 transition-colors">
+              <div>
+                <h4 className="text-[15px] font-bold text-[#111827] mb-1">Candidatures</h4>
+                <p className="text-[#6B7280] text-xs font-medium">En cours ou terminées</p>
+                <div className="mt-4 flex items-baseline gap-1">
+                  <span className="text-3xl font-black text-[#111827]">0</span>
+                </div>
+              </div>
+              <div className="w-16 h-16 rounded-2xl bg-[#F3F4F6] flex items-center justify-center text-gray-400 group-hover:bg-[#111827] group-hover:text-white transition-colors">
+                <Briefcase className="w-7 h-7" />
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
