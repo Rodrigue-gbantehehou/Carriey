@@ -51,11 +51,10 @@ export default function PaymentPage({ params }: { params: Promise<{ id: string }
 
             if (res.ok) {
                 const data = await res.json()
-                // Redirection vers KkiaPay
                 if (data.payment_url) {
                     window.location.href = data.payment_url
                 } else {
-                    alert("Erreur: Pas d'URL de paiement reçue")
+                    router.push(`/checkout?type=single&templateId=${resolvedParams.id}`)
                 }
             } else {
                 const err = await res.json()

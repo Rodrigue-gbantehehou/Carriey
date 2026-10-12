@@ -13,6 +13,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from dotenv import load_dotenv
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
+import pymysql
+pymysql.install_as_MySQLdb()
+
 # ── Importer Base ET tous les modèles (nécessaire pour autogenerate) ──────────
 from app.db.session import Base
 import app.models.user              # noqa: F401
@@ -52,6 +55,21 @@ def get_url() -> str:
     return url
 
 
+def get_connect_args(url: str) -> dict:
+    if url.startswith("sqlite"):
+        return {"check_same_thread": False}
+    connect_args = {}
+    if "mysql" in url:
+        if "tidb" in url or os.getenv("DB_SSL") == "true":
+            import ssl
+            ca_path = os.getenv("SSL_CA_PATH", "/etc/ssl/certs/ca-certificates.crt")
+            if os.path.exists(ca_path):
+                connect_args["ssl"] = {"ca": ca_path, "check_hostname": True}
+            else:
+                connect_args["ssl"] = ssl.create_default_context()
+    return connect_args
+
+
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode."""
     url = get_url()
@@ -69,7 +87,12 @@ def run_migrations_offline() -> None:
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode."""
     from sqlalchemy import create_engine
-    connectable = create_engine(get_url(), poolclass=pool.NullPool)
+    url = get_url()
+    connectable = create_engine(
+        url,
+        connect_args=get_connect_args(url),
+        poolclass=pool.NullPool
+    )
 
     with connectable.connect() as connection:
         context.configure(

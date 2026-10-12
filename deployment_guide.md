@@ -26,6 +26,9 @@ Ce guide vous accompagne dans la mise en ligne de votre application Carriey en u
    - `BACKEND_CORS_ORIGINS` : L'URL de votre futur frontend Vercel (ex: `https://votre-app.vercel.app`).
    - `FRONTEND_URL` : L'URL de votre frontend Vercel.
    - `JWT_SECRET_KEY` : (Généré automatiquement par le Blueprint).
+   - `GEMINI_API_KEY` : Votre clé API Google AI Studio (recommandé pour l'IA).
+   - `PDF_SERVICE_URL` : L'URL Render de votre `carriey-pdf-service` (ex: `https://carriey-pdf-service.onrender.com`).
+   - `PDF_SERVICE_SECRET` : Clé secrète partagée entre le backend et le microservice PDF.
 
 ## 3. Frontend : Vercel
 
@@ -41,4 +44,5 @@ Ce guide vous accompagne dans la mise en ligne de votre application Carriey en u
 
 - **Démarrage à froid** : Render (Free) met le backend en sommeil après 15 min d'inactivité. Le premier chargement du site peut prendre 30 secondes.
 - **Port** : Le backend est configuré pour écouter sur le port `10000`, ce qui est le standard Render.
-- **Playwright** : La génération de PDF est gourmande en RAM. Si Render échoue avec un code `OOM` (Out Of Memory), essayez de réduire le nombre de sections dans votre CV lors du test.
+- **Migrations et initialisation automatiques** : Le conteneur Docker exécute automatiquement `alembic upgrade head` pour créer/mettre à jour le schéma MySQL (TiDB Cloud avec SSL), puis `seed_data.py` pour injecter les forfaits et templates indispensables.
+

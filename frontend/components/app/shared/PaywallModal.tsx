@@ -89,7 +89,7 @@ export function PaywallModal({
             <button
               onClick={() => {
                 if (onSubscribe) onSubscribe();
-                else window.location.href = '/pricing';
+                else window.location.href = '/tarifs';
               }}
               className="w-full py-3 px-4 bg-gradient-to-r from-indigo-600 to-indigo-500 text-white font-bold rounded-panel hover:from-indigo-700 hover:to-indigo-600 transition-all shadow-md shadow-indigo-600/20 flex items-center justify-center gap-2"
             >

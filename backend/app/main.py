@@ -69,6 +69,27 @@ from app.services.cleanup_service import cleanup_service
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
+    logger.info("Vérification de la connectivité base de données au démarrage...")
+    try:
+        from app.db.session import SessionLocal
+        with SessionLocal() as db:
+            db.execute(text("SELECT 1"))
+            try:
+                from app.models.subscription_plan import SubscriptionPlan
+                if db.query(SubscriptionPlan).count() == 0:
+                    import sys
+                    from pathlib import Path
+                    backend_dir = str(Path(__file__).resolve().parent.parent)
+                    if backend_dir not in sys.path:
+                        sys.path.insert(0, backend_dir)
+                    from seed_data import seed_subscription_plans
+                    seed_subscription_plans(db)
+                    logger.info("Plans d'abonnement initialisés avec succès.")
+            except Exception as seed_err:
+                logger.warning(f"Note initialisation plans: {seed_err}")
+    except Exception as db_init_err:
+        logger.warning(f"Note connectivité DB: {db_init_err}")
+
     logger.info("Démarrage des services d'arrière-plan...")
     cleanup_service.start(retention_hours=48, interval_seconds=3600)
     yield

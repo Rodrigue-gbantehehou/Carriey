@@ -34,5 +34,5 @@ RUN mkdir -p static data templates
 # Exposer le port par défaut de Render
 EXPOSE 10000
 
-# Lancer l'application
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "10000", "--forwarded-allow-ips='*'"]
+# Exécuter les migrations Alembic, le seed initial, puis démarrer l'application
+CMD ["sh", "-c", "alembic upgrade head && python seed_data.py && exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-10000} --forwarded-allow-ips='*'"]

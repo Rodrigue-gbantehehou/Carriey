@@ -225,9 +225,12 @@ export async function exportPdf(
   
   // Ensure the URL is absolute if it's a relative path from the backend
   if (res.url && res.url.startsWith('/')) {
-    const urlObj = new URL(API_BASE);
-    const backendBase = `${urlObj.protocol}//${urlObj.host}`;
-    res.url = `${backendBase}${res.url}`;
+    if (typeof window !== 'undefined') {
+      res.url = `${window.location.origin}${res.url}`;
+    } else {
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000';
+      res.url = `${baseUrl.replace(/\/$/, '')}${res.url}`;
+    }
   }
   
   return res;
@@ -264,8 +267,12 @@ export async function exportDocx(
   
   // Ensure the URL is absolute if it's a relative path from the backend
   if (res.url && res.url.startsWith('/')) {
-    const backendBase = API_BASE.replace(/\/api$/, '');
-    res.url = `${backendBase}${res.url}`;
+    if (typeof window !== 'undefined') {
+      res.url = `${window.location.origin}${res.url}`;
+    } else {
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000';
+      res.url = `${baseUrl.replace(/\/$/, '')}${res.url}`;
+    }
   }
   
   return res;

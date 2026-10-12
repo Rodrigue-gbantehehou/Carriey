@@ -18,6 +18,10 @@ class PaymentManager:
             raise ValueError(f"Provider '{name}' non supporté ou non configuré.")
         return provider
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 # Instance globale (Singleton)
 payment_manager = PaymentManager()
 
@@ -27,10 +31,10 @@ try:
     payment_manager.register_provider("kkiapay", KkiapayProvider())
 except Exception as e:
     # Handle missing configuration or import errors gracefully
-    print(f"Warning: Failed to load KkiapayProvider: {e}")
+    logger.warning(f"Failed to load KkiapayProvider: {e}")
 
 try:
     from app.services.payments.providers.fedapay_provider import FedaPayProvider
     payment_manager.register_provider("fedapay", FedaPayProvider())
 except Exception as e:
-    print(f"Warning: Failed to load FedaPayProvider: {e}")
+    logger.warning(f"Failed to load FedaPayProvider: {e}")

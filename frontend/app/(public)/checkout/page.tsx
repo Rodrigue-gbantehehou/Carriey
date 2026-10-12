@@ -164,8 +164,19 @@ function CheckoutContent() {
       setIsProcessing(false);
 
       // Ajouter le listener pour quand c'est validé avec succès
-      (window as any).addKkiapayListener('success', (cbResponse: any) => {
+      (window as any).addKkiapayListener('success', async (cbResponse: any) => {
         console.log("Kkiapay success:", cbResponse);
+        try {
+          if (cbResponse?.transactionId) {
+            await fetch(`${config.apiBaseUrl}/payments/webhook/kkiapay`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ transaction_id: cbResponse.transactionId })
+            });
+          }
+        } catch (e) {
+          console.warn("Validation immédiate backend:", e);
+        }
         router.push('/mes-documents?payment_success=true');
       });
     } catch (error: any) {

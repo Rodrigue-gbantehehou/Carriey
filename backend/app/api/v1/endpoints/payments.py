@@ -210,12 +210,25 @@ async def handle_webhook(
         return {"status": "ignored", "reason": "No transaction ID in webhook result"}
 
     # 1. Retrouver le paiement dans notre BDD
-    payment = db.query(Payment).filter(
-        Payment.provider_payment_id == transaction_id
-    ).first()
+    internal_id = result.get("internal_payment_id")
+    payment = None
+    if internal_id:
+        payment = db.query(Payment).filter(Payment.id == str(internal_id)).first()
+
+    if not payment:
+        payment = db.query(Payment).filter(
+            (Payment.provider_payment_id == str(transaction_id)) |
+            (Payment.id == str(transaction_id)) |
+            (Payment.transaction_id == str(transaction_id))
+        ).first()
     
     if not payment:
+        logger.error(f"[Payment Webhook] Paiement introuvable pour transaction_id={transaction_id}, internal_id={internal_id}")
         raise HTTPException(status_code=404, detail="Paiement introuvable dans la base")
+
+    # Mémoriser l'ID réel de transaction côté fournisseur
+    payment.provider_payment_id = str(transaction_id)
+    payment.transaction_id = str(transaction_id)
 
     # Vérification stricte du montant payé par rapport au montant attendu
     paid_amount = result.get("metadata", {}).get("amount") or result.get("raw_data", {}).get("amount")

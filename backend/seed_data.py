@@ -144,10 +144,75 @@ def seed_personas(db: Session):
 
     db.commit()
 
+def seed_subscription_plans(db: Session):
+    """Créer les plans d'abonnement par défaut"""
+    from app.models.subscription_plan import SubscriptionPlan
+
+    plans = [
+        {
+            "code": "free",
+            "name": "Gratuit",
+            "price": 0,
+            "currency": "XOF",
+            "duration_days": 0,
+            "features": [
+                "Profil professionnel central",
+                "CV et Lettres (thèmes de base)",
+                "Analyse d'offre",
+                "Générations limitées"
+            ],
+            "is_active": True
+        },
+        {
+            "code": "pro_14",
+            "name": "Carriey PRO (14 jours)",
+            "price": 1500,
+            "currency": "XOF",
+            "duration_days": 14,
+            "features": [
+                "Tout du plan Gratuit",
+                "Tous les modèles premium",
+                "IA : Adaptation experte aux offres",
+                "Export PDF Haute Qualité",
+                "Profil public"
+            ],
+            "is_active": True
+        },
+        {
+            "code": "single",
+            "name": "Achat unique",
+            "price": 2000,
+            "currency": "XOF",
+            "duration_days": 0,
+            "features": [
+                "Débloque ce modèle à vie",
+                "Génération IA de base (lettre incluse)",
+                "Export PDF illimité",
+                "Profil professionnel central"
+            ],
+            "is_active": True
+        }
+    ]
+
+    for p in plans:
+        existing = db.query(SubscriptionPlan).filter(SubscriptionPlan.code == p["code"]).first()
+        if existing:
+            existing.name = p["name"]
+            existing.price = p["price"]
+            existing.currency = p["currency"]
+            existing.duration_days = p["duration_days"]
+            existing.features = p["features"]
+            existing.is_active = p["is_active"]
+            print(f"✅ Updated plan: {p['code']}")
+        else:
+            plan_obj = SubscriptionPlan(**p)
+            db.add(plan_obj)
+            print(f"✅ Created plan: {p['code']} ({p['price']} {p['currency']})")
+
+    db.commit()
+
 def main():
     print("🌱 Starting database seeding...")
-    
-
     
     db = SessionLocal()
     try:
@@ -157,10 +222,13 @@ def main():
         # 2. Créer templates
         seed_templates(db, admin_user)
         
-        # 3. Créer utilisateur de test
+        # 3. Créer plans d'abonnement
+        seed_subscription_plans(db)
+
+        # 4. Créer utilisateur de test
         seed_test_user(db)
         
-        # 4. Créer personas
+        # 5. Créer personas
         seed_personas(db)
         
         print("\n✅ Database seeding completed successfully!")

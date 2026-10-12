@@ -282,8 +282,14 @@ export default function AccueilPage() {
             </div>
             
             <div className="flex items-center gap-4">
-              <div className="w-[64px] h-[64px] md:w-[72px] md:h-[72px] rounded-full border-[6px] border-gray-100 border-t-blue-500 border-r-blue-500 flex items-center justify-center relative flex-shrink-0">
-                <span className="text-lg md:text-xl font-black text-[#111827]">{completion}%</span>
+              <div className="w-[64px] h-[64px] md:w-[72px] md:h-[72px] relative flex-shrink-0">
+                <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
+                  <circle cx="50" cy="50" r="45" fill="none" stroke="#F3F4F6" strokeWidth="10" strokeLinecap="round" />
+                  <circle cx="50" cy="50" r="45" fill="none" stroke="#3B82F6" strokeWidth="10" strokeLinecap="round" strokeDasharray="283" strokeDashoffset={`${283 - (283 * completion) / 100}`} />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-lg md:text-xl font-black text-[#111827]">{completion}%</span>
+                </div>
               </div>
               <div>
                 <p className="text-[#111827] font-bold text-sm">Profil complet</p>
@@ -305,16 +311,22 @@ export default function AccueilPage() {
               <div className="w-28 h-28 md:w-32 md:h-32 relative mb-5 md:mb-6">
                 <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
                   <circle cx="50" cy="50" r="45" fill="none" stroke="#F3F4F6" strokeWidth="10" strokeLinecap="round" />
-                  <circle cx="50" cy="50" r="45" fill="none" stroke="#4F46E5" strokeWidth="10" strokeLinecap="round" strokeDasharray="283" strokeDashoffset={`${283 - (283 * 89) / 100}`} />
+                  <circle cx="50" cy="50" r="45" fill="none" stroke="#4F46E5" strokeWidth="10" strokeLinecap="round" strokeDasharray="283" strokeDashoffset={`${283 - (283 * completion) / 100}`} />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-2xl md:text-3xl font-black text-[#111827]">89<span className="text-sm md:text-base text-gray-400">/100</span></span>
+                  <span className="text-2xl md:text-3xl font-black text-[#111827]">{completion}<span className="text-sm md:text-base text-gray-400">/100</span></span>
                 </div>
               </div>
 
-              <h4 className="font-bold text-[#111827] text-sm md:text-base mb-1">Bon niveau !</h4>
+              <h4 className="font-bold text-[#111827] text-sm md:text-base mb-1">
+                {completion > 80 ? "Profil très attractif !" : completion > 50 ? "Bon niveau !" : "Profil en cours de création"}
+              </h4>
               <p className="text-[11px] md:text-xs text-gray-500 font-medium leading-relaxed mb-5 md:mb-6">
-                Ton profil est bien structuré, quelques améliorations peuvent encore le renforcer.
+                {completion > 80 
+                  ? "Votre profil a une structure solide et met bien en valeur vos compétences clés." 
+                  : completion > 50 
+                  ? "Ton profil est bien structuré, quelques améliorations peuvent encore le renforcer." 
+                  : "Remplissez les différentes sections pour obtenir votre analyse IA détaillée."}
               </p>
 
               <Link href="/analyse" className="inline-block text-center px-6 py-2.5 bg-[#EEF2FF] text-indigo-600 rounded-full text-xs font-bold hover:bg-indigo-100 transition-colors w-full">

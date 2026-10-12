@@ -35,16 +35,33 @@ app.post('/generate-pdf', async (req, res) => {
     return res.status(400).json({ error: 'Le paramètre "url" ou "html" est obligatoire.' });
   }
 
+  // Protection contre le SSRF et l'exfiltration de métadonnées Cloud
+  if (url) {
+    try {
+      const parsedUrl = new URL(url);
+      if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+        return res.status(400).json({ error: 'Protocole non autorisé. Seuls http et https sont acceptés.' });
+      }
+      const hostname = parsedUrl.hostname.toLowerCase();
+      if (
+        hostname === '169.254.169.254' ||
+        hostname === 'metadata.google.internal'
+      ) {
+        return res.status(403).json({ error: 'Accès interdit à cette destination (adresse protégée).' });
+      }
+    } catch (e) {
+      return res.status(400).json({ error: 'URL fournie invalide.' });
+    }
+  }
+
   let browser;
   try {
-    // Identique aux args utilisés dans generate_pdf_from_html.py
     const launchArgs = [
       '--disable-dev-shm-usage',
       '--no-sandbox',
       '--disable-setuid-sandbox',
       '--disable-gpu',
-      '--ignore-certificate-errors',
-      '--disable-web-security'
+      '--ignore-certificate-errors'
     ];
 
     browser = await chromium.launch({

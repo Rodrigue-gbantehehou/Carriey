@@ -6,6 +6,21 @@ import { useProfileStore } from '@/store/profile';
 import { Sparkles, ChevronLeft, CheckCircle2, AlertTriangle, Lightbulb, ArrowRight, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 
+function getCompletionPercent(profile: any): number {
+  const checks = [
+    !!profile?.title,
+    !!profile?.username,
+    !!profile?.contact_email,
+    !!profile?.bio,
+    (profile?.experiences?.length || 0) > 0,
+    (profile?.educations?.length || 0) > 0,
+    (profile?.skills?.length || 0) > 0,
+    (profile?.projects?.length || 0) > 0,
+    (profile?.certifications?.length || 0) > 0,
+  ];
+  return Math.round((checks.filter(Boolean).length / checks.length) * 100) || 0;
+}
+
 export default function AnalysePage() {
   const { data: session } = useSession();
   const { profile } = useProfileStore();
@@ -19,7 +34,34 @@ export default function AnalysePage() {
     return () => clearTimeout(timer);
   }, []);
 
-  const score = 89;
+  const score = getCompletionPercent(profile);
+
+  // Analyse dynamique
+  const strengths = [];
+  if (profile?.title) strengths.push({ title: 'Titre précis et ciblé', desc: `Le titre "${profile.title}" donne d'emblée une orientation claire à votre profil.` });
+  if ((profile?.experiences?.length || 0) > 0) strengths.push({ title: 'Expériences documentées', desc: `Vous avez renseigné ${profile?.experiences?.length} expérience(s) professionnelle(s), ce qui est essentiel pour les recruteurs.` });
+  if ((profile?.skills?.length || 0) > 3) strengths.push({ title: 'Compétences variées', desc: `Vos ${profile?.skills?.length} compétences permettent aux systèmes ATS de bien vous classer.` });
+  if (profile?.bio && profile.bio.length > 50) strengths.push({ title: 'Présentation complète', desc: 'Votre section "À propos" est suffisamment détaillée pour susciter l\'intérêt.' });
+  if (strengths.length === 0) strengths.push({ title: 'Profil en construction', desc: 'Complétez votre profil pour découvrir vos points forts ici.' });
+
+  const weaknesses = [];
+  if (!profile?.title) weaknesses.push({ title: 'Titre manquant', desc: 'Il est crucial de définir le poste que vous occupez ou recherchez (ex: Développeur React).' });
+  if ((profile?.experiences?.length || 0) === 0) weaknesses.push({ title: 'Aucune expérience', desc: "L'historique professionnel est la partie la plus regardée. Ajoutez votre parcours." });
+  if (!profile?.bio || profile.bio.length < 50) weaknesses.push({ title: 'Biographie trop courte ou absente', desc: 'Rédigez un court paragraphe (3-4 lignes) pour vous présenter et donner envie.' });
+  if ((profile?.skills?.length || 0) < 4) weaknesses.push({ title: 'Peu de mots-clés (Compétences)', desc: 'Listez au moins 5 à 10 compétences pour passer les filtres automatiques.' });
+  if ((profile?.certifications?.length || 0) === 0) weaknesses.push({ title: 'Certifications manquantes', desc: 'Ajouter des certifications récentes prouve que vous continuez à vous former.' });
+  if (weaknesses.length === 0) weaknesses.push({ title: 'Profil très bien renseigné', desc: 'Il n\'y a pas de défauts majeurs sur la structure de votre profil.' });
+
+  const recommendations = weaknesses.slice(0, 3).map(w => w.title);
+  if (recommendations.length === 0) recommendations.push("Maintenir votre profil à jour régulièrement");
+
+  let sentiment = "Profil en cours de création";
+  if (score > 80) sentiment = "Profil très attractif";
+  else if (score > 50) sentiment = "Profil sur la bonne voie";
+  
+  let sentimentDesc = "Remplissez les différentes sections pour obtenir votre analyse.";
+  if (score > 80) sentimentDesc = "Votre profil a une structure solide et met bien en valeur vos compétences clés.";
+  else if (score > 50) sentimentDesc = "Vous avez une bonne base, mais quelques ajouts feront la différence.";
 
   if (loading) {
     return (
@@ -66,13 +108,13 @@ export default function AnalysePage() {
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               <span className="text-4xl font-black text-white">{score}</span>
-              <span className="text-xs font-bold text-indigo-200 uppercase tracking-wider mt-1">Excellent</span>
+              <span className="text-[10px] font-bold text-indigo-200 uppercase tracking-wider mt-1">Niveau</span>
             </div>
           </div>
           
-          <h3 className="relative z-10 text-xl font-bold mb-2">Profil très attractif</h3>
+          <h3 className="relative z-10 text-xl font-bold mb-2">{sentiment}</h3>
           <p className="relative z-10 text-indigo-200 text-xs font-medium leading-relaxed">
-            Votre profil a une structure solide et met bien en valeur vos compétences clés.
+            {sentimentDesc}
           </p>
         </div>
 
@@ -85,24 +127,17 @@ export default function AnalysePage() {
               <CheckCircle2 className="w-5 h-5 text-green-500" /> Vos Points Forts
             </h3>
             <ul className="space-y-4">
-              <li className="flex items-start gap-3">
-                <div className="w-6 h-6 rounded-full bg-green-50 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-[#111827]">Titre précis et ciblé</h4>
-                  <p className="text-xs text-gray-500 font-medium mt-1">Le titre "{profile?.title || 'Professionnel'}" correspond parfaitement aux recherches standard des recruteurs.</p>
-                </div>
-              </li>
-              <li className="flex items-start gap-3">
-                <div className="w-6 h-6 rounded-full bg-green-50 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-[#111827]">Expériences bien documentées</h4>
-                  <p className="text-xs text-gray-500 font-medium mt-1">Vos descriptions comportent des mots-clés pertinents et démontrent une évolution claire.</p>
-                </div>
-              </li>
+              {strengths.map((str, idx) => (
+                <li key={idx} className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-green-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-[#111827]">{str.title}</h4>
+                    <p className="text-xs text-gray-500 font-medium mt-1">{str.desc}</p>
+                  </div>
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -112,24 +147,17 @@ export default function AnalysePage() {
               <AlertTriangle className="w-5 h-5 text-orange-500" /> Axes d'Amélioration
             </h3>
             <ul className="space-y-4">
-              <li className="flex items-start gap-3">
-                <div className="w-6 h-6 rounded-full bg-orange-50 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <div className="w-2 h-2 rounded-full bg-orange-500"></div>
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-[#111827]">Manque de résultats chiffrés</h4>
-                  <p className="text-xs text-gray-500 font-medium mt-1">L'IA n'a détecté aucun indicateur de performance chiffré dans vos expériences. Les recruteurs adorent les métriques (ex: "+20% de ventes").</p>
-                </div>
-              </li>
-              <li className="flex items-start gap-3">
-                <div className="w-6 h-6 rounded-full bg-orange-50 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <div className="w-2 h-2 rounded-full bg-orange-500"></div>
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-[#111827]">Certifications manquantes</h4>
-                  <p className="text-xs text-gray-500 font-medium mt-1">Pour votre secteur, ajouter des certifications récentes prouverait votre mise à jour continue.</p>
-                </div>
-              </li>
+              {weaknesses.map((wk, idx) => (
+                <li key={idx} className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-orange-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <div className="w-2 h-2 rounded-full bg-orange-500"></div>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-[#111827]">{wk.title}</h4>
+                    <p className="text-xs text-gray-500 font-medium mt-1">{wk.desc}</p>
+                  </div>
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -139,20 +167,15 @@ export default function AnalysePage() {
               <Lightbulb className="w-5 h-5 text-indigo-600" /> Recommandations d'actions
             </h3>
             <div className="space-y-3">
-              <Link href="/profil" className="flex items-center justify-between bg-white p-4 rounded-2xl shadow-sm border border-transparent hover:border-indigo-200 transition-colors group">
-                <div className="flex items-center gap-3">
-                  <TrendingUp className="w-5 h-5 text-indigo-500" />
-                  <span className="text-sm font-bold text-[#111827]">Ajouter des métriques à votre dernière expérience</span>
-                </div>
-                <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-indigo-600 transform group-hover:translate-x-1 transition-all" />
-              </Link>
-              <Link href="/profil" className="flex items-center justify-between bg-white p-4 rounded-2xl shadow-sm border border-transparent hover:border-indigo-200 transition-colors group">
-                <div className="flex items-center gap-3">
-                  <TrendingUp className="w-5 h-5 text-indigo-500" />
-                  <span className="text-sm font-bold text-[#111827]">Compléter la section Certifications</span>
-                </div>
-                <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-indigo-600 transform group-hover:translate-x-1 transition-all" />
-              </Link>
+              {recommendations.map((rec, idx) => (
+                <Link key={idx} href="/profil" className="flex items-center justify-between bg-white p-4 rounded-2xl shadow-sm border border-transparent hover:border-indigo-200 transition-colors group">
+                  <div className="flex items-center gap-3">
+                    <TrendingUp className="w-5 h-5 text-indigo-500" />
+                    <span className="text-sm font-bold text-[#111827]">Résoudre : {rec.toLowerCase()}</span>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-indigo-600 transform group-hover:translate-x-1 transition-all" />
+                </Link>
+              ))}
             </div>
           </div>
 

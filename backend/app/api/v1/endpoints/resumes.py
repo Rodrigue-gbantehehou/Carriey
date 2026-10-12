@@ -8,8 +8,11 @@ from app.models.resume import Resume, ResumeStatus
 from app.models.template import Template
 from app.models.payment import Payment, PaymentStatus
 from app.schemas.resume import ResumeCreate, ResumeUpdate, ResumeOut, ResumeListOut
+import logging
 from app.api.dependencies import get_current_active_user
 from app.services.template_access_service import TemplateAccessService
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -133,7 +136,7 @@ async def create_resume(
         try:
             resume_in = ResumeCreate(**body)
         except ValidationError as ve:
-            print("Pydantic Validation Error on Request:", ve)
+            logger.warning("Pydantic Validation Error on Request: %s", ve)
             raise HTTPException(status_code=422, detail=ve.errors())
         
         # Résoudre le template : Il DOIT être actif

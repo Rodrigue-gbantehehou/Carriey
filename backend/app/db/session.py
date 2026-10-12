@@ -27,11 +27,16 @@ if DATABASE_URL.startswith("sqlite"):
 # Pour MySQL, TiDB et autres
 else:
     # ssl_args pour TiDB Cloud et autres services sécurisés
+    import ssl
     connect_args = {}
     if "mysql" in DATABASE_URL:
         # TiDB Cloud ou hébergement nécessitant SSL explicite
         if "tidb" in DATABASE_URL or os.getenv("DB_SSL") == "true":
-            connect_args["ssl"] = {"reject_unauthorized": True}
+            ca_path = os.getenv("SSL_CA_PATH", "/etc/ssl/certs/ca-certificates.crt")
+            if os.path.exists(ca_path):
+                connect_args["ssl"] = {"ca": ca_path, "check_hostname": True}
+            else:
+                connect_args["ssl"] = ssl.create_default_context()
         
     # pool_pre_ping=True est important pour les bases cloud qui coupent les connexions inactives
     engine = create_engine(

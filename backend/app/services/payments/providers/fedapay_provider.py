@@ -52,17 +52,25 @@ class FedaPayProvider(PaymentProviderInterface):
         # if not hmac.compare_digest(expected_sig, signature):
         #     return {"status": "failed", "reason": "Invalid signature"}
 
-        # Le payload FedaPay contient 'entity'
+        # Le payload FedaPay contient 'entity' ou directement la transaction
         if isinstance(payload, dict) and "entity" in payload:
             transaction = payload["entity"]
-            status = transaction.get("status")
             tx_id = transaction.get("id")
             
+            # Vérification directe auprès de l'API FedaPay (sécurité serveur à serveur)
+            try:
+                verified_data = await fedapay_service.verify_transaction(str(tx_id))
+                tx_info = verified_data.get("v1/transaction", {})
+                status = tx_info.get("status") or transaction.get("status")
+            except Exception:
+                status = transaction.get("status")
+                tx_info = transaction
+
             if status in ["approved", "success"]:
                 return {
                     "status": "success",
                     "transaction_id": str(tx_id),
-                    "raw_data": transaction
+                    "raw_data": tx_info
                 }
             return {
                 "status": "failed",

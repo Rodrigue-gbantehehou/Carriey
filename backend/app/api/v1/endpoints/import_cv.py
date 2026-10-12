@@ -15,8 +15,13 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
+from fastapi import Request
+from app.core.limiter import limiter
+
 @router.post("/extract")
+@limiter.limit("5/minute")
 async def extract_profile_from_cv(
+    request: Request,
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
@@ -27,7 +32,6 @@ async def extract_profile_from_cv(
     """
     if file.content_type not in ("application/pdf", "application/octet-stream", ""):
         logger.warning(f"Unexpected content type: {file.content_type}")
-        # Relaxed check
 
     content = await file.read()
     if len(content) > 5 * 1024 * 1024:
@@ -46,16 +50,13 @@ async def extract_profile_from_cv(
         raise HTTPException(status_code=400, detail="Le PDF semble vide ou illisible.")
 
     # Vérification quota IA
-    # check_and_consume_ai_quota(current_user, is_premium=current_user.is_pro) # Commented out for now if not strictly needed, or we just consume 1 token.
-    # Let's use the ai service
-    ai_service = get_ai_service()
+    check_and_consume_ai_quota(db, current_user)
+
+    ai_service = get_ai_service(db)
 
     try:
         data, metadata = await ai_service.extract_cv_info(text)
-        
-        # Log usage
-        # log_ai_usage(...) # Simplifié
-        
+        log_ai_usage(db, current_user, "import_cv", metadata)
         log_audit(db, current_user.id, "import_cv", "profile", current_user.id, {"file_size": len(content)})
 
         return data

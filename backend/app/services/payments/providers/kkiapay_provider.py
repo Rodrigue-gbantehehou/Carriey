@@ -18,7 +18,8 @@ class KkiapayProvider(PaymentProviderInterface):
         Kkiapay n'utilise pas de lien généré par l'API Backend pour le paiement standard,
         mais plutôt un widget Frontend. Nous renvoyons donc la configuration.
         """
-        transaction_ref = metadata.get("internal_ref") if metadata else f"tx_{amount}"
+        payment_id = metadata.get("payment_id") if metadata else None
+        transaction_ref = payment_id or (metadata.get("internal_ref") if metadata else f"tx_{amount}")
         
         return {
             "checkout_url": "", # Sera géré par le widget côté client
@@ -28,7 +29,8 @@ class KkiapayProvider(PaymentProviderInterface):
                 "amount": int(amount),
                 "sandbox": self.kkiapay_service.sandbox,
                 "theme": "#4f46e5",
-                "callback": success_url
+                "callback": success_url,
+                "data": transaction_ref
             }
         }
 
@@ -36,19 +38,26 @@ class KkiapayProvider(PaymentProviderInterface):
         """
         Vérifie et gère le retour du paiement.
         """
-        transaction_id = payload.get("transaction_id") if isinstance(payload, dict) else payload
+        transaction_id = None
+        if isinstance(payload, dict):
+            transaction_id = payload.get("transaction_id") or payload.get("transactionId")
+        elif isinstance(payload, str):
+            transaction_id = payload
         
         if not transaction_id:
             return {"status": "failed", "error": "Transaction ID manquant"}
 
         # Vérification via le service existant
         try:
-            verification = await self.kkiapay_service.verify_transaction(transaction_id)
+            verification = await self.kkiapay_service.verify_transaction(str(transaction_id))
             if verification.get("status") == "SUCCESS":
+                internal_id = verification.get("data") or verification.get("state")
                 return {
                     "status": "success",
-                    "transaction_id": transaction_id,
-                    "metadata": verification
+                    "transaction_id": str(transaction_id),
+                    "internal_payment_id": internal_id,
+                    "metadata": verification,
+                    "raw_data": verification
                 }
         except Exception as e:
             return {"status": "error", "error": str(e)}

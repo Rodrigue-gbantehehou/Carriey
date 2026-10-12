@@ -75,7 +75,9 @@ export default function RegisterForm() {
   const [animating, setAnimating] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/accueil';
+  const plan = searchParams.get('plan');
+  const defaultRedirect = plan === 'pro' ? '/checkout?type=pro' : '/accueil';
+  const callbackUrl = searchParams.get('callbackUrl') || defaultRedirect;
 
   const goToStep = (next: number) => {
     setError('');

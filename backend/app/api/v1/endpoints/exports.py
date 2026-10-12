@@ -259,17 +259,9 @@ async def export_pdf(
     db: Session = Depends(get_db)
 ):
     """Exporte le CV en PDF (moteur React unifié avec repli Jinja2)"""
-    # ── DEBUG: log d'entrée dans la fonction ───────────────────────────────────
-    _debug_log = STATIC_DIR / "debug_export.txt"
-    try:
-        _debug_log.write_text(
-            f"export_pdf CALLED: user={getattr(current_user, 'email', None)} "
-            f"template={req.template_name}\n",
-            encoding="utf-8"
-        )
-    except:
-        pass
-    # ──────────────────────────────────────────────────────────────────────────
+    logger.info(
+        f"export_pdf called: user={getattr(current_user, 'email', None)} template={req.template_name}"
+    )
     from app.services.mailer_service import mailer_service
     tmp_html = None
     
