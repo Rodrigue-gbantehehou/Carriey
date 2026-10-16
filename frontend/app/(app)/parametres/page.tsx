@@ -18,8 +18,7 @@ export default function ParametresPage() {
 
   useEffect(() => {
     if (session?.user?.accessToken) {
-      const apiBase = (process.env.NEXT_PUBLIC_API_URL ?? '/api/v1').replace(/\/$/, '');
-      fetch(`${apiBase}/payments/history`, {
+      fetch(`${config.apiBaseUrl}/payments/history`, {
         headers: { Authorization: `Bearer ${session.user.accessToken}` }
       })
         .then(r => r.ok ? r.json() : { payments: [] })
@@ -53,8 +52,7 @@ export default function ParametresPage() {
 
     setIsChangingPassword(true);
     try {
-      const apiBase = (process.env.NEXT_PUBLIC_API_URL ?? '/api/v1').replace(/\/$/, '');
-      const res = await fetch(`${apiBase}/auth/change-password`, {
+      const res = await fetch(`${config.apiBaseUrl}/auth/change-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

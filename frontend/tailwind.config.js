@@ -39,6 +39,11 @@ module.exports = {
         primary: {
           DEFAULT: '#1D4ED8',
           hover: '#1E40AF',
+          subtle: '#EFF6FF',
+        },
+        info: {
+          text: '#1D4ED8',
+          bg: '#EFF6FF',
         },
         success: {
           text: '#166534',

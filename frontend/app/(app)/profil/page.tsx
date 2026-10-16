@@ -16,6 +16,8 @@ import AboutMeForm from '@/components/app/profile/AboutMeForm';
 import { getPhotoUrl } from '@/lib/photo-url';
 import { Button } from '@/components/ui/Button';
 import { PageHeader } from '@/components/ui/PageHeader';
+import { SkeletonCard } from '@/components/ui/Skeleton';
+import toast from 'react-hot-toast';
 
 import {
   User, FileText, Briefcase, GraduationCap, Wrench,
@@ -59,11 +61,22 @@ export default function ProfilPage() {
 
   if (!mounted) return null;
   
-  if (!profile) return (
-    <div className="flex justify-center p-12">
-      <div className="w-8 h-8 border-4 border-background-subtle border-t-primary rounded-full animate-spin"></div>
-    </div>
-  );
+  if (!profile) {
+    return (
+      <div className="space-y-8 pb-12 animate-fade-in">
+        <PageHeader
+          title="Mon profil"
+          description="Gérez les informations fondamentales de votre parcours professionnel."
+        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
+      </div>
+    );
+  }
 
   const openPersonalEdit = () => {
     setIsEditingPersonal(true);
@@ -107,17 +120,16 @@ export default function ProfilPage() {
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        alert(err.detail || 'Erreur lors de l\'upload');
-        setLocalPhotoPreview(null); // only clear on error
+        toast.error(err.detail || 'Erreur lors de l\'upload de la photo');
+        setLocalPhotoPreview(null);
         return;
       }
       const updated = await res.json();
-      // Update store with server response — keeps photo on next reload
-      // We do NOT clear localPhotoPreview here: blob URL stays visible for this session
       setProfile({ ...profile!, ...updated });
+      toast.success('Photo de profil mise à jour');
     } catch (err) {
       console.error('Photo upload error:', err);
-      alert('Erreur lors de l\'upload de la photo');
+      toast.error('Erreur lors de l\'upload de la photo');
       setLocalPhotoPreview(null);
     } finally {
       setPhotoUploading(false);

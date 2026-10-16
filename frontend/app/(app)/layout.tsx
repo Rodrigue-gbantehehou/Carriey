@@ -1,5 +1,6 @@
 import AppSidebar from '@/components/app/layout/AppSidebar';
 import MobileHeader from '@/components/app/layout/MobileHeader';
+import MobileDrawer from '@/components/app/layout/MobileDrawer';
 import CreateDocumentModal from '@/components/app/shared/CreateDocumentModal';
 import { PageContainer } from '@/components/ui/PageContainer';
 
@@ -11,9 +12,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Main content area */}
       <div className="flex-1 flex flex-col min-w-0 relative">
-
         {/* Mobile Header (hidden on desktop) */}
-        <div className="lg:hidden relative z-10">
+        <div className="lg:hidden relative z-20">
           <MobileHeader />
         </div>
 
@@ -23,6 +23,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </PageContainer>
         </main>
       </div>
+
+      {/* Mobile Drawer (rendered at root of app layout) */}
+      <MobileDrawer />
 
       {/* Global Modals */}
       <CreateDocumentModal />

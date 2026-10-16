@@ -29,7 +29,7 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="bg-background/80 backdrop-blur-xl border-b border-border sticky top-0 z-50">
+    <nav className="bg-background/80 backdrop-blur-xl border-b border-border sticky top-0 z-50 relative">
       <div className="max-w-public mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         
         {/* Left: Logo */}
@@ -86,9 +86,11 @@ export default function Navbar() {
         {/* Mobile Menu Toggle */}
         <div className="flex md:hidden flex-1 justify-end">
           <button 
+            type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 text-text-muted hover:bg-background-subtle rounded-lg transition-colors"
-            aria-label="Menu"
+            className="p-2 text-text-muted hover:bg-background-subtle rounded-lg transition-colors cursor-pointer"
+            aria-label="Menu de navigation"
+            aria-expanded={mobileMenuOpen}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               {mobileMenuOpen ? (
@@ -103,7 +105,13 @@ export default function Navbar() {
 
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-background border-b border-border px-4 py-6 shadow-xl absolute w-full left-0">
+        <>
+          <div 
+            className="fixed inset-0 z-40 bg-black/20 backdrop-blur-[2px] md:hidden" 
+            onClick={() => setMobileMenuOpen(false)}
+            aria-hidden="true"
+          />
+          <div className="md:hidden bg-background border-b border-border px-4 py-6 shadow-xl absolute top-full w-full left-0 z-50 animate-slide-up">
           <div className="flex flex-col space-y-4">
             {navLinks.map((link) => (
               <Link 
@@ -131,7 +139,8 @@ export default function Navbar() {
             </div>
           </div>
         </div>
-      )}
+      </>
+    )}
     </nav>
   );
 }

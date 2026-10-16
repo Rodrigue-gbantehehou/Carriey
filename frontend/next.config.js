@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  allowedDevOrigins: ['192.168.43.195', '192.168.*', 'localhost:3000'],
   experimental: {
     workerThreads: false,
     cpus: 1,

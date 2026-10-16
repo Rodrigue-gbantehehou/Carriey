@@ -1,8 +1,10 @@
+import { brand } from './tokens';
+
 // Configuration de l'application
 export const config = {
-  // Informations de base de l'application
-  appName: process.env.NEXT_PUBLIC_APP_NAME || 'Carriey',
-  appLogo: process.env.NEXT_PUBLIC_APP_LOGO || '/logo.png',
+  // Informations de base de l'application (sourcées depuis les tokens de marque)
+  appName: process.env.NEXT_PUBLIC_APP_NAME || brand.name,
+  appLogo: process.env.NEXT_PUBLIC_APP_LOGO || brand.logo,
 
   // Configuration de l'API
   backendUrl: process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000',
